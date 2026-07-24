@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mis XV años</title>
+
+<!--
+  ============================================================
+  CÓMO EDITAR ESTA INVITACIÓN
+  ============================================================
+  Todo lo que debes cambiar está en UN SOLO LUGAR: el objeto
+  CONFIG dentro de la etiqueta <script> cerca del final del
+  archivo (busca "EDITA AQUÍ"). No necesitas tocar nada más
+  para personalizar nombres, fechas, lugares, etc.
+  ============================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg-deep:#140f1e;
+    --bg-panel:#1d1730;
+    --bg-panel-2:#241c38;
+    --gold:#c9a24d;
+    --gold-light:#eacea1;
+    --rose:#8a2c3b;
+    --rose-light:#b5566a;
+    --emerald:#2e4a3c;
+    --cream:#f4ead2;
+    --cream-dim:#cfc3a6;
+    --ink:#0c0912;
+    --shadow: 0 10px 30px rgba(0,0,0,.45);
+    --serif-display:'Cinzel', serif;
+    --serif-body:'Cormorant Garamond', serif;
+    --script:'Pinyon Script', cursive;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at 50% -10%, #2a2145 0%, var(--bg-deep) 55%),
+      var(--bg-deep);
+    color:var(--cream);
+    font-family:var(--serif-body);
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- utilidades ---------- */
+  .container{
+    width:100%;
+    max-width:560px;
+    margin:0 auto;
+    padding:0 1.4rem;
+  }
+
+  .eyebrow{
+    font-family:var(--serif-display);
+    letter-spacing:.35em;
+    text-transform:uppercase;
+    font-size:.68rem;
+    color:var(--gold-light);
+    opacity:.85;
+  }
+
+  /* ---------- pétalos ambientales ---------- */
+  #petals{
+    position:fixed; inset:0;
+    pointer-events:none;
+    z-index:5;
+    overflow:hidden;
+  }
+  .petal{
+    position:absolute;
+    top:-5vh;
+    width:14px; height:14px;
+    background:radial-gradient(circle at 30% 30%, var(--rose-light), var(--rose) 70%);
+    border-radius:60% 0 60% 0;
+    opacity:.75;
+    animation-name:fall;
+    animation-timing-function:linear;
+    animation-iteration-count:infinite;
+    will-change:transform;
+  }
+  @keyframes fall{
+    0%{ transform:translateY(-10vh) translateX(0) rotate(0deg); opacity:0;}
+    10%{opacity:.8;}
+    100%{ transform:translateY(110vh) translateX(var(--drift,40px)) rotate(340deg); opacity:0;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .petal{animation:none; display:none;}
+    *{animation-duration:.001ms !important; transition-duration:.001ms !important;}
+  }
+
+  /* ---------- rosetón divisor ---------- */
+  .rosette{
+    display:block;
+    width:64px; height:64px;
+    margin:2.4rem auto;
+    opacity:.9;
+  }
+  .rosette path, .rosette circle{
+    stroke:var(--gold);
+    fill:none;
+    stroke-width:1;
+  }
+
+  /* ============================================================
+     PANTALLA 1 — PORTAL / "toca para comenzar"
+     ============================================================ */
+  #portal{
+    position:fixed; inset:0;
+    z-index:50;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+      radial-gradient(ellipse at 50% 30%, #2a2145 0%, var(--ink) 70%);
+    transition:opacity 1.1s ease, visibility 1.1s ease;
+  }
+  #portal.hide{
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+  }
+  .portal-inner{
+    text-align:center;
+    padding:2rem;
+  }
+  .portal-inner .eyebrow{display:block; margin-bottom:1rem;}
+  #rose-btn{
+    background:none;
+    border:none;
+    cursor:pointer;
+    padding:0;
+    display:inline-block;
+    filter:drop-shadow(0 0 18px rgba(201,162,77,.45));
+    animation:breathe 3.2s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%,100%{ transform:scale(1); filter:drop-shadow(0 0 12px rgba(201,162,77,.35));}
+    50%{ transform:scale(1.055); filter:drop-shadow(0 0 26px rgba(201,162,77,.6));}
+  }
+  #rose-btn svg{width:96px; height:96px;}
+  .portal-caption{
+    margin-top:1.4rem;
+    font-family:var(--serif-display);
+    font-size:.72rem;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    color:var(--cream-dim);
+  }
+
+  /* ============================================================
+     CONTENIDO PRINCIPAL
+     ============================================================ */
+  #contenido{
+    position:relative;
+    z-index:1;
+    opacity:0;
+    transition:opacity 1.3s ease .2s;
+  }
+  #contenido.show{opacity:1;}
+
+  section{
+    padding:3.2rem 0 2.6rem;
+    position:relative;
+  }
+
+  .frame{
+    border:1px solid rgba(201,162,77,.35);
+    border-radius:2px;
+    padding:2.2rem 1.4rem;
+    position:relative;
+    background:linear-gradient(180deg, var(--bg-panel), var(--bg-panel-2));
+    box-shadow:var(--shadow);
+  }
+  .frame::before,.frame::after{
+    content:"";
+    position:absolute;
+    width:22px; height:22px;
+    border:1px solid var(--gold);
+    opacity:.7;
+  }
+  .frame::before{ top:-1px; left:-1px; border-right:none; border-bottom:none;}
+  .frame::after{ bottom:-1px; right:-1px; border-left:none; border-top:none;}
+
+  /* ---- Hero ---- */
+  #hero{ text-align:center; padding-top:4rem;}
+  #hero .eyebrow{margin-bottom:1.1rem;}
+  #hero h1{
+    font-family:var(--script);
+    font-weight:400;
+    font-size:clamp(3.4rem, 18vw, 5.2rem);
+    color:var(--gold-light);
+    margin:.2rem 0 .4rem;
+    line-height:1;
+    text-shadow:0 0 24px rgba(201,162,77,.28);
+  }
+  #hero .subt{
+    font-family:var(--serif-display);
+    font-size:.95rem;
+    letter-spacing:.14em;
+    color:var(--cream-dim);
+    text-transform:uppercase;
+  }
+  #hero .fecha-fija{
+    margin-top:1.6rem;
+    font-family:var(--serif-body);
+    font-style:italic;
+    font-size:1.15rem;
+    color:var(--cream);
+  }
+
+  /* ---- Frase ---- */
+  #frase blockquote{
+    margin:0;
+    font-size:1.28rem;
+    line-height:1.6;
+    font-style:italic;
+    text-align:center;
+    color:var(--cream);
+  }
+  #frase blockquote::before{content:"“";}
+  #frase blockquote::after{content:"”";}
+
+  /* ---- Contador ---- */
+  #contador h2, section > .frame h2{
+    font-family:var(--serif-display);
+    text-align:center;
+    font-size:1.05rem;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    color:var(--gold-light);
+    margin:0 0 1.6rem;
+  }
+  .clock{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:.6rem;
+  }
+  .clock .unit{
+    text-align:center;
+    background:rgba(0,0,0,.25);
+    border:1px solid rgba(201,162,77,.3);
+    border-radius:4px;
+    padding:.8rem .2rem .6rem;
+  }
+  .clock .num{
+    font-family:var(--serif-display);
+    font-size:clamp(1.5rem, 6vw, 2.1rem);
+    color:var(--gold-light);
+    display:block;
+    line-height:1;
+  }
+  .clock .lbl{
+    display:block;
+    margin-top:.35rem;
+    font-size:.62rem;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--cream-dim);
+  }
+  #contador-terminado{
+    text-align:center;
+    font-family:var(--serif-display);
+    letter-spacing:.1em;
+    color:var(--gold-light);
+    display:none;
+  }
+
+  /* ---- Detalles (misa / fiesta) ---- */
+  .detalles-grid{
+    display:grid;
+    gap:1.2rem;
+  }
+  .detalle-card{
+    text-align:center;
+  }
+  .detalle-card .icono{
+    width:34px; height:34px;
+    margin:0 auto .8rem;
+    color:var(--gold);
+  }
+  .detalle-card h3{
+    font-family:var(--serif-display);
+    font-size:1rem;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--gold-light);
+    margin:0 0 .3rem;
+  }
+  .detalle-card .hora{
+    font-style:italic;
+    color:var(--cream-dim);
+    margin:0 0 .5rem;
+    font-size:1rem;
+  }
+  .detalle-card .lugar{
+    font-size:1.15rem;
+    color:var(--cream);
+    margin:0 0 1rem;
+  }
+  .btn-mapa{
+    display:inline-block;
+    font-family:var(--serif-display);
+    font-size:.66rem;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--ink);
+    background:linear-gradient(180deg,var(--gold-light),var(--gold));
+    padding:.65rem 1.3rem;
+    border-radius:2px;
+    text-decoration:none;
+    transition:transform .25s ease, filter .25s ease;
+  }
+  .btn-mapa:hover{ transform:translateY(-2px); filter:brightness(1.08);}
+
+  /* ---- Familia ---- */
+  .familia-grid{
+    display:grid;
+    gap:2rem;
+    text-align:center;
+  }
+  .familia-grupo h3{
+    font-family:var(--serif-display);
+    font-size:.85rem;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    color:var(--gold-light);
+    margin:0 0 .7rem;
+  }
+  .familia-grupo p{
+    margin:.15rem 0;
+    font-size:1.15rem;
+    color:var(--cream);
+  }
+
+  /* ---- Footer ---- */
+  footer{
+    text-align:center;
+    padding:3rem 1rem 4rem;
+  }
+  footer .script{
+    font-family:var(--script);
+    font-size:2rem;
+    color:var(--gold-light);
+  }
+  footer .tiny{
+    margin-top:.6rem;
+    font-size:.68rem;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    color:var(--cream-dim);
+  }
+
+  /* ---- control de música flotante ---- */
+  #music-toggle{
+    position:fixed;
+    bottom:1.1rem;
+    right:1.1rem;
+    z-index:40;
+    width:46px; height:46px;
+    border-radius:50%;
+    border:1px solid var(--gold);
+    background:rgba(20,15,30,.75);
+    backdrop-filter:blur(4px);
+    color:var(--gold-light);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    box-shadow:var(--shadow);
+  }
+  #music-toggle svg{width:20px; height:20px;}
+
+  #yt-audio{
+    position:fixed;
+    width:1px; height:1px;
+    opacity:0;
+    pointer-events:none;
+    bottom:0; left:0;
+  }
+
+  @media (min-width: 640px){
+    .clock{gap:.9rem;}
+    .detalles-grid{grid-template-columns:1fr 1fr;}
+    .familia-grid{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div id="petals" aria-hidden="true"></div>
+
+<!-- ============ PORTAL DE ENTRADA ============ -->
+<div id="portal">
+  <div class="portal-inner">
+    <span class="eyebrow">Una invitación encantada</span>
+    <button id="rose-btn" aria-label="Toca la rosa para comenzar">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="roseGrad" cx="35%" cy="30%" r="75%">
+            <stop offset="0%" stop-color="#e08a99"/>
+            <stop offset="55%" stop-color="#8a2c3b"/>
+            <stop offset="100%" stop-color="#5c1a24"/>
+          </radialGradient>
+        </defs>
+        <path d="M50 30 Q35 10 50 5 Q65 10 50 30 Z" fill="url(#roseGrad)"/>
+        <path d="M50 28 Q25 22 25 42 Q28 62 50 55 Z" fill="url(#roseGrad)"/>
+        <path d="M50 28 Q75 22 75 42 Q72 62 50 55 Z" fill="url(#roseGrad)"/>
+        <path d="M50 32 Q38 40 42 55 Q50 65 50 55 Q58 40 50 32 Z" fill="#b5566a"/>
+        <path d="M50 55 L50 90" stroke="#2e4a3c" stroke-width="3" fill="none"/>
+        <path d="M50 68 Q35 65 32 75" stroke="#2e4a3c" stroke-width="2.5" fill="none"/>
+        <path d="M50 76 Q65 74 68 84" stroke="#2e4a3c" stroke-width="2.5" fill="none"/>
+      </svg>
+    </button>
+    <div class="portal-caption">Toca la rosa para comenzar</div>
+  </div>
+</div>
+
+<!-- ============ CONTENIDO ============ -->
+<div id="contenido">
+
+  <section id="hero">
+    <div class="container">
+      <span class="eyebrow">Mis quince años</span>
+      <h1 id="nombre-hero">X</h1>
+      <p class="subt">Te invito a vivir un cuento hecho realidad</p>
+      <p class="fecha-fija" id="fecha-fija">X de octubre de 2026</p>
+    </div>
+  </section>
+
+  <svg class="rosette" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30"/><circle cx="32" cy="32" r="20"/><path d="M32 2 L32 62 M2 32 L62 32 M11 11 L53 53 M53 11 L11 53"/></svg>
+
+  <section id="frase">
+    <div class="container">
+      <blockquote id="frase-texto">Con la bendición de Dios y el amor de mi familia me siento muy feliz de llegar a este momento de mi vida. Los invito a compartir este día tan especial.</blockquote>
+    </div>
+  </section>
+
+  <svg class="rosette" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30"/><circle cx="32" cy="32" r="20"/><path d="M32 2 L32 62 M2 32 L62 32 M11 11 L53 53 M53 11 L11 53"/></svg>
+
+  <section id="contador">
+    <div class="container">
+      <div class="frame">
+        <h2>Faltan para el gran día</h2>
+        <div class="clock" id="clock">
+          <div class="unit"><span class="num" id="d">00</span><span class="lbl">Días</span></div>
+          <div class="unit"><span class="num" id="h">00</span><span class="lbl">Horas</span></div>
+          <div class="unit"><span class="num" id="m">00</span><span class="lbl">Min</span></div>
+          <div class="unit"><span class="num" id="s">00</span><span class="lbl">Seg</span></div>
+        </div>
+        <p id="contador-terminado">¡Hoy comienza el cuento!</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="detalles">
+    <div class="container">
+      <div class="detalles-grid">
+
+        <div class="frame detalle-card">
+          <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2 L12 8 M8 6 L16 6 M6 22 L18 22 L18 12 L6 12 Z M9 22 L9 16 L15 16 L15 22"/></svg>
+          <h3>Misa</h3>
+          <p class="hora" id="hora-misa">3:00 pm</p>
+          <p class="lugar" id="lugar-misa">X</p>
+          <a class="btn-mapa" id="mapa-misa" href="#" target="_blank" rel="noopener">Cómo llegar</a>
+        </div>
+
+        <div class="frame detalle-card">
+          <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 21 C12 21 4 14.5 4 9 C4 5 7.5 2 12 2 C16.5 2 20 5 20 9 C20 14.5 12 21 12 21 Z M12 12 a3 3 0 1 0 0-6 a3 3 0 0 0 0 6 Z"/></svg>
+          <h3>Recepción</h3>
+          <p class="hora" id="hora-fiesta">1:00 pm</p>
+          <p class="lugar" id="lugar-fiesta">X</p>
+          <a class="btn-mapa" id="mapa-fiesta" href="#" target="_blank" rel="noopener">Cómo llegar</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <svg class="rosette" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30"/><circle cx="32" cy="32" r="20"/><path d="M32 2 L32 62 M2 32 L62 32 M11 11 L53 53 M53 11 L11 53"/></svg>
+
+  <section id="familia">
+    <div class="container">
+      <div class="familia-grid">
+        <div class="familia-grupo">
+          <h3>Mis padres</h3>
+          <p id="padre1">X</p>
+          <p id="padre2">X</p>
+        </div>
+        <div class="familia-grupo">
+          <h3>Mis padrinos</h3>
+          <p id="padrino1">X</p>
+          <p id="padrino2">X</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="script">Gracias por acompañarme</div>
+    <div class="tiny">en este cuento de hadas hecho realidad</div>
+  </footer>
+
+</div>
+
+<!-- ============ Control de música ============ -->
+<button id="music-toggle" aria-label="Silenciar o activar música">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+    <path d="M4 9 L4 15 L8 15 L13 20 L13 4 L8 9 Z"/>
+    <path id="wave1" d="M16.5 8.5 a6 6 0 0 1 0 7"/>
+    <path id="wave2" d="M19 6 a10 10 0 0 1 0 12"/>
+  </svg>
+</button>
+<div id="yt-audio"></div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+/* ============================================================
+   EDITA AQUÍ — todos los datos de la invitación en un solo lugar
+   ============================================================ */
+const CONFIG = {
+  nombre: "X",
+
+  // Texto libre que se muestra siempre, sin importar el contador
+  fechaTexto: "X de octubre de 2026",
+
+  // Fecha y hora EXACTAS para el contador regresivo.
+  // Formato: "AAAA-MM-DDTHH:MM:SS"  (hora en formato 24h)
+  // Ejemplo real para el 24 de octubre de 2026 a la 1:00 pm:
+  fechaISO: "2026-10-24T13:00:00",
+
+  frase: "Con la bendición de Dios y el amor de mi familia me siento muy feliz de llegar a este momento de mi vida. Los invito a compartir este día tan especial.",
+
+  horaMisa: "3:00 pm",
+  ubicacionMisa: "X",
+  mapaMisa: "https://maps.google.com/?q=", // pega aquí el link de Google Maps
+
+  horaFiesta: "1:00 pm",
+  ubicacionFiesta: "X",
+  mapaFiesta: "https://maps.google.com/?q=", // pega aquí el link de Google Maps
+
+  padres: ["X", "X"],
+  padrinos: ["X", "X"],
+
+  // ID del video de YouTube que sonará en bucle
+  // (lo que va después de "v=" en la URL: youtube.com/watch?v=ESTE_ID)
+  youtubeId: "CXZ7Nz69OPg"
+};
+/* ============================================================ */
+
+// --- Rellenar el contenido con CONFIG ---
+document.getElementById('nombre-hero').textContent = CONFIG.nombre;
+document.getElementById('fecha-fija').textContent = CONFIG.fechaTexto;
+document.getElementById('frase-texto').textContent = CONFIG.frase;
+
+document.getElementById('hora-misa').textContent = CONFIG.horaMisa;
+document.getElementById('lugar-misa').textContent = CONFIG.ubicacionMisa;
+document.getElementById('mapa-misa').href = CONFIG.mapaMisa;
+
+document.getElementById('hora-fiesta').textContent = CONFIG.horaFiesta;
+document.getElementById('lugar-fiesta').textContent = CONFIG.ubicacionFiesta;
+document.getElementById('mapa-fiesta').href = CONFIG.mapaFiesta;
+
+document.getElementById('padre1').textContent = CONFIG.padres[0];
+document.getElementById('padre2').textContent = CONFIG.padres[1];
+document.getElementById('padrino1').textContent = CONFIG.padrinos[0];
+document.getElementById('padrino2').textContent = CONFIG.padrinos[1];
+
+document.title = "Mis XV años · " + CONFIG.nombre;
+
+// --- Pétalos ambientales ---
+(function petals(){
+  const wrap = document.getElementById('petals');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce) return;
+  const total = window.innerWidth < 640 ? 10 : 16;
+  for(let i=0;i<total;i++){
+    const p = document.createElement('div');
+    p.className = 'petal';
+    p.style.left = Math.random()*100 + 'vw';
+    p.style.setProperty('--drift', (Math.random()*80-40)+'px');
+    const dur = 9 + Math.random()*9;
+    p.style.animationDuration = dur + 's';
+    p.style.animationDelay = (Math.random()*dur) + 's';
+    p.style.transform = 'scale(' + (0.6+Math.random()*0.8) + ')';
+    wrap.appendChild(p);
+  }
+})();
+
+// --- Contador regresivo ---
+(function countdown(){
+  const target = new Date(CONFIG.fechaISO).getTime();
+  const els = {
+    d: document.getElementById('d'),
+    h: document.getElementById('h'),
+    m: document.getElementById('m'),
+    s: document.getElementById('s')
+  };
+  const clockEl = document.getElementById('clock');
+  const doneEl = document.getElementById('contador-terminado');
+
+  function tick(){
+    const now = Date.now();
+    const diff = target - now;
+    if(diff <= 0){
+      clockEl.style.display = 'none';
+      doneEl.style.display = 'block';
+      clearInterval(timer);
+      return;
+    }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    els.d.textContent = String(d).padStart(2,'0');
+    els.h.textContent = String(h).padStart(2,'0');
+    els.m.textContent = String(m).padStart(2,'0');
+    els.s.textContent = String(s).padStart(2,'0');
+  }
+  tick();
+  const timer = setInterval(tick, 1000);
+})();
+
+// --- Revelar contenido tras aparecer ---
+function revelarContenido(){
+  document.getElementById('contenido').classList.add('show');
+}
+(function scrollReveal(){
+  const secciones = document.querySelectorAll('section, footer');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.style.transition = 'opacity .9s ease, transform .9s ease';
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+        io.unobserve(e.target);
+      }
+    });
+  }, {threshold:.15});
+  secciones.forEach(s=>{
+    s.style.opacity='0';
+    s.style.transform='translateY(24px)';
+    io.observe(s);
+  });
+})();
+
+/* ============================================================
+   MÚSICA DE FONDO EN BUCLE (YouTube IFrame API)
+   Se activa hasta que la persona toca la rosa, cumpliendo con
+   las políticas de reproducción automática de los navegadores.
+   ============================================================ */
+let ytPlayer = null;
+let ytReady = false;
+let musicMuted = false;
+
+function onYouTubeIframeAPIReady(){
+  ytPlayer = new YT.Player('yt-audio', {
+    height: '1',
+    width: '1',
+    videoId: CONFIG.youtubeId,
+    playerVars: {
+      autoplay: 0,
+      controls: 0,
+      disablekb: 1,
+      loop: 1,
+      playlist: CONFIG.youtubeId,
+      playsinline: 1
+    },
+    events: {
+      onReady: function(){ ytReady = true; }
+    }
+  });
+}
+
+document.getElementById('rose-btn').addEventListener('click', function(){
+  const portal = document.getElementById('portal');
+  portal.classList.add('hide');
+  revelarContenido();
+
+  const tryPlay = () => {
+    if(ytReady && ytPlayer && ytPlayer.playVideo){
+      ytPlayer.playVideo();
+    } else {
+      setTimeout(tryPlay, 200);
+    }
+  };
+  tryPlay();
+});
+
+document.getElementById('music-toggle').addEventListener('click', function(){
+  if(!ytPlayer) return;
+  musicMuted = !musicMuted;
+  if(musicMuted){
+    ytPlayer.mute();
+    this.style.opacity = '.5';
+  } else {
+    ytPlayer.unMute();
+    this.style.opacity = '1';
+  }
+});
+</script>
+</body>
+</html>
