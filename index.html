@@ -5,16 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <title>Mis XV años</title>
 
-<!--
-  ============================================================
-  CÓMO EDITAR ESTA INVITACIÓN
-  ============================================================
-  Todo lo que debes cambiar está en UN SOLO LUGAR: el objeto
-  CONFIG dentro de la etiqueta <script> cerca del final del
-  archivo (busca "EDITA AQUÍ"). No necesitas tocar nada más.
-  ============================================================
--->
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
@@ -36,7 +26,6 @@
     --serif-body:'Cormorant Garamond', serif;
     --script:'Pinyon Script', cursive;
   }
-
   *{box-sizing:border-box;}
   html,body{ height:100%; overscroll-behavior:none; }
   body{
@@ -53,72 +42,100 @@
       radial-gradient(ellipse 90% 60% at 50% 8%, #372a58 0%, transparent 60%),
       radial-gradient(ellipse 70% 50% at 85% 90%, #3a2440 0%, transparent 55%),
       linear-gradient(180deg, #17112a 0%, #100b1c 55%, #0b0714 100%);
-    animation:bgshift 16s ease-in-out infinite alternate;
+    animation:bgshift 18s ease-in-out infinite alternate;
   }
   @keyframes bgshift{
     0%{ filter:hue-rotate(0deg) brightness(1); }
-    100%{ filter:hue-rotate(-9deg) brightness(1.08); }
+    100%{ filter:hue-rotate(-12deg) brightness(1.1); }
   }
-  #castle{ position:fixed; left:0; right:0; bottom:0; z-index:1; width:100%; height:26vh; opacity:.55; pointer-events:none; }
 
-  #sparkles, #petals, #cursor-layer{ position:fixed; inset:0; z-index:2; pointer-events:none; overflow:hidden; }
-  #cursor-layer{ z-index:35; }
+  /* ---------- partículas flotantes (confeti) ---------- */
+  #confetti-container{
+    position:fixed; inset:0; z-index:1; pointer-events:none; overflow:hidden;
+  }
+  .confetti-piece{
+    position:absolute; top:-20px; width:8px; height:8px; opacity:0.7;
+    animation:confettiFall linear infinite;
+  }
+  @keyframes confettiFall{
+    0%{ transform:translateY(0) rotate(0deg) scale(1); opacity:0.6; }
+    100%{ transform:translateY(110vh) rotate(720deg) scale(0.2); opacity:0; }
+  }
 
-  .sparkle{
-    position:absolute; border-radius:50%;
-    background:var(--gold-light);
-    box-shadow:0 0 7px 1.5px rgba(240,217,163,.9);
-    animation:twinkle 3.2s ease-in-out infinite;
+  /* ---------- estrellas de fondo ---------- */
+  #stars{
+    position:fixed; inset:0; z-index:1; pointer-events:none; overflow:hidden;
   }
-  @keyframes twinkle{
-    0%,100%{ opacity:.12; transform:scale(1) rotate(0deg); }
-    50%{ opacity:1; transform:scale(1.8) rotate(45deg); }
+  .star{
+    position:absolute; background:white; border-radius:50%; opacity:0.3;
+    animation:twinkleStar 2.5s ease-in-out infinite alternate;
   }
-  .petal{
-    position:absolute; top:-6vh; width:11px; height:11px;
-    background:radial-gradient(circle at 30% 30%, var(--rose-light), var(--rose) 70%);
-    border-radius:60% 0 60% 0; opacity:.7;
-    animation-name:fall; animation-timing-function:linear; animation-iteration-count:infinite;
+  @keyframes twinkleStar{
+    0%{ opacity:0.1; transform:scale(0.5); }
+    100%{ opacity:0.8; transform:scale(1.2); }
   }
-  @keyframes fall{
-    0%{ transform:translateY(-8vh) translateX(0) rotate(0deg); opacity:0;}
-    12%{opacity:.75;}
-    100%{ transform:translateY(112vh) translateX(var(--drift,40px)) rotate(320deg); opacity:0;}
+
+  /* ---------- globos flotantes ---------- */
+  #balloons{
+    position:fixed; inset:0; z-index:1; pointer-events:none; overflow:hidden;
+  }
+  .balloon{
+    position:absolute; border-radius:50% 50% 50% 50% / 40% 40% 60% 60%;
+    opacity:0.15; animation:balloonFloat linear infinite;
+  }
+  @keyframes balloonFloat{
+    0%{ transform:translateY(110vh) rotate(0deg); }
+    100%{ transform:translateY(-20vh) rotate(15deg); }
+  }
+
+  /* ---------- partículas de polvo de hadas (aleatorias) ---------- */
+  .fairy-dust{
+    position:fixed; border-radius:50%; pointer-events:none; z-index:2;
+    background:radial-gradient(circle, var(--gold-light), transparent);
+    animation:fairyDust 4s ease-out forwards;
+  }
+  @keyframes fairyDust{
+    0%{ transform:scale(1); opacity:0.7; }
+    100%{ transform:scale(0) translateY(-80px); opacity:0; }
+  }
+
+  /* ---------- chispas siguiendo al mouse (global) ---------- */
+  #cursor-layer{
+    position:fixed; inset:0; z-index:35; pointer-events:none; overflow:hidden;
   }
   .cursor-spark{
-    position:absolute; width:5px; height:5px; border-radius:50%;
-    background:radial-gradient(circle, #fff 0%, var(--gold-light) 45%, transparent 75%);
-    animation:sparkFade .7s ease-out forwards;
+    position:absolute; width:6px; height:6px; border-radius:50%;
+    background:radial-gradient(circle, #fff 0%, var(--gold-light) 40%, transparent 70%);
+    animation:sparkFade 0.7s ease-out forwards;
   }
   @keyframes sparkFade{
     0%{ opacity:1; transform:scale(1) translateY(0); }
-    100%{ opacity:0; transform:scale(.2) translateY(-14px); }
+    100%{ opacity:0; transform:scale(0.2) translateY(-18px); }
   }
+
+  /* ---------- explosión de chispas (burst) ---------- */
   .burst-dot{
-    position:fixed; width:5px; height:5px; border-radius:50%;
-    background:var(--gold-light); pointer-events:none; z-index:80;
-    box-shadow:0 0 6px rgba(240,217,163,.9);
-    animation:burstOut .6s cubic-bezier(.2,.8,.3,1) forwards;
+    position:fixed; width:7px; height:7px; border-radius:50%;
+    background:radial-gradient(circle, #fff, var(--gold-light));
+    pointer-events:none; z-index:80;
+    animation:burstOut 0.7s cubic-bezier(.2,.8,.3,1) forwards;
   }
   @keyframes burstOut{
     0%{ opacity:1; transform:translate(0,0) scale(1); }
-    100%{ opacity:0; transform:translate(var(--bx), var(--by)) scale(.2); }
+    100%{ opacity:0; transform:translate(var(--bx), var(--by)) scale(0.2); }
   }
 
-  @media (prefers-reduced-motion: reduce){
-    *{animation-duration:.001ms !important; transition-duration:.001ms !important;}
-  }
-
-  /* ============================================================
-     PORTAL DE ENTRADA
-     ============================================================ */
+  /* ---------- portal de entrada ---------- */
   #portal{
     position:fixed; inset:0; z-index:60;
     display:flex; align-items:center; justify-content:center;
     background:radial-gradient(ellipse at 50% 35%, #241a3a 0%, var(--ink) 75%);
-    transition:opacity 1s ease, visibility 1s ease;
+    transition:opacity 1s ease, visibility 1s ease, transform 1s ease;
   }
-  #portal.hide{ opacity:0; visibility:hidden; pointer-events:none; }
+  #portal.hide{
+    opacity:0; visibility:hidden; pointer-events:none;
+    transform:scale(1.1);
+  }
   .portal-inner{ text-align:center; padding:2rem; }
   .eyebrow{
     font-family:var(--serif-display); letter-spacing:.32em; text-transform:uppercase;
@@ -132,11 +149,11 @@
   }
   @keyframes breathe{
     0%,100%{ filter:drop-shadow(0 0 12px rgba(201,162,77,.35));}
-    50%{ filter:drop-shadow(0 0 32px rgba(201,162,77,.7));}
+    50%{ filter:drop-shadow(0 0 40px rgba(201,162,77,.8));}
   }
   @keyframes floaty{
-    0%,100%{ transform:translateY(0) rotate(-1.5deg); }
-    50%{ transform:translateY(-8px) rotate(1.5deg); }
+    0%,100%{ transform:translateY(0) rotate(-2deg); }
+    50%{ transform:translateY(-10px) rotate(2deg); }
   }
   #rose-btn svg{ width:92px; height:92px; }
   .portal-caption{
@@ -158,9 +175,7 @@
     100%{ transform:translate(0,0) rotate(0deg) scale(1); opacity:0; }
   }
 
-  /* ============================================================
-     APP — pantalla única, sin scroll
-     ============================================================ */
+  /* ---------- app principal ---------- */
   #app{
     position:fixed; inset:0; z-index:5;
     display:flex; flex-direction:column; align-items:center; justify-content:space-between;
@@ -183,27 +198,31 @@
   }
   #rose-wrap svg{ width:100%; height:100%; overflow:visible; }
 
-  .name-wrap{ position:relative; }
-  .name-wrap::before{
-    content:""; position:absolute; inset:-30% -40%; z-index:-1;
-    background:radial-gradient(ellipse, rgba(201,162,77,.35), transparent 65%);
-    animation:glowPulse 3.4s ease-in-out infinite;
+  .name-wrap{
+    position:relative;
+    filter:drop-shadow(0 0 20px rgba(201,162,77,0.4));
   }
-  @keyframes glowPulse{ 0%,100%{ opacity:.5; transform:scale(.94);} 50%{ opacity:1; transform:scale(1.05);} }
+  .name-wrap::before{
+    content:""; position:absolute; inset:-40% -50%; z-index:-1;
+    background:radial-gradient(ellipse, rgba(255,215,0,0.5), transparent 65%);
+    animation:glowPulse 3s ease-in-out infinite;
+  }
+  @keyframes glowPulse{ 0%,100%{ opacity:0.5; transform:scale(0.9);} 50%{ opacity:1; transform:scale(1.1);} }
 
   h1#nombre-hero{
     font-family:var(--script); font-weight:400;
-    font-size:clamp(2.5rem, 10.5dvh, 4.4rem); line-height:1; margin:0; cursor:pointer;
-    background:linear-gradient(100deg, var(--gold-light) 20%, #fff6df 40%, var(--gold-light) 60%);
-    background-size:220% auto; -webkit-background-clip:text; background-clip:text; color:transparent;
-    animation:shimmer 5s linear infinite;
-    filter:drop-shadow(0 0 18px rgba(201,162,77,.3));
+    font-size:clamp(2.8rem, 12dvh, 4.8rem); line-height:1; margin:0; cursor:pointer;
+    background:linear-gradient(90deg, #ff0000, #ff8800, #ffd700, #00ff00, #0088ff, #8800ff, #ff0000);
+    background-size:300% auto;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:rainbowMove 4s linear infinite;
+    filter:drop-shadow(0 0 30px rgba(255,215,0,0.3));
     user-select:none; -webkit-tap-highlight-color:transparent;
-    transition:transform .2s ease;
+    transition:transform 0.2s ease;
   }
-  h1#nombre-hero:hover{ transform:scale(1.04); }
-  h1#nombre-hero:active{ transform:scale(.95); }
-  @keyframes shimmer{ 0%{ background-position:0% 50%; } 100%{ background-position:220% 50%; } }
+  h1#nombre-hero:hover{ transform:scale(1.06); }
+  h1#nombre-hero:active{ transform:scale(0.95); }
+  @keyframes rainbowMove{ 0%{ background-position:0% 50%; } 100%{ background-position:300% 50%; } }
 
   .subt{
     font-family:var(--serif-display); font-size:clamp(.62rem,1.5dvh,.82rem);
@@ -262,9 +281,7 @@
   #music-toggle svg{ width:19px; height:19px; }
   #yt-audio{ position:fixed; width:1px; height:1px; opacity:0; pointer-events:none; bottom:0; left:0; }
 
-  /* ============================================================
-     MODALES
-     ============================================================ */
+  /* ---------- modales ---------- */
   .modal-overlay{
     position:fixed; inset:0; z-index:70; background:rgba(8,6,14,.72); backdrop-filter:blur(6px);
     display:flex; align-items:center; justify-content:center; padding:1.1rem;
@@ -320,9 +337,19 @@
   .familia-grupo h3{ font-family:var(--serif-display); font-size:.78rem; letter-spacing:.18em; text-transform:uppercase; color:var(--gold-light); margin:0 0 .5rem; }
   .familia-grupo p{ margin:.1rem 0; font-size:1.05rem; color:var(--cream); }
 
-  /* ============================================================
-     JUEGO SECRETO — Breakout
-     ============================================================ */
+  /* ---------- brillos en el contador (mouse) ---------- */
+  #modal-contador .cursor-spark-modal{
+    position:absolute; width:8px; height:8px; border-radius:50%;
+    background:radial-gradient(circle, #fff, var(--gold-light));
+    pointer-events:none;
+    animation:sparkModal 0.8s ease-out forwards;
+  }
+  @keyframes sparkModal{
+    0%{ opacity:1; transform:scale(1) translateY(0); }
+    100%{ opacity:0; transform:scale(0.2) translateY(-20px); }
+  }
+
+  /* ---------- juego ---------- */
   #game-overlay{
     position:fixed; inset:0; z-index:90; background:rgba(6,4,10,.9);
     display:flex; align-items:center; justify-content:center;
@@ -357,6 +384,8 @@
   .brick.gone{ opacity:0; transform:scale(.3); pointer-events:none; }
   #paddle{ position:absolute; height:10px; border-radius:6px; background:linear-gradient(180deg,var(--gold-light),var(--gold)); box-shadow:0 0 12px rgba(201,162,77,.6); }
   #ball{ position:absolute; width:10px; height:10px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #fff, var(--rose-light) 60%, var(--rose)); box-shadow:0 0 8px rgba(198,108,124,.8); }
+  .ball-trail{ position:absolute; width:6px; height:6px; border-radius:50%; background:rgba(240,217,163,0.3); pointer-events:none; animation:trailFade 0.5s ease-out forwards; }
+  @keyframes trailFade{ 0%{ opacity:0.6; transform:scale(1); } 100%{ opacity:0; transform:scale(0.3); } }
   #game-msg{
     position:absolute; inset:0; display:none; align-items:center; justify-content:center; flex-direction:column; gap:.6rem;
     background:rgba(10,7,16,.82); text-align:center; padding:1rem;
@@ -371,35 +400,30 @@
   #game-close{ background:none; border:1px solid var(--glass-border); color:var(--gold-light); width:38px; height:38px; border-radius:50%; cursor:pointer; font-size:1.05rem; }
   #lives{ letter-spacing:.15em; }
 
+  /* ---------- confeti explosivo (game win) ---------- */
+  .confetti-burst{
+    position:fixed; width:10px; height:10px; border-radius:2px;
+    pointer-events:none; z-index:100; animation:confettiBurst 1.5s ease-out forwards;
+  }
+  @keyframes confettiBurst{
+    0%{ opacity:1; transform:translate(0,0) rotate(0deg) scale(1); }
+    100%{ opacity:0; transform:translate(var(--bx2), var(--by2)) rotate(720deg) scale(0.2); }
+  }
+
   ::-webkit-scrollbar{ width:6px; }
   ::-webkit-scrollbar-thumb{ background:var(--glass-border); border-radius:3px; }
 </style>
 </head>
 <body>
 
+<!-- Capas de fondo -->
 <div id="bg"></div>
-<svg id="castle" viewBox="0 0 800 160" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-  <g fill="#0a0713">
-    <rect x="0" y="90" width="800" height="70"/>
-    <rect x="40" y="55" width="26" height="60"/>
-    <polygon points="53,30 40,55 66,55"/>
-    <rect x="120" y="70" width="34" height="45"/>
-    <polygon points="137,42 120,70 154,70"/>
-    <rect x="300" y="40" width="40" height="75"/>
-    <polygon points="320,5 300,40 340,40"/>
-    <rect x="500" y="65" width="30" height="50"/>
-    <polygon points="515,38 500,65 530,65"/>
-    <rect x="640" y="50" width="36" height="65"/>
-    <polygon points="658,18 640,50 676,50"/>
-    <rect x="740" y="75" width="24" height="40"/>
-    <polygon points="752,55 740,75 764,75"/>
-  </g>
-</svg>
-<div id="sparkles" aria-hidden="true"></div>
-<div id="petals" aria-hidden="true"></div>
-<div id="cursor-layer" aria-hidden="true"></div>
+<div id="confetti-container"></div>
+<div id="stars"></div>
+<div id="balloons"></div>
+<div id="cursor-layer"></div>
 
-<!-- ============ PORTAL DE ENTRADA ============ -->
+<!-- ============ PORTAL ============ -->
 <div id="portal">
   <div class="portal-inner">
     <span class="eyebrow">Una invitación encantada</span>
@@ -424,10 +448,9 @@
   </div>
 </div>
 
-<!-- ============ APP (pantalla única) ============ -->
+<!-- ============ APP ============ -->
 <div id="app">
   <div id="app-top"><span class="eyebrow">Mis quince años</span></div>
-
   <div id="app-mid">
     <div id="rose-wrap">
       <svg viewBox="0 0 100 100">
@@ -446,7 +469,6 @@
         <path class="rose-petal" d="M50 42 Q40 20 50 8 Q60 20 50 42 Z" fill="#b5566a"/>
       </svg>
     </div>
-
     <div class="name-wrap">
       <h1 id="nombre-hero">X</h1>
     </div>
@@ -454,7 +476,6 @@
     <p class="frase-inline" id="frase-texto">Con la bendición de Dios y el amor de mi familia me siento muy feliz de llegar a este momento de mi vida.</p>
     <p class="fecha-fija" id="fecha-fija">X de octubre de 2026</p>
   </div>
-
   <nav id="nav">
     <button class="nav-btn" data-modal="modal-contador">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="13" r="8"/><path d="M12 9 L12 13 L15 15 M9 2 L15 2"/></svg>
@@ -478,11 +499,13 @@
     <path d="M19 6 a10 10 0 0 1 0 12"/>
   </svg>
 </button>
-<div id="yt-audio"></div>
+
+<!-- IFrame de YouTube (oculto) para audio -->
+<iframe id="yt-audio" src="https://www.youtube.com/embed/CXZ7Nz69OPg?autoplay=0&mute=1&loop=1&playlist=CXZ7Nz69OPg&controls=0&disablekb=1" allow="autoplay; encrypted-media" style="position:fixed; width:1px; height:1px; opacity:0; pointer-events:none; bottom:0; left:0;"></iframe>
 
 <!-- ============ MODALES ============ -->
 <div class="modal-overlay" id="modal-contador">
-  <div class="modal-card">
+  <div class="modal-card" style="position:relative;">
     <button class="modal-close" data-close>&times;</button>
     <h2>Faltan para el gran día</h2>
     <div class="clock" id="clock">
@@ -534,7 +557,7 @@
   </div>
 </div>
 
-<!-- ============ JUEGO SECRETO ============ -->
+<!-- ============ JUEGO ============ -->
 <div id="game-overlay">
   <div id="game-panel">
     <div id="game-header">
@@ -555,10 +578,9 @@
   </div>
 </div>
 
-<script src="https://www.youtube.com/iframe_api"></script>
 <script>
 /* ============================================================
-   EDITA AQUÍ — todos los datos de la invitación en un solo lugar
+   CONFIG — EDITA AQUÍ
    ============================================================ */
 const CONFIG = {
   nombre: "Dania",
@@ -572,11 +594,11 @@ const CONFIG = {
   ubicacionFiesta: "X",
   mapaFiesta: "https://maps.google.com/?q=",
   padres: ["X", "X"],
-  padrinos: ["X", "X"],
-  youtubeId: "CXZ7Nz69OPg"
+  padrinos: ["X", "X"]
 };
 /* ============================================================ */
 
+// Rellenar datos
 document.getElementById('nombre-hero').textContent = CONFIG.nombre;
 document.getElementById('fecha-fija').textContent = CONFIG.fechaTexto;
 document.getElementById('frase-texto').textContent = CONFIG.frase;
@@ -595,12 +617,10 @@ document.title = "Mis XV años · " + CONFIG.nombre;
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
 
-/* ---------- audio mágico (Web Audio API, sin archivos externos) ---------- */
+// ---------- AUDIO (Web Audio para efectos) ----------
 let audioCtx = null;
 function ensureAudioCtx(){
-  if(!audioCtx){
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   if(audioCtx.state === 'suspended') audioCtx.resume();
   return audioCtx;
 }
@@ -630,50 +650,82 @@ const soundBrick = ()=> chime([1200 + Math.random()*400], 0.18);
 const soundWin   = ()=> chime([784, 988, 1175, 1568], 0.7);
 const soundLose  = ()=> chime([392, 330], 0.5);
 
-/* ---------- destellos de fondo ---------- */
-(function sparkles(){
+// ---------- ELEMENTOS FLOTANTES (confeti, estrellas, globos) ----------
+(function confetti(){
   if(reduceMotion) return;
-  const wrap = document.getElementById('sparkles');
-  const total = window.innerWidth < 640 ? 14 : 24;
+  const container = document.getElementById('confetti-container');
+  const colors = ['#c9a24d','#e08a99','#8a2c3b','#2e4a3c','#f0d9a3','#ff6b6b','#4ecdc4','#ffe66d'];
+  const total = window.innerWidth < 640 ? 25 : 45;
   for(let i=0;i<total;i++){
-    const s = document.createElement('div');
-    s.className='sparkle';
-    const size = 2 + Math.random()*3;
-    s.style.width = size+'px'; s.style.height = size+'px';
-    s.style.left = Math.random()*100+'vw';
-    s.style.top = Math.random()*92+'vh';
-    s.style.animationDelay = (Math.random()*4)+'s';
-    s.style.animationDuration = (2.4+Math.random()*3)+'s';
-    wrap.appendChild(s);
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.left = Math.random()*100 + 'vw';
+    el.style.background = colors[Math.floor(Math.random()*colors.length)];
+    el.style.width = (4+Math.random()*6)+'px';
+    el.style.height = (4+Math.random()*8)+'px';
+    el.style.borderRadius = Math.random()>0.5 ? '50%' : '2px';
+    el.style.animationDuration = (7+Math.random()*8)+'s';
+    el.style.animationDelay = (Math.random()*6)+'s';
+    container.appendChild(el);
   }
 })();
 
-/* ---------- pétalos ambientales ---------- */
-(function petals(){
+(function stars(){
   if(reduceMotion) return;
-  const wrap = document.getElementById('petals');
-  const total = window.innerWidth < 640 ? 8 : 14;
+  const container = document.getElementById('stars');
+  const total = window.innerWidth < 640 ? 20 : 35;
   for(let i=0;i<total;i++){
-    const p = document.createElement('div');
-    p.className='petal';
-    p.style.left = Math.random()*100+'vw';
-    p.style.setProperty('--drift', (Math.random()*80-40)+'px');
-    const dur = 10+Math.random()*9;
-    p.style.animationDuration = dur+'s';
-    p.style.animationDelay = (Math.random()*dur)+'s';
-    p.style.transform = 'scale('+(0.6+Math.random()*0.7)+')';
-    wrap.appendChild(p);
+    const el = document.createElement('div');
+    el.className = 'star';
+    const size = 1+Math.random()*3;
+    el.style.width = size+'px'; el.style.height = size+'px';
+    el.style.left = Math.random()*100+'vw';
+    el.style.top = Math.random()*100+'vh';
+    el.style.animationDelay = (Math.random()*3)+'s';
+    container.appendChild(el);
   }
 })();
 
-/* ---------- chispas siguiendo el mouse (solo escritorio) ---------- */
+(function balloons(){
+  if(reduceMotion) return;
+  const container = document.getElementById('balloons');
+  const colors = ['#c9a24d','#e08a99','#2e4a3c','#4ecdc4','#ffe66d'];
+  for(let i=0;i<6;i++){
+    const el = document.createElement('div');
+    el.className = 'balloon';
+    el.style.width = (30+Math.random()*50)+'px';
+    el.style.height = (40+Math.random()*60)+'px';
+    el.style.left = Math.random()*100+'vw';
+    el.style.background = colors[Math.floor(Math.random()*colors.length)];
+    el.style.animationDuration = (20+Math.random()*20)+'s';
+    el.style.animationDelay = (Math.random()*10)+'s';
+    container.appendChild(el);
+  }
+})();
+
+// ---------- POLVO DE HADAS (aleatorio) ----------
+(function fairyDust(){
+  if(reduceMotion) return;
+  setInterval(()=>{
+    const el = document.createElement('div');
+    el.className = 'fairy-dust';
+    const size = 2+Math.random()*6;
+    el.style.width = size+'px'; el.style.height = size+'px';
+    el.style.left = Math.random()*100+'vw';
+    el.style.top = Math.random()*100+'vh';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 4500);
+  }, 1200);
+})();
+
+// ---------- CHISPAS SIGUIENDO MOUSE (global) ----------
 (function cursorSparkles(){
   if(reduceMotion || !hasFinePointer) return;
   const layer = document.getElementById('cursor-layer');
   let last = 0;
   window.addEventListener('mousemove', (e)=>{
     const now = performance.now();
-    if(now - last < 55) return;
+    if(now - last < 50) return;
     last = now;
     const s = document.createElement('div');
     s.className = 'cursor-spark';
@@ -684,14 +736,14 @@ const soundLose  = ()=> chime([392, 330], 0.5);
   });
 })();
 
-/* ---------- estallido de chispas doradas (clic en botones) ---------- */
+// ---------- BURST (explosión de chispas) ----------
 function burst(x, y, count){
-  count = count || 8;
+  count = count || 12;
   for(let i=0;i<count;i++){
     const d = document.createElement('div');
     d.className = 'burst-dot';
-    const angle = (Math.PI*2*i)/count + Math.random()*0.4;
-    const dist = 26 + Math.random()*22;
+    const angle = (Math.PI*2*i)/count + Math.random()*0.5;
+    const dist = 30 + Math.random()*30;
     d.style.setProperty('--bx', Math.cos(angle)*dist + 'px');
     d.style.setProperty('--by', Math.sin(angle)*dist + 'px');
     d.style.left = x+'px'; d.style.top = y+'px';
@@ -700,7 +752,7 @@ function burst(x, y, count){
   }
 }
 
-/* ---------- contador ---------- */
+// ---------- CONTADOR ----------
 (function countdown(){
   const target = new Date(CONFIG.fechaISO).getTime();
   const els = { d:document.getElementById('d'), h:document.getElementById('h'), m:document.getElementById('m'), s:document.getElementById('s') };
@@ -718,22 +770,63 @@ function burst(x, y, count){
   const timer = setInterval(tick,1000);
 })();
 
-/* ---------- modales ---------- */
-function openModal(id){ document.getElementById(id).classList.add('open'); soundOpen(); }
-function closeModal(el){ el.classList.remove('open'); soundClose(); }
+// ---------- MODALES ----------
+function openModal(id){
+  const modal = document.getElementById(id);
+  modal.classList.add('open');
+  soundOpen();
+  // Si es el contador, activar brillos con el mouse
+  if(id === 'modal-contador'){
+    enableModalSparkles(modal);
+  }
+}
+function closeModal(el){
+  el.classList.remove('open');
+  soundClose();
+  // Eliminar los brillos del modal
+  el.querySelectorAll('.cursor-spark-modal').forEach(s=>s.remove());
+}
+
+// Brillo en el modal contador
+function enableModalSparkles(modal){
+  const card = modal.querySelector('.modal-card');
+  if(!card) return;
+  const handler = (e)=>{
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    if(x<0 || x>rect.width || y<0 || y>rect.height) return;
+    const s = document.createElement('div');
+    s.className = 'cursor-spark-modal';
+    s.style.left = (e.clientX - rect.left)+'px';
+    s.style.top = (e.clientY - rect.top)+'px';
+    card.appendChild(s);
+    setTimeout(()=>s.remove(), 800);
+  };
+  card.addEventListener('mousemove', handler);
+  card.addEventListener('touchmove', (e)=>{
+    if(e.touches[0]) handler({clientX:e.touches[0].clientX, clientY:e.touches[0].clientY});
+  });
+  // Guardar para limpiar al cerrar
+  card._sparkHandler = handler;
+}
+
+// Botones de navegación
 document.querySelectorAll('.nav-btn').forEach(btn=>{
   btn.addEventListener('click', (e)=>{
     btn.classList.remove('tap'); void btn.offsetWidth; btn.classList.add('tap');
     const r = btn.getBoundingClientRect();
-    burst(r.left + r.width/2, r.top + r.height/2, 10);
-    openModal(btn.dataset.modal);
+    burst(r.left + r.width/2, r.top + r.height/2, 15);
+    const modalId = btn.dataset.modal;
+    openModal(modalId);
   });
 });
+
 document.querySelectorAll('.modal-overlay').forEach(ov=>{
   ov.addEventListener('click', e=>{ if(e.target===ov) closeModal(ov); });
   ov.querySelector('[data-close]').addEventListener('click', (e)=>{
     const r = e.currentTarget.getBoundingClientRect();
-    burst(r.left+r.width/2, r.top+r.height/2, 6);
+    burst(r.left+r.width/2, r.top+r.height/2, 10);
     closeModal(ov);
   });
 });
@@ -741,61 +834,53 @@ document.addEventListener('keydown', e=>{
   if(e.key==='Escape'){ document.querySelectorAll('.modal-overlay.open').forEach(closeModal); }
 });
 
-/* ---------- portal + música (con respaldo si el autoplay falla) ---------- */
-let ytPlayer=null, ytReady=false, musicMuted=false, ytFailed=false;
-
-function onYouTubeIframeAPIReady(){
-  ytPlayer = new YT.Player('yt-audio', {
-    height:'1', width:'1', videoId: CONFIG.youtubeId,
-    playerVars:{ autoplay:0, controls:0, disablekb:1, loop:1, playlist:CONFIG.youtubeId, playsinline:1 },
-    events:{
-      onReady: function(){ ytReady = true; },
-      onError: function(){ ytFailed = true; }
-    }
-  });
-}
-
-function attemptPlay(retries){
-  retries = retries === undefined ? 25 : retries;
-  if(ytFailed) return; // el video no se pudo cargar; no insistimos
-  if(ytReady && ytPlayer && ytPlayer.playVideo){
-    try{ ytPlayer.playVideo(); }catch(e){}
-    setTimeout(()=>{
-      const state = ytPlayer.getPlayerState ? ytPlayer.getPlayerState() : -1;
-      if(state !== 1){
-        // el navegador bloqueó el audio con sonido: reproducimos silenciado
-        // y avisamos con un ícono pulsante para que activen el sonido ellos mismos
-        try{ ytPlayer.mute(); ytPlayer.playVideo(); }catch(e){}
-        musicMuted = true;
-        document.getElementById('music-toggle').classList.add('pulse');
-      }
-    }, 700);
-  } else if(retries > 0){
-    setTimeout(()=> attemptPlay(retries-1), 200);
-  }
-}
+// ---------- PORTAL + MÚSICA ----------
+const ytIframe = document.getElementById('yt-audio');
+let musicMuted = true; // empieza muteado
 
 document.getElementById('rose-btn').addEventListener('click', function(){
   ensureAudioCtx();
   soundOpen();
+  // Efecto de explosión en la rosa
+  const rect = this.getBoundingClientRect();
+  burst(rect.left + rect.width/2, rect.top + rect.height/2, 30);
   document.getElementById('portal').classList.add('hide');
   document.getElementById('app').classList.add('show');
-  attemptPlay();
+  // Reproducir audio (desmutear y autoplay)
+  try{
+    ytIframe.src = "https://www.youtube.com/embed/CXZ7Nz69OPg?autoplay=1&mute=0&loop=1&playlist=CXZ7Nz69OPg&controls=0&disablekb=1";
+    // forzar mute si el navegador lo bloquea
+    setTimeout(()=>{
+      // Si no suena, muteamos y mostramos pulse
+      if(!ytIframe.contentWindow) return;
+      // No hay forma de saber si suena, pero si el usuario hace clic, el autoplay debería funcionar
+      musicMuted = false;
+      document.getElementById('music-toggle').classList.remove('pulse');
+    }, 500);
+  }catch(e){}
 });
 
+// Botón de música
 document.getElementById('music-toggle').addEventListener('click', function(){
-  if(!ytPlayer) return;
-  this.classList.remove('pulse');
-  musicMuted = !musicMuted;
-  if(musicMuted){ ytPlayer.mute(); this.style.opacity='.5'; }
-  else{ ytPlayer.unMute(); try{ ytPlayer.playVideo(); }catch(e){} this.style.opacity='1'; }
   soundTap();
+  musicMuted = !musicMuted;
+  if(musicMuted){
+    this.style.opacity='0.5';
+    this.classList.remove('pulse');
+    // Mutear iframe
+    try{ ytIframe.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*'); }catch(e){}
+  } else {
+    this.style.opacity='1';
+    this.classList.add('pulse');
+    // Desmutear y forzar play
+    try{
+      ytIframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+      ytIframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+    }catch(e){}
+  }
 });
 
-/* ============================================================
-   JUEGO SECRETO — Breakout con las letras del nombre
-   Se abre con un solo clic sobre el nombre
-   ============================================================ */
+// ---------- JUEGO SECRETO ----------
 (function secretGame(){
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', ()=>{ soundTap(); openGame(); });
@@ -808,6 +893,7 @@ document.getElementById('music-toggle').addEventListener('click', function(){
   const msgEl = document.getElementById('game-msg');
   const msgText = document.getElementById('game-msg-text');
   const livesEl = document.getElementById('lives');
+  const restartBtn = document.getElementById('game-restart');
 
   const LW = 300, LH = 420;
   let scale = 1;
@@ -822,6 +908,7 @@ document.getElementById('music-toggle').addEventListener('click', function(){
   let paddle = { w:64, h:10, x:(LW-64)/2 };
   let ball = { x:LW/2, y:LH-40, vx:0, vy:0, r:5 };
   let lives = 3;
+  let score = 0;
   let running = false;
   let rafId = null;
 
@@ -878,11 +965,28 @@ document.getElementById('music-toggle').addEventListener('click', function(){
   }
 
   function updateLives(){ livesEl.textContent = '♥ '.repeat(Math.max(lives,0)).trim() || '—'; }
+  function updateScore(){ /* opcional */ }
 
   function draw(){
     paddleEl.style.left = paddle.x+'px'; paddleEl.style.top=(LH-16)+'px'; paddleEl.style.width=paddle.w+'px';
     ballEl.style.left=(ball.x-ball.r)+'px'; ballEl.style.top=(ball.y-ball.r)+'px';
   }
+
+  // estela de la pelota
+  let trailInterval = null;
+  function startTrail(){
+    if(trailInterval) clearInterval(trailInterval);
+    trailInterval = setInterval(()=>{
+      if(!running) return;
+      const t = document.createElement('div');
+      t.className = 'ball-trail';
+      t.style.left = (ball.x-3)+'px';
+      t.style.top = (ball.y-3)+'px';
+      inner.appendChild(t);
+      setTimeout(()=>t.remove(), 500);
+    }, 60);
+  }
+  function stopTrail(){ if(trailInterval){ clearInterval(trailInterval); trailInterval=null; } }
 
   function step(){
     if(!running) return;
@@ -905,7 +1009,23 @@ document.getElementById('music-toggle').addEventListener('click', function(){
       if(ball.x+ball.r>b.x && ball.x-ball.r<b.x+b.w && ball.y+ball.r>b.y && ball.y-ball.r<b.y+b.h){
         b.alive=false; b.el.classList.add('gone');
         soundBrick();
+        // Partículas desde el ladrillo
         const cx = b.x+b.w/2, cy = b.y+b.h/2;
+        for(let i=0;i<10;i++){
+          const d = document.createElement('div');
+          d.className = 'burst-dot';
+          const ang = Math.random()*2*Math.PI;
+          const dist = 20+Math.random()*30;
+          d.style.setProperty('--bx', Math.cos(ang)*dist + 'px');
+          d.style.setProperty('--by', Math.sin(ang)*dist + 'px');
+          d.style.left = (cx + (LW/2 - cx)*scale + stage.getBoundingClientRect().left) + 'px';
+          d.style.top = (cy + (LH/2 - cy)*scale + stage.getBoundingClientRect().top) + 'px';
+          d.style.width = '5px'; d.style.height='5px';
+          d.style.background = 'radial-gradient(circle, #fff, var(--gold-light))';
+          document.body.appendChild(d);
+          setTimeout(()=>d.remove(), 700);
+        }
+        score++;
         const dx = ball.x-cx, dy = ball.y-cy;
         const overlapX = (ball.r+b.w/2) - Math.abs(dx);
         const overlapY = (ball.r+b.h/2) - Math.abs(dy);
@@ -927,8 +1047,37 @@ document.getElementById('music-toggle').addEventListener('click', function(){
     rafId = requestAnimationFrame(step);
   }
 
+  function endGame(win){
+    running = false;
+    stopTrail();
+    cancelAnimationFrame(rafId);
+    if(win){
+      soundWin();
+      // Confeti explosivo
+      for(let i=0;i<60;i++){
+        const el = document.createElement('div');
+        el.className = 'confetti-burst';
+        const colors = ['#c9a24d','#e08a99','#ff6b6b','#4ecdc4','#ffe66d','#ffd700','#ff0088'];
+        el.style.background = colors[Math.floor(Math.random()*colors.length)];
+        el.style.width = (6+Math.random()*8)+'px';
+        el.style.height = (6+Math.random()*12)+'px';
+        el.style.borderRadius = Math.random()>0.5 ? '50%' : '2px';
+        const angle = Math.random()*2*Math.PI;
+        const dist = 100+Math.random()*200;
+        el.style.setProperty('--bx2', Math.cos(angle)*dist + 'px');
+        el.style.setProperty('--by2', Math.sin(angle)*dist - 100 + 'px');
+        el.style.left = (window.innerWidth/2 - 5 + Math.random()*10) + 'px';
+        el.style.top = (window.innerHeight/2 - 5 + Math.random()*10) + 'px';
+        document.body.appendChild(el);
+        setTimeout(()=>el.remove(), 1600);
+      }
+    }
+    msgText.textContent = win ? '🎉 ¡Has roto el hechizo, '+CONFIG.nombre+'! ✨' : '💔 El hechizo continúa... inténtalo de nuevo';
+    msgEl.classList.add('show');
+  }
+
   function startGame(){
-    lives=3; updateLives();
+    score=0; lives=3; updateLives();
     buildBricks();
     resetBall();
     paddle.x = (LW-paddle.w)/2;
@@ -936,23 +1085,16 @@ document.getElementById('music-toggle').addEventListener('click', function(){
     running = true;
     layoutStage();
     draw();
+    startTrail();
     cancelAnimationFrame(rafId);
     rafId = requestAnimationFrame(step);
   }
 
-  function endGame(win){
-    running = false;
-    cancelAnimationFrame(rafId);
-    if(win) soundWin();
-    msgText.textContent = win ? '¡Has roto el hechizo, '+CONFIG.nombre+'! ✨' : 'El hechizo continúa... inténtalo de nuevo';
-    msgEl.classList.add('show');
-  }
-
   function openGame(){ overlay.classList.add('open'); startGame(); }
-  function closeGame(){ overlay.classList.remove('open'); running = false; cancelAnimationFrame(rafId); soundClose(); }
+  function closeGame(){ overlay.classList.remove('open'); running = false; stopTrail(); cancelAnimationFrame(rafId); soundClose(); }
 
   document.getElementById('game-close').addEventListener('click', closeGame);
-  document.getElementById('game-restart').addEventListener('click', ()=>{ soundTap(); startGame(); });
+  restartBtn.addEventListener('click', ()=>{ soundTap(); startGame(); });
   overlay.addEventListener('click', e=>{ if(e.target===overlay) closeGame(); });
 
   function movePaddle(clientX){
@@ -967,6 +1109,16 @@ document.getElementById('music-toggle').addEventListener('click', function(){
   window.addEventListener('resize', ()=>{ layoutStage(); draw(); });
   layoutStage();
 })();
+
+// ---------- AYUDA: si el audio no se reproduce, mostrar indicación ----------
+setTimeout(()=>{
+  // Si el iframe no ha cargado, intentamos recargar
+  try{
+    if(ytIframe.src.indexOf('autoplay=1') === -1){
+      ytIframe.src = "https://www.youtube.com/embed/CXZ7Nz69OPg?autoplay=0&mute=1&loop=1&playlist=CXZ7Nz69OPg&controls=0&disablekb=1";
+    }
+  }catch(e){}
+}, 3000);
 </script>
 </body>
 </html>
