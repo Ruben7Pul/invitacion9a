@@ -63,7 +63,7 @@ body {
   text-shadow: 0 0 8px rgba(201, 162, 77, 0.2);
 }
 
-/* ===== PORTAL REJA DE DOS HOJAS ===== */
+/* ===== PORTAL con REJA DE DOS HOJAS ===== */
 #portal {
   position: fixed;
   inset: 0;
@@ -78,87 +78,106 @@ body {
 .portal-inner { text-align: center; padding: 2rem; }
 .portal-inner .eyebrow {
   display: block;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   font-family: var(--serif-display);
   letter-spacing: 0.32em;
   text-transform: uppercase;
   font-size: 0.7rem;
 }
 
-#gate-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  position: relative;
-  animation: floaty 5s ease-in-out infinite;
-}
-.gate-container {
+/* Contenedor de la reja */
+.gate-wrapper {
   position: relative;
   width: 140px;
   height: 140px;
+  margin: 0 auto;
+  perspective: 800px;
+  cursor: pointer;
 }
-.gate-svg {
+
+/* Cada hoja de la reja */
+.gate-leaf {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
+  backface-visibility: hidden;
+}
+.gate-leaf svg {
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 0 20px rgba(201, 162, 77, 0.3));
-  transition: filter 0.6s ease;
+  display: block;
 }
-.gate-svg:hover {
-  filter: drop-shadow(0 0 40px rgba(201, 162, 77, 0.7));
-}
-
-/* Hoja izquierda - bisagra en el lado izquierdo */
 .gate-left {
-  transform-origin: 40px 100px;
-  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  left: 0;
+  transform-origin: left center;
+  transform: rotateY(0deg);
 }
-/* Hoja derecha - bisagra en el lado derecho */
 .gate-right {
-  transform-origin: 160px 100px;
-  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  right: 0;
+  transform-origin: right center;
+  transform: rotateY(0deg);
 }
-/* Candado se desvanece al abrir */
-.gate-lock {
-  transition: opacity 0.5s ease;
+/* Al abrir (clase 'open' en el wrapper) */
+.gate-wrapper.open .gate-left {
+  transform: rotateY(-120deg) translateX(-10px);
+  opacity: 0.3;
 }
-
-/* Estado abierto (se añade al botón al hacer clic) */
-#gate-btn.open .gate-left {
-  transform: scaleX(0) rotateY(-30deg);
+.gate-wrapper.open .gate-right {
+  transform: rotateY(120deg) translateX(10px);
+  opacity: 0.3;
 }
-#gate-btn.open .gate-right {
-  transform: scaleX(0) rotateY(30deg);
-}
-#gate-btn.open .gate-lock {
-  opacity: 0;
-}
-#gate-btn.open .gate-svg {
-  filter: drop-shadow(0 0 60px rgba(255,215,0,0.8));
-}
-
 /* Brillo al abrir */
 .gate-brillos {
   position: absolute;
   inset: 0;
-  pointer-events: none;
   border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, rgba(255,215,0,0.3), transparent 70%);
+  pointer-events: none;
+  background: radial-gradient(circle at center, rgba(255,215,0,0.8) 0%, transparent 70%);
   opacity: 0;
-  transition: opacity 0.6s ease;
+  transition: opacity 0.4s ease, transform 0.6s ease;
+  transform: scale(0.5);
+  z-index: 10;
 }
-#gate-btn.open .gate-brillos {
+.gate-wrapper.open .gate-brillos {
   opacity: 1;
+  transform: scale(1.5);
   animation: brilloApertura 0.8s ease forwards;
 }
 @keyframes brilloApertura {
   0% { opacity: 0; transform: scale(0.5); }
-  50% { opacity: 1; transform: scale(2); }
-  100% { opacity: 0; transform: scale(3); }
+  30% { opacity: 1; transform: scale(1.8); }
+  100% { opacity: 0; transform: scale(2.5); }
+}
+
+/* Botón "Abrir" (se oculta tras abrir) */
+.gate-btn {
+  background: none;
+  border: 2px solid var(--gold);
+  color: var(--gold-light);
+  font-family: var(--serif-display);
+  font-size: 0.8rem;
+  padding: 0.5rem 1.5rem;
+  border-radius: 30px;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: all 0.3s ease;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.gate-btn:hover {
+  background: rgba(201, 162, 77, 0.2);
+  box-shadow: 0 0 20px rgba(201, 162, 77, 0.3);
+}
+.gate-btn.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.8);
 }
 
 .portal-caption {
-  margin-top: 1rem;
+  margin-top: 0.8rem;
   font-family: var(--serif-display);
   font-size: 0.65rem;
   letter-spacing: 0.26em;
@@ -225,7 +244,7 @@ body {
   padding: 0.2rem 0;
 }
 
-/* ===== ÓVALO VERTICAL SIN ADORNOS, MÁS SUBIDO ===== */
+/* ===== ÓVALO VERTICAL ===== */
 #oval-wrap {
   width: 140px;
   height: 190px;
@@ -234,13 +253,11 @@ body {
   animation: floaty 6s ease-in-out infinite;
   position: relative;
 }
-
 .oval-frame {
   position: relative;
   width: 100%;
   height: 100%;
 }
-
 .oval-mask {
   width: 100%;
   height: 100%;
@@ -252,7 +269,6 @@ body {
   position: relative;
   z-index: 2;
 }
-
 .gif-central {
   width: 100%;
   height: 100%;
@@ -260,12 +276,9 @@ body {
   display: block;
 }
 
-.name-wrap {
-  position: relative;
-  margin-top: 0.15rem;
-}
+.name-wrap { position: relative; margin-top: 0.15rem; }
 
-/* ===== NOMBRE CON REFLEJO ===== */
+/* ===== REFLEJO EN EL NOMBRE ===== */
 h1#nombre-hero {
   font-family: var(--script);
   font-weight: 400;
@@ -300,6 +313,16 @@ h1#nombre-hero::after {
   animation: rainbowMove 4s linear infinite;
   pointer-events: none;
 }
+h1#nombre-hero::before {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: 0;
+  width: 100%;
+  height: 30px;
+  background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.3));
+  pointer-events: none;
+}
 @keyframes rainbowMove {
   0% { background-position: 0% 50%; }
   100% { background-position: 300% 50%; }
@@ -315,7 +338,6 @@ h1#nombre-hero::after {
   color: var(--gold-light);
   text-shadow: 0 0 12px rgba(201, 162, 77, 0.3);
 }
-
 .frase-inline {
   max-width: 34ch;
   font-family: var(--serif-body);
@@ -326,14 +348,12 @@ h1#nombre-hero::after {
 }
 .frase-inline::before { content: "\201C"; }
 .frase-inline::after { content: "\201D"; }
-
 .fecha-fija {
   font-family: var(--serif-body);
   font-style: italic;
   font-size: 0.95rem;
   margin-top: 0.2rem;
 }
-
 #nav {
   width: 100%;
   max-width: 460px;
@@ -367,7 +387,7 @@ h1#nombre-hero::after {
   text-transform: uppercase;
 }
 
-/* ===== CONTADOR ESTILO CALENDARIO ===== */
+/* ===== ESTILO CALENDARIO CONTADOR ===== */
 .calendar-style .unit {
   background: #f4ead2;
   border: 2px solid #c9a24d;
@@ -375,6 +395,7 @@ h1#nombre-hero::after {
   padding: 0.6rem 0.1rem;
   box-shadow: 0 4px 0 #8a7030, inset 0 -2px 0 rgba(0,0,0,0.1);
   position: relative;
+  transform: rotate(0deg);
   transition: transform 0.3s ease;
 }
 .calendar-style .unit:hover {
@@ -403,7 +424,7 @@ h1#nombre-hero::after {
   opacity: 0.5;
 }
 
-/* ===== MODALES SEMITRANSPARENTES ===== */
+/* ===== MODALES ===== */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -648,7 +669,7 @@ h1#nombre-hero::after {
   text-shadow: 0 0 10px rgba(201, 162, 77, 0.2);
 }
 
-/* ===== ANIMACIÓN PUERTA CERRÁNDOSE (al volver) ===== */
+/* ===== ANIMACIÓN VOLVER ===== */
 #portal.closing {
   animation: closeGate 0.8s ease forwards;
 }
@@ -666,6 +687,11 @@ h1#nombre-hero::after {
   100% { transform: scale(1); }
 }
 
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 480px) {
   #oval-wrap { width: 120px; height: 165px; margin-top: -20px; }
@@ -673,7 +699,8 @@ h1#nombre-hero::after {
   .clock .num { font-size: 1rem; }
   #app-top .eyebrow { font-size: 0.55rem; }
   .top-btn { font-size: 1rem; }
-  .gate-container { width: 100px; height: 100px; }
+  .gate-wrapper { width: 100px; height: 100px; }
+  .gate-leaf svg { width: 50px; height: 100px; }
   .game-help { font-size: 0.7rem; }
   .hint { font-size: 0.65rem; }
   .frase-inline { font-size: 0.8rem; }
