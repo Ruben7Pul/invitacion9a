@@ -1,8 +1,11 @@
 // modal.js - Abrir/cerrar modales
+console.log('📦 módulo modal.js cargado');
+
 import { soundOpen, soundClose, soundTap } from './sonidos.js';
 import { burst } from './particulas.js';
 
 export function initModal() {
+  console.log('📋 Iniciando modales...');
   document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       btn.classList.remove('tap');
@@ -29,6 +32,7 @@ export function initModal() {
       document.querySelectorAll('.modal-overlay.open').forEach(closeModal);
     }
   });
+  console.log('✅ Modales listos');
 }
 
 function openModal(id) {
