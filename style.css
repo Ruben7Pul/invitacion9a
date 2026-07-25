@@ -1,72 +1,149 @@
-/* (Mantengo todo igual excepto la animación de apertura) */
+console.log('🚀 script.js (transición corregida)');
 
-/* ===== REJA ===== */
-.gate-wrapper {
-  /* ... */
-}
-.gate-leaf {
-  /* ... */
-  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
-}
-.gate-wrapper.open .gate-left {
-  transform: rotateY(-110deg) translateX(-20px);
-  opacity: 0.1;
-}
-.gate-wrapper.open .gate-right {
-  transform: rotateY(110deg) translateX(20px);
-  opacity: 0.1;
-}
+let CONFIG = {};
 
-/* Brillo central */
-.gate-brillos {
-  /* ... */
-}
-.gate-wrapper.open .gate-brillos {
-  opacity: 1;
-  animation: brilloSuave 0.8s ease forwards;
-}
-@keyframes brilloSuave {
-  0% { opacity: 0; transform: scale(0.5); }
-  40% { opacity: 0.6; transform: scale(1.5); }
-  100% { opacity: 0; transform: scale(2); }
+async function cargarConfig() {
+  try {
+    const res = await fetch(`config.json?t=${Date.now()}`);
+    CONFIG = await res.json();
+    return CONFIG;
+  } catch (e) {
+    console.warn('⚠️ Fallback config');
+    return {
+      nombre: 'Dania',
+      fechaTexto: '24 de octubre de 2026',
+      fechaISO: '2026-10-24T13:00:00',
+      frase: 'Con la bendición de Dios...',
+      horaMisa: '3:00 pm',
+      ubicacionMisa: 'Iglesia',
+      mapaMisa: '#',
+      horaFiesta: '1:00 pm',
+      ubicacionFiesta: 'Salón',
+      mapaFiesta: '#',
+      padre: 'Papá',
+      madre: 'Mamá',
+      padrino: 'Padrino',
+      madrina: 'Madrina',
+      audioFile: 'archivos/cancion.mp3'
+    };
+  }
 }
 
-/* ===== PORTAL ===== */
-#portal {
-  transition: opacity 0.8s ease 0.3s, visibility 0.8s ease 0.3s;
-}
-#portal.hide {
-  opacity: 0;
-  visibility: hidden;
+function rellenarDatos(config) {
+  document.getElementById('nombre-hero').textContent = config.nombre;
+  document.getElementById('nombre-hero').setAttribute('data-text', config.nombre);
+  document.getElementById('fecha-fija').textContent = config.fechaTexto;
+  document.getElementById('frase-texto').textContent = config.frase;
+  document.getElementById('hora-misa').textContent = config.horaMisa;
+  document.getElementById('lugar-misa').textContent = config.ubicacionMisa;
+  document.getElementById('mapa-misa').href = config.mapaMisa;
+  document.getElementById('hora-fiesta').textContent = config.horaFiesta;
+  document.getElementById('lugar-fiesta').textContent = config.ubicacionFiesta;
+  document.getElementById('mapa-fiesta').href = config.mapaFiesta;
+  document.getElementById('padre1').textContent = config.padre;
+  document.getElementById('padre2').textContent = config.madre;
+  document.getElementById('padrino1').textContent = config.padrino;
+  document.getElementById('padrino2').textContent = config.madrina;
+  document.title = `Mis XV años · ${config.nombre}`;
 }
 
-/* ===== APP ===== */
-#app {
-  transition: opacity 0.8s ease 0.2s;
-  pointer-events: none;
-}
-#app.show {
-  opacity: 1;
-  pointer-events: auto;
-}
+document.addEventListener('DOMContentLoaded', async () => {
+  const config = await cargarConfig();
+  window.CONFIG = config;
+  rellenarDatos(config);
 
-/* ===== CORRECCIÓN: NO SE VE EL CIERRE AL ABRIR ===== */
-/* Eliminamos la animación de cierre durante la apertura */
-#portal.closing .gate-left {
-  animation: closeLeft 0.6s ease forwards;
-}
-#portal.closing .gate-right {
-  animation: closeRight 0.6s ease forwards;
-}
-@keyframes closeLeft {
-  0% { transform: rotateY(-110deg) translateX(-20px); opacity: 0.2; }
-  100% { transform: rotateY(0deg) translateX(0); opacity: 1; }
-}
-@keyframes closeRight {
-  0% { transform: rotateY(110deg) translateX(20px); opacity: 0.2; }
-  100% { transform: rotateY(0deg) translateX(0); opacity: 1; }
-}
-/* Aseguramos que al abrir no se active la clase closing */
-#portal:not(.hide) .gate-wrapper.open + .gate-brillos {
-  /* nada */
-}
+  // Módulos
+  try {
+    const { initContador } = await import('./modules/contador.js');
+    initContador(config);
+  } catch (e) { console.error('❌ Contador:', e); }
+
+  try {
+    const { initSonidos } = await import('./modules/sonidos.js');
+    initSonidos();
+  } catch (e) { console.error('❌ Sonidos:', e); }
+
+  try {
+    const { initParticulas } = await import('./modules/particulas.js');
+    initParticulas();
+  } catch (e) { console.error('❌ Partículas:', e); }
+
+  try {
+    const { initModal } = await import('./modules/modal.js');
+    initModal();
+  } catch (e) { console.error('❌ Modal:', e); }
+
+  try {
+    const { initMusica, playMusic, toggleMusic, resetMusic } = await import('./modules/musica.js');
+    initMusica(config);
+    window.playMusic = playMusic;
+    window.toggleMusic = toggleMusic;
+    window.resetMusic = resetMusic;
+  } catch (e) { console.error('❌ Música:', e); }
+
+  try {
+    const { initJuego } = await import('./modules/juego.js');
+    initJuego(config);
+  } catch (e) { console.error('❌ Juego:', e); }
+
+  // Elementos
+  const gateWrapper = document.getElementById('gate-wrapper');
+  const portal = document.getElementById('portal');
+  const app = document.getElementById('app');
+
+  // ---------- ABRIR REJA (corregido) ----------
+  if (gateWrapper && portal && app) {
+    let isOpening = false;
+
+    const openGate = () => {
+      if (isOpening) return;
+      isOpening = true;
+
+      // 1. Abrir puertas (animación)
+      gateWrapper.classList.add('open');
+
+      // 2. Música
+      if (window.playMusic) {
+        window.resetMusic();
+        setTimeout(() => window.playMusic(), 100);
+      }
+
+      // 3. Después de la animación de apertura (0.8s), hacer fade out del portal y fade in de la app
+      setTimeout(() => {
+        portal.classList.add('hide');
+        app.classList.add('show');
+        // Quitar la clase open para resetear la reja
+        gateWrapper.classList.remove('open');
+        isOpening = false;
+      }, 800);
+    };
+
+    gateWrapper.addEventListener('click', openGate);
+  }
+
+  // ---------- BOTÓN MUTE ----------
+  const muteBtn = document.getElementById('music-toggle');
+  if (muteBtn) {
+    muteBtn.addEventListener('click', () => {
+      if (window.toggleMusic) window.toggleMusic();
+    });
+  }
+
+  // ---------- BOTÓN VOLVER (con cierre de puertas) ----------
+  const backBtn = document.getElementById('back-btn');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      if (window.closeGame) window.closeGame();
+      if (window.resetMusic) window.resetMusic();
+
+      app.classList.remove('show');
+      portal.classList.remove('hide');
+      portal.classList.add('closing');
+
+      setTimeout(() => {
+        portal.classList.remove('closing');
+        gateWrapper.classList.remove('open');
+      }, 600);
+    });
+  }
+});
