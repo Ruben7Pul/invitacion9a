@@ -1,11 +1,18 @@
-// juego.js - Juego secreto Breakout
-console.log('📦 módulo juego.js cargado');
+console.log('📦 juego.js (setInterval fijo, delta fijo)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
-import { burst } from './particulas.js';
+
+const ROWS = 4;
+const COLS = 5;
+const BRICK_W = 46;
+const BRICK_H = 20;
+const GAP = 4;
+const TOP = 30;
+const SPEED = 3.0; // píxeles por frame (a 60 FPS)
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego...');
+  console.log('🎮 Iniciando juego con setInterval (60 FPS fijos, speed=' + SPEED + ')');
+
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => { soundTap(); openGame(); });
 
@@ -22,17 +29,15 @@ export function initJuego(config) {
   const LW = 300, LH = 420;
   let scale = 1;
   let bricks = [];
-  const rows = 5, cols = 6;
-  const brickW = 44, brickH = 20, gap = 4, top = 34;
-  const totalBricksW = cols * brickW + (cols - 1) * gap;
+
+  const totalBricksW = COLS * BRICK_W + (COLS - 1) * GAP;
   const startX = (LW - totalBricksW) / 2;
-  const BASE_SPEED = 4.2;
-  let paddle = { w: 64, h: 10, x: (LW - 64) / 2 };
-  let ball = { x: LW / 2, y: LH - 40, vx: 0, vy: 0, r: 5 };
+
+  let paddle = { w: 60, h: 8, x: (LW - 60) / 2 };
+  let ball = { x: LW / 2, y: LH - 38, vx: 0, vy: 0, r: 4 };
   let lives = 3;
   let running = false;
-  let rafId = null;
-  let trailInterval = null;
+  let gameInterval = null;
 
   function letras() {
     const src = (config.nombre || 'X').toUpperCase().replace(/\s+/g, '');
@@ -41,7 +46,7 @@ export function initJuego(config) {
 
   function setVel(vx, vy) {
     const mag = Math.hypot(vx, vy) || 1;
-    const s = BASE_SPEED / mag;
+    const s = SPEED / mag;
     ball.vx = vx * s;
     ball.vy = vy * s;
   }
@@ -52,22 +57,22 @@ export function initJuego(config) {
     const nombreLetras = letras();
     let li = 0;
     const colors = ['#c9a24d', '#e08a99', '#8a2c3b', '#2e4a3c', '#f0d9a3'];
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const x = startX + c * (brickW + gap);
-        const y = top + r * (brickH + gap);
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const x = startX + c * (BRICK_W + GAP);
+        const y = TOP + r * (BRICK_H + GAP);
         const el = document.createElement('div');
         el.className = 'brick';
         el.style.left = x + 'px';
         el.style.top = y + 'px';
-        el.style.width = brickW + 'px';
-        el.style.height = brickH + 'px';
+        el.style.width = BRICK_W + 'px';
+        el.style.height = BRICK_H + 'px';
         el.style.background = 'linear-gradient(180deg,' + colors[r % colors.length] + ',rgba(0,0,0,.15))';
         const ch = nombreLetras[li % nombreLetras.length];
         li++;
         el.textContent = ch;
         inner.appendChild(el);
-        bricks.push({ x, y, w: brickW, h: brickH, el, alive: true });
+        bricks.push({ x, y, w: BRICK_W, h: BRICK_H, el, alive: true });
       }
     }
   }
@@ -86,70 +91,66 @@ export function initJuego(config) {
 
   function resetBall() {
     ball.x = LW / 2;
-    ball.y = LH - 40;
+    ball.y = LH - 38;
     const dir = Math.random() < 0.5 ? -1 : 1;
-    setVel(1.3 * dir, -2.6);
+    setVel(1.2 * dir, -2.4);
   }
 
   function updateLives() { livesEl.textContent = '♥ '.repeat(Math.max(lives, 0)).trim() || '—'; }
 
   function draw() {
     paddleEl.style.left = paddle.x + 'px';
-    paddleEl.style.top = (LH - 16) + 'px';
+    paddleEl.style.top = (LH - 14) + 'px';
     paddleEl.style.width = paddle.w + 'px';
     ballEl.style.left = (ball.x - ball.r) + 'px';
     ballEl.style.top = (ball.y - ball.r) + 'px';
   }
 
-  function startTrail() {
-    if (trailInterval) clearInterval(trailInterval);
-    trailInterval = setInterval(() => {
-      if (!running) return;
-      const t = document.createElement('div');
-      t.className = 'ball-trail';
-      t.style.left = (ball.x - 3) + 'px';
-      t.style.top = (ball.y - 3) + 'px';
-      inner.appendChild(t);
-      setTimeout(() => t.remove(), 500);
-    }, 50);
-  }
-
-  function stopTrail() { if (trailInterval) { clearInterval(trailInterval); trailInterval = null; } }
-
-  function step() {
+  // Bucle de juego con delta fijo (1/60)
+  function gameLoop() {
     if (!running) return;
+
+    // Aplicar física (siempre con el mismo delta)
     ball.x += ball.vx;
     ball.y += ball.vy;
 
+    // Colisiones paredes
     if (ball.x - ball.r < 0) { ball.x = ball.r; ball.vx = Math.abs(ball.vx); }
     if (ball.x + ball.r > LW) { ball.x = LW - ball.r; ball.vx = -Math.abs(ball.vx); }
     if (ball.y - ball.r < 0) { ball.y = ball.r; ball.vy = Math.abs(ball.vy); }
 
-    const py = LH - 16;
-    if (ball.vy > 0 && ball.y + ball.r >= py && ball.y + ball.r <= py + 14 && ball.x >= paddle.x - ball.r && ball.x <= paddle.x + paddle.w + ball.r) {
+    // Colisión paleta
+    const py = LH - 14;
+    if (ball.vy > 0 && ball.y + ball.r >= py && ball.y + ball.r <= py + 10 &&
+        ball.x >= paddle.x - ball.r && ball.x <= paddle.x + paddle.w + ball.r) {
       ball.y = py - ball.r;
       let hit = (ball.x - (paddle.x + paddle.w / 2)) / (paddle.w / 2);
       hit = Math.max(-0.85, Math.min(0.85, hit));
-      setVel(hit * 2.8, -Math.sqrt(Math.max(BASE_SPEED * BASE_SPEED - (hit * 2.8) * (hit * 2.8), 1)));
+      const angle = hit * 0.8;
+      const speed = SPEED;
+      ball.vx = Math.sin(angle) * speed;
+      ball.vy = -Math.cos(angle) * speed;
     }
 
+    // Colisión ladrillos
     for (const b of bricks) {
       if (!b.alive) continue;
-      if (ball.x + ball.r > b.x && ball.x - ball.r < b.x + b.w && ball.y + ball.r > b.y && ball.y - ball.r < b.y + b.h) {
+      if (ball.x + ball.r > b.x && ball.x - ball.r < b.x + b.w &&
+          ball.y + ball.r > b.y && ball.y - ball.r < b.y + b.h) {
         b.alive = false;
         b.el.classList.add('gone');
         soundBrick();
         const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
-        const rect = stage.getBoundingClientRect();
-        burst(cx * scale + rect.left, cy * scale + rect.top, 10);
         const dx = ball.x - cx, dy = ball.y - cy;
         const overlapX = (ball.r + b.w / 2) - Math.abs(dx);
         const overlapY = (ball.r + b.h / 2) - Math.abs(dy);
-        if (overlapX < overlapY) { setVel(-ball.vx, ball.vy); } else { setVel(ball.vx, -ball.vy); }
+        if (overlapX < overlapY) { ball.vx = -ball.vx; }
+        else { ball.vy = -ball.vy; }
         break;
       }
     }
 
+    // Perdida
     if (ball.y - ball.r > LH) {
       lives--;
       updateLives();
@@ -158,36 +159,16 @@ export function initJuego(config) {
       resetBall();
     }
 
+    // Victoria
     if (bricks.every(b => !b.alive)) { endGame(true); return; }
 
     draw();
-    rafId = requestAnimationFrame(step);
   }
 
   function endGame(win) {
     running = false;
-    stopTrail();
-    cancelAnimationFrame(rafId);
-    if (win) {
-      soundWin();
-      for (let i = 0; i < 80; i++) {
-        const el = document.createElement('div');
-        el.className = 'confetti-burst';
-        const colors = ['#c9a24d', '#e08a99', '#ff6b6b', '#4ecdc4', '#ffe66d', '#ffd700', '#ff0088'];
-        el.style.background = colors[Math.floor(Math.random() * colors.length)];
-        el.style.width = (6 + Math.random() * 8) + 'px';
-        el.style.height = (6 + Math.random() * 12) + 'px';
-        el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-        const angle = Math.random() * 2 * Math.PI;
-        const dist = 120 + Math.random() * 220;
-        el.style.setProperty('--bx2', Math.cos(angle) * dist + 'px');
-        el.style.setProperty('--by2', Math.sin(angle) * dist - 100 + 'px');
-        el.style.left = (window.innerWidth / 2 - 5 + Math.random() * 10) + 'px';
-        el.style.top = (window.innerHeight / 2 - 5 + Math.random() * 10) + 'px';
-        document.body.appendChild(el);
-        setTimeout(() => el.remove(), 1800);
-      }
-    }
+    if (gameInterval) { clearInterval(gameInterval); gameInterval = null; }
+    if (win) soundWin();
     msgText.textContent = win ? '🎉 ¡Has roto el hechizo, ' + config.nombre + '! ✨' : '💔 El hechizo continúa... inténtalo de nuevo';
     msgEl.classList.add('show');
   }
@@ -202,13 +183,12 @@ export function initJuego(config) {
     running = true;
     layoutStage();
     draw();
-    startTrail();
-    cancelAnimationFrame(rafId);
-    rafId = requestAnimationFrame(step);
+    if (gameInterval) clearInterval(gameInterval);
+    gameInterval = setInterval(gameLoop, 16); // 60 FPS fijos
   }
 
   function openGame() { overlay.classList.add('open'); startGame(); }
-  function closeGame() { overlay.classList.remove('open'); running = false; stopTrail(); cancelAnimationFrame(rafId); soundClose(); }
+  function closeGame() { overlay.classList.remove('open'); running = false; if (gameInterval) { clearInterval(gameInterval); gameInterval = null; } soundClose(); }
 
   document.getElementById('game-close').addEventListener('click', closeGame);
   restartBtn.addEventListener('click', () => { soundTap(); startGame(); });
@@ -225,5 +205,5 @@ export function initJuego(config) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego listo');
+  console.log('✅ Juego listo (setInterval)');
 }
