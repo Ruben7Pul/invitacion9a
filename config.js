@@ -14,4 +14,4 @@ export const CONFIG = {
   padrino: "Rdorigo Nava Vega",
   madrina: "Irma Lopez Villasana",
   youtubeId: "CXZ7Nz69OPg"
-};
+}; 
