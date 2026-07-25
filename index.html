@@ -14,6 +14,9 @@
   <div id="bg"></div>
   <div id="petals-layer"></div>
 
+  <!-- OVERLAY DE FADE (para transiciones) -->
+  <div id="fade-overlay"></div>
+
   <div id="portal">
     <div class="portal-inner">
       <span class="eyebrow gold-text">Una invitación encantada</span>
@@ -44,24 +47,19 @@
                 <path d="M 8 0 L 8 16 M 0 8 L 16 8" stroke="rgba(255,215,0,0.04)" stroke-width="0.5" fill="none"/>
               </pattern>
             </defs>
-            <!-- Fondo con patrón -->
             <rect x="10" y="10" width="180" height="260" rx="15" fill="url(#grid)"/>
-            <!-- Marco exterior -->
             <rect x="10" y="10" width="180" height="260" rx="15" fill="none" stroke="url(#goldGrad)" stroke-width="6" filter="url(#glow)"/>
             <rect x="18" y="18" width="164" height="244" rx="10" fill="none" stroke="rgba(255,215,0,0.15)" stroke-width="2"/>
-            <!-- Barrotes verticales (más gruesos y con remates) -->
             <g filter="url(#glow)">
               <rect x="35" y="25" width="10" height="230" rx="5" fill="url(#goldGrad)"/>
               <rect x="75" y="25" width="10" height="230" rx="5" fill="url(#goldGrad)"/>
               <rect x="115" y="25" width="10" height="230" rx="5" fill="url(#goldGrad)"/>
               <rect x="155" y="25" width="10" height="230" rx="5" fill="url(#goldGrad)"/>
-              <!-- Remates en punta de lanza -->
               <path d="M35 25 L40 12 L45 25 Z" fill="url(#goldGrad)"/>
               <path d="M75 25 L80 12 L85 25 Z" fill="url(#goldGrad)"/>
               <path d="M115 25 L120 12 L125 25 Z" fill="url(#goldGrad)"/>
               <path d="M155 25 L160 12 L165 25 Z" fill="url(#goldGrad)"/>
             </g>
-            <!-- Barrotes horizontales (doble línea) -->
             <g filter="url(#glow)">
               <rect x="20" y="55" width="160" height="8" rx="4" fill="url(#goldGrad)"/>
               <rect x="20" y="55" width="160" height="3" rx="1.5" fill="rgba(255,255,255,0.2)"/>
@@ -72,9 +70,7 @@
               <rect x="20" y="205" width="160" height="8" rx="4" fill="url(#goldGrad)"/>
               <rect x="20" y="205" width="160" height="3" rx="1.5" fill="rgba(255,255,255,0.2)"/>
             </g>
-            <!-- Adornos circulares con gemas (5 filas x 4 columnas) -->
             <g filter="url(#gemGlow)">
-              <!-- Fila 1 (y=60) -->
               <circle cx="40" cy="60" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
               <circle cx="40" cy="60" r="5" fill="#e63946" stroke="#fff" stroke-width="1"/>
               <circle cx="80" cy="60" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
@@ -83,7 +79,6 @@
               <circle cx="120" cy="60" r="5" fill="#3498db" stroke="#fff" stroke-width="1"/>
               <circle cx="160" cy="60" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
               <circle cx="160" cy="60" r="5" fill="#f1c40f" stroke="#fff" stroke-width="1"/>
-              <!-- Fila 2 (y=110) -->
               <circle cx="40" cy="110" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
               <circle cx="40" cy="110" r="5" fill="#9b59b6" stroke="#fff" stroke-width="1"/>
               <circle cx="80" cy="110" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
@@ -92,7 +87,6 @@
               <circle cx="120" cy="110" r="5" fill="#1abc9c" stroke="#fff" stroke-width="1"/>
               <circle cx="160" cy="110" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
               <circle cx="160" cy="110" r="5" fill="#e63946" stroke="#fff" stroke-width="1"/>
-              <!-- Fila 3 (y=160) -->
               <circle cx="40" cy="160" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
               <circle cx="40" cy="160" r="5" fill="#f1c40f" stroke="#fff" stroke-width="1"/>
               <circle cx="80" cy="160" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
@@ -101,7 +95,6 @@
               <circle cx="120" cy="160" r="5" fill="#2ecc71" stroke="#fff" stroke-width="1"/>
               <circle cx="160" cy="160" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
               <circle cx="160" cy="160" r="5" fill="#9b59b6" stroke="#fff" stroke-width="1"/>
-              <!-- Fila 4 (y=210) -->
               <circle cx="40" cy="210" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
               <circle cx="40" cy="210" r="5" fill="#e67e22" stroke="#fff" stroke-width="1"/>
               <circle cx="80" cy="210" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
@@ -111,20 +104,16 @@
               <circle cx="160" cy="210" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
               <circle cx="160" cy="210" r="5" fill="#f1c40f" stroke="#fff" stroke-width="1"/>
             </g>
-            <!-- Arco superior gótico con tracería -->
             <g filter="url(#glow)">
               <path d="M35 25 Q100 -30 165 25" fill="none" stroke="url(#goldGrad)" stroke-width="8"/>
               <path d="M45 30 Q100 -20 155 30" fill="none" stroke="rgba(255,215,0,0.2)" stroke-width="4"/>
-              <!-- Tréboles en el arco -->
               <circle cx="80" cy="-5" r="10" fill="none" stroke="url(#goldGrad)" stroke-width="3"/>
               <circle cx="100" cy="-12" r="10" fill="none" stroke="url(#goldGrad)" stroke-width="3"/>
               <circle cx="120" cy="-5" r="10" fill="none" stroke="url(#goldGrad)" stroke-width="3"/>
-              <!-- Gemas en el arco -->
               <circle cx="80" cy="-5" r="5" fill="#e63946" filter="url(#gemGlow)"/>
               <circle cx="100" cy="-12" r="5" fill="#3498db" filter="url(#gemGlow)"/>
               <circle cx="120" cy="-5" r="5" fill="#2ecc71" filter="url(#gemGlow)"/>
             </g>
-            <!-- Flor de lis central en la cima -->
             <g filter="url(#glow)">
               <circle cx="100" cy="-20" r="16" fill="url(#goldDark)" stroke="url(#goldGrad)" stroke-width="3"/>
               <path d="M100 -35 L92 -10 L108 -10 Z" fill="url(#goldGrad)"/>
@@ -134,7 +123,6 @@
               <circle cx="96" cy="-24" r="3" fill="#e63946" filter="url(#gemGlow)"/>
               <circle cx="104" cy="-24" r="3" fill="#3498db" filter="url(#gemGlow)"/>
             </g>
-            <!-- Candado detallado con gemas -->
             <g filter="url(#glow)">
               <rect x="83" y="120" width="34" height="28" rx="6" fill="url(#goldDark)" stroke="url(#goldGrad)" stroke-width="3"/>
               <rect x="88" y="125" width="24" height="18" rx="3" fill="none" stroke="rgba(255,215,0,0.2)" stroke-width="1"/>
@@ -142,7 +130,6 @@
               <circle cx="100" cy="120" r="5" fill="url(#goldGrad)" filter="url(#gemGlow)"/>
               <circle cx="100" cy="120" r="3" fill="#e63946" filter="url(#gemGlow)"/>
               <rect x="93" y="140" width="14" height="8" rx="2" fill="#8a6d1b" stroke="url(#goldGrad)" stroke-width="1"/>
-              <!-- Gema en el candado -->
               <circle cx="100" cy="135" r="4" fill="#3498db" filter="url(#gemGlow)"/>
             </g>
           </svg>
@@ -151,12 +138,11 @@
         <!-- Hoja derecha (reflejada) -->
         <div class="gate-leaf gate-right">
           <svg viewBox="0 0 200 280" width="100%" height="100%">
-            <!-- Se usa transform: scaleX(-1) en CSS, así que el contenido es el mismo -->
             <use href="#gate-left-svg" />
           </svg>
         </div>
 
-        <!-- Definición de la hoja izquierda para reutilizar -->
+        <!-- Definición -->
         <svg style="display:none;">
           <defs>
             <g id="gate-left-svg">
