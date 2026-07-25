@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initMusica(config);
     window.playMusic = playMusic;
     window.toggleMusic = toggleMusic;
-    window.resetMusic = resetMusic; // exponer para el botón volver
+    window.resetMusic = resetMusic;
   } catch (e) { console.error('❌ Música:', e); }
 
   try {
@@ -96,8 +96,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       portal.classList.add('hide');
       app.classList.add('show');
       if (window.playMusic) {
-        window.resetMusic(); // reiniciar la canción desde 0
-        setTimeout(() => window.playMusic(), 100);
+        window.resetMusic(); // reiniciar desde 0
+        setTimeout(() => window.playMusic(), 50);
       }
     });
   }
@@ -110,18 +110,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // ---------- BOTÓN VOLVER (regresa al portal y apaga música) ----------
+  // ---------- BOTÓN VOLVER (regresa al portal, apaga y reinicia música) ----------
   const backBtn = document.getElementById('back-btn');
   if (backBtn) {
     backBtn.addEventListener('click', () => {
       // Cerrar juego si está abierto
       if (window.closeGame) window.closeGame();
-      // Apagar música y reiniciar
+      // Reiniciar música (pausar y poner en 0)
       if (window.resetMusic) window.resetMusic();
-      // Ocultar app y mostrar portal
+      // Mostrar portal, ocultar app
       app.classList.remove('show');
       portal.classList.remove('hide');
-      console.log('↩️ Volviendo al portal (música reiniciada)');
+      console.log('↩️ Volviendo al portal');
     });
   }
 });
