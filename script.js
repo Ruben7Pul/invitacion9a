@@ -1,4 +1,4 @@
-console.log('🚀 script.js (con flash screen)');
+console.log('🚀 script.js (transición suave)');
 
 let CONFIG = {};
 
@@ -90,30 +90,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   const gateWrapper = document.getElementById('gate-wrapper');
   const portal = document.getElementById('portal');
   const app = document.getElementById('app');
-  const flashScreen = document.getElementById('flash-screen');
 
-  // ---------- ABRIR REJA ----------
-  if (gateWrapper && portal && app && flashScreen) {
+  // ---------- ABRIR REJA (transición suave) ----------
+  if (gateWrapper && portal && app) {
     const openGate = () => {
-      // 1. Activar brillo de pantalla completa
-      flashScreen.classList.add('active');
-
-      // 2. Activar animación de la reja (abrir puertas)
+      // 1. Abrir puertas (animación)
       gateWrapper.classList.add('open');
 
-      // 3. Música
+      // 2. Música
       if (window.playMusic) {
         window.resetMusic();
         setTimeout(() => window.playMusic(), 100);
       }
 
-      // 4. Después del flash (0.8s), ocultar portal y mostrar app
+      // 3. Después de la animación de apertura (0.8s), hacer fade out del portal y fade in de la app
       setTimeout(() => {
         portal.classList.add('hide');
         app.classList.add('show');
-        // Resetear reja (para futuros usos)
+        // Quitar la clase open para resetear la reja (pero ya no es visible)
         gateWrapper.classList.remove('open');
-        flashScreen.classList.remove('active');
       }, 800);
     };
 
@@ -135,26 +130,24 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Cerrar juego
       if (window.closeGame) window.closeGame();
 
-      // 1. Activar brillo de pantalla completa
-      flashScreen.classList.add('active');
-
-      // 2. Apagar música
+      // Apagar música
       if (window.resetMusic) window.resetMusic();
 
-      // 3. Ocultar app y mostrar portal (con clase closing para animación de puertas)
+      // 1. Ocultar app
       app.classList.remove('show');
+
+      // 2. Mostrar portal con clase closing para animación de cierre
       portal.classList.remove('hide');
       portal.classList.add('closing');
 
-      // 4. Después del flash (0.6s), quitar brillo y clase closing
+      // 3. Después de la animación de cierre (0.6s), quitar clase closing
       setTimeout(() => {
-        flashScreen.classList.remove('active');
         portal.classList.remove('closing');
-        // Asegurar que la reja esté cerrada (resetear)
+        // Asegurar que la reja esté cerrada
         gateWrapper.classList.remove('open');
       }, 600);
 
-      console.log('↩️ Volviendo al portal (con flash)');
+      console.log('↩️ Volviendo al portal (con cierre de puertas)');
     });
   }
 });
