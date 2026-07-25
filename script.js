@@ -1,4 +1,4 @@
-console.log('🚀 script.js');
+console.log('🚀 script.js (con overlay)');
 
 let CONFIG = {};
 
@@ -62,6 +62,20 @@ function rellenarDatos(config) {
   document.title = `Mis XV años · ${config.nombre}`;
 }
 
+// Función para hacer fade y redirigir
+function fadeAndRedirect(url) {
+  const overlay = document.getElementById('fade-overlay');
+  if (overlay) {
+    overlay.style.transition = 'opacity 0.5s ease';
+    overlay.style.opacity = '1';
+    setTimeout(() => {
+      window.location.href = url;
+    }, 500);
+  } else {
+    window.location.href = url;
+  }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const config = await cargarConfig();
   window.CONFIG = config;
@@ -70,7 +84,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const isIndex = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname === '';
   const isPrincipal = window.location.pathname.endsWith('principal.html');
 
-  // Cargar módulos comunes
+  // Módulos comunes
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
     initSonidos();
@@ -91,34 +105,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (isIndex) {
     // Página de inicio: reja
-    console.log('📌 Página de inicio');
+    console.log('📌 index.html');
     const gateWrapper = document.getElementById('gate-wrapper');
     if (gateWrapper) {
       gateWrapper.addEventListener('click', () => {
-        // Abrir la reja (animación)
         gateWrapper.classList.add('open');
-
-        // Iniciar música (reiniciar desde 0)
         if (window.playMusic) {
           window.resetMusic();
           setTimeout(() => window.playMusic(), 100);
         }
-
-        // Después de la animación (0.9s), redirigir con fade
+        // Redirigir después de la animación (0.9s)
         setTimeout(() => {
-          // Añadir un pequeño fade antes de ir a principal
-          document.body.style.transition = 'opacity 0.5s ease';
-          document.body.style.opacity = '0';
-          setTimeout(() => {
-            window.location.href = 'principal.html';
-          }, 500);
+          fadeAndRedirect('principal.html');
         }, 900);
       });
     }
   } else if (isPrincipal) {
     // Pantalla principal
-    console.log('📌 Pantalla principal');
-    // La app ya tiene clase "show" por defecto, pero aseguramos que se vea
+    console.log('📌 principal.html');
     const app = document.getElementById('app');
     if (app) {
       app.classList.add('show');
@@ -129,7 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       setTimeout(() => window.playMusic(), 200);
     }
 
-    // Cargar módulos específicos
+    // Cargar módulos específicos (solo una vez)
     try {
       const { initContador } = await import('./modules/contador.js');
       initContador(config);
@@ -145,6 +149,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       initJuego(config);
     } catch (e) { console.error('❌ Juego:', e); }
 
+    // Mute
     const muteBtn = document.getElementById('music-toggle');
     if (muteBtn) {
       muteBtn.addEventListener('click', () => {
@@ -152,25 +157,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
 
-    // Botón de volver (enlace a index.html) - manejar animación de salida
+    // Volver a index con fade
     const backLink = document.getElementById('back-link');
     if (backLink) {
       backLink.addEventListener('click', (e) => {
-        e.preventDefault(); // Prevenir la navegación inmediata
-        // 1. Fade out de la app
-        const app = document.getElementById('app');
-        if (app) {
-          app.classList.remove('show');
-          app.classList.add('fade-out');
-        }
-        // 2. Cerrar juego si está abierto
+        e.preventDefault();
+        // Cerrar juego y pausar música
         if (window.closeGame) window.closeGame();
-        // 3. Pausar y reiniciar música
         if (window.resetMusic) window.resetMusic();
-        // 4. Después del fade (0.7s), ir a index.html
-        setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 700);
+        // Fade y redirigir
+        fadeAndRedirect('index.html');
       });
     }
   }
