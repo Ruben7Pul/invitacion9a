@@ -14,7 +14,6 @@
   <div id="bg"></div>
   <div id="petals-layer"></div>
 
-  <!-- PORTAL con REJA -->
   <div id="portal">
     <div class="portal-inner">
       <span class="eyebrow gold-text">Una invitación encantada</span>
@@ -74,6 +73,29 @@
     </div>
   </div>
 
+  <!-- Script inline para manejar la reja -->
+  <script>
+    (function() {
+      const gateWrapper = document.getElementById('gate-wrapper');
+      if (gateWrapper) {
+        console.log('✅ Reja encontrada en index.html');
+        gateWrapper.addEventListener('click', function(e) {
+          console.log('🔄 Clic en la reja detectado');
+          e.preventDefault();
+          // Añadir clase para animación de apertura
+          this.classList.add('open');
+          // Redirigir a principal.html después de 0.8s
+          setTimeout(function() {
+            window.location.href = 'principal.html';
+          }, 800);
+        });
+      } else {
+        console.error('❌ No se encontró #gate-wrapper en index.html');
+      }
+    })();
+  </script>
+
+  <!-- El script module ya no es necesario para la reja, pero lo dejamos por si acaso -->
   <script type="module" src="script.js"></script>
 </body>
 </html>
