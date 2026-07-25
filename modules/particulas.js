@@ -1,4 +1,4 @@
-console.log('📦 partículas (setInterval fijo)');
+console.log('📦 partículas (pétalos rojos)');
 
 let petals = [];
 let intervalId = null;
@@ -10,34 +10,34 @@ export function initParticulas() {
     return;
   }
 
-  // Crear 6 pétalos
-  const colors = ['#e08a99', '#d68a96', '#f0d9a3', '#c9a24d', '#8a2c3b', '#f0d9a3'];
-  for (let i = 0; i < 6; i++) {
+  // Colores rojos (variantes)
+  const colors = ['#cc2233', '#e63946', '#b71c2e', '#d32f3f', '#ff1744', '#f44336'];
+
+  // Más cantidad: 15 pétalos
+  for (let i = 0; i < 18; i++) {
     const p = document.createElement('div');
     p.className = 'petal';
-    const size = 10 + Math.random() * 8;
+    const size = 10 + Math.random() * 10;
     p.style.width = size + 'px';
     p.style.height = size + 'px';
     p.style.left = Math.random() * 95 + 'vw';
-    p.style.top = -20 + Math.random() * 10 + 'vh';
-    p.style.background = colors[i % colors.length];
+    p.style.top = -20 + Math.random() * 20 + 'vh';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
     p.style.transform = `rotate(${Math.random() * 360}deg)`;
+    p.style.opacity = 0.4 + Math.random() * 0.4;
     layer.appendChild(p);
     petals.push({
       el: p,
       x: parseFloat(p.style.left),
       y: parseFloat(p.style.top),
-      speed: 0.5 + Math.random() * 0.5, // píxeles por frame (a 60 FPS)
+      speed: 0.3 + Math.random() * 0.6,
       rotSpeed: (Math.random() - 0.5) * 2,
-      drift: (Math.random() - 0.5) * 0.4,
+      drift: (Math.random() - 0.5) * 0.5,
       size: size
     });
   }
 
-  // Limpiar intervalo anterior si existe
   if (intervalId) clearInterval(intervalId);
-  
-  // Mover pétalos cada 16ms (60 FPS fijos)
   intervalId = setInterval(() => {
     for (const p of petals) {
       p.y += p.speed;
@@ -50,15 +50,16 @@ export function initParticulas() {
       if (p.y > 110) {
         p.y = -10 - Math.random() * 20;
         p.x = Math.random() * 95;
-        p.speed = 0.5 + Math.random() * 0.5;
-        p.drift = (Math.random() - 0.5) * 0.4;
+        p.speed = 0.3 + Math.random() * 0.6;
+        p.drift = (Math.random() - 0.5) * 0.5;
         p.el.style.left = p.x + 'vw';
         p.el.style.top = p.y + 'vh';
+        p.el.style.opacity = 0.4 + Math.random() * 0.4;
       }
     }
-  }, 16); // 16ms = ~60 FPS
+  }, 16);
 
-  console.log('✅ 6 pétalos creados y animados con setInterval (60 FPS)');
+  console.log('✅ 18 pétalos rojos creados y animados');
 }
 
-export function burst() { /* vacío */ }
+export function burst() { /* vacío para compatibilidad */ }
