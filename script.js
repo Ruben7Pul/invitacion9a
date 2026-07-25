@@ -1,4 +1,4 @@
-console.log('🚀 script.js');
+console.log('🚀 script.js (con animación de puerta)');
 
 let CONFIG = {};
 
@@ -31,6 +31,8 @@ async function cargarConfig() {
 
 function rellenarDatos(config) {
   document.getElementById('nombre-hero').textContent = config.nombre;
+  // Añadir atributo para el reflejo
+  document.getElementById('nombre-hero').setAttribute('data-text', config.nombre);
   document.getElementById('fecha-fija').textContent = config.fechaTexto;
   document.getElementById('frase-texto').textContent = config.frase;
   document.getElementById('hora-misa').textContent = config.horaMisa;
@@ -85,20 +87,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     initJuego(config);
   } catch (e) { console.error('❌ Juego:', e); }
 
-  // ---------- ROSA ----------
-  const roseBtn = document.getElementById('rose-btn');
+  // ---------- REJA (PORTAL) ----------
+  const gateBtn = document.getElementById('gate-btn');
   const portal = document.getElementById('portal');
   const app = document.getElementById('app');
 
-  if (roseBtn && portal && app) {
-    roseBtn.addEventListener('click', function(e) {
+  if (gateBtn && portal && app) {
+    gateBtn.addEventListener('click', function(e) {
       e.preventDefault();
-      portal.classList.add('hide');
-      app.classList.add('show');
+      // Añadir clase para animación de apertura
+      this.classList.add('open');
+      // Sonido y efectos
       if (window.playMusic) {
-        window.resetMusic(); // reiniciar desde 0
+        window.resetMusic();
         setTimeout(() => window.playMusic(), 50);
       }
+      // Después de la animación, ocultar portal y mostrar app
+      setTimeout(() => {
+        portal.classList.add('hide');
+        app.classList.add('show');
+        // Quitar clase open para que la reja vuelva a su estado original
+        this.classList.remove('open');
+      }, 800);
     });
   }
 
@@ -110,18 +120,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // ---------- BOTÓN VOLVER (regresa al portal, apaga y reinicia música) ----------
+  // ---------- BOTÓN VOLVER (CON ANIMACIÓN DE PUERTA) ----------
   const backBtn = document.getElementById('back-btn');
   if (backBtn) {
     backBtn.addEventListener('click', () => {
       // Cerrar juego si está abierto
       if (window.closeGame) window.closeGame();
-      // Reiniciar música (pausar y poner en 0)
+
+      // Animación de "puerta cerrándose" en el portal
+      portal.classList.add('closing');
+      backBtn.classList.add('animating');
+
+      // Apagar música
       if (window.resetMusic) window.resetMusic();
+
       // Mostrar portal, ocultar app
       app.classList.remove('show');
       portal.classList.remove('hide');
-      console.log('↩️ Volviendo al portal');
+
+      // Limpiar clases de animación después de un tiempo
+      setTimeout(() => {
+        portal.classList.remove('closing');
+        backBtn.classList.remove('animating');
+      }, 800);
+
+      console.log('↩️ Volviendo al portal (puerta cerrándose)');
     });
   }
 });
