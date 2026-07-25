@@ -1,4 +1,4 @@
-console.log('🚀 script.js');
+console.log('🚀 script.js (con flash screen)');
 
 let CONFIG = {};
 
@@ -30,50 +30,21 @@ async function cargarConfig() {
 }
 
 function rellenarDatos(config) {
-  const nombreEl = document.getElementById('nombre-hero');
-  if (nombreEl) {
-    nombreEl.textContent = config.nombre;
-    nombreEl.setAttribute('data-text', config.nombre);
-  }
-  const fechaEl = document.getElementById('fecha-fija');
-  if (fechaEl) fechaEl.textContent = config.fechaTexto;
-  const fraseEl = document.getElementById('frase-texto');
-  if (fraseEl) fraseEl.textContent = config.frase;
-  const horaMisa = document.getElementById('hora-misa');
-  if (horaMisa) horaMisa.textContent = config.horaMisa;
-  const lugarMisa = document.getElementById('lugar-misa');
-  if (lugarMisa) lugarMisa.textContent = config.ubicacionMisa;
-  const mapaMisa = document.getElementById('mapa-misa');
-  if (mapaMisa) mapaMisa.href = config.mapaMisa;
-  const horaFiesta = document.getElementById('hora-fiesta');
-  if (horaFiesta) horaFiesta.textContent = config.horaFiesta;
-  const lugarFiesta = document.getElementById('lugar-fiesta');
-  if (lugarFiesta) lugarFiesta.textContent = config.ubicacionFiesta;
-  const mapaFiesta = document.getElementById('mapa-fiesta');
-  if (mapaFiesta) mapaFiesta.href = config.mapaFiesta;
-  const padre1 = document.getElementById('padre1');
-  if (padre1) padre1.textContent = config.padre;
-  const padre2 = document.getElementById('padre2');
-  if (padre2) padre2.textContent = config.madre;
-  const padrino1 = document.getElementById('padrino1');
-  if (padrino1) padrino1.textContent = config.padrino;
-  const padrino2 = document.getElementById('padrino2');
-  if (padrino2) padrino2.textContent = config.madrina;
+  document.getElementById('nombre-hero').textContent = config.nombre;
+  document.getElementById('nombre-hero').setAttribute('data-text', config.nombre);
+  document.getElementById('fecha-fija').textContent = config.fechaTexto;
+  document.getElementById('frase-texto').textContent = config.frase;
+  document.getElementById('hora-misa').textContent = config.horaMisa;
+  document.getElementById('lugar-misa').textContent = config.ubicacionMisa;
+  document.getElementById('mapa-misa').href = config.mapaMisa;
+  document.getElementById('hora-fiesta').textContent = config.horaFiesta;
+  document.getElementById('lugar-fiesta').textContent = config.ubicacionFiesta;
+  document.getElementById('mapa-fiesta').href = config.mapaFiesta;
+  document.getElementById('padre1').textContent = config.padre;
+  document.getElementById('padre2').textContent = config.madre;
+  document.getElementById('padrino1').textContent = config.padrino;
+  document.getElementById('padrino2').textContent = config.madrina;
   document.title = `Mis XV años · ${config.nombre}`;
-}
-
-function fadeAndRedirect(url) {
-  const overlay = document.getElementById('fade-overlay');
-  if (overlay) {
-    overlay.style.transition = 'opacity 0.5s ease';
-    overlay.style.opacity = '1';
-    overlay.classList.add('active');
-    setTimeout(() => {
-      window.location.href = url;
-    }, 550);
-  } else {
-    window.location.href = url;
-  }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -81,10 +52,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.CONFIG = config;
   rellenarDatos(config);
 
-  const isIndex = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname === '';
-  const isPrincipal = window.location.pathname.endsWith('principal.html');
+  // Módulos
+  try {
+    const { initContador } = await import('./modules/contador.js');
+    initContador(config);
+  } catch (e) { console.error('❌ Contador:', e); }
 
-  // Cargar módulos comunes (sonidos, partículas, música)
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
     initSonidos();
@@ -96,6 +69,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (e) { console.error('❌ Partículas:', e); }
 
   try {
+    const { initModal } = await import('./modules/modal.js');
+    initModal();
+  } catch (e) { console.error('❌ Modal:', e); }
+
+  try {
     const { initMusica, playMusic, toggleMusic, resetMusic } = await import('./modules/musica.js');
     initMusica(config);
     window.playMusic = playMusic;
@@ -103,71 +81,97 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.resetMusic = resetMusic;
   } catch (e) { console.error('❌ Música:', e); }
 
-  if (isIndex) {
-    console.log('📌 index.html - Reja lista para abrir');
-    const gateWrapper = document.getElementById('gate-wrapper');
-    if (gateWrapper) {
-      gateWrapper.addEventListener('click', function(e) {
-        console.log('🔓 Clic en la reja detectado');
-        // Abrir reja
-        this.classList.add('open');
-        // Música
-        if (window.playMusic) {
-          window.resetMusic();
-          setTimeout(() => window.playMusic(), 100);
-        }
-        // Redirigir después de la animación
-        setTimeout(() => {
-          fadeAndRedirect('principal.html');
-        }, 950);
-      });
-    } else {
-      console.error('❌ No se encontró #gate-wrapper');
-    }
-  } else if (isPrincipal) {
-    console.log('📌 principal.html');
-    const app = document.getElementById('app');
-    if (app) {
-      app.classList.add('show');
-      app.classList.remove('fade-out');
-    }
+  try {
+    const { initJuego } = await import('./modules/juego.js');
+    initJuego(config);
+  } catch (e) { console.error('❌ Juego:', e); }
 
-    if (window.playMusic) {
-      setTimeout(() => window.playMusic(), 200);
-    }
+  // Elementos
+  const gateWrapper = document.getElementById('gate-wrapper');
+  const portal = document.getElementById('portal');
+  const app = document.getElementById('app');
+  const flashScreen = document.getElementById('flash-screen');
 
-    // Cargar módulos específicos
-    try {
-      const { initContador } = await import('./modules/contador.js');
-      initContador(config);
-    } catch (e) { console.error('❌ Contador:', e); }
-
-    try {
-      const { initModal } = await import('./modules/modal.js');
-      initModal();
-    } catch (e) { console.error('❌ Modal:', e); }
-
-    try {
-      const { initJuego } = await import('./modules/juego.js');
-      initJuego(config);
-    } catch (e) { console.error('❌ Juego:', e); }
-
-    const muteBtn = document.getElementById('music-toggle');
-    if (muteBtn) {
-      muteBtn.addEventListener('click', () => {
-        if (window.toggleMusic) window.toggleMusic();
-      });
-    }
-
-    const backLink = document.getElementById('back-link');
-    if (backLink) {
-      backLink.addEventListener('click', (e) => {
+  // ---------- ABRIR REJA ----------
+  if (gateWrapper && portal && app && flashScreen) {
+    const openGate = (e) => {
+      if (e) {
         e.preventDefault();
-        console.log('↩️ Volviendo a index');
-        if (window.closeGame) window.closeGame();
-        if (window.resetMusic) window.resetMusic();
-        fadeAndRedirect('index.html');
-      });
-    }
+        e.stopPropagation();
+      }
+      
+      console.log('🔓 Abriendo reja...');
+      
+      // 1. Activar brillo de pantalla completa
+      flashScreen.classList.add('active');
+
+      // 2. Activar animación de la reja (abrir puertas)
+      gateWrapper.classList.add('open');
+
+      // 3. Música
+      if (window.playMusic) {
+        window.resetMusic();
+        setTimeout(() => window.playMusic(), 100);
+      }
+
+      // 4. Después del flash (0.8s), ocultar portal y mostrar app
+      setTimeout(() => {
+        portal.classList.add('hide');
+        app.classList.add('show');
+        // Resetear reja (para futuros usos)
+        gateWrapper.classList.remove('open');
+        flashScreen.classList.remove('active');
+      }, 800);
+    };
+
+    // Agregar listener tanto al wrapper como a los elementos SVG
+    gateWrapper.addEventListener('click', openGate);
+    
+    // También capturar clicks en los gate-leaf directamente
+    const gateLeaves = gateWrapper.querySelectorAll('.gate-leaf');
+    gateLeaves.forEach(leaf => {
+      leaf.style.cursor = 'pointer';
+      leaf.addEventListener('click', openGate);
+    });
+    
+    console.log('✅ Gate-wrapper configurado para clicks');
+  }
+
+  // ---------- BOTÓN MUTE ----------
+  const muteBtn = document.getElementById('music-toggle');
+  if (muteBtn) {
+    muteBtn.addEventListener('click', () => {
+      if (window.toggleMusic) window.toggleMusic();
+    });
+  }
+
+  // ---------- BOTÓN VOLVER ----------
+  const backBtn = document.getElementById('back-btn');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      // Cerrar juego
+      if (window.closeGame) window.closeGame();
+
+      // 1. Activar brillo de pantalla completa
+      flashScreen.classList.add('active');
+
+      // 2. Apagar música
+      if (window.resetMusic) window.resetMusic();
+
+      // 3. Ocultar app y mostrar portal (con clase closing para animación de puertas)
+      app.classList.remove('show');
+      portal.classList.remove('hide');
+      portal.classList.add('closing');
+
+      // 4. Después del flash (0.6s), quitar brillo y clase closing
+      setTimeout(() => {
+        flashScreen.classList.remove('active');
+        portal.classList.remove('closing');
+        // Asegurar que la reja esté cerrada (resetear)
+        gateWrapper.classList.remove('open');
+      }, 600);
+
+      console.log('↩️ Volviendo al portal (con flash)');
+    });
   }
 });
