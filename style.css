@@ -138,7 +138,7 @@ body {
 }
 .top-btn:hover { opacity: 0.7; }
 #music-toggle svg { width: 20px; height: 20px; }
-#music-toggle { opacity: 1; } /* visible por defecto */
+#music-toggle { opacity: 1; }
 
 #app-mid {
   flex: 1;
@@ -151,24 +151,27 @@ body {
   gap: 0.3rem;
 }
 
-/* ===== ROSA EN DOMO DE CRISTAL (nuevo) ===== */
+/* ===== ROSA EN DOMO DE CRISTAL ===== */
 #rose-wrap {
-  width: 80px;
-  height: 80px;
+  width: 90px;
+  height: 90px;
   margin-bottom: 0.3rem;
   animation: floaty 6s ease-in-out infinite;
 }
 #rose-wrap svg { width: 100%; height: 100%; }
 
 /* Pétalos que caen dentro del domo */
-.petal-falling2 {
-  animation: fallDome2 7s linear infinite;
+.petal-falling-dome {
+  animation: fallDomeReal 6s ease-in-out infinite;
 }
-.petal-falling2:nth-child(2) { animation-delay: 2.5s; }
-.petal-falling2:nth-child(3) { animation-delay: 4.8s; }
-@keyframes fallDome2 {
-  0% { transform: translate(0, 0) rotate(0deg); opacity: 0.5; }
-  100% { transform: translate(35px, 100px) rotate(360deg); opacity: 0; }
+.petal-falling-dome:nth-child(2) { animation-delay: 1.8s; }
+.petal-falling-dome:nth-child(3) { animation-delay: 3.5s; }
+.petal-falling-dome:nth-child(4) { animation-delay: 4.8s; }
+
+@keyframes fallDomeReal {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0.7; }
+  50% { opacity: 0.9; }
+  100% { transform: translate(20px, 40px) rotate(200deg); opacity: 0; }
 }
 
 .name-wrap { position: relative; }
@@ -497,7 +500,7 @@ h1#nombre-hero {
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 480px) {
-  #rose-wrap { width: 60px; height: 60px; }
+  #rose-wrap { width: 70px; height: 70px; }
   h1#nombre-hero { font-size: 2rem; }
   .clock .num { font-size: 1rem; }
   #app-top .eyebrow { font-size: 0.6rem; }
