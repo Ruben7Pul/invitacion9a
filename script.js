@@ -1,4 +1,4 @@
-console.log('🚀 script.js (con overlay)');
+console.log('🚀 script.js');
 
 let CONFIG = {};
 
@@ -62,7 +62,6 @@ function rellenarDatos(config) {
   document.title = `Mis XV años · ${config.nombre}`;
 }
 
-// Función para hacer fade y redirigir
 function fadeAndRedirect(url) {
   const overlay = document.getElementById('fade-overlay');
   if (overlay) {
@@ -84,7 +83,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const isIndex = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname === '';
   const isPrincipal = window.location.pathname.endsWith('principal.html');
 
-  // Módulos comunes
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
     initSonidos();
@@ -104,7 +102,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (e) { console.error('❌ Música:', e); }
 
   if (isIndex) {
-    // Página de inicio: reja
     console.log('📌 index.html');
     const gateWrapper = document.getElementById('gate-wrapper');
     if (gateWrapper) {
@@ -114,14 +111,12 @@ document.addEventListener('DOMContentLoaded', async () => {
           window.resetMusic();
           setTimeout(() => window.playMusic(), 100);
         }
-        // Redirigir después de la animación (0.9s)
         setTimeout(() => {
           fadeAndRedirect('principal.html');
         }, 900);
       });
     }
   } else if (isPrincipal) {
-    // Pantalla principal
     console.log('📌 principal.html');
     const app = document.getElementById('app');
     if (app) {
@@ -133,7 +128,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       setTimeout(() => window.playMusic(), 200);
     }
 
-    // Cargar módulos específicos (solo una vez)
     try {
       const { initContador } = await import('./modules/contador.js');
       initContador(config);
@@ -149,7 +143,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       initJuego(config);
     } catch (e) { console.error('❌ Juego:', e); }
 
-    // Mute
     const muteBtn = document.getElementById('music-toggle');
     if (muteBtn) {
       muteBtn.addEventListener('click', () => {
@@ -157,15 +150,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
 
-    // Volver a index con fade
     const backLink = document.getElementById('back-link');
     if (backLink) {
       backLink.addEventListener('click', (e) => {
         e.preventDefault();
-        // Cerrar juego y pausar música
         if (window.closeGame) window.closeGame();
         if (window.resetMusic) window.resetMusic();
-        // Fade y redirigir
         fadeAndRedirect('index.html');
       });
     }
