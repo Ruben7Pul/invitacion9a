@@ -11,11 +11,10 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌹</text></svg>">
 </head>
 <body>
-  <!-- Fondo con imagen (se controla desde CSS) -->
   <div id="bg"></div>
   <div id="petals-layer"></div>
 
-  <!-- PORTAL (rosa simple) -->
+  <!-- PORTAL -->
   <div id="portal">
     <div class="portal-inner">
       <span class="eyebrow gold-text">Una invitación encantada</span>
@@ -34,11 +33,11 @@
     </div>
   </div>
 
-  <!-- APP PRINCIPAL (con ÓVALO VERTICAL) -->
+  <!-- APP PRINCIPAL -->
   <div id="app">
     <div id="app-top">
       <button id="back-btn" aria-label="Volver" class="top-btn">↩</button>
-      <span class="eyebrow gold-text">Mis quince años</span>
+      <span class="eyebrow gold-text">Te invito a mis XV años</span>
       <button id="music-toggle" aria-label="Silenciar o activar música" class="top-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
           <path d="M4 9 L4 15 L8 15 L13 20 L13 4 L8 9 Z"/>
@@ -49,18 +48,26 @@
     </div>
 
     <div id="app-mid">
-      <!-- ===== ÓVALO VERTICAL CON GIF ===== -->
+      <!-- ÓVALO VERTICAL CON GIF (con adornos) -->
       <div id="oval-wrap">
-        <div class="oval-mask">
-          <img src="archivos/centro.gif" alt="Imagen central" class="gif-central">
+        <div class="oval-frame">
+          <div class="oval-mask">
+            <img src="archivos/centro.gif" alt="Imagen central" class="gif-central">
+          </div>
+          <!-- Adornos del óvalo (puntas y perlas) -->
+          <div class="oval-adorn top-left"></div>
+          <div class="oval-adorn top-right"></div>
+          <div class="oval-adorn bottom-left"></div>
+          <div class="oval-adorn bottom-right"></div>
         </div>
       </div>
 
       <div class="name-wrap">
         <h1 id="nombre-hero">X</h1>
-        <p class="hint gold-text">Toca mi nombre para jugar</p>
+        <!-- Mensaje más grande y movido arriba de los botones -->
+        <p class="hint gold-text">👆 Toca mi nombre para jugar</p>
       </div>
-      <p class="subt gold-text">Te invito a vivir un cuento hecho realidad</p>
+      <!-- Eliminado "Te invito a vivir un cuento hecho realidad" -->
       <p class="frase-inline gold-text" id="frase-texto">Cargando...</p>
       <p class="fecha-fija gold-text" id="fecha-fija">Cargando...</p>
     </div>
@@ -144,7 +151,7 @@
           <button class="game-btn gold-text" id="game-restart">Jugar de nuevo</button>
         </div>
       </div>
-      <p class="game-help gold-text">Mueva con dedo, A/D o con flechas del teclado</p>
+      <p class="game-help gold-text">Mueva con dedo, A/D o flechas del teclado</p>
     </div>
   </div>
 
