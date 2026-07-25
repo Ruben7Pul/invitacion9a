@@ -24,11 +24,25 @@ body {
   inset: 0;
 }
 
+/* ===== FONDO CON IMAGEN DEL CASTILLO ===== */
 #bg {
   position: fixed;
   inset: 0;
   z-index: 0;
   background: var(--bg-deep);
+  background-image: url('archivos/bella.jpg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  /* Fallback si la imagen no carga */
+  background-color: var(--bg-deep);
+}
+/* Oscurecer un poco la imagen para que el texto resalte */
+#bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
 }
 
 #petals-layer {
@@ -151,16 +165,29 @@ body {
   gap: 0.3rem;
 }
 
-/* ===== ÓVALO VERTICAL CON ADORNOS ===== */
+/* ===== ÓVALO VERTICAL CON GIF (subido para que no se monte con el nombre) ===== */
 #oval-wrap {
-  width: 120px;
-  height: 150px;
-  margin-bottom: 0.3rem;
+  width: 130px;
+  height: 180px;   /* Alto > ancho → óvalo vertical */
+  margin-bottom: 0.1rem;  /* reducido para subirlo */
+  margin-top: -10px;      /* subir el óvalo un poco */
   animation: floaty 6s ease-in-out infinite;
 }
-#oval-wrap svg {
+
+.oval-mask {
   width: 100%;
   height: 100%;
+  border-radius: 50%;    /* Con ancho≠alto → óvalo vertical perfecto */
+  overflow: hidden;
+  border: 4px solid var(--gold);
+  box-shadow: 0 0 25px rgba(201, 162, 77, 0.3);
+  background: var(--bg-deep);
+}
+
+.gif-central {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
 }
 
@@ -454,6 +481,7 @@ h1#nombre-hero {
   font-family: var(--serif-display);
   color: var(--gold-light);
   font-size: 0.9rem;
+  white-space: pre-line;
 }
 .game-btn {
   font-family: var(--serif-display);
@@ -490,7 +518,7 @@ h1#nombre-hero {
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 480px) {
-  #oval-wrap { width: 90px; height: 115px; }
+  #oval-wrap { width: 110px; height: 150px; margin-top: -5px; }
   h1#nombre-hero { font-size: 2rem; }
   .clock .num { font-size: 1rem; }
   #app-top .eyebrow { font-size: 0.6rem; }
