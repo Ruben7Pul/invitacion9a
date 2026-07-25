@@ -33,7 +33,7 @@
     </div>
   </div>
 
-  <!-- APP PRINCIPAL (con domo más alto y rosa más grande) -->
+  <!-- APP PRINCIPAL (con marco de vitral y GIF) -->
   <div id="app">
     <div id="app-top">
       <button id="back-btn" aria-label="Volver" class="top-btn">↩</button>
@@ -48,99 +48,109 @@
     </div>
 
     <div id="app-mid">
-      <!-- ===== ROSA EN DOMO DE CRISTAL MEJORADO ===== -->
-      <div id="rose-wrap">
-        <svg viewBox="0 0 200 220" width="110" height="121">
+      <!-- ===== MARCO DE VITRAL CON GIF ===== -->
+      <div id="marco-wrap">
+        <svg viewBox="0 0 200 200" width="110" height="110">
           <defs>
-            <radialGradient id="domeGlass" cx="50%" cy="30%" r="70%">
-              <stop offset="0%" stop-color="rgba(255,255,255,0.35)"/>
-              <stop offset="30%" stop-color="rgba(220,235,255,0.12)"/>
-              <stop offset="70%" stop-color="rgba(180,200,230,0.05)"/>
-              <stop offset="100%" stop-color="rgba(140,170,210,0.02)"/>
-            </radialGradient>
-            <linearGradient id="baseGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#c9a24d"/>
-              <stop offset="30%" stop-color="#d4af37"/>
-              <stop offset="70%" stop-color="#b8943c"/>
-              <stop offset="100%" stop-color="#8a7030"/>
-            </linearGradient>
-            <radialGradient id="roseGradDome" cx="40%" cy="30%" r="60%">
-              <stop offset="0%" stop-color="#e08a99"/>
-              <stop offset="50%" stop-color="#8a2c3b"/>
-              <stop offset="100%" stop-color="#5c1a24"/>
-            </radialGradient>
-            <filter id="roseGlowDome">
-              <feGaussianBlur stdDeviation="1.8" result="blur"/>
+            <!-- Filtro para sombra y brillo -->
+            <filter id="marcoGlow">
+              <feGaussianBlur stdDeviation="2" result="blur"/>
               <feMerge>
                 <feMergeNode in="blur"/>
                 <feMergeNode in="SourceGraphic"/>
               </feMerge>
             </filter>
+
+            <!-- Gradiente del marco dorado -->
+            <linearGradient id="goldFrame" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#f0d9a3"/>
+              <stop offset="30%" stop-color="#c9a24d"/>
+              <stop offset="70%" stop-color="#d4af37"/>
+              <stop offset="100%" stop-color="#8a7030"/>
+            </linearGradient>
+
+            <!-- Patrón de vitral (formas) -->
+            <clipPath id="vitralClip">
+              <circle cx="100" cy="100" r="65"/>
+            </clipPath>
           </defs>
 
-          <!-- BASE DEL DOMO (más ancha) -->
-          <ellipse cx="100" cy="190" rx="80" ry="14" fill="url(#baseGrad)" stroke="#d4af37" stroke-width="2"/>
-          <ellipse cx="100" cy="190" rx="70" ry="10" fill="rgba(0,0,0,0.12)"/>
-          
-          <!-- CÚPULA DE CRISTAL (más alta) -->
-          <path d="M20 190 Q20 10 100 5 Q180 10 180 190 Z" 
-                fill="url(#domeGlass)" 
-                stroke="rgba(200,220,255,0.25)" 
-                stroke-width="1.5"/>
-          
-          <!-- Líneas de estructura -->
-          <path d="M100 5 L100 190" stroke="rgba(200,220,255,0.08)" stroke-width="1.2"/>
-          <path d="M45 25 L45 190" stroke="rgba(200,220,255,0.06)" stroke-width="1"/>
-          <path d="M155 25 L155 190" stroke="rgba(200,220,255,0.06)" stroke-width="1"/>
-          <path d="M55 15 Q100 40 145 15" stroke="rgba(200,220,255,0.05)" stroke-width="1" fill="none"/>
-          <path d="M40 40 Q100 70 160 40" stroke="rgba(200,220,255,0.05)" stroke-width="1" fill="none"/>
-          <path d="M30 70 Q100 110 170 70" stroke="rgba(200,220,255,0.05)" stroke-width="1" fill="none"/>
+          <!-- ===== FONDO DEL MARCO (exterior) ===== -->
+          <circle cx="100" cy="100" r="85" fill="none" stroke="url(#goldFrame)" stroke-width="6" filter="url(#marcoGlow)"/>
+          <circle cx="100" cy="100" r="85" fill="none" stroke="rgba(255,215,0,0.3)" stroke-width="8"/>
 
-          <!-- REFLEJOS Y BRILLOS -->
-          <path d="M50 50 Q75 35 90 50 Q70 60 50 50 Z" fill="rgba(255,255,255,0.35)"/>
-          <path d="M55 65 Q70 55 82 65 Q70 72 55 65 Z" fill="rgba(255,255,255,0.18)"/>
-          <path d="M145 140 Q165 130 170 145 Q155 155 145 140 Z" fill="rgba(255,255,255,0.15)"/>
-          <circle cx="100" cy="8" r="5" fill="rgba(255,255,255,0.5)"/>
-          <circle cx="100" cy="8" r="2.5" fill="rgba(255,255,255,0.7)"/>
-          <path d="M30 110 Q25 120 30 130" stroke="rgba(255,255,255,0.1)" stroke-width="2" fill="none"/>
-          <path d="M170 110 Q175 120 170 130" stroke="rgba(255,255,255,0.1)" stroke-width="2" fill="none"/>
-
-          <!-- ROSA MÁS GRANDE Y ALTA -->
-          <g filter="url(#roseGlowDome)">
-            <!-- Tallo más largo y grueso -->
-            <path d="M100 185 Q100 150 100 120" stroke="#2e4a3c" stroke-width="4" fill="none"/>
-            <!-- Hojas más grandes -->
-            <path d="M100 150 Q80 135 72 115 Q88 125 100 140" fill="#2e4a3c" opacity="0.9"/>
-            <path d="M100 162 Q120 145 128 125 Q112 135 100 150" fill="#2e4a3c" opacity="0.9"/>
-            <path d="M100 132 Q82 118 78 100 Q90 108 100 122" fill="#1a2e1f" opacity="0.8"/>
-            <path d="M100 142 Q118 128 122 110 Q110 118 100 132" fill="#1a2e1f" opacity="0.8"/>
-
-            <!-- Pétalos exteriores (más grandes) -->
-            <path d="M100 70 Q68 50 60 78 Q75 98 100 90 Z" fill="url(#roseGradDome)"/>
-            <path d="M100 70 Q132 50 140 78 Q125 98 100 90 Z" fill="url(#roseGradDome)"/>
-            <path d="M100 90 Q50 82 42 110 Q62 130 100 115 Z" fill="url(#roseGradDome)"/>
-            <path d="M100 90 Q150 82 158 110 Q138 130 100 115 Z" fill="url(#roseGradDome)"/>
-            <path d="M100 105 Q72 130 65 150 Q82 145 100 130 Z" fill="url(#roseGradDome)"/>
-            <path d="M100 105 Q128 130 135 150 Q118 145 100 130 Z" fill="url(#roseGradDome)"/>
-            
-            <!-- Pétalos interiores -->
-            <path d="M100 85 Q84 70 80 90 Q92 100 100 95 Z" fill="#b5566a"/>
-            <path d="M100 85 Q116 70 120 90 Q108 100 100 95 Z" fill="#b5566a"/>
-            <path d="M100 98 Q88 115 85 128 Q94 122 100 112 Z" fill="#d68a96"/>
-            <path d="M100 98 Q112 115 115 128 Q106 122 100 112 Z" fill="#d68a96"/>
-            
-            <!-- Centro más grande -->
-            <circle cx="100" cy="102" r="10" fill="#5c1a24"/>
-            <circle cx="100" cy="102" r="5" fill="#8a2c3b"/>
-            <circle cx="100" cy="102" r="2.5" fill="#e08a99"/>
+          <!-- ===== ADORNOS EXTERIORES (puntas / perlas) ===== -->
+          <!-- Perlas alrededor -->
+          <g fill="#d4af37" stroke="#c9a24d" stroke-width="0.5">
+            <circle cx="100" cy="15" r="4"/>
+            <circle cx="133" cy="22" r="4"/>
+            <circle cx="160" cy="40" r="4"/>
+            <circle cx="178" cy="67" r="4"/>
+            <circle cx="185" cy="100" r="4"/>
+            <circle cx="178" cy="133" r="4"/>
+            <circle cx="160" cy="160" r="4"/>
+            <circle cx="133" cy="178" r="4"/>
+            <circle cx="100" cy="185" r="4"/>
+            <circle cx="67" cy="178" r="4"/>
+            <circle cx="40" cy="160" r="4"/>
+            <circle cx="22" cy="133" r="4"/>
+            <circle cx="15" cy="100" r="4"/>
+            <circle cx="22" cy="67" r="4"/>
+            <circle cx="40" cy="40" r="4"/>
+            <circle cx="67" cy="22" r="4"/>
           </g>
 
-          <!-- PÉTALOS QUE CAEN DENTRO DEL DOMO -->
-          <path class="petal-falling-dome" d="M40 85 Q36 82 38 77 Q43 80 40 85 Z" fill="#e08a99" opacity="0.7"/>
-          <path class="petal-falling-dome" d="M160 75 Q163 72 161 67 Q157 70 160 75 Z" fill="#d68a96" opacity="0.6"/>
-          <path class="petal-falling-dome" d="M165 125 Q168 122 166 117 Q162 120 165 125 Z" fill="#b5566a" opacity="0.5"/>
-          <path class="petal-falling-dome" d="M45 145 Q42 142 44 138 Q48 140 45 145 Z" fill="#e08a99" opacity="0.4"/>
-          <path class="petal-falling-dome" d="M130 50 Q133 47 131 43 Q127 45 130 50 Z" fill="#d68a96" opacity="0.5"/>
+          <!-- Puntas decorativas (entre perlas) -->
+          <g fill="none" stroke="url(#goldFrame)" stroke-width="2">
+            <path d="M100 10 L103 18 L97 18 Z"/>
+            <path d="M140 18 L143 26 L137 26 Z"/>
+            <path d="M168 38 L174 44 L164 44 Z"/>
+            <path d="M188 67 L192 74 L184 74 Z"/>
+            <path d="M190 100 L194 107 L186 107 Z"/>
+            <path d="M188 133 L192 140 L184 140 Z"/>
+            <path d="M168 162 L174 168 L164 168 Z"/>
+            <path d="M140 182 L143 190 L137 190 Z"/>
+            <path d="M100 190 L103 198 L97 198 Z"/>
+            <path d="M60 182 L57 190 L63 190 Z"/>
+            <path d="M32 162 L26 168 L36 168 Z"/>
+            <path d="M12 133 L8 140 L16 140 Z"/>
+            <path d="M10 100 L6 107 L14 107 Z"/>
+            <path d="M12 67 L8 74 L16 74 Z"/>
+            <path d="M32 38 L26 44 L36 44 Z"/>
+            <path d="M60 18 L57 26 L63 26 Z"/>
+          </g>
+
+          <!-- ===== VITRAL (patrón de vidriería) ===== -->
+          <g clip-path="url(#vitralClip)">
+            <!-- Fondo base del vitral -->
+            <circle cx="100" cy="100" r="65" fill="#1a1a2e"/>
+
+            <!-- Formas del vitral (vidriería) -->
+            <path d="M100 35 L60 60 L60 100 L100 120 Z" fill="#4a2e5a" opacity="0.6"/>
+            <path d="M100 35 L140 60 L140 100 L100 120 Z" fill="#2e4a5a" opacity="0.6"/>
+            <path d="M60 100 L60 140 L100 165 L100 120 Z" fill="#5a2e3a" opacity="0.6"/>
+            <path d="M100 120 L140 100 L140 140 L100 165 Z" fill="#3a5a2e" opacity="0.6"/>
+
+            <circle cx="100" cy="100" r="30" fill="rgba(100,80,140,0.3)"/>
+            <circle cx="100" cy="100" r="15" fill="rgba(200,180,220,0.15)"/>
+
+            <!-- Líneas divisorias del vitral (plomo) -->
+            <path d="M100 35 L100 165" stroke="rgba(80,70,60,0.5)" stroke-width="2"/>
+            <path d="M60 60 L140 140" stroke="rgba(80,70,60,0.5)" stroke-width="2"/>
+            <path d="M140 60 L60 140" stroke="rgba(80,70,60,0.5)" stroke-width="2"/>
+            <circle cx="100" cy="100" r="30" stroke="rgba(80,70,60,0.5)" stroke-width="2" fill="none"/>
+            <circle cx="100" cy="100" r="15" stroke="rgba(80,70,60,0.5)" stroke-width="1.5" fill="none"/>
+
+            <!-- ===== GIF DENTRO DEL VITRAL ===== -->
+            <image x="70" y="70" width="60" height="60" href="archivos/centro.gif" clip-path="url(#vitralClip)"/>
+          </g>
+
+          <!-- ===== MARCO INTERIOR (borde del vitral) ===== -->
+          <circle cx="100" cy="100" r="65" fill="none" stroke="url(#goldFrame)" stroke-width="3"/>
+
+          <!-- ===== REFLEJOS DEL VITRAL ===== -->
+          <path d="M70 70 Q90 65 95 75 Q85 80 70 70 Z" fill="rgba(255,255,255,0.15)"/>
+          <path d="M130 130 Q145 125 148 135 Q135 140 130 130 Z" fill="rgba(255,255,255,0.1)"/>
         </svg>
       </div>
 
