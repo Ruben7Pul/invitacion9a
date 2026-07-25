@@ -1,4 +1,6 @@
 // sonidos.js - Efectos de audio con Web Audio API
+console.log('📦 módulo sonidos.js cargado');
+
 let audioCtx = null;
 
 export function ensureAudioCtx() {
@@ -25,7 +27,7 @@ function chime(freqs, dur) {
       osc.start(now + i * 0.05);
       osc.stop(now + i * 0.05 + dur + 0.05);
     });
-  } catch (e) {}
+  } catch (e) { console.warn('Error en sonido:', e); }
 }
 
 export const soundOpen = () => chime([880, 1318, 1760], 0.5);
@@ -36,6 +38,7 @@ export const soundWin = () => chime([784, 988, 1175, 1568], 0.7);
 export const soundLose = () => chime([392, 330], 0.5);
 
 export function initSonidos() {
-  // Solo inicializa el contexto cuando el usuario interactúa
+  console.log('🔊 Iniciando sonidos...');
   document.addEventListener('click', () => ensureAudioCtx(), { once: true });
+  console.log('✅ Sonidos listos');
 }
