@@ -1,17 +1,17 @@
-console.log('📦 juego.js (universal, 6 columnas, teclado)');
+console.log('📦 juego.js (teclado + giroscopio, sin mouse/touch)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
 const ROWS = 4;
-const COLS = 6;          // 6 columnas
-const BRICK_W = 44;      // ajustado para 6 columnas (44*6 + 4*5 = 284, cabe en 300)
+const COLS = 6;
+const BRICK_W = 44;
 const BRICK_H = 20;
 const GAP = 4;
 const TOP = 30;
-const SPEED = 3.8;       // velocidad universal (ajustable)
+const SPEED = 3.8;
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego con 6 columnas, speed=' + SPEED);
+  console.log('🎮 Iniciando juego (teclado + giroscopio)');
 
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => { soundTap(); openGame(); });
@@ -38,6 +38,10 @@ export function initJuego(config) {
   let lives = 3;
   let running = false;
   let gameInterval = null;
+
+  // Variable para inclinación
+  let tiltX = 0;
+  let tiltActive = false;
 
   // Exponer closeGame para el botón de volver
   window.closeGame = closeGame;
@@ -109,19 +113,24 @@ export function initJuego(config) {
     ballEl.style.top = (ball.y - ball.r) + 'px';
   }
 
-  // Bucle de juego con delta fijo (16ms = 60 FPS)
   function gameLoop() {
     if (!running) return;
+
+    // Movimiento por inclinación
+    if (tiltActive) {
+      const sens = 8;
+      paddle.x += tiltX * sens;
+      paddle.x = Math.max(0, Math.min(LW - paddle.w, paddle.x));
+    }
 
     ball.x += ball.vx;
     ball.y += ball.vy;
 
-    // Colisiones paredes
+    // Colisiones
     if (ball.x - ball.r < 0) { ball.x = ball.r; ball.vx = Math.abs(ball.vx); }
     if (ball.x + ball.r > LW) { ball.x = LW - ball.r; ball.vx = -Math.abs(ball.vx); }
     if (ball.y - ball.r < 0) { ball.y = ball.r; ball.vy = Math.abs(ball.vy); }
 
-    // Colisión paleta
     const py = LH - 14;
     if (ball.vy > 0 && ball.y + ball.r >= py && ball.y + ball.r <= py + 10 &&
         ball.x >= paddle.x - ball.r && ball.x <= paddle.x + paddle.w + ball.r) {
@@ -134,7 +143,6 @@ export function initJuego(config) {
       ball.vy = -Math.cos(angle) * speed;
     }
 
-    // Colisión ladrillos
     for (const b of bricks) {
       if (!b.alive) continue;
       if (ball.x + ball.r > b.x && ball.x - ball.r < b.x + b.w &&
@@ -152,7 +160,6 @@ export function initJuego(config) {
       }
     }
 
-    // Perdida
     if (ball.y - ball.r > LH) {
       lives--;
       updateLives();
@@ -161,7 +168,6 @@ export function initJuego(config) {
       resetBall();
     }
 
-    // Victoria
     if (bricks.every(b => !b.alive)) { endGame(true); return; }
 
     draw();
@@ -186,12 +192,11 @@ export function initJuego(config) {
     layoutStage();
     draw();
     if (gameInterval) clearInterval(gameInterval);
-    gameInterval = setInterval(gameLoop, 16); // 60 FPS fijos
+    gameInterval = setInterval(gameLoop, 16);
   }
 
   function openGame() {
     overlay.classList.add('open');
-    // Mostrar mensaje de preparación
     msgText.textContent = 'Preparando...';
     msgEl.classList.add('show');
     setTimeout(() => {
@@ -205,39 +210,63 @@ export function initJuego(config) {
     running = false;
     if (gameInterval) { clearInterval(gameInterval); gameInterval = null; }
     soundClose();
+    console.log('🔚 Juego cerrado');
   }
 
-  // Eventos
+  // Eventos UI
   document.getElementById('game-close').addEventListener('click', closeGame);
   restartBtn.addEventListener('click', () => { soundTap(); startGame(); });
   overlay.addEventListener('click', e => { if (e.target === overlay) closeGame(); });
 
-  // Movimiento con ratón/toque
-  function movePaddle(clientX) {
-    const rect = stage.getBoundingClientRect();
-    const localX = (clientX - rect.left) / scale;
-    paddle.x = Math.min(Math.max(localX - paddle.w / 2, 0), LW - paddle.w);
-    if (!running) draw();
-  }
-  stage.addEventListener('pointermove', e => movePaddle(e.clientX));
-  stage.addEventListener('touchmove', e => { if (e.touches[0]) movePaddle(e.touches[0].clientX); e.preventDefault(); }, { passive: false });
-
-  // Controles de teclado
+  // ---------- CONTROLES DE TECLADO ----------
+  const keys = { left: false, right: false };
   document.addEventListener('keydown', (e) => {
     if (!running) return;
-    const step = 8;
     if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
-      paddle.x = Math.max(0, paddle.x - step);
-      if (!running) draw();
+      keys.left = true;
       e.preventDefault();
     } else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') {
-      paddle.x = Math.min(LW - paddle.w, paddle.x + step);
-      if (!running) draw();
+      keys.right = true;
+      e.preventDefault();
+    }
+  });
+  document.addEventListener('keyup', (e) => {
+    if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
+      keys.left = false;
+      e.preventDefault();
+    } else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') {
+      keys.right = false;
       e.preventDefault();
     }
   });
 
+  // Aplicar teclado en cada frame
+  const origLoop = gameLoop;
+  gameLoop = function() {
+    if (running) {
+      if (keys.left) paddle.x = Math.max(0, paddle.x - 8);
+      if (keys.right) paddle.x = Math.min(LW - paddle.w, paddle.x + 8);
+    }
+    origLoop.call(this);
+  };
+
+  // ---------- CONTROL POR INCLINACIÓN (GIROSCOPIO) ----------
+  if (window.DeviceOrientationEvent) {
+    window.addEventListener('deviceorientation', (e) => {
+      if (!running) return;
+      const gamma = e.gamma || 0;
+      let tilt = 0;
+      if (Math.abs(gamma) > 5) {
+        tilt = Math.max(-1, Math.min(1, gamma / 45));
+      }
+      tiltX = tilt;
+      tiltActive = true;
+    });
+  } else {
+    console.warn('⚠️ Giroscopio no soportado');
+  }
+
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego listo (6 columnas, teclado, retraso 2s)');
+  console.log('✅ Juego listo (teclado + giroscopio)');
 }
