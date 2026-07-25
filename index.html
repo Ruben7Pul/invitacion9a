@@ -20,82 +20,241 @@
       <div class="gate-wrapper" id="gate-wrapper">
         <!-- Hoja izquierda -->
         <div class="gate-leaf gate-left">
-          <svg viewBox="0 0 150 200" width="100%" height="100%">
+          <svg viewBox="0 0 200 280" width="100%" height="100%">
             <defs>
               <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#f5e6b8"/>
-                <stop offset="50%" stop-color="#d4af37"/>
+                <stop offset="30%" stop-color="#d4af37"/>
+                <stop offset="70%" stop-color="#b8860b"/>
                 <stop offset="100%" stop-color="#8a6d1b"/>
               </linearGradient>
+              <linearGradient id="goldDark" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#c9a24d"/>
+                <stop offset="100%" stop-color="#5a3d1a"/>
+              </linearGradient>
               <filter id="glow">
-                <feGaussianBlur stdDeviation="2" result="blur"/>
+                <feGaussianBlur stdDeviation="2.5" result="blur"/>
                 <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
               </filter>
+              <filter id="gemGlow">
+                <feGaussianBlur stdDeviation="1.5" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <pattern id="grid" width="16" height="16" patternUnits="userSpaceOnUse">
+                <path d="M 8 0 L 8 16 M 0 8 L 16 8" stroke="rgba(255,215,0,0.04)" stroke-width="0.5" fill="none"/>
+              </pattern>
             </defs>
-            <rect x="5" y="5" width="140" height="190" rx="10" fill="none" stroke="url(#goldGrad)" stroke-width="6" filter="url(#glow)"/>
-            <rect x="12" y="12" width="126" height="176" rx="6" fill="none" stroke="rgba(255,215,0,0.2)" stroke-width="2"/>
-            <rect x="25" y="20" width="8" height="160" rx="4" fill="url(#goldGrad)"/>
-            <rect x="55" y="20" width="8" height="160" rx="4" fill="url(#goldGrad)"/>
-            <rect x="85" y="20" width="8" height="160" rx="4" fill="url(#goldGrad)"/>
-            <rect x="115" y="20" width="8" height="160" rx="4" fill="url(#goldGrad)"/>
-            <rect x="15" y="40" width="120" height="6" rx="3" fill="url(#goldGrad)"/>
-            <rect x="15" y="80" width="120" height="6" rx="3" fill="url(#goldGrad)"/>
-            <rect x="15" y="120" width="120" height="6" rx="3" fill="url(#goldGrad)"/>
-            <rect x="15" y="160" width="120" height="6" rx="3" fill="url(#goldGrad)"/>
-            <circle cx="29" cy="43" r="6" fill="#e63946" stroke="#fff" stroke-width="1"/>
-            <circle cx="59" cy="43" r="6" fill="#2ecc71" stroke="#fff" stroke-width="1"/>
-            <circle cx="89" cy="43" r="6" fill="#3498db" stroke="#fff" stroke-width="1"/>
-            <circle cx="119" cy="43" r="6" fill="#f1c40f" stroke="#fff" stroke-width="1"/>
-            <circle cx="29" cy="83" r="6" fill="#9b59b6" stroke="#fff" stroke-width="1"/>
-            <circle cx="59" cy="83" r="6" fill="#e63946" stroke="#fff" stroke-width="1"/>
-            <circle cx="89" cy="83" r="6" fill="#2ecc71" stroke="#fff" stroke-width="1"/>
-            <circle cx="119" cy="83" r="6" fill="#3498db" stroke="#fff" stroke-width="1"/>
-            <circle cx="29" cy="123" r="6" fill="#f1c40f" stroke="#fff" stroke-width="1"/>
-            <circle cx="59" cy="123" r="6" fill="#9b59b6" stroke="#fff" stroke-width="1"/>
-            <circle cx="89" cy="123" r="6" fill="#e63946" stroke="#fff" stroke-width="1"/>
-            <circle cx="119" cy="123" r="6" fill="#2ecc71" stroke="#fff" stroke-width="1"/>
-            <path d="M25 20 Q75 -15 125 20" fill="none" stroke="url(#goldGrad)" stroke-width="6" filter="url(#glow)"/>
-            <circle cx="75" cy="-5" r="10" fill="url(#goldGrad)" stroke="#fff" stroke-width="1"/>
-            <rect x="65" y="90" width="20" height="25" rx="4" fill="#b8943c" stroke="#8a6d1b" stroke-width="2"/>
-            <circle cx="75" cy="90" r="8" fill="none" stroke="url(#goldGrad)" stroke-width="3"/>
-            <circle cx="75" cy="90" r="4" fill="#e63946"/>
+            <!-- Fondo con patrón -->
+            <rect x="10" y="10" width="180" height="260" rx="15" fill="url(#grid)"/>
+            <!-- Marco exterior -->
+            <rect x="10" y="10" width="180" height="260" rx="15" fill="none" stroke="url(#goldGrad)" stroke-width="6" filter="url(#glow)"/>
+            <rect x="18" y="18" width="164" height="244" rx="10" fill="none" stroke="rgba(255,215,0,0.15)" stroke-width="2"/>
+            <!-- Barrotes verticales (más gruesos y con remates) -->
+            <g filter="url(#glow)">
+              <rect x="35" y="25" width="10" height="230" rx="5" fill="url(#goldGrad)"/>
+              <rect x="75" y="25" width="10" height="230" rx="5" fill="url(#goldGrad)"/>
+              <rect x="115" y="25" width="10" height="230" rx="5" fill="url(#goldGrad)"/>
+              <rect x="155" y="25" width="10" height="230" rx="5" fill="url(#goldGrad)"/>
+              <!-- Remates en punta de lanza -->
+              <path d="M35 25 L40 12 L45 25 Z" fill="url(#goldGrad)"/>
+              <path d="M75 25 L80 12 L85 25 Z" fill="url(#goldGrad)"/>
+              <path d="M115 25 L120 12 L125 25 Z" fill="url(#goldGrad)"/>
+              <path d="M155 25 L160 12 L165 25 Z" fill="url(#goldGrad)"/>
+            </g>
+            <!-- Barrotes horizontales (doble línea) -->
+            <g filter="url(#glow)">
+              <rect x="20" y="55" width="160" height="8" rx="4" fill="url(#goldGrad)"/>
+              <rect x="20" y="55" width="160" height="3" rx="1.5" fill="rgba(255,255,255,0.2)"/>
+              <rect x="20" y="105" width="160" height="8" rx="4" fill="url(#goldGrad)"/>
+              <rect x="20" y="105" width="160" height="3" rx="1.5" fill="rgba(255,255,255,0.2)"/>
+              <rect x="20" y="155" width="160" height="8" rx="4" fill="url(#goldGrad)"/>
+              <rect x="20" y="155" width="160" height="3" rx="1.5" fill="rgba(255,255,255,0.2)"/>
+              <rect x="20" y="205" width="160" height="8" rx="4" fill="url(#goldGrad)"/>
+              <rect x="20" y="205" width="160" height="3" rx="1.5" fill="rgba(255,255,255,0.2)"/>
+            </g>
+            <!-- Adornos circulares con gemas (5 filas x 4 columnas) -->
+            <g filter="url(#gemGlow)">
+              <!-- Fila 1 (y=60) -->
+              <circle cx="40" cy="60" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+              <circle cx="40" cy="60" r="5" fill="#e63946" stroke="#fff" stroke-width="1"/>
+              <circle cx="80" cy="60" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+              <circle cx="80" cy="60" r="5" fill="#2ecc71" stroke="#fff" stroke-width="1"/>
+              <circle cx="120" cy="60" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+              <circle cx="120" cy="60" r="5" fill="#3498db" stroke="#fff" stroke-width="1"/>
+              <circle cx="160" cy="60" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+              <circle cx="160" cy="60" r="5" fill="#f1c40f" stroke="#fff" stroke-width="1"/>
+              <!-- Fila 2 (y=110) -->
+              <circle cx="40" cy="110" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+              <circle cx="40" cy="110" r="5" fill="#9b59b6" stroke="#fff" stroke-width="1"/>
+              <circle cx="80" cy="110" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+              <circle cx="80" cy="110" r="5" fill="#e67e22" stroke="#fff" stroke-width="1"/>
+              <circle cx="120" cy="110" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+              <circle cx="120" cy="110" r="5" fill="#1abc9c" stroke="#fff" stroke-width="1"/>
+              <circle cx="160" cy="110" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+              <circle cx="160" cy="110" r="5" fill="#e63946" stroke="#fff" stroke-width="1"/>
+              <!-- Fila 3 (y=160) -->
+              <circle cx="40" cy="160" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+              <circle cx="40" cy="160" r="5" fill="#f1c40f" stroke="#fff" stroke-width="1"/>
+              <circle cx="80" cy="160" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+              <circle cx="80" cy="160" r="5" fill="#3498db" stroke="#fff" stroke-width="1"/>
+              <circle cx="120" cy="160" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+              <circle cx="120" cy="160" r="5" fill="#2ecc71" stroke="#fff" stroke-width="1"/>
+              <circle cx="160" cy="160" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+              <circle cx="160" cy="160" r="5" fill="#9b59b6" stroke="#fff" stroke-width="1"/>
+              <!-- Fila 4 (y=210) -->
+              <circle cx="40" cy="210" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+              <circle cx="40" cy="210" r="5" fill="#e67e22" stroke="#fff" stroke-width="1"/>
+              <circle cx="80" cy="210" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+              <circle cx="80" cy="210" r="5" fill="#1abc9c" stroke="#fff" stroke-width="1"/>
+              <circle cx="120" cy="210" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+              <circle cx="120" cy="210" r="5" fill="#e63946" stroke="#fff" stroke-width="1"/>
+              <circle cx="160" cy="210" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+              <circle cx="160" cy="210" r="5" fill="#f1c40f" stroke="#fff" stroke-width="1"/>
+            </g>
+            <!-- Arco superior gótico con tracería -->
+            <g filter="url(#glow)">
+              <path d="M35 25 Q100 -30 165 25" fill="none" stroke="url(#goldGrad)" stroke-width="8"/>
+              <path d="M45 30 Q100 -20 155 30" fill="none" stroke="rgba(255,215,0,0.2)" stroke-width="4"/>
+              <!-- Tréboles en el arco -->
+              <circle cx="80" cy="-5" r="10" fill="none" stroke="url(#goldGrad)" stroke-width="3"/>
+              <circle cx="100" cy="-12" r="10" fill="none" stroke="url(#goldGrad)" stroke-width="3"/>
+              <circle cx="120" cy="-5" r="10" fill="none" stroke="url(#goldGrad)" stroke-width="3"/>
+              <!-- Gemas en el arco -->
+              <circle cx="80" cy="-5" r="5" fill="#e63946" filter="url(#gemGlow)"/>
+              <circle cx="100" cy="-12" r="5" fill="#3498db" filter="url(#gemGlow)"/>
+              <circle cx="120" cy="-5" r="5" fill="#2ecc71" filter="url(#gemGlow)"/>
+            </g>
+            <!-- Flor de lis central en la cima -->
+            <g filter="url(#glow)">
+              <circle cx="100" cy="-20" r="16" fill="url(#goldDark)" stroke="url(#goldGrad)" stroke-width="3"/>
+              <path d="M100 -35 L92 -10 L108 -10 Z" fill="url(#goldGrad)"/>
+              <path d="M100 -35 L85 -8 L92 -10 Z" fill="url(#goldGrad)"/>
+              <path d="M100 -35 L115 -8 L108 -10 Z" fill="url(#goldGrad)"/>
+              <circle cx="100" cy="-20" r="6" fill="#f1c40f" filter="url(#gemGlow)"/>
+              <circle cx="96" cy="-24" r="3" fill="#e63946" filter="url(#gemGlow)"/>
+              <circle cx="104" cy="-24" r="3" fill="#3498db" filter="url(#gemGlow)"/>
+            </g>
+            <!-- Candado detallado con gemas -->
+            <g filter="url(#glow)">
+              <rect x="83" y="120" width="34" height="28" rx="6" fill="url(#goldDark)" stroke="url(#goldGrad)" stroke-width="3"/>
+              <rect x="88" y="125" width="24" height="18" rx="3" fill="none" stroke="rgba(255,215,0,0.2)" stroke-width="1"/>
+              <circle cx="100" cy="120" r="10" fill="none" stroke="url(#goldGrad)" stroke-width="4"/>
+              <circle cx="100" cy="120" r="5" fill="url(#goldGrad)" filter="url(#gemGlow)"/>
+              <circle cx="100" cy="120" r="3" fill="#e63946" filter="url(#gemGlow)"/>
+              <rect x="93" y="140" width="14" height="8" rx="2" fill="#8a6d1b" stroke="url(#goldGrad)" stroke-width="1"/>
+              <!-- Gema en el candado -->
+              <circle cx="100" cy="135" r="4" fill="#3498db" filter="url(#gemGlow)"/>
+            </g>
           </svg>
         </div>
+
         <!-- Hoja derecha (reflejada) -->
         <div class="gate-leaf gate-right">
-          <svg viewBox="0 0 150 200" width="100%" height="100%">
-            <use href="#gate-left-svg" transform="scale(-1, 1) translate(-150, 0)" />
+          <svg viewBox="0 0 200 280" width="100%" height="100%">
+            <!-- Se usa transform: scaleX(-1) en CSS, así que el contenido es el mismo -->
+            <use href="#gate-left-svg" />
           </svg>
         </div>
+
+        <!-- Definición de la hoja izquierda para reutilizar -->
+        <svg style="display:none;">
+          <defs>
+            <g id="gate-left-svg">
+              <rect x="10" y="10" width="180" height="260" rx="15" fill="url(#grid)"/>
+              <rect x="10" y="10" width="180" height="260" rx="15" fill="none" stroke="url(#goldGrad)" stroke-width="6" filter="url(#glow)"/>
+              <rect x="18" y="18" width="164" height="244" rx="10" fill="none" stroke="rgba(255,215,0,0.15)" stroke-width="2"/>
+              <g filter="url(#glow)">
+                <rect x="35" y="25" width="10" height="230" rx="5" fill="url(#goldGrad)"/>
+                <rect x="75" y="25" width="10" height="230" rx="5" fill="url(#goldGrad)"/>
+                <rect x="115" y="25" width="10" height="230" rx="5" fill="url(#goldGrad)"/>
+                <rect x="155" y="25" width="10" height="230" rx="5" fill="url(#goldGrad)"/>
+                <path d="M35 25 L40 12 L45 25 Z" fill="url(#goldGrad)"/>
+                <path d="M75 25 L80 12 L85 25 Z" fill="url(#goldGrad)"/>
+                <path d="M115 25 L120 12 L125 25 Z" fill="url(#goldGrad)"/>
+                <path d="M155 25 L160 12 L165 25 Z" fill="url(#goldGrad)"/>
+              </g>
+              <g filter="url(#glow)">
+                <rect x="20" y="55" width="160" height="8" rx="4" fill="url(#goldGrad)"/>
+                <rect x="20" y="55" width="160" height="3" rx="1.5" fill="rgba(255,255,255,0.2)"/>
+                <rect x="20" y="105" width="160" height="8" rx="4" fill="url(#goldGrad)"/>
+                <rect x="20" y="105" width="160" height="3" rx="1.5" fill="rgba(255,255,255,0.2)"/>
+                <rect x="20" y="155" width="160" height="8" rx="4" fill="url(#goldGrad)"/>
+                <rect x="20" y="155" width="160" height="3" rx="1.5" fill="rgba(255,255,255,0.2)"/>
+                <rect x="20" y="205" width="160" height="8" rx="4" fill="url(#goldGrad)"/>
+                <rect x="20" y="205" width="160" height="3" rx="1.5" fill="rgba(255,255,255,0.2)"/>
+              </g>
+              <g filter="url(#gemGlow)">
+                <circle cx="40" cy="60" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+                <circle cx="40" cy="60" r="5" fill="#e63946" stroke="#fff" stroke-width="1"/>
+                <circle cx="80" cy="60" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+                <circle cx="80" cy="60" r="5" fill="#2ecc71" stroke="#fff" stroke-width="1"/>
+                <circle cx="120" cy="60" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+                <circle cx="120" cy="60" r="5" fill="#3498db" stroke="#fff" stroke-width="1"/>
+                <circle cx="160" cy="60" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+                <circle cx="160" cy="60" r="5" fill="#f1c40f" stroke="#fff" stroke-width="1"/>
+                <circle cx="40" cy="110" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+                <circle cx="40" cy="110" r="5" fill="#9b59b6" stroke="#fff" stroke-width="1"/>
+                <circle cx="80" cy="110" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+                <circle cx="80" cy="110" r="5" fill="#e67e22" stroke="#fff" stroke-width="1"/>
+                <circle cx="120" cy="110" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+                <circle cx="120" cy="110" r="5" fill="#1abc9c" stroke="#fff" stroke-width="1"/>
+                <circle cx="160" cy="110" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+                <circle cx="160" cy="110" r="5" fill="#e63946" stroke="#fff" stroke-width="1"/>
+                <circle cx="40" cy="160" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+                <circle cx="40" cy="160" r="5" fill="#f1c40f" stroke="#fff" stroke-width="1"/>
+                <circle cx="80" cy="160" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+                <circle cx="80" cy="160" r="5" fill="#3498db" stroke="#fff" stroke-width="1"/>
+                <circle cx="120" cy="160" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+                <circle cx="120" cy="160" r="5" fill="#2ecc71" stroke="#fff" stroke-width="1"/>
+                <circle cx="160" cy="160" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+                <circle cx="160" cy="160" r="5" fill="#9b59b6" stroke="#fff" stroke-width="1"/>
+                <circle cx="40" cy="210" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+                <circle cx="40" cy="210" r="5" fill="#e67e22" stroke="#fff" stroke-width="1"/>
+                <circle cx="80" cy="210" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+                <circle cx="80" cy="210" r="5" fill="#1abc9c" stroke="#fff" stroke-width="1"/>
+                <circle cx="120" cy="210" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+                <circle cx="120" cy="210" r="5" fill="#e63946" stroke="#fff" stroke-width="1"/>
+                <circle cx="160" cy="210" r="9" fill="#2c3e50" stroke="url(#goldGrad)" stroke-width="2"/>
+                <circle cx="160" cy="210" r="5" fill="#f1c40f" stroke="#fff" stroke-width="1"/>
+              </g>
+              <g filter="url(#glow)">
+                <path d="M35 25 Q100 -30 165 25" fill="none" stroke="url(#goldGrad)" stroke-width="8"/>
+                <path d="M45 30 Q100 -20 155 30" fill="none" stroke="rgba(255,215,0,0.2)" stroke-width="4"/>
+                <circle cx="80" cy="-5" r="10" fill="none" stroke="url(#goldGrad)" stroke-width="3"/>
+                <circle cx="100" cy="-12" r="10" fill="none" stroke="url(#goldGrad)" stroke-width="3"/>
+                <circle cx="120" cy="-5" r="10" fill="none" stroke="url(#goldGrad)" stroke-width="3"/>
+                <circle cx="80" cy="-5" r="5" fill="#e63946" filter="url(#gemGlow)"/>
+                <circle cx="100" cy="-12" r="5" fill="#3498db" filter="url(#gemGlow)"/>
+                <circle cx="120" cy="-5" r="5" fill="#2ecc71" filter="url(#gemGlow)"/>
+              </g>
+              <g filter="url(#glow)">
+                <circle cx="100" cy="-20" r="16" fill="url(#goldDark)" stroke="url(#goldGrad)" stroke-width="3"/>
+                <path d="M100 -35 L92 -10 L108 -10 Z" fill="url(#goldGrad)"/>
+                <path d="M100 -35 L85 -8 L92 -10 Z" fill="url(#goldGrad)"/>
+                <path d="M100 -35 L115 -8 L108 -10 Z" fill="url(#goldGrad)"/>
+                <circle cx="100" cy="-20" r="6" fill="#f1c40f" filter="url(#gemGlow)"/>
+                <circle cx="96" cy="-24" r="3" fill="#e63946" filter="url(#gemGlow)"/>
+                <circle cx="104" cy="-24" r="3" fill="#3498db" filter="url(#gemGlow)"/>
+              </g>
+              <g filter="url(#glow)">
+                <rect x="83" y="120" width="34" height="28" rx="6" fill="url(#goldDark)" stroke="url(#goldGrad)" stroke-width="3"/>
+                <rect x="88" y="125" width="24" height="18" rx="3" fill="none" stroke="rgba(255,215,0,0.2)" stroke-width="1"/>
+                <circle cx="100" cy="120" r="10" fill="none" stroke="url(#goldGrad)" stroke-width="4"/>
+                <circle cx="100" cy="120" r="5" fill="url(#goldGrad)" filter="url(#gemGlow)"/>
+                <circle cx="100" cy="120" r="3" fill="#e63946" filter="url(#gemGlow)"/>
+                <rect x="93" y="140" width="14" height="8" rx="2" fill="#8a6d1b" stroke="url(#goldGrad)" stroke-width="1"/>
+                <circle cx="100" cy="135" r="4" fill="#3498db" filter="url(#gemGlow)"/>
+              </g>
+            </g>
+          </defs>
+        </svg>
+
         <div class="gate-brillos"></div>
       </div>
       <div class="portal-caption gold-text">Toca la reja para entrar</div>
     </div>
   </div>
 
-  <!-- Script inline para manejar la reja -->
-  <script>
-    (function() {
-      const gateWrapper = document.getElementById('gate-wrapper');
-      if (gateWrapper) {
-        console.log('✅ Reja encontrada en index.html');
-        gateWrapper.addEventListener('click', function(e) {
-          console.log('🔄 Clic en la reja detectado');
-          e.preventDefault();
-          // Añadir clase para animación de apertura
-          this.classList.add('open');
-          // Redirigir a principal.html después de 0.8s
-          setTimeout(function() {
-            window.location.href = 'principal.html';
-          }, 800);
-        });
-      } else {
-        console.error('❌ No se encontró #gate-wrapper en index.html');
-      }
-    })();
-  </script>
-
-  <!-- El script module ya no es necesario para la reja, pero lo dejamos por si acaso -->
   <script type="module" src="script.js"></script>
 </body>
 </html>
