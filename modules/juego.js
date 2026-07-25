@@ -1,17 +1,17 @@
-console.log('📦 juego.js (setInterval fijo, delta fijo)');
+console.log('📦 juego.js (universal, 6 columnas, teclado)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
 const ROWS = 4;
-const COLS = 5;
-const BRICK_W = 46;
+const COLS = 6;          // 6 columnas
+const BRICK_W = 44;      // ajustado para 6 columnas (44*6 + 4*5 = 284, cabe en 300)
 const BRICK_H = 20;
 const GAP = 4;
 const TOP = 30;
-const SPEED = 3.0; // píxeles por frame (a 60 FPS)
+const SPEED = 3.8;       // velocidad universal (ajustable)
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego con setInterval (60 FPS fijos, speed=' + SPEED + ')');
+  console.log('🎮 Iniciando juego con 6 columnas, speed=' + SPEED);
 
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => { soundTap(); openGame(); });
@@ -39,6 +39,9 @@ export function initJuego(config) {
   let running = false;
   let gameInterval = null;
 
+  // Exponer closeGame para el botón de volver
+  window.closeGame = closeGame;
+
   function letras() {
     const src = (config.nombre || 'X').toUpperCase().replace(/\s+/g, '');
     return src.length ? src : 'X';
@@ -56,7 +59,7 @@ export function initJuego(config) {
     bricks = [];
     const nombreLetras = letras();
     let li = 0;
-    const colors = ['#c9a24d', '#e08a99', '#8a2c3b', '#2e4a3c', '#f0d9a3'];
+    const colors = ['#c9a24d', '#e08a99', '#8a2c3b', '#2e4a3c', '#f0d9a3', '#d68a96'];
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
         const x = startX + c * (BRICK_W + GAP);
@@ -106,11 +109,10 @@ export function initJuego(config) {
     ballEl.style.top = (ball.y - ball.r) + 'px';
   }
 
-  // Bucle de juego con delta fijo (1/60)
+  // Bucle de juego con delta fijo (16ms = 60 FPS)
   function gameLoop() {
     if (!running) return;
 
-    // Aplicar física (siempre con el mismo delta)
     ball.x += ball.vx;
     ball.y += ball.vy;
 
@@ -187,13 +189,30 @@ export function initJuego(config) {
     gameInterval = setInterval(gameLoop, 16); // 60 FPS fijos
   }
 
-  function openGame() { overlay.classList.add('open'); startGame(); }
-  function closeGame() { overlay.classList.remove('open'); running = false; if (gameInterval) { clearInterval(gameInterval); gameInterval = null; } soundClose(); }
+  function openGame() {
+    overlay.classList.add('open');
+    // Mostrar mensaje de preparación
+    msgText.textContent = 'Preparando...';
+    msgEl.classList.add('show');
+    setTimeout(() => {
+      msgEl.classList.remove('show');
+      startGame();
+    }, 2000);
+  }
 
+  function closeGame() {
+    overlay.classList.remove('open');
+    running = false;
+    if (gameInterval) { clearInterval(gameInterval); gameInterval = null; }
+    soundClose();
+  }
+
+  // Eventos
   document.getElementById('game-close').addEventListener('click', closeGame);
   restartBtn.addEventListener('click', () => { soundTap(); startGame(); });
   overlay.addEventListener('click', e => { if (e.target === overlay) closeGame(); });
 
+  // Movimiento con ratón/toque
   function movePaddle(clientX) {
     const rect = stage.getBoundingClientRect();
     const localX = (clientX - rect.left) / scale;
@@ -203,7 +222,22 @@ export function initJuego(config) {
   stage.addEventListener('pointermove', e => movePaddle(e.clientX));
   stage.addEventListener('touchmove', e => { if (e.touches[0]) movePaddle(e.touches[0].clientX); e.preventDefault(); }, { passive: false });
 
+  // Controles de teclado
+  document.addEventListener('keydown', (e) => {
+    if (!running) return;
+    const step = 8;
+    if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
+      paddle.x = Math.max(0, paddle.x - step);
+      if (!running) draw();
+      e.preventDefault();
+    } else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') {
+      paddle.x = Math.min(LW - paddle.w, paddle.x + step);
+      if (!running) draw();
+      e.preventDefault();
+    }
+  });
+
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego listo (setInterval)');
+  console.log('✅ Juego listo (6 columnas, teclado, retraso 2s)');
 }
