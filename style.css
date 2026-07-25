@@ -151,45 +151,29 @@ body {
   gap: 0.3rem;
 }
 
-/* ===== CÍRCULO MÁSCARA CON GIF (Solución simple) ===== */
-#marco-wrap {
-  width: 130px;
-  height: 130px;
+/* ===== ÓVALO CON GIF (ESTO ES TODO LO QUE PEDISTE) ===== */
+#oval-wrap {
+  width: 180px;   /* Ancho mayor que alto → óvalo horizontal */
+  height: 120px;
   margin-bottom: 0.3rem;
   animation: floaty 6s ease-in-out infinite;
-  position: relative;
 }
 
-/* El círculo que enmascara el GIF */
-.circle-mask {
+.oval-mask {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
-  overflow: hidden;  /* <--- Esto recorta la imagen en forma de círculo */
-  border: 4px solid var(--gold); /* Borde dorado */
-  box-shadow: 0 0 20px rgba(201, 162, 77, 0.3);
-  background: var(--bg-deep); /* Fondo de respaldo por si el GIF no carga */
+  border-radius: 50%;    /* Con ancho≠alto → óvalo perfecto */
+  overflow: hidden;      /* Recorta la imagen en forma de óvalo */
+  border: 4px solid var(--gold);
+  box-shadow: 0 0 25px rgba(201, 162, 77, 0.3);
+  background: var(--bg-deep);
 }
 
-/* El GIF dentro del círculo, se ajusta para ocupar todo el espacio */
 .gif-central {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* <--- Escala la imagen para que llene el círculo sin distorsión */
+  object-fit: cover;    /* Escala la imagen para llenar el óvalo sin distorsión */
   display: block;
-}
-
-/* (Opcional) Un pequeño brillo decorativo encima del círculo */
-#marco-wrap::after {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 215, 0, 0.2);
-  pointer-events: none;
 }
 
 .name-wrap { position: relative; }
@@ -518,7 +502,7 @@ h1#nombre-hero {
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 480px) {
-  #marco-wrap { width: 100px; height: 100px; }
+  #oval-wrap { width: 140px; height: 95px; }
   h1#nombre-hero { font-size: 2rem; }
   .clock .num { font-size: 1rem; }
   #app-top .eyebrow { font-size: 0.6rem; }
