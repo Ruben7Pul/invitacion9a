@@ -24,6 +24,7 @@ body {
   inset: 0;
 }
 
+/* ===== FONDO CASTILLO ===== */
 #bg {
   position: fixed;
   inset: 0;
@@ -49,6 +50,7 @@ body {
   z-index: 3;
   overflow: hidden;
 }
+
 .petal {
   position: absolute;
   border-radius: 60% 0 60% 0;
@@ -70,13 +72,9 @@ body {
   align-items: center;
   justify-content: center;
   background: radial-gradient(ellipse at 50% 35%, #241a3a 0%, var(--ink) 75%);
-  transition: opacity 0.8s ease 0.3s, visibility 0.8s ease 0.3s;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
 }
-#portal.hide {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
+#portal.hide { opacity: 0; visibility: hidden; pointer-events: none; }
 .portal-inner {
   text-align: center;
   padding: 2rem;
@@ -96,17 +94,18 @@ body {
   font-size: 0.9rem;
 }
 
-/* ===== REJA ===== */
+/* ===== REJA GRANDE ===== */
 .gate-wrapper {
   position: relative;
   width: 90vw;
-  max-width: 400px;
-  height: 60vh;
-  max-height: 500px;
+  max-width: 800px;
+  height: 75vh;
+  max-height: 600px;
   margin: 0 auto;
-  perspective: 1000px;
+  perspective: 1200px;
   cursor: pointer;
 }
+
 .gate-leaf {
   position: absolute;
   top: 0;
@@ -124,41 +123,45 @@ body {
 .gate-left {
   left: 0;
   transform-origin: left center;
+  transform: rotateY(0deg);
 }
 .gate-right {
   right: 0;
   transform-origin: right center;
-}
-.gate-right svg {
-  transform: scaleX(-1);
+  transform: rotateY(0deg);
 }
 .gate-wrapper.open .gate-left {
   transform: rotateY(-110deg) translateX(-20px);
-  opacity: 0.1;
+  opacity: 0.2;
 }
 .gate-wrapper.open .gate-right {
   transform: rotateY(110deg) translateX(20px);
-  opacity: 0.1;
+  opacity: 0.2;
 }
+
+/* Brillo central al abrir */
 .gate-brillos {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(circle at center, rgba(255,215,0,0.4) 0%, transparent 70%);
+  background: radial-gradient(circle at center, rgba(255,215,0,0.9) 0%, transparent 70%);
   opacity: 0;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.4s ease, transform 0.6s ease;
+  transform: scale(0.5);
   z-index: 10;
   border-radius: 50%;
 }
 .gate-wrapper.open .gate-brillos {
   opacity: 1;
-  animation: brilloSuave 0.8s ease forwards;
+  transform: scale(2);
+  animation: brilloApertura 0.8s ease forwards;
 }
-@keyframes brilloSuave {
-  0% { opacity: 0; transform: scale(0.5); }
-  40% { opacity: 0.6; transform: scale(1.5); }
-  100% { opacity: 0; transform: scale(2); }
+@keyframes brilloApertura {
+  0% { opacity: 0; transform: scale(0.3); }
+  40% { opacity: 1; transform: scale(2.2); }
+  100% { opacity: 0; transform: scale(3); }
 }
+
 .portal-caption {
   margin-top: 1.5rem;
   font-family: var(--serif-display);
@@ -168,7 +171,29 @@ body {
   color: var(--gold-light);
 }
 
-/* ===== APP ===== */
+/* ===== PANTALLA DE BRILLO (FLASH) ===== */
+#flash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: radial-gradient(circle at center, #fff 0%, #ffd700 40%, #ff8c00 80%, transparent 100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.1s ease;
+}
+#flash-screen.active {
+  opacity: 1;
+  pointer-events: all;
+  animation: flashPulse 0.6s ease forwards;
+}
+@keyframes flashPulse {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ===== APP PRINCIPAL ===== */
 #app {
   position: fixed;
   inset: 0;
@@ -179,14 +204,11 @@ body {
   justify-content: space-between;
   padding: 1.2rem 1rem 1rem;
   opacity: 0;
-  transition: opacity 0.8s ease 0.2s;
+  transition: opacity 1s ease 0.15s;
   text-align: center;
-  pointer-events: none;
 }
-#app.show {
-  opacity: 1;
-  pointer-events: auto;
-}
+#app.show { opacity: 1; }
+
 #app-top {
   width: 100%;
   max-width: 560px;
@@ -218,6 +240,7 @@ body {
 .top-btn:hover { opacity: 0.7; }
 #music-toggle svg { width: 20px; height: 20px; }
 #music-toggle { opacity: 1; }
+
 #app-mid {
   flex: 1;
   display: flex;
@@ -230,6 +253,7 @@ body {
   padding: 0.2rem 0;
 }
 
+/* ===== ÓVALO ===== */
 #oval-wrap {
   width: 140px;
   height: 190px;
@@ -260,8 +284,10 @@ body {
   object-fit: cover;
   display: block;
 }
+
 .name-wrap { position: relative; margin-top: 0.15rem; }
 
+/* ===== REFLEJO EN NOMBRE ===== */
 h1#nombre-hero {
   font-family: var(--script);
   font-weight: 400;
@@ -310,6 +336,7 @@ h1#nombre-hero::before {
   0% { background-position: 0% 50%; }
   100% { background-position: 300% 50%; }
 }
+
 .hint {
   font-size: 0.75rem;
   opacity: 0.8;
@@ -641,6 +668,7 @@ h1#nombre-hero::before {
   font-size: 1rem;
 }
 #lives { letter-spacing: 0.15em; }
+
 .game-help {
   font-size: 0.85rem;
   opacity: 0.7;
@@ -650,12 +678,13 @@ h1#nombre-hero::before {
   text-shadow: 0 0 10px rgba(201, 162, 77, 0.2);
 }
 
+/* ===== ANIMACIONES ===== */
 @keyframes floaty {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
 }
 
-/* ===== CIERRE DE PUERTA (VOLVER) ===== */
+/* Cierre de puerta (volver) */
 #portal.closing .gate-left {
   animation: closeLeft 0.6s ease forwards;
 }
@@ -677,6 +706,7 @@ h1#nombre-hero::before {
   0% { opacity: 1; transform: scale(2); }
   100% { opacity: 0; transform: scale(0.5); }
 }
+
 #back-btn.animating {
   animation: backBtnPulse 0.6s ease;
 }
@@ -688,12 +718,12 @@ h1#nombre-hero::before {
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-  .gate-wrapper { max-width: 300px; height: 50vh; }
+  .gate-wrapper { width: 95vw; height: 65vh; max-height: 500px; }
   .portal-inner .eyebrow { font-size: 0.7rem; }
   .portal-caption { font-size: 0.7rem; }
 }
 @media (max-width: 480px) {
-  .gate-wrapper { max-width: 200px; height: 40vh; }
+  .gate-wrapper { width: 98vw; height: 55vh; max-height: 350px; }
   .portal-inner .eyebrow { font-size: 0.6rem; }
   .portal-caption { font-size: 0.6rem; }
   #oval-wrap { width: 120px; height: 165px; margin-top: -20px; }
