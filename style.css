@@ -151,28 +151,16 @@ body {
   gap: 0.3rem;
 }
 
-/* ===== ÓVALO HORIZONTAL CON GIF ===== */
+/* ===== ÓVALO VERTICAL CON ADORNOS ===== */
 #oval-wrap {
-  width: 200px;   /* Ancho claramente mayor que alto → óvalo horizontal */
-  height: 120px;
+  width: 120px;
+  height: 150px;
   margin-bottom: 0.3rem;
   animation: floaty 6s ease-in-out infinite;
 }
-
-.oval-mask {
+#oval-wrap svg {
   width: 100%;
   height: 100%;
-  border-radius: 50%;    /* Con ancho≠alto → óvalo horizontal perfecto */
-  overflow: hidden;
-  border: 4px solid var(--gold);
-  box-shadow: 0 0 25px rgba(201, 162, 77, 0.3);
-  background: var(--bg-deep);
-}
-
-.gif-central {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
   display: block;
 }
 
@@ -502,7 +490,7 @@ h1#nombre-hero {
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 480px) {
-  #oval-wrap { width: 150px; height: 90px; }
+  #oval-wrap { width: 90px; height: 115px; }
   h1#nombre-hero { font-size: 2rem; }
   .clock .num { font-size: 1rem; }
   #app-top .eyebrow { font-size: 0.6rem; }
