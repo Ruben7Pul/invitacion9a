@@ -151,10 +151,10 @@ body {
   gap: 0.3rem;
 }
 
-/* ===== ROSA EN DOMO DE CRISTAL ===== */
+/* ===== ROSA EN DOMO DE CRISTAL (más grande) ===== */
 #rose-wrap {
-  width: 90px;
-  height: 90px;
+  width: 110px;
+  height: 121px;
   margin-bottom: 0.3rem;
   animation: floaty 6s ease-in-out infinite;
 }
@@ -167,11 +167,12 @@ body {
 .petal-falling-dome:nth-child(2) { animation-delay: 1.8s; }
 .petal-falling-dome:nth-child(3) { animation-delay: 3.5s; }
 .petal-falling-dome:nth-child(4) { animation-delay: 4.8s; }
+.petal-falling-dome:nth-child(5) { animation-delay: 2.5s; }
 
 @keyframes fallDomeReal {
   0% { transform: translate(0, 0) rotate(0deg); opacity: 0.7; }
   50% { opacity: 0.9; }
-  100% { transform: translate(20px, 40px) rotate(200deg); opacity: 0; }
+  100% { transform: translate(25px, 50px) rotate(220deg); opacity: 0; }
 }
 
 .name-wrap { position: relative; }
@@ -500,7 +501,7 @@ h1#nombre-hero {
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 480px) {
-  #rose-wrap { width: 70px; height: 70px; }
+  #rose-wrap { width: 90px; height: 99px; }
   h1#nombre-hero { font-size: 2rem; }
   .clock .num { font-size: 1rem; }
   #app-top .eyebrow { font-size: 0.6rem; }
