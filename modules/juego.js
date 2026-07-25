@@ -1,4 +1,4 @@
-console.log('📦 juego.js (teclado + arrastre)');
+console.log('📦 juego.js (teclado + arrastre con dedo)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
@@ -11,7 +11,7 @@ const TOP = 30;
 const SPEED = 3.8;
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego (controles: teclado, arrastre con dedo)');
+  console.log('🎮 Iniciando juego (controles: teclado + arrastre con dedo)');
 
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => { soundTap(); openGame(); });
@@ -114,19 +114,20 @@ export function initJuego(config) {
     ballEl.style.top = (ball.y - ball.r) + 'px';
   }
 
+  // ---- BUCLE PRINCIPAL ----
   function gameLoop() {
     if (!running) return;
 
-    // Teclado
+    // 1. Teclado
     if (keys.left) paddle.x = Math.max(0, paddle.x - 8);
     if (keys.right) paddle.x = Math.min(LW - paddle.w, paddle.x + 8);
 
-    // Arrastre (prioridad)
+    // 2. Arrastre con dedo (prioridad)
     if (touchActive) {
       paddle.x = Math.max(0, Math.min(LW - paddle.w, touchX));
     }
 
-    // Física
+    // ---- Física ----
     ball.x += ball.vx;
     ball.y += ball.vy;
 
@@ -135,6 +136,7 @@ export function initJuego(config) {
     if (ball.x + ball.r > LW) { ball.x = LW - ball.r; ball.vx = -Math.abs(ball.vx); }
     if (ball.y - ball.r < 0) { ball.y = ball.r; ball.vy = Math.abs(ball.vy); }
 
+    // Colisión paleta
     const py = LH - 14;
     if (ball.vy > 0 && ball.y + ball.r >= py && ball.y + ball.r <= py + 10 &&
         ball.x >= paddle.x - ball.r && ball.x <= paddle.x + paddle.w + ball.r) {
@@ -147,6 +149,7 @@ export function initJuego(config) {
       ball.vy = -Math.cos(angle) * speed;
     }
 
+    // Colisión ladrillos
     for (const b of bricks) {
       if (!b.alive) continue;
       if (ball.x + ball.r > b.x && ball.x - ball.r < b.x + b.w &&
@@ -164,6 +167,7 @@ export function initJuego(config) {
       }
     }
 
+    // Perdida
     if (ball.y - ball.r > LH) {
       lives--;
       updateLives();
@@ -172,6 +176,7 @@ export function initJuego(config) {
       resetBall();
     }
 
+    // Victoria
     if (bricks.every(b => !b.alive)) { endGame(true); return; }
 
     draw();
@@ -201,16 +206,17 @@ export function initJuego(config) {
 
   function openGame() {
     overlay.classList.add('open');
-    // Mostrar contador de 3 segundos
-    msgText.textContent = '3';
-    msgEl.classList.add('show');
+    // Contador de 3 segundos antes de empezar
     let countdown = 3;
-    const interval = setInterval(() => {
+    msgText.textContent = 'Preparando... ' + countdown;
+    msgEl.classList.add('show');
+
+    const countInterval = setInterval(() => {
       countdown--;
       if (countdown > 0) {
-        msgText.textContent = countdown;
+        msgText.textContent = 'Preparando... ' + countdown;
       } else {
-        clearInterval(interval);
+        clearInterval(countInterval);
         msgEl.classList.remove('show');
         startGame();
       }
@@ -230,7 +236,7 @@ export function initJuego(config) {
   restartBtn.addEventListener('click', () => { soundTap(); startGame(); });
   overlay.addEventListener('click', e => { if (e.target === overlay) closeGame(); });
 
-  // ---- Teclado ----
+  // ---- CONTROLES DE TECLADO ----
   document.addEventListener('keydown', (e) => {
     if (!running) return;
     if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
@@ -251,7 +257,7 @@ export function initJuego(config) {
     }
   });
 
-  // ---- Arrastre con dedo ----
+  // ---- ARRASTRE CON DEDO ----
   stage.addEventListener('touchstart', (e) => {
     if (!running) return;
     const touch = e.touches[0];
@@ -280,5 +286,5 @@ export function initJuego(config) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego listo (teclado + arrastre)');
+  console.log('✅ Juego listo (controles: teclado + arrastre con dedo)');
 }
