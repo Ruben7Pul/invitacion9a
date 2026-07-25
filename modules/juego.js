@@ -1,4 +1,4 @@
-console.log('📦 juego.js (teclado + giroscopio corregido)');
+console.log('📦 juego.js (teclado + giroscopio corregido )');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
