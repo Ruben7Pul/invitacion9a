@@ -1,4 +1,4 @@
-console.log('🚀 script.js');
+console.log('🚀 script.js (con flash screen)');
 
 let CONFIG = {};
 
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.CONFIG = config;
   rellenarDatos(config);
 
-  // Módulos (todos los import son desde la carpeta modules)
+  // Módulos
   try {
     const { initContador } = await import('./modules/contador.js');
     initContador(config);
@@ -90,28 +90,37 @@ document.addEventListener('DOMContentLoaded', async () => {
   const gateWrapper = document.getElementById('gate-wrapper');
   const portal = document.getElementById('portal');
   const app = document.getElementById('app');
+  const flashScreen = document.getElementById('flash-screen');
 
-  if (gateWrapper && portal && app) {
-    let isOpening = false;
+  // ---------- ABRIR REJA ----------
+  if (gateWrapper && portal && app && flashScreen) {
     const openGate = () => {
-      if (isOpening) return;
-      isOpening = true;
+      // 1. Activar brillo de pantalla completa
+      flashScreen.classList.add('active');
+
+      // 2. Activar animación de la reja (abrir puertas)
       gateWrapper.classList.add('open');
+
+      // 3. Música
       if (window.playMusic) {
         window.resetMusic();
         setTimeout(() => window.playMusic(), 100);
       }
+
+      // 4. Después del flash (0.8s), ocultar portal y mostrar app
       setTimeout(() => {
         portal.classList.add('hide');
         app.classList.add('show');
+        // Resetear reja (para futuros usos)
         gateWrapper.classList.remove('open');
-        isOpening = false;
+        flashScreen.classList.remove('active');
       }, 800);
     };
+
     gateWrapper.addEventListener('click', openGate);
   }
 
-  // Mute
+  // ---------- BOTÓN MUTE ----------
   const muteBtn = document.getElementById('music-toggle');
   if (muteBtn) {
     muteBtn.addEventListener('click', () => {
@@ -119,19 +128,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Volver
+  // ---------- BOTÓN VOLVER ----------
   const backBtn = document.getElementById('back-btn');
   if (backBtn) {
     backBtn.addEventListener('click', () => {
+      // Cerrar juego
       if (window.closeGame) window.closeGame();
+
+      // 1. Activar brillo de pantalla completa
+      flashScreen.classList.add('active');
+
+      // 2. Apagar música
       if (window.resetMusic) window.resetMusic();
+
+      // 3. Ocultar app y mostrar portal (con clase closing para animación de puertas)
       app.classList.remove('show');
       portal.classList.remove('hide');
       portal.classList.add('closing');
+
+      // 4. Después del flash (0.6s), quitar brillo y clase closing
       setTimeout(() => {
+        flashScreen.classList.remove('active');
         portal.classList.remove('closing');
+        // Asegurar que la reja esté cerrada (resetear)
         gateWrapper.classList.remove('open');
       }, 600);
+
+      console.log('↩️ Volviendo al portal (con flash)');
     });
   }
 });
