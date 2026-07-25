@@ -14,7 +14,7 @@
   <div id="bg"></div>
   <div id="petals-layer"></div>
 
-  <!-- Portal -->
+  <!-- ===== PORTAL ===== (rosa simple, sin domo) -->
   <div id="portal">
     <div class="portal-inner">
       <span class="eyebrow gold-text">Una invitación encantada</span>
@@ -33,7 +33,7 @@
     </div>
   </div>
 
-  <!-- App principal -->
+  <!-- ===== APP PRINCIPAL ===== (con rosa en domo de cristal) -->
   <div id="app">
     <div id="app-top">
       <button id="back-btn" aria-label="Volver" class="top-btn">↩</button>
@@ -48,17 +48,71 @@
     </div>
 
     <div id="app-mid">
+      <!-- ===== ROSA EN DOMO DE CRISTAL (NUEVA) ===== -->
       <div id="rose-wrap">
-        <svg viewBox="0 0 100 100" width="80" height="80">
-          <defs><radialGradient id="roseGrad2" cx="35%" cy="30%" r="75%"><stop offset="0%" stop-color="#e08a99"/><stop offset="55%" stop-color="#8a2c3b"/><stop offset="100%" stop-color="#5c1a24"/></radialGradient></defs>
-          <path d="M50 42 L50 90" stroke="#2e4a3c" stroke-width="2.5" fill="none"/>
-          <path d="M50 42 Q30 30 34 14 Q46 20 50 42 Z" fill="url(#roseGrad2)"/>
-          <path d="M50 42 Q70 30 66 14 Q54 20 50 42 Z" fill="url(#roseGrad2)"/>
-          <path d="M50 42 Q26 40 24 55 Q38 62 50 42 Z" fill="url(#roseGrad2)"/>
-          <path d="M50 42 Q74 40 76 55 Q62 62 50 42 Z" fill="url(#roseGrad2)"/>
-          <path d="M50 42 Q40 20 50 8 Q60 20 50 42 Z" fill="#b5566a"/>
+        <svg viewBox="0 0 120 120" width="80" height="80">
+          <defs>
+            <radialGradient id="glassGrad" cx="50%" cy="40%" r="50%">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.25)"/>
+              <stop offset="40%" stop-color="rgba(200,220,255,0.05)"/>
+              <stop offset="100%" stop-color="rgba(180,200,255,0.01)"/>
+            </radialGradient>
+            <radialGradient id="roseGrad2" cx="40%" cy="30%" r="60%">
+              <stop offset="0%" stop-color="#e08a99"/>
+              <stop offset="55%" stop-color="#8a2c3b"/>
+              <stop offset="100%" stop-color="#5c1a24"/>
+            </radialGradient>
+            <linearGradient id="stemGrad2" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#2e4a3c"/>
+              <stop offset="100%" stop-color="#1a2e1f"/>
+            </linearGradient>
+            <filter id="glow2">
+              <feGaussianBlur stdDeviation="1.5" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          <!-- Domo de cristal -->
+          <circle cx="60" cy="60" r="50" fill="url(#glassGrad)" stroke="rgba(255,255,255,0.2)" stroke-width="1.2"/>
+          <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(200,210,255,0.25)" stroke-width="0.5" stroke-dasharray="3 3"/>
+
+          <!-- Brillos del domo -->
+          <ellipse cx="42" cy="38" rx="12" ry="6" fill="rgba(255,255,255,0.2)" transform="rotate(-30, 42, 38)"/>
+          <ellipse cx="80" cy="78" rx="8" ry="4" fill="rgba(255,255,255,0.12)" transform="rotate(40, 80, 78)"/>
+
+          <!-- Base -->
+          <rect x="38" y="100" width="44" height="6" rx="3" fill="rgba(80,70,60,0.4)" stroke="rgba(200,180,160,0.2)" stroke-width="0.8"/>
+
+          <!-- Tallo y hojas -->
+          <path d="M60 100 Q60 80 60 68" stroke="url(#stemGrad2)" stroke-width="2.5" fill="none"/>
+          <path d="M60 78 Q50 72 48 62 Q54 66 60 72" fill="#2e4a3c" opacity="0.8"/>
+          <path d="M60 85 Q70 80 72 70 Q66 74 60 80" fill="#2e4a3c" opacity="0.8"/>
+
+          <!-- Rosa (pétalos) -->
+          <g filter="url(#glow2)">
+            <path d="M60 38 Q45 28 42 42 Q50 52 60 48 Z" fill="url(#roseGrad2)"/>
+            <path d="M60 38 Q75 28 78 42 Q70 52 60 48 Z" fill="url(#roseGrad2)"/>
+            <path d="M60 48 Q38 45 35 58 Q45 68 60 60 Z" fill="url(#roseGrad2)"/>
+            <path d="M60 48 Q82 45 85 58 Q75 68 60 60 Z" fill="url(#roseGrad2)"/>
+            <path d="M60 52 Q46 65 44 74 Q52 72 60 65 Z" fill="url(#roseGrad2)"/>
+            <path d="M60 52 Q74 65 76 74 Q68 72 60 65 Z" fill="url(#roseGrad2)"/>
+            <!-- Pétalos interiores -->
+            <path d="M60 48 Q52 38 48 48 Q54 55 60 52 Z" fill="#b5566a"/>
+            <path d="M60 48 Q68 38 72 48 Q66 55 60 52 Z" fill="#b5566a"/>
+            <path d="M60 54 Q54 60 52 66 Q56 64 60 60 Z" fill="#d68a96"/>
+            <path d="M60 54 Q66 60 68 66 Q64 64 60 60 Z" fill="#d68a96"/>
+            <!-- Centro -->
+            <circle cx="60" cy="55" r="5" fill="#5c1a24"/>
+            <circle cx="60" cy="55" r="2.5" fill="#8a2c3b"/>
+          </g>
+
+          <!-- Pétalos que caen (dentro del domo) -->
+          <path class="petal-falling2" d="M25 25 Q22 22 24 18 Q28 20 25 25 Z" fill="#e08a99" opacity="0.5"/>
+          <path class="petal-falling2" d="M95 20 Q98 17 96 13 Q90 15 95 20 Z" fill="#d68a96" opacity="0.4"/>
+          <path class="petal-falling2" d="M100 48 Q103 45 101 42 Q96 44 100 48 Z" fill="#b5566a" opacity="0.3"/>
         </svg>
       </div>
+
       <div class="name-wrap">
         <h1 id="nombre-hero">X</h1>
         <p class="hint gold-text">Toca mi nombre para jugar</p>
@@ -75,7 +129,7 @@
     </nav>
   </div>
 
-  <!-- Modales -->
+  <!-- ===== MODALES ===== -->
   <div class="modal-overlay" id="modal-contador">
     <div class="modal-card">
       <button class="modal-close" data-close>&times;</button>
@@ -147,7 +201,7 @@
           <button class="game-btn gold-text" id="game-restart">Jugar de nuevo</button>
         </div>
       </div>
-      <p id="game-help" class="gold-text">Mueve con dedo, A/D o con flechas del teclado</p>
+      <p class="game-help gold-text">Mueva con dedo, A/D o con flechas del teclado</p>
     </div>
   </div>
 
