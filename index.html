@@ -33,7 +33,7 @@
     </div>
   </div>
 
-  <!-- APP PRINCIPAL (con ÓVALO HORIZONTAL) -->
+  <!-- APP PRINCIPAL (con ÓVALO VERTICAL Y ADORNOS) -->
   <div id="app">
     <div id="app-top">
       <button id="back-btn" aria-label="Volver" class="top-btn">↩</button>
@@ -48,11 +48,68 @@
     </div>
 
     <div id="app-mid">
-      <!-- ===== ÓVALO HORIZONTAL CON GIF ===== -->
+      <!-- ===== ÓVALO VERTICAL CON GIF Y ADORNOS (estáticos) ===== -->
       <div id="oval-wrap">
-        <div class="oval-mask">
-          <img src="archivos/centro.gif" alt="Imagen central" class="gif-central">
-        </div>
+        <svg viewBox="0 0 160 200" width="120" height="150">
+          <defs>
+            <clipPath id="ovalClip">
+              <ellipse cx="80" cy="100" rx="60" ry="85" />
+            </clipPath>
+            <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#f0d9a3"/>
+              <stop offset="30%" stop-color="#c9a24d"/>
+              <stop offset="70%" stop-color="#d4af37"/>
+              <stop offset="100%" stop-color="#8a7030"/>
+            </linearGradient>
+          </defs>
+
+          <!-- MARCO EXTERIOR (adornos) -->
+          <!-- Óvalo base para los adornos (dorado) -->
+          <ellipse cx="80" cy="100" rx="68" ry="93" fill="none" stroke="url(#goldGrad)" stroke-width="6"/>
+          <ellipse cx="80" cy="100" rx="62" ry="87" fill="none" stroke="rgba(255,215,0,0.3)" stroke-width="2"/>
+
+          <!-- PERLAS (círculos decorativos) alrededor del óvalo -->
+          <g fill="#d4af37" stroke="#c9a24d" stroke-width="0.5">
+            <circle cx="80" cy="7" r="4"/>
+            <circle cx="108" cy="16" r="4"/>
+            <circle cx="130" cy="40" r="4"/>
+            <circle cx="140" cy="70" r="4"/>
+            <circle cx="140" cy="130" r="4"/>
+            <circle cx="130" cy="160" r="4"/>
+            <circle cx="108" cy="184" r="4"/>
+            <circle cx="80" cy="193" r="4"/>
+            <circle cx="52" cy="184" r="4"/>
+            <circle cx="30" cy="160" r="4"/>
+            <circle cx="20" cy="130" r="4"/>
+            <circle cx="20" cy="70" r="4"/>
+            <circle cx="30" cy="40" r="4"/>
+            <circle cx="52" cy="16" r="4"/>
+          </g>
+
+          <!-- PUNTAS DECORATIVAS (triángulos) -->
+          <g fill="none" stroke="url(#goldGrad)" stroke-width="2">
+            <path d="M80 0 L85 10 L75 10 Z"/>
+            <path d="M114 11 L118 20 L110 20 Z"/>
+            <path d="M137 35 L144 42 L130 42 Z"/>
+            <path d="M148 70 L153 78 L143 78 Z"/>
+            <path d="M148 130 L153 138 L143 138 Z"/>
+            <path d="M137 165 L144 172 L130 172 Z"/>
+            <path d="M114 189 L118 198 L110 198 Z"/>
+            <path d="M80 200 L85 210 L75 210 Z"/>
+            <path d="M46 189 L42 198 L50 198 Z"/>
+            <path d="M23 165 L16 172 L30 172 Z"/>
+            <path d="M12 130 L7 138 L17 138 Z"/>
+            <path d="M12 70 L7 78 L17 78 Z"/>
+            <path d="M23 35 L16 42 L30 42 Z"/>
+            <path d="M46 11 L42 20 L50 20 Z"/>
+          </g>
+
+          <!-- ÓVALO INTERIOR (máscara para el GIF) -->
+          <ellipse cx="80" cy="100" rx="55" ry="80" fill="none" stroke="rgba(200,180,160,0.3)" stroke-width="1"/>
+
+          <!-- GIF dentro del óvalo (recortado) -->
+          <image x="25" y="20" width="110" height="160" href="archivos/centro.gif" clip-path="url(#ovalClip)" preserveAspectRatio="xMidYMid slice"/>
+        </svg>
       </div>
 
       <div class="name-wrap">
