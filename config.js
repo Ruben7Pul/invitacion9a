@@ -1,7 +1,7 @@
 export const CONFIG = {
   nombre: "Melina",
   fechaTexto: "10 de octubre de 2026",
-  fechaISO: "2026-10-8T13:00:00",
+  fechaISO": "2026-8-10T13:00:00",
   frase: "Con la bendición de Dios y el amor de mi familia me siento muy feliz de llegar a este momento de mi vida. Los invito a compartir este día tan especial.",
   horaMisa: "1:00 pm",
   ubicacionMisa: "Capilla del puente Guadalupe Yancuictlalpan",
