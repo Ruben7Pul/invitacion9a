@@ -67,9 +67,10 @@ function fadeAndRedirect(url) {
   if (overlay) {
     overlay.style.transition = 'opacity 0.5s ease';
     overlay.style.opacity = '1';
+    overlay.classList.add('active');
     setTimeout(() => {
       window.location.href = url;
-    }, 500);
+    }, 550);
   } else {
     window.location.href = url;
   }
@@ -83,6 +84,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const isIndex = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname === '';
   const isPrincipal = window.location.pathname.endsWith('principal.html');
 
+  // Cargar módulos comunes (sonidos, partículas, música)
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
     initSonidos();
@@ -102,19 +104,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (e) { console.error('❌ Música:', e); }
 
   if (isIndex) {
-    console.log('📌 index.html');
+    console.log('📌 index.html - Reja lista para abrir');
     const gateWrapper = document.getElementById('gate-wrapper');
     if (gateWrapper) {
-      gateWrapper.addEventListener('click', () => {
-        gateWrapper.classList.add('open');
+      gateWrapper.addEventListener('click', function(e) {
+        console.log('🔓 Clic en la reja detectado');
+        // Abrir reja
+        this.classList.add('open');
+        // Música
         if (window.playMusic) {
           window.resetMusic();
           setTimeout(() => window.playMusic(), 100);
         }
+        // Redirigir después de la animación
         setTimeout(() => {
           fadeAndRedirect('principal.html');
-        }, 900);
+        }, 950);
       });
+    } else {
+      console.error('❌ No se encontró #gate-wrapper');
     }
   } else if (isPrincipal) {
     console.log('📌 principal.html');
@@ -128,6 +136,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       setTimeout(() => window.playMusic(), 200);
     }
 
+    // Cargar módulos específicos
     try {
       const { initContador } = await import('./modules/contador.js');
       initContador(config);
@@ -154,6 +163,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (backLink) {
       backLink.addEventListener('click', (e) => {
         e.preventDefault();
+        console.log('↩️ Volviendo a index');
         if (window.closeGame) window.closeGame();
         if (window.resetMusic) window.resetMusic();
         fadeAndRedirect('index.html');
