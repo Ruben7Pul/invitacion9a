@@ -51,6 +51,7 @@ body {
   text-shadow: 0 0 8px rgba(201, 162, 77, 0.2);
 }
 
+/* ===== PORTAL (rosa simple) ===== */
 #portal {
   position: fixed;
   inset: 0;
@@ -91,6 +92,7 @@ body {
   text-transform: uppercase;
 }
 
+/* ===== APP PRINCIPAL ===== */
 #app {
   position: fixed;
   inset: 0;
@@ -132,9 +134,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: opacity 0.3s ease;
 }
 .top-btn:hover { opacity: 0.7; }
 #music-toggle svg { width: 20px; height: 20px; }
+#music-toggle { opacity: 1; } /* visible por defecto */
 
 #app-mid {
   flex: 1;
@@ -147,6 +151,7 @@ body {
   gap: 0.3rem;
 }
 
+/* ===== ROSA EN DOMO DE CRISTAL (nuevo) ===== */
 #rose-wrap {
   width: 80px;
   height: 80px;
@@ -154,6 +159,17 @@ body {
   animation: floaty 6s ease-in-out infinite;
 }
 #rose-wrap svg { width: 100%; height: 100%; }
+
+/* Pétalos que caen dentro del domo */
+.petal-falling2 {
+  animation: fallDome2 7s linear infinite;
+}
+.petal-falling2:nth-child(2) { animation-delay: 2.5s; }
+.petal-falling2:nth-child(3) { animation-delay: 4.8s; }
+@keyframes fallDome2 {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0.5; }
+  100% { transform: translate(35px, 100px) rotate(360deg); opacity: 0; }
+}
 
 .name-wrap { position: relative; }
 .hint {
@@ -469,14 +485,14 @@ h1#nombre-hero {
   font-size: 1rem;
 }
 #lives { letter-spacing: 0.15em; }
-#game-help {
+
+.game-help {
   font-size: 0.85rem;
-  opacity: 0.85;
-  margin-top: 0.4rem;
+  opacity: 0.7;
+  margin-top: 0.5rem;
   font-family: var(--serif-body);
   font-style: italic;
-  text-align: center;
-  padding: 0 0.5rem;
+  text-shadow: 0 0 10px rgba(201, 162, 77, 0.2);
 }
 
 /* ===== RESPONSIVE ===== */
@@ -486,7 +502,8 @@ h1#nombre-hero {
   .clock .num { font-size: 1rem; }
   #app-top .eyebrow { font-size: 0.6rem; }
   .top-btn { font-size: 1rem; }
-  #game-help { font-size: 0.75rem; }
+  #rose-btn svg { width: 100px; height: 100px; }
+  .game-help { font-size: 0.7rem; }
 }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 3px; }
