@@ -1,11 +1,15 @@
 // particulas.js - Estrellas, pétalos, confeti, cursor
+console.log('📦 módulo particulas.js cargado');
+
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 export function initParticulas() {
-  if (reduce) return;
+  console.log('✨ Iniciando partículas...');
+  if (reduce) { console.log('♿ Motion reduced, partículas desactivadas'); return; }
   crearEstrellasFugaces();
   crearPetalesFlotantes();
   crearChispasCursor();
+  console.log('✅ Partículas iniciadas');
 }
 
 function crearEstrellasFugaces() {
@@ -68,7 +72,6 @@ function crearChispasCursor() {
   }, { passive: true });
 }
 
-// Función para explosión de chispas (se usa desde otros módulos)
 export function burst(x, y, count = 14) {
   for (let i = 0; i < count; i++) {
     const d = document.createElement('div');
