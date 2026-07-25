@@ -469,12 +469,14 @@ h1#nombre-hero {
   font-size: 1rem;
 }
 #lives { letter-spacing: 0.15em; }
-.game-help {
-  font-size: 0.55rem;
-  opacity: 0.6;
-  margin-top: 0.3rem;
+#game-help {
+  font-size: 0.85rem;
+  opacity: 0.85;
+  margin-top: 0.4rem;
   font-family: var(--serif-body);
   font-style: italic;
+  text-align: center;
+  padding: 0 0.5rem;
 }
 
 /* ===== RESPONSIVE ===== */
@@ -484,6 +486,7 @@ h1#nombre-hero {
   .clock .num { font-size: 1rem; }
   #app-top .eyebrow { font-size: 0.6rem; }
   .top-btn { font-size: 1rem; }
+  #game-help { font-size: 0.75rem; }
 }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 3px; }
