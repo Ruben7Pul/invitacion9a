@@ -1,39 +1,31 @@
-// script.js - ORQUESTADOR PRINCIPAL
-console.log('🚀 script.js cargado');
+console.log('🚀 script.js');
 
-let CONFIG = {};
+let CONFIG = null;
 
 async function cargarConfig() {
-  console.log('📡 Cargando config.json...');
   try {
     const res = await fetch(`config.json?t=${Date.now()}`);
+    if (!res.ok) throw new Error('No se pudo cargar config.json');
     CONFIG = await res.json();
-    console.log('✅ config.json cargado:', CONFIG);
+    console.log('✅ Configuración cargada:', CONFIG);
     return CONFIG;
   } catch (e) {
-    console.error('❌ Error cargando config.json:', e);
-    return {
-      nombre: 'Dania',
-      fechaTexto: '24 de octubre de 2026',
-      fechaISO: '2026-10-24T13:00:00',
-      frase: 'Frase de ejemplo',
-      horaMisa: '3:00 pm',
-      ubicacionMisa: 'Iglesia',
-      mapaMisa: '#',
-      horaFiesta: '1:00 pm',
-      ubicacionFiesta: 'Salón',
-      mapaFiesta: '#',
-      padre: 'Papá',
-      madre: 'Mamá',
-      padrino: 'Padrino',
-      madrina: 'Madrina',
-      audioFile: 'archivos/cancion.mp3'
-    };
+    console.error('❌ Error crítico: no se pudo cargar config.json', e);
+    // Mostrar mensaje en pantalla
+    document.body.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0b0818;color:#f0d9a3;font-family:sans-serif;text-align:center;padding:2rem;">
+        <div>
+          <h1>⚠️ Error de configuración</h1>
+          <p>No se pudo cargar el archivo <strong>config.json</strong>.</p>
+          <p style="font-size:0.8rem;opacity:0.7;">Asegúrate de que exista en la raíz del proyecto.</p>
+        </div>
+      </div>
+    `;
+    throw e;
   }
 }
 
 function rellenarDatos(config) {
-  console.log('📝 Rellenando datos en HTML...');
   document.getElementById('nombre-hero').textContent = config.nombre;
   document.getElementById('fecha-fija').textContent = config.fechaTexto;
   document.getElementById('frase-texto').textContent = config.frase;
@@ -48,108 +40,67 @@ function rellenarDatos(config) {
   document.getElementById('padrino1').textContent = config.padrino;
   document.getElementById('padrino2').textContent = config.madrina;
   document.title = `Mis XV años · ${config.nombre}`;
-  console.log('✅ Datos rellenados');
 }
 
-// Inicializar todo
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('🌐 DOM listo, cargando configuración...');
-  const config = await cargarConfig();
-  window.CONFIG = config;
-  rellenarDatos(config);
-
-  // Importar y ejecutar módulos
   try {
-    const { initContador } = await import('./modules/contador.js');
-    initContador(config);
-    console.log('✅ Módulo contador iniciado');
-  } catch (e) { console.error('❌ Error en contador:', e); }
+    const config = await cargarConfig();
+    window.CONFIG = config;
+    rellenarDatos(config);
 
-  try {
-    const { initSonidos } = await import('./modules/sonidos.js');
-    initSonidos();
-    console.log('✅ Módulo sonidos iniciado');
-  } catch (e) { console.error('❌ Error en sonidos:', e); }
+    // Importar y ejecutar módulos (todos usan window.CONFIG)
+    const modules = [
+      { name: 'contador', path: './modules/contador.js' },
+      { name: 'sonidos', path: './modules/sonidos.js' },
+      { name: 'particulas', path: './modules/particulas.js' },
+      { name: 'modal', path: './modules/modal.js' },
+      { name: 'musica', path: './modules/musica.js' },
+      { name: 'juego', path: './modules/juego.js' }
+    ];
 
-  try {
-    const { initParticulas } = await import('./modules/particulas.js');
-    initParticulas();
-    console.log('✅ Módulo particulas iniciado');
-  } catch (e) { console.error('❌ Error en particulas:', e); }
-
-  try {
-    const { initModal } = await import('./modules/modal.js');
-    initModal();
-    console.log('✅ Módulo modal iniciado');
-  } catch (e) { console.error('❌ Error en modal:', e); }
-
-  try {
-    const { initMusica, playMusic, toggleMusic } = await import('./modules/musica.js');
-    initMusica(config);
-    window.playMusic = playMusic;
-    window.toggleMusic = toggleMusic;
-    console.log('✅ Módulo musica iniciado (audio local)');
-  } catch (e) { console.error('❌ Error en musica:', e); }
-
-  try {
-    const { initJuego } = await import('./modules/juego.js');
-    initJuego(config);
-    console.log('✅ Módulo juego iniciado');
-  } catch (e) { console.error('❌ Error en juego:', e); }
-
-  // ---------------- MANEJO DE LA ROSA ----------------
-  const roseBtn = document.getElementById('rose-btn');
-  const portal = document.getElementById('portal');
-  const app = document.getElementById('app');
-
-  if (!roseBtn) console.error('❌ Botón rosa NO encontrado');
-  if (!portal) console.error('❌ Portal NO encontrado');
-  if (!app) console.error('❌ App NO encontrada');
-
-  if (roseBtn && portal && app) {
-    console.log('✅ Elementos para la rosa encontrados');
-
-    // Reemplazar para evitar duplicados
-    const newBtn = roseBtn.cloneNode(true);
-    roseBtn.parentNode.replaceChild(newBtn, roseBtn);
-    const finalBtn = document.getElementById('rose-btn');
-
-    finalBtn.addEventListener('click', function(e) {
-      console.log('🌹 CLIC EN ROSA detectado');
-      e.preventDefault();
-
-      portal.classList.add('hide');
-      app.classList.add('show');
-      console.log('🔓 Portal cerrado, App visible');
-
-      // Reproducir música local
-      if (window.playMusic) {
-        try {
-          window.playMusic();
-          console.log('🎵 Música local iniciada');
-        } catch (err) {
-          console.error('❌ Error al reproducir música:', err);
+    for (const mod of modules) {
+      try {
+        const module = await import(mod.path);
+        if (mod.name === 'musica') {
+          module.initMusica(config);
+          window.playMusic = module.playMusic;
+          window.toggleMusic = module.toggleMusic;
+        } else if (mod.name === 'juego') {
+          module.initJuego(config);
+        } else if (mod.name === 'contador') {
+          module.initContador(config);
+        } else if (typeof module.init === 'function') {
+          module.init();
+        } else if (typeof module.initParticulas === 'function') {
+          module.initParticulas();
+        } else if (typeof module.initModal === 'function') {
+          module.initModal();
+        } else if (typeof module.initSonidos === 'function') {
+          module.initSonidos();
         }
-      } else {
-        console.warn('⚠️ playMusic no disponible');
+        console.log(`✅ Módulo ${mod.name} iniciado`);
+      } catch (e) {
+        console.error(`❌ Error en módulo ${mod.name}:`, e);
       }
+    }
 
-      // Efectos sonoros y chispas
-      import('./modules/sonidos.js').then(module => {
-        try { module.soundOpen(); } catch (e) {}
-      }).catch(() => {});
-      import('./modules/particulas.js').then(module => {
-        try {
-          const rect = this.getBoundingClientRect();
-          module.burst(rect.left + rect.width/2, rect.top + rect.height/2, 30);
-        } catch (e) {}
-      }).catch(() => {});
-    });
+    // Portal / rosa
+    const roseBtn = document.getElementById('rose-btn');
+    const portal = document.getElementById('portal');
+    const app = document.getElementById('app');
 
-    console.log('✅ Evento click asignado a la rosa');
-  } else {
-    console.error('❌ NO se pudo asignar evento a la rosa');
+    if (roseBtn && portal && app) {
+      roseBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        portal.classList.add('hide');
+        app.classList.add('show');
+        if (window.playMusic) window.playMusic();
+      });
+    } else {
+      console.warn('⚠️ Elementos del portal no encontrados');
+    }
+
+  } catch (e) {
+    // El error ya se mostró en pantalla desde cargarConfig
   }
 });
-
-console.log('✅ script.js terminó de cargarse');
