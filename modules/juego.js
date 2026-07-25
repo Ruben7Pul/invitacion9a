@@ -1,4 +1,4 @@
-console.log('📦 juego.js (teclado + arrastre con dedo)');
+console.log('📦 juego.js (con recompensa y contador 3,2,1)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
@@ -11,7 +11,7 @@ const TOP = 30;
 const SPEED = 3.8;
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego (controles: teclado + arrastre con dedo)');
+  console.log('🎮 Iniciando juego (recompensa por rendimiento)');
 
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => { soundTap(); openGame(); });
@@ -39,14 +39,19 @@ export function initJuego(config) {
   let running = false;
   let gameInterval = null;
 
-  // ---- Variables de control ----
+  // ---- Variables para rendimiento ----
+  let startTime = 0;
+  let endTime = 0;
+  let finalLives = 3;
+
+  // ---- Controles ----
   const keys = { left: false, right: false };
   let touchActive = false;
   let touchX = 0;
 
   window.closeGame = closeGame;
 
-  // ---- Funciones auxiliares ----
+  // ---- Funciones ----
   function letras() {
     const src = (config.nombre || 'X').toUpperCase().replace(/\s+/g, '');
     return src.length ? src : 'X';
@@ -104,7 +109,10 @@ export function initJuego(config) {
     setVel(1.2 * dir, -2.4);
   }
 
-  function updateLives() { livesEl.textContent = '♥ '.repeat(Math.max(lives, 0)).trim() || '—'; }
+  function updateLives() {
+    livesEl.textContent = '♥ '.repeat(Math.max(lives, 0)).trim() || '—';
+    finalLives = lives;
+  }
 
   function draw() {
     paddleEl.style.left = paddle.x + 'px';
@@ -114,29 +122,27 @@ export function initJuego(config) {
     ballEl.style.top = (ball.y - ball.r) + 'px';
   }
 
-  // ---- BUCLE PRINCIPAL ----
+  // ---- BUCLE ----
   function gameLoop() {
     if (!running) return;
 
-    // 1. Teclado
+    // Teclado
     if (keys.left) paddle.x = Math.max(0, paddle.x - 8);
     if (keys.right) paddle.x = Math.min(LW - paddle.w, paddle.x + 8);
 
-    // 2. Arrastre con dedo (prioridad)
+    // Arrastre con dedo
     if (touchActive) {
       paddle.x = Math.max(0, Math.min(LW - paddle.w, touchX));
     }
 
-    // ---- Física ----
+    // Física
     ball.x += ball.vx;
     ball.y += ball.vy;
 
-    // Colisiones paredes
     if (ball.x - ball.r < 0) { ball.x = ball.r; ball.vx = Math.abs(ball.vx); }
     if (ball.x + ball.r > LW) { ball.x = LW - ball.r; ball.vx = -Math.abs(ball.vx); }
     if (ball.y - ball.r < 0) { ball.y = ball.r; ball.vy = Math.abs(ball.vy); }
 
-    // Colisión paleta
     const py = LH - 14;
     if (ball.vy > 0 && ball.y + ball.r >= py && ball.y + ball.r <= py + 10 &&
         ball.x >= paddle.x - ball.r && ball.x <= paddle.x + paddle.w + ball.r) {
@@ -149,7 +155,6 @@ export function initJuego(config) {
       ball.vy = -Math.cos(angle) * speed;
     }
 
-    // Colisión ladrillos
     for (const b of bricks) {
       if (!b.alive) continue;
       if (ball.x + ball.r > b.x && ball.x - ball.r < b.x + b.w &&
@@ -167,7 +172,6 @@ export function initJuego(config) {
       }
     }
 
-    // Perdida
     if (ball.y - ball.r > LH) {
       lives--;
       updateLives();
@@ -176,21 +180,61 @@ export function initJuego(config) {
       resetBall();
     }
 
-    // Victoria
-    if (bricks.every(b => !b.alive)) { endGame(true); return; }
+    if (bricks.every(b => !b.alive)) {
+      endTime = performance.now();
+      endGame(true);
+      return;
+    }
 
     draw();
   }
 
+  // ---- FIN DEL JUEGO (con recompensa) ----
   function endGame(win) {
     running = false;
     if (gameInterval) { clearInterval(gameInterval); gameInterval = null; }
-    if (win) soundWin();
-    msgText.textContent = win ? '🎉 ¡Has roto el hechizo, ' + config.nombre + '! ✨' : '💔 El hechizo continúa... inténtalo de nuevo';
+
+    let message = '';
+    let extraClass = '';
+
+    if (win) {
+      const elapsed = (endTime - startTime) / 1000; // segundos
+      const vidas = finalLives;
+
+      // Determinar personaje según rendimiento
+      if (elapsed < 10 && vidas === 3) {
+        message = `👑 ¡${config.nombre} se convierte en el PRÍNCIPE TRANSFORMADO! \n✨ Tiempo: ${elapsed.toFixed(1)}s, 3 vidas. ¡Perfecto!`;
+        extraClass = 'perfect';
+        soundWin();
+      } else if (elapsed < 15 && vidas >= 2) {
+        message = `🤴 ¡${config.nombre} es el PRÍNCIPE! \n⏱️ Tiempo: ${elapsed.toFixed(1)}s, ${vidas} vidas. ¡Muy bien!`;
+        extraClass = 'good';
+        soundWin();
+      } else {
+        message = `🐻 ${config.nombre} sigue siendo la BESTIA... \n⏱️ Tiempo: ${elapsed.toFixed(1)}s, ${vidas} vidas. ¡Sigue intentando!`;
+        extraClass = 'ok';
+        soundWin();
+      }
+    } else {
+      // Perdió
+      message = `🎩 ¡${config.nombre} se convierte en GASTÓN! \n💔 ¡Has perdido todas las vidas! Vuelve a intentarlo.`;
+      extraClass = 'lose';
+      soundLose();
+    }
+
+    msgText.textContent = message;
     msgEl.classList.add('show');
+    // Añadir clase extra para estilos (opcional)
+    msgEl.className = 'show ' + extraClass;
   }
 
+  // ---- INICIO ----
   function startGame() {
+    // Reiniciar variables de rendimiento
+    startTime = performance.now();
+    endTime = 0;
+    finalLives = 3;
+
     lives = 3;
     updateLives();
     buildBricks();
@@ -206,17 +250,16 @@ export function initJuego(config) {
 
   function openGame() {
     overlay.classList.add('open');
-    // Contador de 3 segundos antes de empezar
+    // Mostrar solo números 3, 2, 1 (sin "Preparando")
     let countdown = 3;
-    msgText.textContent = 'Preparando... ' + countdown;
+    msgText.textContent = countdown;
     msgEl.classList.add('show');
-
-    const countInterval = setInterval(() => {
+    const timer = setInterval(() => {
       countdown--;
       if (countdown > 0) {
-        msgText.textContent = 'Preparando... ' + countdown;
+        msgText.textContent = countdown;
       } else {
-        clearInterval(countInterval);
+        clearInterval(timer);
         msgEl.classList.remove('show');
         startGame();
       }
@@ -236,7 +279,7 @@ export function initJuego(config) {
   restartBtn.addEventListener('click', () => { soundTap(); startGame(); });
   overlay.addEventListener('click', e => { if (e.target === overlay) closeGame(); });
 
-  // ---- CONTROLES DE TECLADO ----
+  // ---- TECLADO ----
   document.addEventListener('keydown', (e) => {
     if (!running) return;
     if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
@@ -284,7 +327,8 @@ export function initJuego(config) {
   stage.addEventListener('touchend', () => { touchActive = false; }, { passive: true });
   stage.addEventListener('touchcancel', () => { touchActive = false; }, { passive: true });
 
+  // ---- RESIZE ----
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego listo (controles: teclado + arrastre con dedo)');
+  console.log('✅ Juego con recompensa por rendimiento listo');
 }
