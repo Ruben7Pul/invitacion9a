@@ -1,4 +1,4 @@
-console.log('📦 juego.js (sin mensaje de "Jugar de nuevo" al inicio)');
+console.log('📦 juego.js (reinicio completo)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
@@ -11,7 +11,7 @@ const TOP = 30;
 const SPEED = 3.8;
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego (recompensa por rendimiento)');
+  console.log('🎮 Iniciando juego (reinicio completo)');
 
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => { soundTap(); openGame(); });
@@ -26,7 +26,6 @@ export function initJuego(config) {
   const livesEl = document.getElementById('lives');
   const restartBtn = document.getElementById('game-restart');
 
-  // Ocultar el botón de reinicio al inicio
   restartBtn.style.display = 'none';
 
   const LW = 300, LH = 420;
@@ -188,8 +187,6 @@ export function initJuego(config) {
   function endGame(win) {
     running = false;
     if (gameInterval) { clearInterval(gameInterval); gameInterval = null; }
-
-    // Mostrar botón de reinicio solo al finalizar
     restartBtn.style.display = 'inline-block';
 
     let message = '';
@@ -228,11 +225,11 @@ export function initJuego(config) {
     endTime = 0;
     finalLives = 3;
 
-    // Ocultar botón de reinicio al iniciar
     restartBtn.style.display = 'none';
 
     lives = 3;
     updateLives();
+    // Reconstruir todo
     buildBricks();
     resetBall();
     paddle.x = (LW - paddle.w) / 2;
@@ -246,11 +243,25 @@ export function initJuego(config) {
 
   function openGame() {
     overlay.classList.add('open');
+    // Reiniciar completamente el estado del juego antes de mostrar la cuenta regresiva
+    // Limpiar ladrillos viejos
+    inner.querySelectorAll('.brick').forEach(b => b.remove());
+    bricks = [];
+    // Resetear posición de paleta y pelota a valores iniciales
+    paddle.x = (LW - paddle.w) / 2;
+    ball.x = LW / 2;
+    ball.y = LH - 38;
+    ball.vx = 0;
+    ball.vy = 0;
+    // Ocultar mensaje
+    msgEl.classList.remove('show');
+    restartBtn.style.display = 'none';
+    // Forzar dibujo
+    draw();
+
     let countdown = 3;
     msgText.textContent = countdown;
     msgEl.classList.add('show');
-    // Ocultar botón de reinicio durante la cuenta regresiva
-    restartBtn.style.display = 'none';
     const timer = setInterval(() => {
       countdown--;
       if (countdown > 0) {
@@ -323,5 +334,5 @@ export function initJuego(config) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego listo (sin mensaje de reinicio al inicio)');
+  console.log('✅ Juego con reinicio completo listo');
 }
