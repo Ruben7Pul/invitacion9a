@@ -14,7 +14,7 @@
   <div id="bg"></div>
   <div id="petals-layer"></div>
 
-  <!-- PORTAL con REJA DE LUJO -->
+  <!-- PORTAL con REJA GRANDE -->
   <div id="portal">
     <div class="portal-inner">
       <span class="eyebrow gold-text">Una invitación encantada</span>
@@ -36,14 +36,6 @@
                   <feMergeNode in="SourceGraphic"/>
                 </feMerge>
               </filter>
-              <!-- Filtro de brillo para gemas -->
-              <filter id="gemGlow">
-                <feGaussianBlur stdDeviation="2" result="blur"/>
-                <feMerge>
-                  <feMergeNode in="blur"/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
             </defs>
             <!-- Marco exterior -->
             <rect x="10" y="10" width="280" height="380" rx="20" fill="none" stroke="url(#goldGateGrad)" stroke-width="8" filter="url(#gateGlowBig)"/>
@@ -60,62 +52,43 @@
             <rect x="20" y="180" width="260" height="12" rx="5" fill="url(#goldGateGrad)"/>
             <rect x="20" y="240" width="260" height="12" rx="5" fill="url(#goldGateGrad)"/>
             <rect x="20" y="300" width="260" height="12" rx="5" fill="url(#goldGateGrad)"/>
-            
-            <!-- ADORNOS CON GEMAS (círculos con colores) -->
-            <!-- Fila 1 (60) -->
-            <circle cx="48" cy="66" r="12" fill="#e63946" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <circle cx="98" cy="66" r="12" fill="#2ecc71" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <circle cx="148" cy="66" r="12" fill="#3498db" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <circle cx="198" cy="66" r="12" fill="#9b59b6" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <circle cx="248" cy="66" r="12" fill="#f1c40f" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <!-- Fila 2 (120) -->
-            <circle cx="48" cy="126" r="12" fill="#3498db" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <circle cx="98" cy="126" r="12" fill="#e63946" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <circle cx="148" cy="126" r="12" fill="#9b59b6" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <circle cx="198" cy="126" r="12" fill="#2ecc71" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <circle cx="248" cy="126" r="12" fill="#f1c40f" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <!-- Fila 3 (180) -->
-            <circle cx="48" cy="186" r="12" fill="#9b59b6" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <circle cx="98" cy="186" r="12" fill="#f1c40f" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <circle cx="148" cy="186" r="12" fill="#e63946" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <circle cx="198" cy="186" r="12" fill="#3498db" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <circle cx="248" cy="186" r="12" fill="#2ecc71" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <!-- Fila 4 (240) -->
-            <circle cx="48" cy="246" r="12" fill="#2ecc71" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <circle cx="98" cy="246" r="12" fill="#9b59b6" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <circle cx="148" cy="246" r="12" fill="#3498db" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <circle cx="198" cy="246" r="12" fill="#f1c40f" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <circle cx="248" cy="246" r="12" fill="#e63946" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <!-- Fila 5 (300) -->
-            <circle cx="48" cy="306" r="12" fill="#f1c40f" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <circle cx="98" cy="306" r="12" fill="#2ecc71" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <circle cx="148" cy="306" r="12" fill="#e63946" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <circle cx="198" cy="306" r="12" fill="#9b59b6" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-            <circle cx="248" cy="306" r="12" fill="#3498db" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-
-            <!-- Arco superior con gemas -->
+            <!-- Adornos decorativos (círculos en las intersecciones) -->
+            <circle cx="48" cy="66" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <circle cx="98" cy="66" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <circle cx="148" cy="66" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <circle cx="198" cy="66" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <circle cx="248" cy="66" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <!-- Repetir en otras filas -->
+            <circle cx="48" cy="126" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <circle cx="98" cy="126" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <circle cx="148" cy="126" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <circle cx="198" cy="126" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <circle cx="248" cy="126" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <circle cx="48" cy="186" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <circle cx="98" cy="186" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <circle cx="148" cy="186" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <circle cx="198" cy="186" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <circle cx="248" cy="186" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <circle cx="48" cy="246" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <circle cx="98" cy="246" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <circle cx="148" cy="246" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <circle cx="198" cy="246" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <circle cx="248" cy="246" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <circle cx="48" cy="306" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <circle cx="98" cy="306" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <circle cx="148" cy="306" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <circle cx="198" cy="306" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <circle cx="248" cy="306" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+            <!-- Arco superior -->
             <path d="M50 20 Q150 -20 250 20" fill="none" stroke="url(#goldGateGrad)" stroke-width="8" filter="url(#gateGlowBig)"/>
             <path d="M60 30 Q150 -10 240 30" fill="none" stroke="rgba(255,215,0,0.2)" stroke-width="6"/>
-            <!-- Gemas en el arco -->
-            <circle cx="70" cy="15" r="8" fill="#e63946" stroke="#fff" stroke-width="1" filter="url(#gemGlow)"/>
-            <circle cx="100" cy="5" r="8" fill="#3498db" stroke="#fff" stroke-width="1" filter="url(#gemGlow)"/>
-            <circle cx="130" cy="-2" r="8" fill="#2ecc71" stroke="#fff" stroke-width="1" filter="url(#gemGlow)"/>
-            <circle cx="160" cy="0" r="8" fill="#9b59b6" stroke="#fff" stroke-width="1" filter="url(#gemGlow)"/>
-            <circle cx="190" cy="5" r="8" fill="#f1c40f" stroke="#fff" stroke-width="1" filter="url(#gemGlow)"/>
-            <circle cx="220" cy="15" r="8" fill="#e63946" stroke="#fff" stroke-width="1" filter="url(#gemGlow)"/>
-
-            <!-- Flor de lis en la cima con gemas -->
-            <circle cx="150" cy="5" r="18" fill="url(#goldGateGrad)" filter="url(#gateGlowBig)"/>
-            <path d="M150 -10 L142 12 L158 12 Z" fill="url(#goldGateGrad)"/>
-            <circle cx="150" cy="5" r="6" fill="#f1c40f" stroke="#fff" stroke-width="1" filter="url(#gemGlow)"/>
-            <circle cx="145" cy="0" r="4" fill="#e63946" filter="url(#gemGlow)"/>
-            <circle cx="155" cy="0" r="4" fill="#3498db" filter="url(#gemGlow)"/>
-
-            <!-- Candado (mitad izquierda) con gema -->
+            <!-- Flor de lis en la cima -->
+            <circle cx="150" cy="5" r="15" fill="url(#goldGateGrad)" filter="url(#gateGlowBig)"/>
+            <path d="M150 -5 L145 10 L155 10 Z" fill="url(#goldGateGrad)"/>
+            <!-- Candado (en la hoja izquierda, la mitad del candado) -->
             <rect x="130" y="160" width="20" height="30" rx="4" fill="#b8943c" stroke="#8a7030" stroke-width="2"/>
             <circle cx="140" cy="160" r="10" fill="none" stroke="#b8943c" stroke-width="4"/>
             <rect x="135" y="180" width="10" height="10" rx="2" fill="#8a7030"/>
-            <circle cx="140" cy="175" r="4" fill="#e63946" filter="url(#gemGlow)"/>
           </svg>
         </div>
 
@@ -126,11 +99,10 @@
           </svg>
         </div>
 
-        <!-- Definición para la hoja derecha -->
+        <!-- Definición para la hoja derecha (espejo) -->
         <svg style="display:none;">
           <defs>
             <g id="gate-left-svg-big">
-              <!-- Mismo contenido que la izquierda pero con las gemas simétricas -->
               <rect x="10" y="10" width="280" height="380" rx="20" fill="none" stroke="url(#goldGateGrad)" stroke-width="8" filter="url(#gateGlowBig)"/>
               <rect x="10" y="10" width="280" height="380" rx="20" fill="none" stroke="rgba(255,215,0,0.2)" stroke-width="10"/>
               <rect x="40" y="20" width="16" height="360" rx="6" fill="url(#goldGateGrad)"/>
@@ -143,64 +115,57 @@
               <rect x="20" y="180" width="260" height="12" rx="5" fill="url(#goldGateGrad)"/>
               <rect x="20" y="240" width="260" height="12" rx="5" fill="url(#goldGateGrad)"/>
               <rect x="20" y="300" width="260" height="12" rx="5" fill="url(#goldGateGrad)"/>
-              <!-- Gemas (simétricas a la izquierda) -->
-              <circle cx="48" cy="66" r="12" fill="#f1c40f" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="98" cy="66" r="12" fill="#9b59b6" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="148" cy="66" r="12" fill="#3498db" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="198" cy="66" r="12" fill="#2ecc71" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="248" cy="66" r="12" fill="#e63946" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="48" cy="126" r="12" fill="#2ecc71" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="98" cy="126" r="12" fill="#f1c40f" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="148" cy="126" r="12" fill="#9b59b6" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="198" cy="126" r="12" fill="#e63946" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="248" cy="126" r="12" fill="#3498db" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="48" cy="186" r="12" fill="#e63946" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="98" cy="186" r="12" fill="#3498db" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="148" cy="186" r="12" fill="#f1c40f" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="198" cy="186" r="12" fill="#9b59b6" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="248" cy="186" r="12" fill="#2ecc71" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="48" cy="246" r="12" fill="#9b59b6" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="98" cy="246" r="12" fill="#2ecc71" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="148" cy="246" r="12" fill="#e63946" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="198" cy="246" r="12" fill="#3498db" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="248" cy="246" r="12" fill="#f1c40f" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="48" cy="306" r="12" fill="#3498db" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="98" cy="306" r="12" fill="#e63946" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="148" cy="306" r="12" fill="#2ecc71" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="198" cy="306" r="12" fill="#f1c40f" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
-              <circle cx="248" cy="306" r="12" fill="#9b59b6" stroke="#fff" stroke-width="1.5" filter="url(#gemGlow)"/>
+              <!-- Círculos decorativos -->
+              <circle cx="48" cy="66" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="98" cy="66" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="148" cy="66" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="198" cy="66" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="248" cy="66" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="48" cy="126" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="98" cy="126" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="148" cy="126" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="198" cy="126" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="248" cy="126" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="48" cy="186" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="98" cy="186" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="148" cy="186" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="198" cy="186" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="248" cy="186" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="48" cy="246" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="98" cy="246" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="148" cy="246" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="198" cy="246" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="248" cy="246" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="48" cy="306" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="98" cy="306" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="148" cy="306" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="198" cy="306" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
+              <circle cx="248" cy="306" r="10" fill="url(#goldGateGrad)" opacity="0.8"/>
               <path d="M50 20 Q150 -20 250 20" fill="none" stroke="url(#goldGateGrad)" stroke-width="8" filter="url(#gateGlowBig)"/>
               <path d="M60 30 Q150 -10 240 30" fill="none" stroke="rgba(255,215,0,0.2)" stroke-width="6"/>
-              <circle cx="70" cy="15" r="8" fill="#2ecc71" stroke="#fff" stroke-width="1" filter="url(#gemGlow)"/>
-              <circle cx="100" cy="5" r="8" fill="#e63946" stroke="#fff" stroke-width="1" filter="url(#gemGlow)"/>
-              <circle cx="130" cy="-2" r="8" fill="#f1c40f" stroke="#fff" stroke-width="1" filter="url(#gemGlow)"/>
-              <circle cx="160" cy="0" r="8" fill="#3498db" stroke="#fff" stroke-width="1" filter="url(#gemGlow)"/>
-              <circle cx="190" cy="5" r="8" fill="#9b59b6" stroke="#fff" stroke-width="1" filter="url(#gemGlow)"/>
-              <circle cx="220" cy="15" r="8" fill="#2ecc71" stroke="#fff" stroke-width="1" filter="url(#gemGlow)"/>
-              <circle cx="150" cy="5" r="18" fill="url(#goldGateGrad)" filter="url(#gateGlowBig)"/>
-              <path d="M150 -10 L142 12 L158 12 Z" fill="url(#goldGateGrad)"/>
-              <circle cx="150" cy="5" r="6" fill="#f1c40f" stroke="#fff" stroke-width="1" filter="url(#gemGlow)"/>
-              <circle cx="145" cy="0" r="4" fill="#e63946" filter="url(#gemGlow)"/>
-              <circle cx="155" cy="0" r="4" fill="#3498db" filter="url(#gemGlow)"/>
+              <circle cx="150" cy="5" r="15" fill="url(#goldGateGrad)" filter="url(#gateGlowBig)"/>
+              <path d="M150 -5 L145 10 L155 10 Z" fill="url(#goldGateGrad)"/>
               <!-- Candado (mitad derecha) -->
               <rect x="150" y="160" width="20" height="30" rx="4" fill="#b8943c" stroke="#8a7030" stroke-width="2"/>
               <circle cx="160" cy="160" r="10" fill="none" stroke="#b8943c" stroke-width="4"/>
               <rect x="155" y="180" width="10" height="10" rx="2" fill="#8a7030"/>
-              <circle cx="160" cy="175" r="4" fill="#3498db" filter="url(#gemGlow)"/>
             </g>
           </defs>
         </svg>
 
-        <!-- Brillo central sutil (no cegador) -->
+        <!-- Brillo central (al abrir) -->
         <div class="gate-brillos"></div>
       </div>
 
+      <!-- Texto inferior (se mantiene) -->
       <div class="portal-caption gold-text">Toca la reja para abrirla</div>
     </div>
   </div>
 
-  <!-- CONTENEDOR PARA TRANSICIÓN (usamos el mismo #bg para el fondo) -->
-  <!-- APP PRINCIPAL -->
+  <!-- PANTALLA DE BRILLO (para transiciones) -->
+  <div id="flash-screen"></div>
+
+  <!-- APP PRINCIPAL (sin cambios) -->
   <div id="app">
     <div id="app-top">
       <button id="back-btn" aria-label="Volver" class="top-btn">↩</button>
@@ -238,7 +203,7 @@
     </nav>
   </div>
 
-  <!-- MODALES -->
+  <!-- ===== MODALES ===== -->
   <div class="modal-overlay" id="modal-contador">
     <div class="modal-card">
       <button class="modal-close" data-close>&times;</button>
@@ -292,7 +257,7 @@
     </div>
   </div>
 
-  <!-- JUEGO -->
+  <!-- ===== JUEGO ===== -->
   <div id="game-overlay">
     <div id="game-panel">
       <div id="game-header">
