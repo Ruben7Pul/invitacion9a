@@ -9,19 +9,24 @@ export function initMusica(cfg) {
   audio.loop = true;
   audio.volume = 0.8;
   audio.load();
+  // Asegurar que el botón de mute se vea brillante al inicio
+  const toggle = document.getElementById('music-toggle');
+  if (toggle) toggle.style.opacity = '1';
+  console.log('🎵 Audio cargado:', config.audioFile);
 }
 
 export function playMusic() {
   if (!audio) return;
   if (!audio.paused) return;
   audio.play().catch(() => {});
+  document.getElementById('music-toggle').style.opacity = '1';
 }
 
 export function resetMusic() {
   if (!audio) return;
   audio.pause();
   audio.currentTime = 0;
-  document.getElementById('music-toggle').style.opacity = '0.5';
+  document.getElementById('music-toggle').style.opacity = '1';
   console.log('⏹️ Música reiniciada y pausada');
 }
 
