@@ -24,6 +24,7 @@ body {
   inset: 0;
 }
 
+/* ===== FONDO CASTILLO ===== */
 #bg {
   position: fixed;
   inset: 0;
@@ -49,6 +50,7 @@ body {
   z-index: 3;
   overflow: hidden;
 }
+
 .petal {
   position: absolute;
   border-radius: 60% 0 60% 0;
@@ -61,21 +63,6 @@ body {
   text-shadow: 0 0 8px rgba(201, 162, 77, 0.2);
 }
 
-/* ===== OVERLAY DE FADE (CORREGIDO) ===== */
-#fade-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 999;
-  background: #0b0818;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.5s ease;
-}
-#fade-overlay.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
 /* ===== PORTAL ===== */
 #portal {
   position: fixed;
@@ -85,13 +72,9 @@ body {
   align-items: center;
   justify-content: center;
   background: radial-gradient(ellipse at 50% 35%, #241a3a 0%, var(--ink) 75%);
-  transition: opacity 0.8s ease 0.3s, visibility 0.8s ease 0.3s;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
 }
-#portal.hide {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
+#portal.hide { opacity: 0; visibility: hidden; pointer-events: none; }
 .portal-inner {
   text-align: center;
   padding: 2rem;
@@ -111,33 +94,33 @@ body {
   font-size: 0.9rem;
 }
 
-/* ===== REJA (CON POINTER-EVENTS CORREGIDO) ===== */
+/* ===== REJA GRANDE ===== */
 .gate-wrapper {
   position: relative;
   width: 90vw;
-  max-width: 450px;
-  height: 65vh;
-  max-height: 550px;
+  max-width: 800px;
+  height: 75vh;
+  max-height: 600px;
   margin: 0 auto;
   perspective: 1200px;
   cursor: pointer;
-  pointer-events: all;
 }
+
 .gate-leaf {
   position: absolute;
   top: 0;
   width: 50%;
   height: 100%;
-  transition: transform 0.9s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.7s ease;
+  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
   backface-visibility: hidden;
-  pointer-events: none;
 }
 .gate-leaf svg {
   width: 100%;
   height: 100%;
   display: block;
-  filter: drop-shadow(0 0 25px rgba(201, 162, 77, 0.25));
-  pointer-events: none;
+  filter: drop-shadow(0 0 20px rgba(201, 162, 77, 0.3));
+  pointer-events: auto;
+  cursor: pointer;
 }
 .gate-left {
   left: 0;
@@ -149,36 +132,36 @@ body {
   transform-origin: right center;
   transform: rotateY(0deg);
 }
-.gate-right svg {
-  transform: scaleX(-1);
-}
 .gate-wrapper.open .gate-left {
-  transform: rotateY(-105deg) translateX(-25px);
-  opacity: 0.1;
+  transform: rotateY(-110deg) translateX(-20px);
+  opacity: 0.2;
 }
 .gate-wrapper.open .gate-right {
-  transform: rotateY(105deg) translateX(25px);
-  opacity: 0.1;
+  transform: rotateY(110deg) translateX(20px);
+  opacity: 0.2;
 }
 
+/* Brillo central al abrir */
 .gate-brillos {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(circle at center, rgba(255,215,0,0.25) 0%, transparent 70%);
+  background: radial-gradient(circle at center, rgba(255,215,0,0.9) 0%, transparent 70%);
   opacity: 0;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.4s ease, transform 0.6s ease;
+  transform: scale(0.5);
   z-index: 10;
   border-radius: 50%;
 }
 .gate-wrapper.open .gate-brillos {
   opacity: 1;
-  animation: brilloSuave 0.9s ease forwards;
+  transform: scale(2);
+  animation: brilloApertura 0.8s ease forwards;
 }
-@keyframes brilloSuave {
-  0% { opacity: 0; transform: scale(0.6); }
-  40% { opacity: 0.5; transform: scale(1.4); }
-  100% { opacity: 0; transform: scale(2); }
+@keyframes brilloApertura {
+  0% { opacity: 0; transform: scale(0.3); }
+  40% { opacity: 1; transform: scale(2.2); }
+  100% { opacity: 0; transform: scale(3); }
 }
 
 .portal-caption {
@@ -190,7 +173,29 @@ body {
   color: var(--gold-light);
 }
 
-/* ===== APP ===== */
+/* ===== PANTALLA DE BRILLO (FLASH) ===== */
+#flash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: radial-gradient(circle at center, #fff 0%, #ffd700 40%, #ff8c00 80%, transparent 100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.1s ease;
+}
+#flash-screen.active {
+  opacity: 1;
+  pointer-events: all;
+  animation: flashPulse 0.6s ease forwards;
+}
+@keyframes flashPulse {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ===== APP PRINCIPAL ===== */
 #app {
   position: fixed;
   inset: 0;
@@ -201,19 +206,10 @@ body {
   justify-content: space-between;
   padding: 1.2rem 1rem 1rem;
   opacity: 0;
-  transition: opacity 0.9s ease 0.3s;
+  transition: opacity 1s ease 0.15s;
   text-align: center;
-  pointer-events: none;
 }
-#app.show {
-  opacity: 1;
-  pointer-events: auto;
-}
-#app.fade-out {
-  opacity: 0;
-  transition: opacity 0.6s ease;
-  pointer-events: none;
-}
+#app.show { opacity: 1; }
 
 #app-top {
   width: 100%;
@@ -242,11 +238,11 @@ body {
   align-items: center;
   justify-content: center;
   transition: opacity 0.3s ease;
-  text-decoration: none;
 }
 .top-btn:hover { opacity: 0.7; }
 #music-toggle svg { width: 20px; height: 20px; }
 #music-toggle { opacity: 1; }
+
 #app-mid {
   flex: 1;
   display: flex;
@@ -259,6 +255,7 @@ body {
   padding: 0.2rem 0;
 }
 
+/* ===== ÓVALO ===== */
 #oval-wrap {
   width: 140px;
   height: 190px;
@@ -291,6 +288,8 @@ body {
 }
 
 .name-wrap { position: relative; margin-top: 0.15rem; }
+
+/* ===== REFLEJO EN NOMBRE ===== */
 h1#nombre-hero {
   font-family: var(--script);
   font-weight: 400;
@@ -339,6 +338,7 @@ h1#nombre-hero::before {
   0% { background-position: 0% 50%; }
   100% { background-position: 300% 50%; }
 }
+
 .hint {
   font-size: 0.75rem;
   opacity: 0.8;
@@ -397,9 +397,42 @@ h1#nombre-hero::before {
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
-@keyframes floaty {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+
+/* ===== CALENDARIO ===== */
+.calendar-style .unit {
+  background: #f4ead2;
+  border: 2px solid #c9a24d;
+  border-radius: 12px;
+  padding: 0.6rem 0.1rem;
+  box-shadow: 0 4px 0 #8a7030, inset 0 -2px 0 rgba(0,0,0,0.1);
+  position: relative;
+  transform: rotate(0deg);
+  transition: transform 0.3s ease;
+}
+.calendar-style .unit:hover {
+  transform: rotate(-2deg) scale(1.05);
+}
+.calendar-style .num {
+  color: #2c1a0e !important;
+  font-size: 1.6rem !important;
+  text-shadow: none !important;
+}
+.calendar-style .lbl {
+  color: #5a3d1a !important;
+  font-size: 0.5rem !important;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.calendar-style .unit::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 10%;
+  width: 80%;
+  height: 6px;
+  background: #c9a24d;
+  border-radius: 3px 3px 0 0;
+  opacity: 0.5;
 }
 
 /* ===== MODALES ===== */
@@ -637,6 +670,7 @@ h1#nombre-hero::before {
   font-size: 1rem;
 }
 #lives { letter-spacing: 0.15em; }
+
 .game-help {
   font-size: 0.85rem;
   opacity: 0.7;
@@ -646,45 +680,52 @@ h1#nombre-hero::before {
   text-shadow: 0 0 10px rgba(201, 162, 77, 0.2);
 }
 
-/* ===== CIERRE DE PUERTAS (VOLVER) ===== */
+/* ===== ANIMACIONES ===== */
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Cierre de puerta (volver) */
 #portal.closing .gate-left {
-  animation: closeLeft 0.7s ease forwards;
+  animation: closeLeft 0.6s ease forwards;
 }
 #portal.closing .gate-right {
-  animation: closeRight 0.7s ease forwards;
+  animation: closeRight 0.6s ease forwards;
 }
 @keyframes closeLeft {
-  0% { transform: rotateY(-105deg) translateX(-25px); opacity: 0.1; }
+  0% { transform: rotateY(-110deg) translateX(-20px); opacity: 0.2; }
   100% { transform: rotateY(0deg) translateX(0); opacity: 1; }
 }
 @keyframes closeRight {
-  0% { transform: rotateY(105deg) translateX(25px); opacity: 0.1; }
+  0% { transform: rotateY(110deg) translateX(20px); opacity: 0.2; }
   100% { transform: rotateY(0deg) translateX(0); opacity: 1; }
 }
 #portal.closing .gate-brillos {
-  animation: brilloCierre 0.7s ease forwards;
+  animation: brilloCierre 0.6s ease forwards;
 }
 @keyframes brilloCierre {
-  0% { opacity: 0.3; transform: scale(1.5); }
+  0% { opacity: 1; transform: scale(2); }
   100% { opacity: 0; transform: scale(0.5); }
 }
-#back-link.animating {
-  animation: backPulse 0.6s ease;
+
+#back-btn.animating {
+  animation: backBtnPulse 0.6s ease;
 }
-@keyframes backPulse {
+@keyframes backBtnPulse {
   0% { transform: scale(1); }
-  50% { transform: scale(1.2); color: #ffd700; text-shadow: 0 0 25px rgba(255,215,0,0.7); }
+  50% { transform: scale(1.3); color: #ffd700; text-shadow: 0 0 30px rgba(255,215,0,0.8); }
   100% { transform: scale(1); }
 }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-  .gate-wrapper { max-width: 340px; height: 55vh; }
+  .gate-wrapper { width: 95vw; height: 65vh; max-height: 500px; }
   .portal-inner .eyebrow { font-size: 0.7rem; }
   .portal-caption { font-size: 0.7rem; }
 }
 @media (max-width: 480px) {
-  .gate-wrapper { max-width: 240px; height: 45vh; }
+  .gate-wrapper { width: 98vw; height: 55vh; max-height: 350px; }
   .portal-inner .eyebrow { font-size: 0.6rem; }
   .portal-caption { font-size: 0.6rem; }
   #oval-wrap { width: 120px; height: 165px; margin-top: -20px; }
@@ -696,6 +737,7 @@ h1#nombre-hero::before {
   .hint { font-size: 0.65rem; }
   .frase-inline { font-size: 0.8rem; }
   .fecha-fija { font-size: 0.85rem; }
+  .calendar-style .num { font-size: 1.2rem !important; }
 }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 3px; }
