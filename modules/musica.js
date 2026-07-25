@@ -1,59 +1,33 @@
-// musica.js - Control de música de YouTube
-let ytPlayer = null;
-let ytReady = false;
+// musica.js - Control de música con iframe directo (sin API)
+let iframe = null;
 let musicMuted = true;
-let config = null;
 
-export function initMusica(cfg) {
-  config = cfg;
-  // El reproductor se crea desde el script de YouTube (onYouTubeIframeAPIReady)
-  window.onYouTubeIframeAPIReady = function() {
-    ytPlayer = new YT.Player('yt-audio', {
-      height: '1',
-      width: '1',
-      videoId: config.youtubeId,
-      playerVars: {
-        autoplay: 0,
-        controls: 0,
-        disablekb: 1,
-        loop: 1,
-        playlist: config.youtubeId,
-        playsinline: 1
-      },
-      events: {
-        onReady: () => { ytReady = true; },
-        onError: () => console.warn('YouTube error')
-      }
-    });
-  };
-  // Si la API ya se cargó, llamarla directamente
-  if (typeof YT !== 'undefined' && YT.loaded) {
-    window.onYouTubeIframeAPIReady();
-  }
+export function initMusica(config) {
+  // Crear iframe oculto
+  iframe = document.createElement('iframe');
+  iframe.id = 'yt-audio';
+  iframe.src = `https://www.youtube.com/embed/${config.youtubeId}?autoplay=0&mute=1&loop=1&playlist=${config.youtubeId}&controls=0&disablekb=1`;
+  iframe.style.cssText = 'position:fixed; width:1px; height:1px; opacity:0; pointer-events:none; bottom:0; left:0;';
+  document.body.appendChild(iframe);
 }
 
 export function playMusic() {
-  if (ytReady && ytPlayer) {
-    try {
-      ytPlayer.playVideo();
-      musicMuted = false;
-      document.getElementById('music-toggle').classList.remove('pulse');
-    } catch (e) {}
-  } else {
-    setTimeout(playMusic, 300);
-  }
+  if (!iframe) return;
+  // Forzar recarga del iframe con autoplay y unmute
+  iframe.src = iframe.src.replace('autoplay=0&mute=1', 'autoplay=1&mute=0');
+  musicMuted = false;
+  document.getElementById('music-toggle').classList.remove('pulse');
 }
 
 export function toggleMusic() {
-  if (!ytPlayer) return;
+  if (!iframe) return;
   musicMuted = !musicMuted;
   if (musicMuted) {
-    ytPlayer.mute();
+    iframe.src = iframe.src.replace('autoplay=1&mute=0', 'autoplay=0&mute=1');
     document.getElementById('music-toggle').style.opacity = '0.5';
     document.getElementById('music-toggle').classList.remove('pulse');
   } else {
-    ytPlayer.unMute();
-    ytPlayer.playVideo();
+    iframe.src = iframe.src.replace('autoplay=0&mute=1', 'autoplay=1&mute=0');
     document.getElementById('music-toggle').style.opacity = '1';
     document.getElementById('music-toggle').classList.add('pulse');
   }
