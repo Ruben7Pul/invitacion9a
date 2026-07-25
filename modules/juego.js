@@ -1,8 +1,11 @@
 // juego.js - Juego secreto Breakout
+console.log('📦 módulo juego.js cargado');
+
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 import { burst } from './particulas.js';
 
 export function initJuego(config) {
+  console.log('🎮 Iniciando juego...');
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => { soundTap(); openGame(); });
 
@@ -111,20 +114,16 @@ export function initJuego(config) {
     }, 50);
   }
 
-  function stopTrail() { if (trailInterval) { clearInterval(trailInterval);
-      trailInterval = null; } }
+  function stopTrail() { if (trailInterval) { clearInterval(trailInterval); trailInterval = null; } }
 
   function step() {
     if (!running) return;
     ball.x += ball.vx;
     ball.y += ball.vy;
 
-    if (ball.x - ball.r < 0) { ball.x = ball.r;
-      ball.vx = Math.abs(ball.vx); }
-    if (ball.x + ball.r > LW) { ball.x = LW - ball.r;
-      ball.vx = -Math.abs(ball.vx); }
-    if (ball.y - ball.r < 0) { ball.y = ball.r;
-      ball.vy = Math.abs(ball.vy); }
+    if (ball.x - ball.r < 0) { ball.x = ball.r; ball.vx = Math.abs(ball.vx); }
+    if (ball.x + ball.r > LW) { ball.x = LW - ball.r; ball.vx = -Math.abs(ball.vx); }
+    if (ball.y - ball.r < 0) { ball.y = ball.r; ball.vy = Math.abs(ball.vy); }
 
     const py = LH - 16;
     if (ball.vy > 0 && ball.y + ball.r >= py && ball.y + ball.r <= py + 14 && ball.x >= paddle.x - ball.r && ball.x <= paddle.x + paddle.w + ball.r) {
@@ -171,7 +170,6 @@ export function initJuego(config) {
     cancelAnimationFrame(rafId);
     if (win) {
       soundWin();
-      // Confeti masivo
       for (let i = 0; i < 80; i++) {
         const el = document.createElement('div');
         el.className = 'confetti-burst';
@@ -209,18 +207,11 @@ export function initJuego(config) {
     rafId = requestAnimationFrame(step);
   }
 
-  function openGame() { overlay.classList.add('open');
-    startGame(); }
-
-  function closeGame() { overlay.classList.remove('open');
-    running = false;
-    stopTrail();
-    cancelAnimationFrame(rafId);
-    soundClose(); }
+  function openGame() { overlay.classList.add('open'); startGame(); }
+  function closeGame() { overlay.classList.remove('open'); running = false; stopTrail(); cancelAnimationFrame(rafId); soundClose(); }
 
   document.getElementById('game-close').addEventListener('click', closeGame);
-  restartBtn.addEventListener('click', () => { soundTap();
-    startGame(); });
+  restartBtn.addEventListener('click', () => { soundTap(); startGame(); });
   overlay.addEventListener('click', e => { if (e.target === overlay) closeGame(); });
 
   function movePaddle(clientX) {
@@ -230,10 +221,9 @@ export function initJuego(config) {
     if (!running) draw();
   }
   stage.addEventListener('pointermove', e => movePaddle(e.clientX));
-  stage.addEventListener('touchmove', e => { if (e.touches[0]) movePaddle(e.touches[0].clientX);
-    e.preventDefault(); }, { passive: false });
+  stage.addEventListener('touchmove', e => { if (e.touches[0]) movePaddle(e.touches[0].clientX); e.preventDefault(); }, { passive: false });
 
-  window.addEventListener('resize', () => { layoutStage();
-    draw(); });
+  window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
+  console.log('✅ Juego listo');
 }
