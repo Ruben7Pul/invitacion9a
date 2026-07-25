@@ -67,11 +67,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.CONFIG = config;
   rellenarDatos(config);
 
-  // Cargar módulos según la página actual
   const isIndex = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname === '';
   const isPrincipal = window.location.pathname.endsWith('principal.html');
 
-  // Módulos comunes (sonidos, partículas, música)
+  // Módulos comunes
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
     initSonidos();
@@ -91,31 +90,30 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (e) { console.error('❌ Música:', e); }
 
   if (isIndex) {
-    // Lógica de la reja (solo en index.html)
-    console.log('📌 Página de inicio (index)');
+    console.log('📌 Página de inicio (index) - al hacer clic en reja → principal.html');
     const gateWrapper = document.getElementById('gate-wrapper');
     if (gateWrapper) {
       gateWrapper.addEventListener('click', () => {
-        // Abrir reja y redirigir a principal.html
+        // Animación de apertura
         gateWrapper.classList.add('open');
         if (window.playMusic) {
           window.resetMusic();
           setTimeout(() => window.playMusic(), 100);
         }
+        // Redirigir a principal.html DESPUÉS de la animación
         setTimeout(() => {
           window.location.href = 'principal.html';
         }, 800);
       });
+    } else {
+      console.warn('⚠️ No se encontró #gate-wrapper');
     }
   } else if (isPrincipal) {
-    // Lógica de la pantalla principal
     console.log('📌 Pantalla principal (principal)');
-    // Iniciar música automáticamente si no está sonando
     if (window.playMusic) {
       setTimeout(() => window.playMusic(), 200);
     }
 
-    // Módulos específicos de la principal
     try {
       const { initContador } = await import('./modules/contador.js');
       initContador(config);
@@ -131,15 +129,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       initJuego(config);
     } catch (e) { console.error('❌ Juego:', e); }
 
-    // Mute
     const muteBtn = document.getElementById('music-toggle');
     if (muteBtn) {
       muteBtn.addEventListener('click', () => {
         if (window.toggleMusic) window.toggleMusic();
       });
     }
-
-    // El botón "volver" es un enlace a index.html (ya está en el HTML como <a href="index.html">)
-    // No necesita lógica adicional
   }
-});
+});  
