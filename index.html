@@ -14,14 +14,13 @@
   <div id="bg"></div>
   <div id="petals-layer"></div>
 
-  <!-- PORTAL con REJA DORADA -->
+  <!-- ===== PORTAL con REJA DE DOS HOJAS ===== -->
   <div id="portal">
     <div class="portal-inner">
       <span class="eyebrow gold-text">Una invitación encantada</span>
       <button id="gate-btn" aria-label="Abrir la reja">
         <div class="gate-container">
           <svg viewBox="0 0 200 200" width="140" height="140" class="gate-svg">
-            <!-- Reja (diseño simple) -->
             <defs>
               <linearGradient id="goldGate" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#f0d9a3"/>
@@ -36,29 +35,45 @@
                 </feMerge>
               </filter>
             </defs>
-            <!-- Marco de la reja -->
-            <rect x="30" y="30" width="140" height="140" rx="20" fill="none" stroke="url(#goldGate)" stroke-width="6" filter="url(#gateGlow)"/>
-            <rect x="30" y="30" width="140" height="140" rx="20" fill="none" stroke="rgba(255,215,0,0.3)" stroke-width="8"/>
-            <!-- Barrotes verticales -->
-            <rect x="65" y="40" width="10" height="120" rx="3" fill="url(#goldGate)"/>
-            <rect x="95" y="40" width="10" height="120" rx="3" fill="url(#goldGate)"/>
-            <rect x="125" y="40" width="10" height="120" rx="3" fill="url(#goldGate)"/>
-            <!-- Barrotes horizontales -->
-            <rect x="40" y="65" width="120" height="10" rx="3" fill="url(#goldGate)"/>
-            <rect x="40" y="125" width="120" height="10" rx="3" fill="url(#goldGate)"/>
-            <!-- Centro decorativo -->
-            <circle cx="100" cy="100" r="18" fill="none" stroke="url(#goldGate)" stroke-width="3"/>
-            <circle cx="100" cy="100" r="10" fill="url(#goldGate)" opacity="0.8"/>
+
+            <!-- HOJA IZQUIERDA (bisagra en x=40) -->
+            <g class="gate-left" transform-origin="40 100">
+              <!-- Marco izquierdo -->
+              <rect x="40" y="40" width="60" height="120" rx="8" fill="none" stroke="url(#goldGate)" stroke-width="5"/>
+              <!-- Barrotes verticales izquierdos -->
+              <rect x="55" y="48" width="6" height="104" rx="2" fill="url(#goldGate)"/>
+              <rect x="78" y="48" width="6" height="104" rx="2" fill="url(#goldGate)"/>
+              <!-- Barrotes horizontales izquierdos -->
+              <rect x="48" y="65" width="44" height="6" rx="2" fill="url(#goldGate)"/>
+              <rect x="48" y="125" width="44" height="6" rx="2" fill="url(#goldGate)"/>
+            </g>
+
+            <!-- HOJA DERECHA (bisagra en x=160) -->
+            <g class="gate-right" transform-origin="160 100">
+              <!-- Marco derecho -->
+              <rect x="100" y="40" width="60" height="120" rx="8" fill="none" stroke="url(#goldGate)" stroke-width="5"/>
+              <!-- Barrotes verticales derechos -->
+              <rect x="116" y="48" width="6" height="104" rx="2" fill="url(#goldGate)"/>
+              <rect x="139" y="48" width="6" height="104" rx="2" fill="url(#goldGate)"/>
+              <!-- Barrotes horizontales derechos -->
+              <rect x="108" y="65" width="44" height="6" rx="2" fill="url(#goldGate)"/>
+              <rect x="108" y="125" width="44" height="6" rx="2" fill="url(#goldGate)"/>
+            </g>
+
+            <!-- Candado central (se desvanece al abrir) -->
+            <g class="gate-lock">
+              <rect x="93" y="85" width="14" height="12" rx="2" fill="#b8943c" stroke="#8a7030" stroke-width="1"/>
+              <circle cx="100" cy="85" r="5" fill="none" stroke="#b8943c" stroke-width="3"/>
+            </g>
+
+            <!-- Arco superior -->
+            <path d="M40 40 Q100 10 160 40" fill="none" stroke="url(#goldGate)" stroke-width="5" filter="url(#gateGlow)"/>
+
             <!-- Brillos decorativos -->
-            <circle cx="70" cy="70" r="4" fill="#fff" opacity="0.6"/>
-            <circle cx="130" cy="70" r="4" fill="#fff" opacity="0.6"/>
-            <circle cx="70" cy="130" r="4" fill="#fff" opacity="0.6"/>
-            <circle cx="130" cy="130" r="4" fill="#fff" opacity="0.6"/>
-            <!-- Candado (cerrado) -->
-            <rect x="93" y="85" width="14" height="12" rx="2" fill="#b8943c" stroke="#8a7030" stroke-width="1"/>
-            <circle cx="100" cy="85" r="5" fill="none" stroke="#b8943c" stroke-width="3"/>
-            <!-- Arco superior (opcional) -->
-            <path d="M50 30 Q100 0 150 30" fill="none" stroke="url(#goldGate)" stroke-width="5" filter="url(#gateGlow)"/>
+            <circle cx="70" cy="70" r="3" fill="#fff" opacity="0.6"/>
+            <circle cx="130" cy="70" r="3" fill="#fff" opacity="0.6"/>
+            <circle cx="70" cy="130" r="3" fill="#fff" opacity="0.6"/>
+            <circle cx="130" cy="130" r="3" fill="#fff" opacity="0.6"/>
           </svg>
           <div class="gate-brillos"></div>
         </div>
@@ -67,7 +82,7 @@
     </div>
   </div>
 
-  <!-- APP PRINCIPAL -->
+  <!-- ===== APP PRINCIPAL ===== -->
   <div id="app">
     <div id="app-top">
       <button id="back-btn" aria-label="Volver" class="top-btn">↩</button>
@@ -82,7 +97,7 @@
     </div>
 
     <div id="app-mid">
-      <!-- ÓVALO VERTICAL (sin adornos) -->
+      <!-- ÓVALO VERTICAL (sin adornos, más subido) -->
       <div id="oval-wrap">
         <div class="oval-frame">
           <div class="oval-mask">
@@ -92,7 +107,7 @@
       </div>
 
       <div class="name-wrap">
-        <h1 id="nombre-hero">X</h1>
+        <h1 id="nombre-hero" data-text="X">X</h1>
         <p class="hint gold-text">👆 Toca mi nombre para jugar</p>
       </div>
       <p class="frase-inline gold-text" id="frase-texto">Cargando...</p>
