@@ -12,7 +12,6 @@ async function cargarConfig() {
     return CONFIG;
   } catch (e) {
     console.error('❌ Error cargando config.json:', e);
-    // Fallback por si falla
     return {
       nombre: 'Dania',
       fechaTexto: '24 de octubre de 2026',
@@ -28,7 +27,7 @@ async function cargarConfig() {
       madre: 'Mamá',
       padrino: 'Padrino',
       madrina: 'Madrina',
-      youtubeId: 'CXZ7Nz69OPg'
+      audioFile: 'archivos/cancion.mp3'
     };
   }
 }
@@ -59,7 +58,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.CONFIG = config;
   rellenarDatos(config);
 
-  // Importar y ejecutar módulos (con try/catch para ver errores)
+  // Importar y ejecutar módulos
   try {
     const { initContador } = await import('./modules/contador.js');
     initContador(config);
@@ -89,7 +88,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initMusica(config);
     window.playMusic = playMusic;
     window.toggleMusic = toggleMusic;
-    console.log('✅ Módulo musica iniciado');
+    console.log('✅ Módulo musica iniciado (audio local)');
   } catch (e) { console.error('❌ Error en musica:', e); }
 
   try {
@@ -98,19 +97,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('✅ Módulo juego iniciado');
   } catch (e) { console.error('❌ Error en juego:', e); }
 
-  // ---------------- MANEJO DE LA ROSA (prioridad) ----------------
+  // ---------------- MANEJO DE LA ROSA ----------------
   const roseBtn = document.getElementById('rose-btn');
   const portal = document.getElementById('portal');
   const app = document.getElementById('app');
 
-  if (!roseBtn) console.error('❌ Botón rosa NO encontrado en el DOM');
+  if (!roseBtn) console.error('❌ Botón rosa NO encontrado');
   if (!portal) console.error('❌ Portal NO encontrado');
   if (!app) console.error('❌ App NO encontrada');
 
   if (roseBtn && portal && app) {
     console.log('✅ Elementos para la rosa encontrados');
 
-    // Eliminar cualquier listener anterior (por seguridad)
+    // Reemplazar para evitar duplicados
     const newBtn = roseBtn.cloneNode(true);
     roseBtn.parentNode.replaceChild(newBtn, roseBtn);
     const finalBtn = document.getElementById('rose-btn');
@@ -119,35 +118,26 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.log('🌹 CLIC EN ROSA detectado');
       e.preventDefault();
 
-      // Cerrar portal
       portal.classList.add('hide');
       app.classList.add('show');
       console.log('🔓 Portal cerrado, App visible');
 
-      // Intentar reproducir música
+      // Reproducir música local
       if (window.playMusic) {
         try {
           window.playMusic();
-          console.log('🎵 Música iniciada (desde script.js)');
+          console.log('🎵 Música local iniciada');
         } catch (err) {
           console.error('❌ Error al reproducir música:', err);
         }
       } else {
         console.warn('⚠️ playMusic no disponible');
-        // Fallback: intentar cargar iframe directamente
-        const iframe = document.getElementById('yt-audio');
-        if (iframe) {
-          iframe.src = `https://www.youtube.com/embed/${config.youtubeId}?autoplay=1&mute=0&loop=1&playlist=${config.youtubeId}&controls=0&disablekb=1`;
-          console.log('🎵 Fallback: iframe configurado');
-        }
       }
 
-      // Efecto de sonido (si está disponible)
+      // Efectos sonoros y chispas
       import('./modules/sonidos.js').then(module => {
         try { module.soundOpen(); } catch (e) {}
       }).catch(() => {});
-
-      // Efecto de chispas
       import('./modules/particulas.js').then(module => {
         try {
           const rect = this.getBoundingClientRect();
@@ -158,7 +148,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     console.log('✅ Evento click asignado a la rosa');
   } else {
-    console.error('❌ NO se pudo asignar evento a la rosa (elementos faltantes)');
+    console.error('❌ NO se pudo asignar evento a la rosa');
   }
 });
 
