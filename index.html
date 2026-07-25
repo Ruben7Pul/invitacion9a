@@ -4,13 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
   <title>Mis XV años</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+
+  <!-- CSS con verificación de carga -->
+  <link rel="stylesheet" href="style.css" onload="console.log('✅ style.css cargado (onload)')">
+  <script>
+    // Fallback para verificar CSS
+    setTimeout(() => {
+      const bg = getComputedStyle(document.body).backgroundImage;
+      if (bg && bg !== 'none') console.log('✅ style.css verificado (background existe)');
+      else console.warn('⚠️ style.css NO se cargó correctamente');
+    }, 500);
+  </script>
+
+  <!-- API de YouTube (solo por si acaso, pero usaremos iframe directo) -->
   <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
+  <script>console.log('✅ index.html: body iniciado');</script>
+
   <!-- Capas de fondo -->
   <div id="bg"></div>
   <div id="stars"></div>
@@ -18,13 +33,19 @@
   <div id="confetti-container"></div>
   <div id="cursor-layer"></div>
 
-  <!-- Portal -->
+  <!-- ============ PORTAL ============ -->
   <div id="portal">
     <div class="portal-inner">
       <span class="eyebrow gold-text">Una invitación encantada</span>
       <button id="rose-btn" aria-label="Toca la rosa para comenzar">
         <svg viewBox="0 0 100 100">
-          <defs><radialGradient id="roseGradP" cx="35%" cy="30%" r="75%"><stop offset="0%" stop-color="#e08a99"/><stop offset="55%" stop-color="#8a2c3b"/><stop offset="100%" stop-color="#5c1a24"/></radialGradient></defs>
+          <defs>
+            <radialGradient id="roseGradP" cx="35%" cy="30%" r="75%">
+              <stop offset="0%" stop-color="#e08a99"/>
+              <stop offset="55%" stop-color="#8a2c3b"/>
+              <stop offset="100%" stop-color="#5c1a24"/>
+            </radialGradient>
+          </defs>
           <path d="M50 42 L50 90" stroke="#2e4a3c" stroke-width="2.5" fill="none"/>
           <path class="rose-petal" d="M50 42 Q30 30 34 14 Q46 20 50 42 Z" fill="url(#roseGradP)"/>
           <path class="rose-petal" d="M50 42 Q70 30 66 14 Q54 20 50 42 Z" fill="url(#roseGradP)"/>
@@ -37,15 +58,23 @@
     </div>
   </div>
 
-  <!-- App principal -->
+  <!-- ============ APP PRINCIPAL ============ -->
   <div id="app">
     <div id="app-top"><span class="eyebrow gold-text">Mis quince años</span></div>
     <div id="app-mid">
       <div id="rose-wrap">
         <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <radialGradient id="roseGrad2" cx="35%" cy="30%" r="75%"><stop offset="0%" stop-color="#e08a99"/><stop offset="55%" stop-color="#8a2c3b"/><stop offset="100%" stop-color="#5c1a24"/></radialGradient>
-            <linearGradient id="glassGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="rgba(255,255,255,0.15)"/><stop offset="50%" stop-color="rgba(255,255,255,0.02)"/><stop offset="100%" stop-color="rgba(255,255,255,0.1)"/></linearGradient>
+            <radialGradient id="roseGrad2" cx="35%" cy="30%" r="75%">
+              <stop offset="0%" stop-color="#e08a99"/>
+              <stop offset="55%" stop-color="#8a2c3b"/>
+              <stop offset="100%" stop-color="#5c1a24"/>
+            </radialGradient>
+            <linearGradient id="glassGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.15)"/>
+              <stop offset="50%" stop-color="rgba(255,255,255,0.02)"/>
+              <stop offset="100%" stop-color="rgba(255,255,255,0.1)"/>
+            </linearGradient>
           </defs>
           <path d="M35 75 L38 92 Q50 98 62 92 L65 75 Z" fill="rgba(200,180,160,0.3)" stroke="var(--gold)" stroke-width="1.2"/>
           <path d="M35 75 L38 92 Q50 98 62 92 L65 75 Z" fill="url(#glassGrad)"/>
@@ -83,6 +112,7 @@
     </nav>
   </div>
 
+  <!-- Botón de música -->
   <button id="music-toggle" aria-label="Silenciar o activar música">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
       <path d="M4 9 L4 15 L8 15 L13 20 L13 4 L8 9 Z"/>
@@ -91,7 +121,10 @@
     </svg>
   </button>
 
-  <!-- MODALES -->
+  <!-- IFrame para música (se carga dinámicamente) -->
+  <iframe id="yt-audio" style="position:fixed; width:1px; height:1px; opacity:0; pointer-events:none; bottom:0; left:0;"></iframe>
+
+  <!-- ============ MODALES ============ -->
   <div class="modal-overlay" id="modal-contador">
     <div class="modal-card">
       <button class="modal-close" data-close>&times;</button>
@@ -145,7 +178,7 @@
     </div>
   </div>
 
-  <!-- JUEGO -->
+  <!-- ============ JUEGO ============ -->
   <div id="game-overlay">
     <div id="game-panel">
       <div id="game-header">
@@ -166,6 +199,8 @@
     </div>
   </div>
 
+  <!-- Script principal (módulo) -->
   <script type="module" src="script.js"></script>
+  <script>console.log('✅ index.html: script principal solicitado');</script>
 </body>
 </html>
