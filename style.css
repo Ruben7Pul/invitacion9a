@@ -63,7 +63,7 @@ body {
   text-shadow: 0 0 8px rgba(201, 162, 77, 0.2);
 }
 
-/* ===== PORTAL REJA ===== */
+/* ===== PORTAL REJA DE DOS HOJAS ===== */
 #portal {
   position: fixed;
   inset: 0;
@@ -85,7 +85,6 @@ body {
   font-size: 0.7rem;
 }
 
-/* Reja y animación */
 #gate-btn {
   background: none;
   border: none;
@@ -102,13 +101,43 @@ body {
 .gate-svg {
   width: 100%;
   height: 100%;
-  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.6s ease;
   filter: drop-shadow(0 0 20px rgba(201, 162, 77, 0.3));
+  transition: filter 0.6s ease;
 }
 .gate-svg:hover {
   filter: drop-shadow(0 0 40px rgba(201, 162, 77, 0.7));
 }
 
+/* Hoja izquierda - bisagra en el lado izquierdo */
+.gate-left {
+  transform-origin: 40px 100px;
+  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+/* Hoja derecha - bisagra en el lado derecho */
+.gate-right {
+  transform-origin: 160px 100px;
+  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+/* Candado se desvanece al abrir */
+.gate-lock {
+  transition: opacity 0.5s ease;
+}
+
+/* Estado abierto (se añade al botón al hacer clic) */
+#gate-btn.open .gate-left {
+  transform: scaleX(0) rotateY(-30deg);
+}
+#gate-btn.open .gate-right {
+  transform: scaleX(0) rotateY(30deg);
+}
+#gate-btn.open .gate-lock {
+  opacity: 0;
+}
+#gate-btn.open .gate-svg {
+  filter: drop-shadow(0 0 60px rgba(255,215,0,0.8));
+}
+
+/* Brillo al abrir */
 .gate-brillos {
   position: absolute;
   inset: 0;
@@ -118,25 +147,9 @@ body {
   opacity: 0;
   transition: opacity 0.6s ease;
 }
-#gate-btn:active .gate-brillos {
-  opacity: 1;
-  animation: brilloGate 0.8s ease forwards;
-}
-@keyframes brilloGate {
-  0% { opacity: 0; transform: scale(0.8); }
-  30% { opacity: 1; transform: scale(1.2); }
-  100% { opacity: 0; transform: scale(1.5); }
-}
-/* Al hacer clic, la reja se "abre" (se ensancha y desvanece) */
-#gate-btn.open .gate-svg {
-  transform: scaleX(1.8) scaleY(0.9) rotate(5deg);
-  filter: drop-shadow(0 0 80px rgba(255,215,0,0.9));
-  opacity: 0.3;
-  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.8s ease, opacity 0.8s ease;
-}
 #gate-btn.open .gate-brillos {
   opacity: 1;
-  animation: brilloApertura 1s ease forwards;
+  animation: brilloApertura 0.8s ease forwards;
 }
 @keyframes brilloApertura {
   0% { opacity: 0; transform: scale(0.5); }
@@ -212,12 +225,12 @@ body {
   padding: 0.2rem 0;
 }
 
-/* ===== ÓVALO VERTICAL (sin adornos, más subido) ===== */
+/* ===== ÓVALO VERTICAL SIN ADORNOS, MÁS SUBIDO ===== */
 #oval-wrap {
   width: 140px;
   height: 190px;
   margin-bottom: 0.05rem;
-  margin-top: -30px;  /* subido */
+  margin-top: -30px;
   animation: floaty 6s ease-in-out infinite;
   position: relative;
 }
@@ -252,7 +265,7 @@ body {
   margin-top: 0.15rem;
 }
 
-/* ===== REFLEJO EN EL NOMBRE ===== */
+/* ===== NOMBRE CON REFLEJO ===== */
 h1#nombre-hero {
   font-family: var(--script);
   font-weight: 400;
@@ -270,7 +283,6 @@ h1#nombre-hero {
   position: relative;
   text-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
 }
-/* Reflejo (efecto espejo) */
 h1#nombre-hero::after {
   content: attr(data-text);
   position: absolute;
@@ -288,17 +300,6 @@ h1#nombre-hero::after {
   animation: rainbowMove 4s linear infinite;
   pointer-events: none;
 }
-h1#nombre-hero::before {
-  content: '';
-  position: absolute;
-  bottom: -15px;
-  left: 0;
-  width: 100%;
-  height: 30px;
-  background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.3));
-  pointer-events: none;
-}
-
 @keyframes rainbowMove {
   0% { background-position: 0% 50%; }
   100% { background-position: 300% 50%; }
@@ -366,7 +367,7 @@ h1#nombre-hero::before {
   text-transform: uppercase;
 }
 
-/* ===== ESTILO CALENDARIO PARA EL CONTADOR ===== */
+/* ===== CONTADOR ESTILO CALENDARIO ===== */
 .calendar-style .unit {
   background: #f4ead2;
   border: 2px solid #c9a24d;
@@ -374,7 +375,6 @@ h1#nombre-hero::before {
   padding: 0.6rem 0.1rem;
   box-shadow: 0 4px 0 #8a7030, inset 0 -2px 0 rgba(0,0,0,0.1);
   position: relative;
-  transform: rotate(0deg);
   transition: transform 0.3s ease;
 }
 .calendar-style .unit:hover {
@@ -673,7 +673,7 @@ h1#nombre-hero::before {
   .clock .num { font-size: 1rem; }
   #app-top .eyebrow { font-size: 0.55rem; }
   .top-btn { font-size: 1rem; }
-  #gate-btn .gate-container { width: 100px; height: 100px; }
+  .gate-container { width: 100px; height: 100px; }
   .game-help { font-size: 0.7rem; }
   .hint { font-size: 0.65rem; }
   .frase-inline { font-size: 0.8rem; }
