@@ -4,17 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
   <title>Mis XV años</title>
+
+  <!-- Favicon (para evitar error 404) -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌹</text></svg>">
+
+  <!-- Fuentes de Google -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
 
-  <!-- CSS con verificación de carga -->
-  <link rel="stylesheet" href="style.css" onload="console.log('✅ style.css cargado (onload)')">
+  <!-- ⭐ CSS PRINCIPAL (¡ESTA LÍNEA ES LA QUE FALTABA!) -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Verificación de carga (opcional) -->
   <script>
+    console.log('🔍 Verificando carga de CSS...');
     setTimeout(() => {
       const bg = getComputedStyle(document.body).backgroundImage;
-      if (bg && bg !== 'none') console.log('✅ style.css verificado');
+      if (bg && bg !== 'none') console.log('✅ style.css cargado correctamente');
       else console.warn('⚠️ style.css NO se cargó');
     }, 500);
   </script>
