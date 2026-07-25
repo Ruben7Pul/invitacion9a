@@ -6,7 +6,6 @@ export function initContador(config) {
   // Usar la fecha directamente de config.json
   const target = new Date(config.fechaISO).getTime();
   
-  // Si la fecha es inválida, mostrar un error y usar un fallback (pero no debería pasar)
   if (isNaN(target)) {
     console.error('❌ Fecha inválida en config.json:', config.fechaISO);
     document.getElementById('clock').innerHTML = '<p style="color:red;">Error: fecha inválida en config.json</p>';
