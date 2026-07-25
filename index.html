@@ -12,16 +12,12 @@
   <!-- CSS con verificación de carga -->
   <link rel="stylesheet" href="style.css" onload="console.log('✅ style.css cargado (onload)')">
   <script>
-    // Fallback para verificar CSS
     setTimeout(() => {
       const bg = getComputedStyle(document.body).backgroundImage;
-      if (bg && bg !== 'none') console.log('✅ style.css verificado (background existe)');
-      else console.warn('⚠️ style.css NO se cargó correctamente');
+      if (bg && bg !== 'none') console.log('✅ style.css verificado');
+      else console.warn('⚠️ style.css NO se cargó');
     }, 500);
   </script>
-
-  <!-- API de YouTube (solo por si acaso, pero usaremos iframe directo) -->
-  <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
   <script>console.log('✅ index.html: body iniciado');</script>
@@ -120,9 +116,6 @@
       <path d="M19 6 a10 10 0 0 1 0 12"/>
     </svg>
   </button>
-
-  <!-- IFrame para música (se carga dinámicamente) -->
-  <iframe id="yt-audio" style="position:fixed; width:1px; height:1px; opacity:0; pointer-events:none; bottom:0; left:0;"></iframe>
 
   <!-- ============ MODALES ============ -->
   <div class="modal-overlay" id="modal-contador">
