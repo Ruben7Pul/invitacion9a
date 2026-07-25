@@ -1,12 +1,24 @@
-console.log('📦 contador');
+console.log('📦 contador.js (usa fecha de config.json)');
 
 export function initContador(config) {
+  console.log('🕒 Iniciando contador con fecha:', config.fechaISO);
+  
+  // Usar la fecha directamente de config.json
   const target = new Date(config.fechaISO).getTime();
+  
+  // Si la fecha es inválida, mostrar un error y usar un fallback (pero no debería pasar)
   if (isNaN(target)) {
-    console.error('❌ fechaISO inválida en config.json:', config.fechaISO);
+    console.error('❌ Fecha inválida en config.json:', config.fechaISO);
+    document.getElementById('clock').innerHTML = '<p style="color:red;">Error: fecha inválida en config.json</p>';
     return;
   }
-  const els = { d: document.getElementById('d'), h: document.getElementById('h'), m: document.getElementById('m'), s: document.getElementById('s') };
+
+  const els = {
+    d: document.getElementById('d'),
+    h: document.getElementById('h'),
+    m: document.getElementById('m'),
+    s: document.getElementById('s')
+  };
   const clockEl = document.getElementById('clock');
   const doneEl = document.getElementById('contador-terminado');
 
@@ -16,6 +28,7 @@ export function initContador(config) {
       clockEl.style.display = 'none';
       doneEl.style.display = 'block';
       clearInterval(timer);
+      console.log('🎉 Contador finalizado');
       return;
     }
     els.d.textContent = String(Math.floor(diff / 86400000)).padStart(2, '0');
@@ -25,4 +38,5 @@ export function initContador(config) {
   }
   tick();
   const timer = setInterval(tick, 1000);
+  console.log('✅ Contador iniciado con fecha:', new Date(target).toLocaleString());
 }
