@@ -1,4 +1,4 @@
-console.log('📦 juego.js (teclado + giroscopio, sin mouse/touch)');
+console.log('📦 juego.js (teclado + giroscopio corregido)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
@@ -39,11 +39,9 @@ export function initJuego(config) {
   let running = false;
   let gameInterval = null;
 
-  // Variable para inclinación
   let tiltX = 0;
   let tiltActive = false;
 
-  // Exponer closeGame para el botón de volver
   window.closeGame = closeGame;
 
   function letras() {
@@ -113,6 +111,7 @@ export function initJuego(config) {
     ballEl.style.top = (ball.y - ball.r) + 'px';
   }
 
+  // Bucle principal
   function gameLoop() {
     if (!running) return;
 
@@ -122,6 +121,9 @@ export function initJuego(config) {
       paddle.x += tiltX * sens;
       paddle.x = Math.max(0, Math.min(LW - paddle.w, paddle.x));
     }
+
+    // Movimiento por teclado (se maneja con eventos keydown/keyup)
+    // (ya implementado más abajo con variables keys)
 
     ball.x += ball.vx;
     ball.y += ball.vy;
@@ -240,7 +242,7 @@ export function initJuego(config) {
     }
   });
 
-  // Aplicar teclado en cada frame
+  // Inyectar teclado en el bucle
   const origLoop = gameLoop;
   gameLoop = function() {
     if (running) {
@@ -251,20 +253,43 @@ export function initJuego(config) {
   };
 
   // ---------- CONTROL POR INCLINACIÓN (GIROSCOPIO) ----------
-  if (window.DeviceOrientationEvent) {
-    window.addEventListener('deviceorientation', (e) => {
-      if (!running) return;
-      const gamma = e.gamma || 0;
-      let tilt = 0;
-      if (Math.abs(gamma) > 5) {
-        tilt = Math.max(-1, Math.min(1, gamma / 45));
+  function initTilt() {
+    if (window.DeviceOrientationEvent) {
+      // iOS 13+ requiere permiso
+      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission()
+          .then(state => {
+            if (state === 'granted') {
+              window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+              console.log('✅ Permiso de giroscopio concedido');
+            } else {
+              console.warn('⚠️ Permiso de giroscopio denegado');
+            }
+          })
+          .catch(err => console.warn('Error al solicitar permiso:', err));
+      } else {
+        // Android y otros
+        window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+        console.log('✅ Giroscopio activado (sin permiso)');
       }
-      tiltX = tilt;
-      tiltActive = true;
-    });
-  } else {
-    console.warn('⚠️ Giroscopio no soportado');
+    } else {
+      console.warn('⚠️ Giroscopio no soportado');
+    }
   }
+
+  function handleOrientation(e) {
+    if (!running) return;
+    const gamma = e.gamma || 0;
+    let tilt = 0;
+    if (Math.abs(gamma) > 5) {
+      tilt = Math.max(-1, Math.min(1, gamma / 45));
+    }
+    tiltX = tilt;
+    tiltActive = true;
+  }
+
+  // Iniciar giroscopio al abrir el juego, o al cargar la página
+  initTilt();
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
