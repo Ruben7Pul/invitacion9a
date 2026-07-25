@@ -1,4 +1,4 @@
-console.log('📦 música (toggle corregido)');
+console.log('📦 música (con reset)');
 
 let audio = null;
 let config = null;
@@ -15,7 +15,15 @@ export function initMusica(cfg) {
 export function playMusic() {
   if (!audio) return;
   if (!audio.paused) return;
+  // Si está pausado, reanudar desde donde estaba
   audio.play().catch(() => {});
+}
+
+export function resetMusic() {
+  if (!audio) return;
+  audio.pause();
+  audio.currentTime = 0;
+  console.log('⏹️ Música reiniciada y pausada');
 }
 
 export function toggleMusic() {
