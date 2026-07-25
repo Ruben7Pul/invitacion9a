@@ -1,4 +1,4 @@
-console.log('📦 juego.js (teclado + acelerómetro + arrastre)');
+console.log('📦 juego.js (teclado + arrastre)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
@@ -11,7 +11,7 @@ const TOP = 30;
 const SPEED = 3.8;
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego (controles: teclado, acelerómetro, arrastre con dedo)');
+  console.log('🎮 Iniciando juego (controles: teclado, arrastre con dedo)');
 
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => { soundTap(); openGame(); });
@@ -40,14 +40,9 @@ export function initJuego(config) {
   let gameInterval = null;
 
   // ---- Variables de control ----
-  // Teclado
   const keys = { left: false, right: false };
-  // Arrastre con dedo
   let touchActive = false;
   let touchX = 0;
-  // Acelerómetro
-  let accelX = 0;
-  let accelActive = false;
 
   window.closeGame = closeGame;
 
@@ -119,27 +114,19 @@ export function initJuego(config) {
     ballEl.style.top = (ball.y - ball.r) + 'px';
   }
 
-  // ---- BUCLE PRINCIPAL ----
   function gameLoop() {
     if (!running) return;
 
-    // 1. Teclado
+    // Teclado
     if (keys.left) paddle.x = Math.max(0, paddle.x - 8);
     if (keys.right) paddle.x = Math.min(LW - paddle.w, paddle.x + 8);
 
-    // 2. Acelerómetro
-    if (accelActive) {
-      const sens = 8;
-      paddle.x += accelX * sens;
-      paddle.x = Math.max(0, Math.min(LW - paddle.w, paddle.x));
-    }
-
-    // 3. Arrastre con dedo (prioridad sobre los demás)
+    // Arrastre (prioridad)
     if (touchActive) {
       paddle.x = Math.max(0, Math.min(LW - paddle.w, touchX));
     }
 
-    // ---- Física ----
+    // Física
     ball.x += ball.vx;
     ball.y += ball.vy;
 
@@ -148,7 +135,6 @@ export function initJuego(config) {
     if (ball.x + ball.r > LW) { ball.x = LW - ball.r; ball.vx = -Math.abs(ball.vx); }
     if (ball.y - ball.r < 0) { ball.y = ball.r; ball.vy = Math.abs(ball.vy); }
 
-    // Colisión paleta
     const py = LH - 14;
     if (ball.vy > 0 && ball.y + ball.r >= py && ball.y + ball.r <= py + 10 &&
         ball.x >= paddle.x - ball.r && ball.x <= paddle.x + paddle.w + ball.r) {
@@ -161,7 +147,6 @@ export function initJuego(config) {
       ball.vy = -Math.cos(angle) * speed;
     }
 
-    // Colisión ladrillos
     for (const b of bricks) {
       if (!b.alive) continue;
       if (ball.x + ball.r > b.x && ball.x - ball.r < b.x + b.w &&
@@ -179,7 +164,6 @@ export function initJuego(config) {
       }
     }
 
-    // Perdida
     if (ball.y - ball.r > LH) {
       lives--;
       updateLives();
@@ -188,7 +172,6 @@ export function initJuego(config) {
       resetBall();
     }
 
-    // Victoria
     if (bricks.every(b => !b.alive)) { endGame(true); return; }
 
     draw();
@@ -218,12 +201,20 @@ export function initJuego(config) {
 
   function openGame() {
     overlay.classList.add('open');
-    msgText.textContent = 'Preparando...';
+    // Mostrar contador de 3 segundos
+    msgText.textContent = '3';
     msgEl.classList.add('show');
-    setTimeout(() => {
-      msgEl.classList.remove('show');
-      startGame();
-    }, 2000);
+    let countdown = 3;
+    const interval = setInterval(() => {
+      countdown--;
+      if (countdown > 0) {
+        msgText.textContent = countdown;
+      } else {
+        clearInterval(interval);
+        msgEl.classList.remove('show');
+        startGame();
+      }
+    }, 1000);
   }
 
   function closeGame() {
@@ -239,7 +230,7 @@ export function initJuego(config) {
   restartBtn.addEventListener('click', () => { soundTap(); startGame(); });
   overlay.addEventListener('click', e => { if (e.target === overlay) closeGame(); });
 
-  // ---- CONTROLES DE TECLADO ----
+  // ---- Teclado ----
   document.addEventListener('keydown', (e) => {
     if (!running) return;
     if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
@@ -260,7 +251,7 @@ export function initJuego(config) {
     }
   });
 
-  // ---- ARRASTRE CON DEDO (sobre el área del juego) ----
+  // ---- Arrastre con dedo ----
   stage.addEventListener('touchstart', (e) => {
     if (!running) return;
     const touch = e.touches[0];
@@ -287,49 +278,7 @@ export function initJuego(config) {
   stage.addEventListener('touchend', () => { touchActive = false; }, { passive: true });
   stage.addEventListener('touchcancel', () => { touchActive = false; }, { passive: true });
 
-  // ---- ACELERÓMETRO (con dirección corregida y sensibilidad reducida) ----
-  function initAccel() {
-    if (window.DeviceMotionEvent) {
-      if (typeof DeviceMotionEvent.requestPermission === 'function') {
-        DeviceMotionEvent.requestPermission()
-          .then(state => {
-            if (state === 'granted') {
-              window.addEventListener('devicemotion', handleMotion, { passive: true });
-              console.log('✅ Acelerómetro activado (iOS)');
-            } else {
-              console.warn('⚠️ Permiso de acelerómetro denegado');
-            }
-          })
-          .catch(err => console.warn('Error al pedir permiso:', err));
-      } else {
-        window.addEventListener('devicemotion', handleMotion, { passive: true });
-        console.log('✅ Acelerómetro activado (Android/otros)');
-      }
-    } else {
-      console.warn('⚠️ Acelerómetro no soportado');
-    }
-  }
-
-  function handleMotion(e) {
-    if (!running) return;
-    const accel = e.accelerationIncludingGravity || e.acceleration;
-    if (!accel) return;
-    let rawX = accel.x || 0;
-    // Invertir dirección (corrección común)
-    rawX = -rawX;
-    if (Math.abs(rawX) < 0.3) {
-      accelX = 0;
-      accelActive = false;
-      return;
-    }
-    accelX = Math.max(-1, Math.min(1, rawX / 8));
-    accelActive = true;
-  }
-
-  // Iniciar acelerómetro al cargar
-  initAccel();
-
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego listo (controles: teclado, acelerómetro, arrastre con dedo)');
+  console.log('✅ Juego listo (teclado + arrastre)');
 }
