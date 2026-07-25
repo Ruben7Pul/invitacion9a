@@ -1,4 +1,4 @@
-console.log('🚀 script.js (con reja tipo puerta)');
+console.log('🚀 script.js');
 
 let CONFIG = {};
 
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.CONFIG = config;
   rellenarDatos(config);
 
-  // Cargar módulos
+  // Módulos
   try {
     const { initContador } = await import('./modules/contador.js');
     initContador(config);
@@ -88,23 +88,37 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ---------- REJA (PORTAL) ----------
   const gateBtn = document.getElementById('gate-btn');
+  const gateWrapper = document.getElementById('gate-wrapper');
   const portal = document.getElementById('portal');
   const app = document.getElementById('app');
 
-  if (gateBtn && portal && app) {
-    gateBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      this.classList.add('open');
+  if (gateBtn && gateWrapper && portal && app) {
+    const openGate = () => {
+      // Añadir clase open al wrapper (activa la animación de las hojas)
+      gateWrapper.classList.add('open');
+      gateBtn.classList.add('hidden'); // ocultar botón
+
+      // Sonido y música
       if (window.playMusic) {
         window.resetMusic();
         setTimeout(() => window.playMusic(), 50);
       }
+
+      // Después de la animación (0.8s), ocultar portal y mostrar app
       setTimeout(() => {
         portal.classList.add('hide');
         app.classList.add('show');
-        this.classList.remove('open');
+        // Quitamos la clase open para resetear la reja (pero ya no se ve)
+        gateWrapper.classList.remove('open');
+        gateBtn.classList.remove('hidden');
       }, 800);
-    });
+    };
+
+    // Al hacer clic en el botón
+    gateBtn.addEventListener('click', openGate);
+
+    // También al hacer clic en la reja (wrapper)
+    gateWrapper.addEventListener('click', openGate);
   }
 
   // ---------- BOTÓN MUTE ----------
@@ -115,7 +129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // ---------- BOTÓN VOLVER (CON ANIMACIÓN DE PUERTA) ----------
+  // ---------- BOTÓN VOLVER ----------
   const backBtn = document.getElementById('back-btn');
   if (backBtn) {
     backBtn.addEventListener('click', () => {
@@ -129,7 +143,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         portal.classList.remove('closing');
         backBtn.classList.remove('animating');
       }, 800);
-      console.log('↩️ Volviendo al portal (puerta cerrándose)');
+      console.log('↩️ Volviendo al portal');
     });
   }
 });
