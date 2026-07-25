@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const isIndex = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname === '';
   const isPrincipal = window.location.pathname.endsWith('principal.html');
 
-  // Módulos comunes
+  // Cargar módulos comunes
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
     initSonidos();
@@ -89,14 +89,47 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.resetMusic = resetMusic;
   } catch (e) { console.error('❌ Música:', e); }
 
-  // Ahora la lógica de la reja está en un script inline en index.html,
-  // así que aquí solo manejamos principal.html
-  if (isPrincipal) {
-    console.log('📌 Pantalla principal (principal)');
+  if (isIndex) {
+    // Página de inicio: reja
+    console.log('📌 Página de inicio');
+    const gateWrapper = document.getElementById('gate-wrapper');
+    if (gateWrapper) {
+      gateWrapper.addEventListener('click', () => {
+        // Abrir la reja (animación)
+        gateWrapper.classList.add('open');
+
+        // Iniciar música (reiniciar desde 0)
+        if (window.playMusic) {
+          window.resetMusic();
+          setTimeout(() => window.playMusic(), 100);
+        }
+
+        // Después de la animación (0.9s), redirigir con fade
+        setTimeout(() => {
+          // Añadir un pequeño fade antes de ir a principal
+          document.body.style.transition = 'opacity 0.5s ease';
+          document.body.style.opacity = '0';
+          setTimeout(() => {
+            window.location.href = 'principal.html';
+          }, 500);
+        }, 900);
+      });
+    }
+  } else if (isPrincipal) {
+    // Pantalla principal
+    console.log('📌 Pantalla principal');
+    // La app ya tiene clase "show" por defecto, pero aseguramos que se vea
+    const app = document.getElementById('app');
+    if (app) {
+      app.classList.add('show');
+      app.classList.remove('fade-out');
+    }
+
     if (window.playMusic) {
       setTimeout(() => window.playMusic(), 200);
     }
 
+    // Cargar módulos específicos
     try {
       const { initContador } = await import('./modules/contador.js');
       initContador(config);
@@ -118,7 +151,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (window.toggleMusic) window.toggleMusic();
       });
     }
-  } else {
-    console.log('📌 Página de inicio - no se ejecuta lógica de reja aquí (ya está en HTML)');
+
+    // Botón de volver (enlace a index.html) - manejar animación de salida
+    const backLink = document.getElementById('back-link');
+    if (backLink) {
+      backLink.addEventListener('click', (e) => {
+        e.preventDefault(); // Prevenir la navegación inmediata
+        // 1. Fade out de la app
+        const app = document.getElementById('app');
+        if (app) {
+          app.classList.remove('show');
+          app.classList.add('fade-out');
+        }
+        // 2. Cerrar juego si está abierto
+        if (window.closeGame) window.closeGame();
+        // 3. Pausar y reiniciar música
+        if (window.resetMusic) window.resetMusic();
+        // 4. Después del fade (0.7s), ir a index.html
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 700);
+      });
+    }
   }
 });
