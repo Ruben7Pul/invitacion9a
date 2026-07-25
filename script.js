@@ -73,10 +73,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (e) { console.error('❌ Modal:', e); }
 
   try {
-    const { initMusica, playMusic, toggleMusic } = await import('./modules/musica.js');
+    const { initMusica, playMusic, toggleMusic, resetMusic } = await import('./modules/musica.js');
     initMusica(config);
     window.playMusic = playMusic;
     window.toggleMusic = toggleMusic;
+    window.resetMusic = resetMusic; // exponer para el botón volver
   } catch (e) { console.error('❌ Música:', e); }
 
   try {
@@ -84,18 +85,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     initJuego(config);
   } catch (e) { console.error('❌ Juego:', e); }
 
-  // ---------- ELEMENTOS ----------
+  // ---------- ROSA ----------
   const roseBtn = document.getElementById('rose-btn');
   const portal = document.getElementById('portal');
   const app = document.getElementById('app');
 
-  // ---------- ROSA ----------
   if (roseBtn && portal && app) {
     roseBtn.addEventListener('click', function(e) {
       e.preventDefault();
       portal.classList.add('hide');
       app.classList.add('show');
-      if (window.playMusic) window.playMusic();
+      if (window.playMusic) {
+        window.resetMusic(); // reiniciar la canción desde 0
+        setTimeout(() => window.playMusic(), 100);
+      }
     });
   }
 
@@ -107,14 +110,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // ---------- BOTÓN VOLVER (regresa al portal) ----------
+  // ---------- BOTÓN VOLVER (regresa al portal y apaga música) ----------
   const backBtn = document.getElementById('back-btn');
   if (backBtn) {
     backBtn.addEventListener('click', () => {
-      // Solo regresa al portal, sin tocar el juego
+      // Cerrar juego si está abierto
+      if (window.closeGame) window.closeGame();
+      // Apagar música y reiniciar
+      if (window.resetMusic) window.resetMusic();
+      // Ocultar app y mostrar portal
       app.classList.remove('show');
       portal.classList.remove('hide');
-      console.log('↩️ Volviendo al portal');
+      console.log('↩️ Volviendo al portal (música reiniciada)');
     });
   }
 });
