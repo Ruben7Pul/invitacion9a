@@ -1,4 +1,4 @@
-console.log('🚀 script.js (con animación de puerta)');
+console.log('🚀 script.js (con reja tipo puerta)');
 
 let CONFIG = {};
 
@@ -31,7 +31,6 @@ async function cargarConfig() {
 
 function rellenarDatos(config) {
   document.getElementById('nombre-hero').textContent = config.nombre;
-  // Añadir atributo para el reflejo
   document.getElementById('nombre-hero').setAttribute('data-text', config.nombre);
   document.getElementById('fecha-fija').textContent = config.fechaTexto;
   document.getElementById('frase-texto').textContent = config.frase;
@@ -95,18 +94,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (gateBtn && portal && app) {
     gateBtn.addEventListener('click', function(e) {
       e.preventDefault();
-      // Añadir clase para animación de apertura
       this.classList.add('open');
-      // Sonido y efectos
       if (window.playMusic) {
         window.resetMusic();
         setTimeout(() => window.playMusic(), 50);
       }
-      // Después de la animación, ocultar portal y mostrar app
       setTimeout(() => {
         portal.classList.add('hide');
         app.classList.add('show');
-        // Quitar clase open para que la reja vuelva a su estado original
         this.classList.remove('open');
       }, 800);
     });
@@ -124,26 +119,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   const backBtn = document.getElementById('back-btn');
   if (backBtn) {
     backBtn.addEventListener('click', () => {
-      // Cerrar juego si está abierto
       if (window.closeGame) window.closeGame();
-
-      // Animación de "puerta cerrándose" en el portal
       portal.classList.add('closing');
       backBtn.classList.add('animating');
-
-      // Apagar música
       if (window.resetMusic) window.resetMusic();
-
-      // Mostrar portal, ocultar app
       app.classList.remove('show');
       portal.classList.remove('hide');
-
-      // Limpiar clases de animación después de un tiempo
       setTimeout(() => {
         portal.classList.remove('closing');
         backBtn.classList.remove('animating');
       }, 800);
-
       console.log('↩️ Volviendo al portal (puerta cerrándose)');
     });
   }
