@@ -1,4 +1,4 @@
-console.log('📦 juego.js (con recompensa y contador 3,2,1)');
+console.log('📦 juego.js (sin mensaje de "Jugar de nuevo" al inicio)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
@@ -26,6 +26,9 @@ export function initJuego(config) {
   const livesEl = document.getElementById('lives');
   const restartBtn = document.getElementById('game-restart');
 
+  // Ocultar el botón de reinicio al inicio
+  restartBtn.style.display = 'none';
+
   const LW = 300, LH = 420;
   let scale = 1;
   let bricks = [];
@@ -39,19 +42,16 @@ export function initJuego(config) {
   let running = false;
   let gameInterval = null;
 
-  // ---- Variables para rendimiento ----
   let startTime = 0;
   let endTime = 0;
   let finalLives = 3;
 
-  // ---- Controles ----
   const keys = { left: false, right: false };
   let touchActive = false;
   let touchX = 0;
 
   window.closeGame = closeGame;
 
-  // ---- Funciones ----
   function letras() {
     const src = (config.nombre || 'X').toUpperCase().replace(/\s+/g, '');
     return src.length ? src : 'X';
@@ -122,20 +122,16 @@ export function initJuego(config) {
     ballEl.style.top = (ball.y - ball.r) + 'px';
   }
 
-  // ---- BUCLE ----
   function gameLoop() {
     if (!running) return;
 
-    // Teclado
     if (keys.left) paddle.x = Math.max(0, paddle.x - 8);
     if (keys.right) paddle.x = Math.min(LW - paddle.w, paddle.x + 8);
 
-    // Arrastre con dedo
     if (touchActive) {
       paddle.x = Math.max(0, Math.min(LW - paddle.w, touchX));
     }
 
-    // Física
     ball.x += ball.vx;
     ball.y += ball.vy;
 
@@ -189,19 +185,20 @@ export function initJuego(config) {
     draw();
   }
 
-  // ---- FIN DEL JUEGO (con recompensa) ----
   function endGame(win) {
     running = false;
     if (gameInterval) { clearInterval(gameInterval); gameInterval = null; }
+
+    // Mostrar botón de reinicio solo al finalizar
+    restartBtn.style.display = 'inline-block';
 
     let message = '';
     let extraClass = '';
 
     if (win) {
-      const elapsed = (endTime - startTime) / 1000; // segundos
+      const elapsed = (endTime - startTime) / 1000;
       const vidas = finalLives;
 
-      // Determinar personaje según rendimiento
       if (elapsed < 10 && vidas === 3) {
         message = `👑 ¡${config.nombre} se convierte en el PRÍNCIPE TRANSFORMADO! \n✨ Tiempo: ${elapsed.toFixed(1)}s, 3 vidas. ¡Perfecto!`;
         extraClass = 'perfect';
@@ -216,7 +213,6 @@ export function initJuego(config) {
         soundWin();
       }
     } else {
-      // Perdió
       message = `🎩 ¡${config.nombre} se convierte en GASTÓN! \n💔 ¡Has perdido todas las vidas! Vuelve a intentarlo.`;
       extraClass = 'lose';
       soundLose();
@@ -224,16 +220,16 @@ export function initJuego(config) {
 
     msgText.textContent = message;
     msgEl.classList.add('show');
-    // Añadir clase extra para estilos (opcional)
     msgEl.className = 'show ' + extraClass;
   }
 
-  // ---- INICIO ----
   function startGame() {
-    // Reiniciar variables de rendimiento
     startTime = performance.now();
     endTime = 0;
     finalLives = 3;
+
+    // Ocultar botón de reinicio al iniciar
+    restartBtn.style.display = 'none';
 
     lives = 3;
     updateLives();
@@ -250,10 +246,11 @@ export function initJuego(config) {
 
   function openGame() {
     overlay.classList.add('open');
-    // Mostrar solo números 3, 2, 1 (sin "Preparando")
     let countdown = 3;
     msgText.textContent = countdown;
     msgEl.classList.add('show');
+    // Ocultar botón de reinicio durante la cuenta regresiva
+    restartBtn.style.display = 'none';
     const timer = setInterval(() => {
       countdown--;
       if (countdown > 0) {
@@ -274,12 +271,10 @@ export function initJuego(config) {
     console.log('🔚 Juego cerrado');
   }
 
-  // ---- Eventos UI ----
   document.getElementById('game-close').addEventListener('click', closeGame);
   restartBtn.addEventListener('click', () => { soundTap(); startGame(); });
   overlay.addEventListener('click', e => { if (e.target === overlay) closeGame(); });
 
-  // ---- TECLADO ----
   document.addEventListener('keydown', (e) => {
     if (!running) return;
     if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
@@ -300,7 +295,6 @@ export function initJuego(config) {
     }
   });
 
-  // ---- ARRASTRE CON DEDO ----
   stage.addEventListener('touchstart', (e) => {
     if (!running) return;
     const touch = e.touches[0];
@@ -327,8 +321,7 @@ export function initJuego(config) {
   stage.addEventListener('touchend', () => { touchActive = false; }, { passive: true });
   stage.addEventListener('touchcancel', () => { touchActive = false; }, { passive: true });
 
-  // ---- RESIZE ----
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego con recompensa por rendimiento listo');
+  console.log('✅ Juego listo (sin mensaje de reinicio al inicio)');
 }
