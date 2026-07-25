@@ -1,0 +1,45 @@
+// modal.js - Abrir/cerrar modales
+import { soundOpen, soundClose, soundTap } from './sonidos.js';
+import { burst } from './particulas.js';
+
+export function initModal() {
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      btn.classList.remove('tap');
+      void btn.offsetWidth;
+      btn.classList.add('tap');
+      const r = btn.getBoundingClientRect();
+      burst(r.left + r.width / 2, r.top + r.height / 2, 16);
+      const modalId = btn.dataset.modal;
+      openModal(modalId);
+    });
+  });
+
+  document.querySelectorAll('.modal-overlay').forEach(ov => {
+    ov.addEventListener('click', e => { if (e.target === ov) closeModal(ov); });
+    ov.querySelector('[data-close]').addEventListener('click', (e) => {
+      const r = e.currentTarget.getBoundingClientRect();
+      burst(r.left + r.width / 2, r.top + r.height / 2, 10);
+      closeModal(ov);
+    });
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.open').forEach(closeModal);
+    }
+  });
+}
+
+function openModal(id) {
+  const modal = document.getElementById(id);
+  if (!modal) return;
+  modal.classList.add('open');
+  soundOpen();
+}
+
+function closeModal(el) {
+  if (!el) return;
+  el.classList.remove('open');
+  soundClose();
+}
