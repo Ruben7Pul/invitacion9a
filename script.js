@@ -89,26 +89,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.resetMusic = resetMusic;
   } catch (e) { console.error('❌ Música:', e); }
 
-  if (isIndex) {
-    console.log('📌 Página de inicio (index) - al hacer clic en reja → principal.html');
-    const gateWrapper = document.getElementById('gate-wrapper');
-    if (gateWrapper) {
-      gateWrapper.addEventListener('click', () => {
-        // Animación de apertura
-        gateWrapper.classList.add('open');
-        if (window.playMusic) {
-          window.resetMusic();
-          setTimeout(() => window.playMusic(), 100);
-        }
-        // Redirigir a principal.html DESPUÉS de la animación
-        setTimeout(() => {
-          window.location.href = 'principal.html';
-        }, 800);
-      });
-    } else {
-      console.warn('⚠️ No se encontró #gate-wrapper');
-    }
-  } else if (isPrincipal) {
+  // Ahora la lógica de la reja está en un script inline en index.html,
+  // así que aquí solo manejamos principal.html
+  if (isPrincipal) {
     console.log('📌 Pantalla principal (principal)');
     if (window.playMusic) {
       setTimeout(() => window.playMusic(), 200);
@@ -135,5 +118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (window.toggleMusic) window.toggleMusic();
       });
     }
+  } else {
+    console.log('📌 Página de inicio - no se ejecuta lógica de reja aquí (ya está en HTML)');
   }
-});  
+});
