@@ -1,4 +1,4 @@
-console.log('📦 juego.js (teclado + giroscopio)');
+console.log('📦 juego.js (acelerómetro + teclado)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
@@ -11,7 +11,7 @@ const TOP = 30;
 const SPEED = 3.8;
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego');
+  console.log('🎮 Iniciando juego (acelerómetro + teclado)');
 
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => { soundTap(); openGame(); });
@@ -39,8 +39,9 @@ export function initJuego(config) {
   let running = false;
   let gameInterval = null;
 
-  let tiltX = 0;
-  let tiltActive = false;
+  // Variables para acelerómetro
+  let accelX = 0;
+  let accelActive = false;
 
   window.closeGame = closeGame;
 
@@ -115,10 +116,10 @@ export function initJuego(config) {
   function gameLoop() {
     if (!running) return;
 
-    // Movimiento por inclinación
-    if (tiltActive) {
-      const sens = 8;
-      paddle.x += tiltX * sens;
+    // Movimiento por acelerómetro (solo si está activo)
+    if (accelActive) {
+      const sens = 12; // sensibilidad (ajustable)
+      paddle.x += accelX * sens;
       paddle.x = Math.max(0, Math.min(LW - paddle.w, paddle.x));
     }
 
@@ -253,44 +254,52 @@ export function initJuego(config) {
     origLoop.call(this);
   };
 
-  // ----- GIROSCOPIO -----
-  function initTilt() {
-    if (window.DeviceOrientationEvent) {
-      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-        DeviceOrientationEvent.requestPermission()
+  // ----- ACELERÓMETRO (en lugar de giroscopio) -----
+  function initAccel() {
+    if (window.DeviceMotionEvent) {
+      if (typeof DeviceMotionEvent.requestPermission === 'function') {
+        // iOS 13+ requiere permiso
+        DeviceMotionEvent.requestPermission()
           .then(state => {
             if (state === 'granted') {
-              window.addEventListener('deviceorientation', handleOrientation, { passive: true });
-              console.log('✅ Giroscopio activado (iOS)');
+              window.addEventListener('devicemotion', handleMotion, { passive: true });
+              console.log('✅ Acelerómetro activado (iOS)');
             } else {
-              console.warn('⚠️ Permiso denegado');
+              console.warn('⚠️ Permiso de acelerómetro denegado');
             }
           })
           .catch(err => console.warn('Error al pedir permiso:', err));
       } else {
-        window.addEventListener('deviceorientation', handleOrientation, { passive: true });
-        console.log('✅ Giroscopio activado (Android/otros)');
+        // Android y otros
+        window.addEventListener('devicemotion', handleMotion, { passive: true });
+        console.log('✅ Acelerómetro activado (Android/otros)');
       }
     } else {
-      console.warn('⚠️ Giroscopio no soportado');
+      console.warn('⚠️ Acelerómetro no soportado');
     }
   }
 
-  function handleOrientation(e) {
+  function handleMotion(e) {
     if (!running) return;
-    const gamma = e.gamma || 0;
-    if (Math.abs(gamma) > 5) {
-      tiltX = Math.max(-1, Math.min(1, gamma / 45));
-      tiltActive = true;
-    } else {
-      tiltActive = false;
+    const accel = e.accelerationIncludingGravity || e.acceleration;
+    if (!accel) return;
+    // Usamos la aceleración en el eje X (movimiento lateral)
+    let rawX = accel.x || 0;
+    // Aplicar un filtro simple para evitar ruido (umbral)
+    if (Math.abs(rawX) < 0.5) {
+      accelX = 0;
+      accelActive = false;
+      return;
     }
+    // Normalizar y limitar
+    accelX = Math.max(-1, Math.min(1, rawX / 5));
+    accelActive = true;
   }
 
-  // Activar giroscopio al cargar la página
-  initTilt();
+  // Activar acelerómetro al cargar la página
+  initAccel();
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego listo');
+  console.log('✅ Juego listo (acelerómetro + teclado)');
 }
