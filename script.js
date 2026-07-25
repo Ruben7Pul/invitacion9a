@@ -1,27 +1,31 @@
 console.log('🚀 script.js');
 
-let CONFIG = null;
+let CONFIG = {};
 
 async function cargarConfig() {
   try {
     const res = await fetch(`config.json?t=${Date.now()}`);
-    if (!res.ok) throw new Error('No se pudo cargar config.json');
     CONFIG = await res.json();
-    console.log('✅ Configuración cargada:', CONFIG);
     return CONFIG;
   } catch (e) {
-    console.error('❌ Error crítico: no se pudo cargar config.json', e);
-    // Mostrar mensaje en pantalla
-    document.body.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0b0818;color:#f0d9a3;font-family:sans-serif;text-align:center;padding:2rem;">
-        <div>
-          <h1>⚠️ Error de configuración</h1>
-          <p>No se pudo cargar el archivo <strong>config.json</strong>.</p>
-          <p style="font-size:0.8rem;opacity:0.7;">Asegúrate de que exista en la raíz del proyecto.</p>
-        </div>
-      </div>
-    `;
-    throw e;
+    console.warn('⚠️ Fallback config');
+    return {
+      nombre: 'Dania',
+      fechaTexto: '24 de octubre de 2026',
+      fechaISO: '2026-10-24T13:00:00',
+      frase: 'Con la bendición de Dios...',
+      horaMisa: '3:00 pm',
+      ubicacionMisa: 'Iglesia',
+      mapaMisa: '#',
+      horaFiesta: '1:00 pm',
+      ubicacionFiesta: 'Salón',
+      mapaFiesta: '#',
+      padre: 'Papá',
+      madre: 'Mamá',
+      padrino: 'Padrino',
+      madrina: 'Madrina',
+      audioFile: 'archivos/cancion.mp3'
+    };
   }
 }
 
@@ -43,64 +47,77 @@ function rellenarDatos(config) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  const config = await cargarConfig();
+  window.CONFIG = config;
+  rellenarDatos(config);
+
+  // Cargar módulos
   try {
-    const config = await cargarConfig();
-    window.CONFIG = config;
-    rellenarDatos(config);
+    const { initContador } = await import('./modules/contador.js');
+    initContador(config);
+  } catch (e) { console.error('❌ Contador:', e); }
 
-    // Importar y ejecutar módulos (todos usan window.CONFIG)
-    const modules = [
-      { name: 'contador', path: './modules/contador.js' },
-      { name: 'sonidos', path: './modules/sonidos.js' },
-      { name: 'particulas', path: './modules/particulas.js' },
-      { name: 'modal', path: './modules/modal.js' },
-      { name: 'musica', path: './modules/musica.js' },
-      { name: 'juego', path: './modules/juego.js' }
-    ];
+  try {
+    const { initSonidos } = await import('./modules/sonidos.js');
+    initSonidos();
+  } catch (e) { console.error('❌ Sonidos:', e); }
 
-    for (const mod of modules) {
-      try {
-        const module = await import(mod.path);
-        if (mod.name === 'musica') {
-          module.initMusica(config);
-          window.playMusic = module.playMusic;
-          window.toggleMusic = module.toggleMusic;
-        } else if (mod.name === 'juego') {
-          module.initJuego(config);
-        } else if (mod.name === 'contador') {
-          module.initContador(config);
-        } else if (typeof module.init === 'function') {
-          module.init();
-        } else if (typeof module.initParticulas === 'function') {
-          module.initParticulas();
-        } else if (typeof module.initModal === 'function') {
-          module.initModal();
-        } else if (typeof module.initSonidos === 'function') {
-          module.initSonidos();
-        }
-        console.log(`✅ Módulo ${mod.name} iniciado`);
-      } catch (e) {
-        console.error(`❌ Error en módulo ${mod.name}:`, e);
+  try {
+    const { initParticulas } = await import('./modules/particulas.js');
+    initParticulas();
+  } catch (e) { console.error('❌ Partículas:', e); }
+
+  try {
+    const { initModal } = await import('./modules/modal.js');
+    initModal();
+  } catch (e) { console.error('❌ Modal:', e); }
+
+  try {
+    const { initMusica, playMusic, toggleMusic } = await import('./modules/musica.js');
+    initMusica(config);
+    window.playMusic = playMusic;
+    window.toggleMusic = toggleMusic;
+  } catch (e) { console.error('❌ Música:', e); }
+
+  try {
+    const { initJuego } = await import('./modules/juego.js');
+    initJuego(config);
+  } catch (e) { console.error('❌ Juego:', e); }
+
+  // ROSA
+  const roseBtn = document.getElementById('rose-btn');
+  const portal = document.getElementById('portal');
+  const app = document.getElementById('app');
+
+  if (roseBtn && portal && app) {
+    roseBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      portal.classList.add('hide');
+      app.classList.add('show');
+      if (window.playMusic) window.playMusic();
+    });
+  }
+
+  // BOTÓN MUTE
+  const muteBtn = document.getElementById('music-toggle');
+  if (muteBtn) {
+    muteBtn.addEventListener('click', () => {
+      if (window.toggleMusic) window.toggleMusic();
+    });
+  }
+
+  // BOTÓN VOLVER
+  const backBtn = document.getElementById('back-btn');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      // Si el juego está abierto, cerrarlo
+      const overlay = document.getElementById('game-overlay');
+      if (overlay && overlay.classList.contains('open')) {
+        if (window.closeGame) window.closeGame();
+      } else {
+        // Si no hay juego, no hace nada o podría volver al portal
+        // pero mejor no hacer nada para no romper flujo
       }
-    }
-
-    // Portal / rosa
-    const roseBtn = document.getElementById('rose-btn');
-    const portal = document.getElementById('portal');
-    const app = document.getElementById('app');
-
-    if (roseBtn && portal && app) {
-      roseBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        portal.classList.add('hide');
-        app.classList.add('show');
-        if (window.playMusic) window.playMusic();
-      });
-    } else {
-      console.warn('⚠️ Elementos del portal no encontrados');
-    }
-
-  } catch (e) {
-    // El error ya se mostró en pantalla desde cargarConfig
+    });
   }
 });
