@@ -84,11 +84,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     initJuego(config);
   } catch (e) { console.error('❌ Juego:', e); }
 
-  // ROSA
+  // ---------- ELEMENTOS ----------
   const roseBtn = document.getElementById('rose-btn');
   const portal = document.getElementById('portal');
   const app = document.getElementById('app');
 
+  // ---------- ROSA ----------
   if (roseBtn && portal && app) {
     roseBtn.addEventListener('click', function(e) {
       e.preventDefault();
@@ -98,7 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // BOTÓN MUTE
+  // ---------- BOTÓN MUTE ----------
   const muteBtn = document.getElementById('music-toggle');
   if (muteBtn) {
     muteBtn.addEventListener('click', () => {
@@ -106,18 +107,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // BOTÓN VOLVER
+  // ---------- BOTÓN VOLVER (regresa al portal) ----------
   const backBtn = document.getElementById('back-btn');
   if (backBtn) {
     backBtn.addEventListener('click', () => {
-      // Si el juego está abierto, cerrarlo
-      const overlay = document.getElementById('game-overlay');
-      if (overlay && overlay.classList.contains('open')) {
-        if (window.closeGame) window.closeGame();
-      } else {
-        // Si no hay juego, no hace nada o podría volver al portal
-        // pero mejor no hacer nada para no romper flujo
-      }
+      // Solo regresa al portal, sin tocar el juego
+      app.classList.remove('show');
+      portal.classList.remove('hide');
+      console.log('↩️ Volviendo al portal');
     });
   }
 });
