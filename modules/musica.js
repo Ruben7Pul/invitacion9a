@@ -1,47 +1,85 @@
-// musica.js - Música con iframe directo (sin API)
-console.log('📦 módulo musica.js cargado');
+// musica.js - Reproducción de audio local (archivo .mp3)
+console.log('📦 módulo musica.js cargado (versión local)');
 
-let iframe = null;
+let audio = null;
 let config = null;
+let musicMuted = false;
 
 export function initMusica(cfg) {
   config = cfg;
-  console.log('🎵 Inicializando música con iframe...');
-  iframe = document.getElementById('yt-audio');
-  if (!iframe) {
-    console.warn('⚠️ No existe #yt-audio, creando uno...');
-    iframe = document.createElement('iframe');
-    iframe.id = 'yt-audio';
-    iframe.style.cssText = 'position:fixed; width:1px; height:1px; opacity:0; pointer-events:none; bottom:0; left:0;';
-    document.body.appendChild(iframe);
-  }
-  iframe.src = `https://www.youtube.com/embed/${config.youtubeId}?autoplay=0&mute=1&loop=1&playlist=${config.youtubeId}&controls=0&disablekb=1`;
-  console.log('✅ Iframe configurado con src:', iframe.src);
+  console.log('🎵 Inicializando audio local...');
+  audio = new Audio(config.audioFile);
+  audio.loop = true;
+  audio.volume = 0.8;
+
+  // Verificar si el archivo se carga correctamente
+  audio.addEventListener('canplaythrough', () => {
+    console.log('✅ Audio cargado y listo para reproducir');
+  });
+
+  audio.addEventListener('error', (e) => {
+    console.error('❌ Error al cargar el audio:', e);
+    console.warn('⚠️ Verifica que el archivo exista en:', config.audioFile);
+  });
+
+  // Precargar el audio
+  audio.load();
+  console.log('✅ Audio inicializado (ruta:', config.audioFile, ')');
 }
 
 export function playMusic() {
-  console.log('▶️ playMusic() llamado');
-  if (!iframe) {
-    console.warn('⚠️ iframe no existe, reiniciando...');
+  console.log('▶️ playMusic() llamado (audio local)');
+  if (!audio) {
+    console.warn('⚠️ Audio no inicializado, reiniciando...');
     initMusica(config);
   }
-  if (!iframe) return;
-  iframe.src = `https://www.youtube.com/embed/${config.youtubeId}?autoplay=1&mute=0&loop=1&playlist=${config.youtubeId}&controls=0&disablekb=1`;
-  document.getElementById('music-toggle').classList.remove('pulse');
-  console.log('🎵 Música activada (autoplay=1, mute=0)');
+  if (!audio) return;
+
+  // Si ya está sonando, no hacer nada
+  if (!audio.paused) {
+    console.log('⏸️ El audio ya está sonando');
+    return;
+  }
+
+  audio.play()
+    .then(() => {
+      console.log('🎵 Audio local reproduciéndose');
+      document.getElementById('music-toggle').classList.remove('pulse');
+      document.getElementById('music-toggle').style.opacity = '1';
+    })
+    .catch(err => {
+      console.error('❌ Error al reproducir audio:', err);
+      // Si falla, mostramos un mensaje en la consola
+      console.warn('⚠️ Es posible que el navegador bloquee la reproducción automática. Haz clic en el botón de música.');
+    });
 }
 
 export function toggleMusic() {
-  console.log('🔊 toggleMusic() llamado');
-  if (!iframe) return;
-  const isMuted = iframe.src.includes('mute=1');
-  if (isMuted) {
-    iframe.src = iframe.src.replace('mute=1', 'mute=0').replace('autoplay=0', 'autoplay=1');
-    document.getElementById('music-toggle').style.opacity = '1';
-    document.getElementById('music-toggle').classList.add('pulse');
+  console.log('🔊 toggleMusic() llamado (audio local)');
+  if (!audio) return;
+
+  if (audio.paused) {
+    // Reproducir
+    audio.play()
+      .then(() => {
+        document.getElementById('music-toggle').style.opacity = '1';
+        document.getElementById('music-toggle').classList.add('pulse');
+        console.log('▶️ Audio reanudado');
+      })
+      .catch(err => console.error('Error al reanudar:', err));
   } else {
-    iframe.src = iframe.src.replace('mute=0', 'mute=1').replace('autoplay=1', 'autoplay=0');
+    // Pausar
+    audio.pause();
     document.getElementById('music-toggle').style.opacity = '0.5';
     document.getElementById('music-toggle').classList.remove('pulse');
+    console.log('⏸️ Audio pausado');
   }
+}
+
+// Función para silenciar/desilenciar (opcional)
+export function muteMusic() {
+  if (!audio) return;
+  audio.muted = !audio.muted;
+  musicMuted = audio.muted;
+  console.log(musicMuted ? '🔇 Audio silenciado' : '🔊 Audio desilenciado');
 }
