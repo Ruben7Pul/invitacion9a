@@ -1,88 +1,64 @@
-// particulas.js - Estrellas, pétalos, confeti, cursor
-console.log('📦 módulo particulas.js cargado');
+console.log('📦 partículas (setInterval fijo)');
 
-const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let petals = [];
+let intervalId = null;
 
 export function initParticulas() {
-  console.log('✨ Iniciando partículas...');
-  if (reduce) { console.log('♿ Motion reduced, partículas desactivadas'); return; }
-  crearEstrellasFugaces();
-  crearPetalesFlotantes();
-  crearChispasCursor();
-  console.log('✅ Partículas iniciadas');
-}
-
-function crearEstrellasFugaces() {
-  const container = document.getElementById('stars');
-  if (!container) return;
-  setInterval(() => {
-    const star = document.createElement('div');
-    star.className = 'shooting-star';
-    const x = Math.random() * 90 + 5;
-    const y = Math.random() * 40 + 5;
-    const angle = Math.PI / 4 + Math.random() * 0.8;
-    const dist = 150 + Math.random() * 200;
-    star.style.left = x + 'vw';
-    star.style.top = y + 'vh';
-    star.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
-    star.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
-    star.style.animationDuration = (1.2 + Math.random() * 0.8) + 's';
-    container.appendChild(star);
-    setTimeout(() => star.remove(), 2500);
-  }, 4000);
-}
-
-function crearPetalesFlotantes() {
   const layer = document.getElementById('petals-layer');
-  if (!layer) return;
-  const colors = ['#e08a99', '#d68a96', '#f0d9a3', '#c9a24d', '#8a2c3b'];
-  for (let i = 0; i < 18; i++) {
+  if (!layer) {
+    console.error('❌ #petals-layer no encontrado');
+    return;
+  }
+
+  // Crear 6 pétalos
+  const colors = ['#e08a99', '#d68a96', '#f0d9a3', '#c9a24d', '#8a2c3b', '#f0d9a3'];
+  for (let i = 0; i < 6; i++) {
     const p = document.createElement('div');
-    p.className = 'petal-float';
-    p.style.left = Math.random() * 100 + 'vw';
-    p.style.top = -5 + Math.random() * 5 + 'vh';
-    p.style.background = colors[Math.floor(Math.random() * colors.length)];
-    p.style.width = (8 + Math.random() * 10) + 'px';
-    p.style.height = (8 + Math.random() * 12) + 'px';
-    p.style.borderRadius = Math.random() > 0.5 ? '60% 0 60% 0' : '0 60% 0 60%';
-    p.style.animationDuration = (12 + Math.random() * 10) + 's';
-    p.style.animationDelay = (Math.random() * 8) + 's';
+    p.className = 'petal';
+    const size = 10 + Math.random() * 8;
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    p.style.left = Math.random() * 95 + 'vw';
+    p.style.top = -20 + Math.random() * 10 + 'vh';
+    p.style.background = colors[i % colors.length];
+    p.style.transform = `rotate(${Math.random() * 360}deg)`;
     layer.appendChild(p);
+    petals.push({
+      el: p,
+      x: parseFloat(p.style.left),
+      y: parseFloat(p.style.top),
+      speed: 0.5 + Math.random() * 0.5, // píxeles por frame (a 60 FPS)
+      rotSpeed: (Math.random() - 0.5) * 2,
+      drift: (Math.random() - 0.5) * 0.4,
+      size: size
+    });
   }
+
+  // Limpiar intervalo anterior si existe
+  if (intervalId) clearInterval(intervalId);
+  
+  // Mover pétalos cada 16ms (60 FPS fijos)
+  intervalId = setInterval(() => {
+    for (const p of petals) {
+      p.y += p.speed;
+      p.x += p.drift;
+      p.el.style.top = p.y + 'vh';
+      p.el.style.left = p.x + 'vw';
+      const currentRot = parseFloat(p.el.style.transform?.match(/[\d.]+/)?.[0] || 0);
+      p.el.style.transform = `rotate(${currentRot + p.rotSpeed}deg)`;
+
+      if (p.y > 110) {
+        p.y = -10 - Math.random() * 20;
+        p.x = Math.random() * 95;
+        p.speed = 0.5 + Math.random() * 0.5;
+        p.drift = (Math.random() - 0.5) * 0.4;
+        p.el.style.left = p.x + 'vw';
+        p.el.style.top = p.y + 'vh';
+      }
+    }
+  }, 16); // 16ms = ~60 FPS
+
+  console.log('✅ 6 pétalos creados y animados con setInterval (60 FPS)');
 }
 
-function crearChispasCursor() {
-  const layer = document.getElementById('cursor-layer');
-  if (!layer) return;
-  let last = 0;
-  const handler = (e) => {
-    const now = performance.now();
-    if (now - last < 40) return;
-    last = now;
-    const s = document.createElement('div');
-    s.className = 'cursor-spark';
-    s.style.left = (e.clientX + (Math.random() * 12 - 6)) + 'px';
-    s.style.top = (e.clientY + (Math.random() * 12 - 6)) + 'px';
-    layer.appendChild(s);
-    s.addEventListener('animationend', () => s.remove());
-  };
-  window.addEventListener('mousemove', handler);
-  window.addEventListener('touchmove', (e) => {
-    if (e.touches[0]) handler({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
-  }, { passive: true });
-}
-
-export function burst(x, y, count = 14) {
-  for (let i = 0; i < count; i++) {
-    const d = document.createElement('div');
-    d.className = 'burst-dot';
-    const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;
-    const dist = 30 + Math.random() * 35;
-    d.style.setProperty('--bx', Math.cos(angle) * dist + 'px');
-    d.style.setProperty('--by', Math.sin(angle) * dist + 'px');
-    d.style.left = x + 'px';
-    d.style.top = y + 'px';
-    document.body.appendChild(d);
-    d.addEventListener('animationend', () => d.remove());
-  }
-}
+export function burst() { /* vacío */ }
