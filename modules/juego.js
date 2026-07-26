@@ -1,17 +1,15 @@
-console.log('📦 juego.js (60 FPS, 36 ladrillos, velocidad fija)');
+console.log('📦 juego.js (60 FPS, 36 ladrillos, reseteo completo al abrir)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
-const BRICK_COUNT = 36; // 6x6
+const BRICK_COUNT = 36;
 const PADDLE_W = 60;
 const PADDLE_H = 8;
 const BALL_R = 4;
 const STAGE_W = 300;
 const STAGE_H = 420;
 const TOP_OFFSET = 30;
-
-// Velocidad fija en píxeles por frame (a 60 FPS)
-const BALL_SPEED = 5; // 5 px/frame
+const BALL_SPEED = 5;
 
 export function initJuego(config) {
   console.log('🎮 Iniciando juego (60 FPS, 36 ladrillos, velocidad fija)');
@@ -48,6 +46,32 @@ export function initJuego(config) {
 
   window.closeGame = closeGame;
 
+  // Reset completo del estado del juego
+  function resetGameState() {
+    if (gameInterval) { clearInterval(gameInterval); gameInterval = null; }
+    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+    running = false;
+    bricks = [];
+    paddle.x = (STAGE_W - PADDLE_W) / 2;
+    ball.x = STAGE_W / 2;
+    ball.y = STAGE_H - 38;
+    ball.vx = 0;
+    ball.vy = 0;
+    lives = 3;
+    startTime = 0;
+    endTime = 0;
+    keys.left = false;
+    keys.right = false;
+    touchActive = false;
+    touchX = 0;
+    // Limpiar ladrillos del DOM
+    inner.querySelectorAll('.brick').forEach(b => b.remove());
+    msgEl.classList.remove('show');
+    restartBtn.style.display = 'none';
+    updateLives();
+    draw();
+  }
+
   function generateBrickLayout() {
     const cols = 6;
     const rows = 6;
@@ -57,7 +81,6 @@ export function initJuego(config) {
     const totalWidth = cols * (brickW + gap) - gap;
     const startX = (STAGE_W - totalWidth) / 2;
     const startY = TOP_OFFSET;
-
     const grid = [];
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
@@ -220,6 +243,7 @@ export function initJuego(config) {
   }
 
   function startGame() {
+    resetGameState(); // Aseguramos estado limpio
     startTime = performance.now();
     lives = 3;
     updateLives();
@@ -235,19 +259,13 @@ export function initJuego(config) {
   }
 
   function openGame() {
-    // Limpiar cualquier intervalo pendiente
-    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
-    if (gameInterval) { clearInterval(gameInterval); gameInterval = null; }
-    running = false;
+    // Resetear todo antes de abrir
+    resetGameState();
 
     overlay.classList.add('open');
+    // Asegurar que no haya elementos de ladrillos
     inner.querySelectorAll('.brick').forEach(b => b.remove());
     bricks = [];
-    paddle.x = (STAGE_W - PADDLE_W) / 2;
-    ball.x = STAGE_W / 2;
-    ball.y = STAGE_H - 38;
-    ball.vx = 0;
-    ball.vy = 0;
     msgEl.classList.remove('show');
     restartBtn.style.display = 'none';
     draw();
@@ -271,11 +289,9 @@ export function initJuego(config) {
 
   function closeGame() {
     overlay.classList.remove('open');
-    running = false;
-    if (gameInterval) { clearInterval(gameInterval); gameInterval = null; }
-    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+    resetGameState(); // Limpieza total al cerrar
     soundClose();
-    console.log('🔚 Juego cerrado (limpiado)');
+    console.log('🔚 Juego cerrado y reiniciado');
   }
 
   document.getElementById('game-close').addEventListener('click', closeGame);
@@ -328,5 +344,6 @@ export function initJuego(config) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
+  resetGameState(); // Estado inicial limpio
   console.log('✅ Juego listo (60 FPS, 36 bloques, velocidad fija)');
 }
