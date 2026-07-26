@@ -1,7 +1,7 @@
-console.log('📦 partículas (pétalos rojos)');
+console.log('📦 partículas (pétalos rojos con requestAnimationFrame)');
 
 let petals = [];
-let intervalId = null;
+let animationId = null;
 
 export function initParticulas() {
   const layer = document.getElementById('petals-layer');
@@ -10,11 +10,10 @@ export function initParticulas() {
     return;
   }
 
-  // Colores rojos (variantes)
   const colors = ['#cc2233', '#e63946', '#b71c2e', '#d32f3f', '#ff1744', '#f44336'];
+  const count = 18;
 
-  // Más cantidad: 15 pétalos
-  for (let i = 0; i < 18; i++) {
+  for (let i = 0; i < count; i++) {
     const p = document.createElement('div');
     p.className = 'petal';
     const size = 10 + Math.random() * 10;
@@ -33,12 +32,10 @@ export function initParticulas() {
       speed: 0.3 + Math.random() * 0.6,
       rotSpeed: (Math.random() - 0.5) * 2,
       drift: (Math.random() - 0.5) * 0.5,
-      size: size
     });
   }
 
-  if (intervalId) clearInterval(intervalId);
-  intervalId = setInterval(() => {
+  function updatePetals() {
     for (const p of petals) {
       p.y += p.speed;
       p.x += p.drift;
@@ -57,9 +54,12 @@ export function initParticulas() {
         p.el.style.opacity = 0.4 + Math.random() * 0.4;
       }
     }
-  }, 16);
+    animationId = requestAnimationFrame(updatePetals);
+  }
 
-  console.log('✅ 18 pétalos rojos creados y animados');
+  if (animationId) cancelAnimationFrame(animationId);
+  updatePetals();
+  console.log('✅ 18 pétalos rojos con requestAnimationFrame');
 }
 
-export function burst() { /* vacío para compatibilidad */ }
+export function burst() { /* compatibilidad */ }
