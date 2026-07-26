@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Invitación XV</title>
+
+  <!-- Metaetiquetas Open Graph / SEO -->
+  <meta property="og:title" content="Invitación a mis XV años" />
+  <meta property="og:description" content="Te invitamos a celebrar mis 15 años. ¡No faltes!" />
+  <meta property="og:image" content="https://tudominio.com/archivos/og-image.jpg" />
+  <meta property="og:url" content="https://tudominio.com/invitacion" />
+  <meta name="twitter:card" content="summary_large_image" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
@@ -12,15 +20,15 @@
 </head>
 <body>
   <div id="bg"></div>
-  <div id="petals-layer"></div>
+  <div id="petals-layer" role="presentation"></div>
 
   <!-- PORTAL / REJA -->
-  <div id="portal">
+  <div id="portal" role="dialog" aria-label="Puerta de entrada">
     <div class="portal-inner">
       <span class="eyebrow gold-text">Una invitación encantada</span>
-      <div class="gate-wrapper" id="gate-wrapper">
+      <div class="gate-wrapper" id="gate-wrapper" role="button" tabindex="0" aria-label="Abrir la reja">
         <!-- Hoja izquierda -->
-        <div class="gate-leaf gate-left">
+        <div class="gate-leaf gate-left" aria-hidden="true">
           <svg viewBox="0 0 150 200" width="100%" height="100%">
             <defs>
               <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
@@ -57,77 +65,56 @@
                 <circle cx="0" cy="-13" r="2.3" fill="url(#goldGrad)"/>
               </g>
             </defs>
-
-            <!-- Marco exterior -->
             <rect x="5" y="5" width="140" height="190" rx="8" fill="none" stroke="url(#goldGrad)" stroke-width="6" filter="url(#glow)"/>
             <rect x="12" y="12" width="126" height="176" rx="5" fill="none" stroke="rgba(255,215,0,0.2)" stroke-width="2"/>
-
-            <!-- Arco gotico superior -->
             <path d="M22 20 Q75 -20 128 20" fill="none" stroke="url(#goldGrad)" stroke-width="6" filter="url(#glow)"/>
             <path d="M32 20 Q75 -6 118 20" fill="none" stroke="url(#goldGrad)" stroke-width="2.2" opacity="0.6"/>
             <use href="#finial" x="75" y="-20"/>
             <use href="#rosette" x="75" y="4"/>
-
-            <!-- Barras verticales -->
             <rect x="22" y="20" width="6" height="160" rx="3" fill="url(#goldGrad)"/>
             <rect x="48" y="20" width="6" height="160" rx="3" fill="url(#goldGrad)"/>
             <rect x="74" y="20" width="6" height="160" rx="3" fill="url(#goldGrad)"/>
             <rect x="100" y="20" width="6" height="160" rx="3" fill="url(#goldGrad)"/>
             <rect x="126" y="20" width="6" height="160" rx="3" fill="url(#goldGrad)"/>
-
-            <!-- Remates goticos sobre cada barra -->
             <use href="#finial" x="25" y="20"/>
             <use href="#finial" x="51" y="20"/>
             <use href="#finial" x="77" y="20"/>
             <use href="#finial" x="103" y="20"/>
             <use href="#finial" x="129" y="20"/>
-
-            <!-- Pies decorativos -->
             <circle cx="25" cy="178" r="3.4" fill="url(#goldGrad)"/>
             <circle cx="51" cy="178" r="3.4" fill="url(#goldGrad)"/>
             <circle cx="77" cy="178" r="3.4" fill="url(#goldGrad)"/>
             <circle cx="103" cy="178" r="3.4" fill="url(#goldGrad)"/>
             <circle cx="129" cy="178" r="3.4" fill="url(#goldGrad)"/>
-
-            <!-- Barrotes horizontales -->
             <rect x="15" y="40" width="120" height="6" rx="3" fill="url(#goldGrad)"/>
             <rect x="15" y="80" width="120" height="6" rx="3" fill="url(#goldGrad)"/>
             <rect x="15" y="120" width="120" height="6" rx="3" fill="url(#goldGrad)"/>
             <rect x="15" y="160" width="120" height="6" rx="3" fill="url(#goldGrad)"/>
-
-            <!-- Rosetones en cada cruce (se deja libre el centro para el medallon) -->
             <use href="#rosette" x="25" y="43"/>
             <use href="#rosette" x="51" y="43"/>
             <use href="#rosette" x="103" y="43"/>
             <use href="#rosette" x="129" y="43"/>
-
             <use href="#rosette" x="25" y="83"/>
             <use href="#rosette" x="51" y="83"/>
             <use href="#rosette" x="103" y="83"/>
             <use href="#rosette" x="129" y="83"/>
-
             <use href="#rosette" x="25" y="123"/>
             <use href="#rosette" x="51" y="123"/>
             <use href="#rosette" x="103" y="123"/>
             <use href="#rosette" x="129" y="123"/>
-
             <use href="#rosette" x="25" y="163"/>
             <use href="#rosette" x="51" y="163"/>
             <use href="#rosette" x="103" y="163"/>
             <use href="#rosette" x="129" y="163"/>
-
-            <!-- Medallon central gotico -->
             <path d="M77 74 C86 74 92 80 92 90 C92 100 86 106 77 106 C68 106 62 100 62 90 C62 80 68 74 77 74 Z" fill="none" stroke="url(#goldGrad)" stroke-width="2.4" opacity="0.85"/>
             <circle cx="77" cy="90" r="10" fill="none" stroke="url(#goldGrad)" stroke-width="3"/>
             <circle cx="77" cy="90" r="5" fill="url(#rubyGrad)"/>
-
-            <!-- Volutas inferiores -->
             <use href="#scroll" x="25" y="176"/>
             <use href="#scrollR" x="129" y="176"/>
           </svg>
         </div>
-        <!-- Hoja derecha: misma reja, reflejada por CSS (scaleX(-1)) -->
-        <div class="gate-leaf gate-right">
+        <!-- Hoja derecha -->
+        <div class="gate-leaf gate-right" aria-hidden="true">
           <svg viewBox="0 0 150 200" width="100%" height="100%">
             <defs>
               <linearGradient id="goldGrad2" x1="0" y1="0" x2="0" y2="1">
@@ -164,62 +151,50 @@
                 <circle cx="0" cy="-13" r="2.3" fill="url(#goldGrad2)"/>
               </g>
             </defs>
-
             <rect x="5" y="5" width="140" height="190" rx="8" fill="none" stroke="url(#goldGrad2)" stroke-width="6" filter="url(#glow2)"/>
             <rect x="12" y="12" width="126" height="176" rx="5" fill="none" stroke="rgba(255,215,0,0.2)" stroke-width="2"/>
-
             <path d="M22 20 Q75 -20 128 20" fill="none" stroke="url(#goldGrad2)" stroke-width="6" filter="url(#glow2)"/>
             <path d="M32 20 Q75 -6 118 20" fill="none" stroke="url(#goldGrad2)" stroke-width="2.2" opacity="0.6"/>
             <use href="#finial2" x="75" y="-20"/>
             <use href="#rosette2" x="75" y="4"/>
-
             <rect x="22" y="20" width="6" height="160" rx="3" fill="url(#goldGrad2)"/>
             <rect x="48" y="20" width="6" height="160" rx="3" fill="url(#goldGrad2)"/>
             <rect x="74" y="20" width="6" height="160" rx="3" fill="url(#goldGrad2)"/>
             <rect x="100" y="20" width="6" height="160" rx="3" fill="url(#goldGrad2)"/>
             <rect x="126" y="20" width="6" height="160" rx="3" fill="url(#goldGrad2)"/>
-
             <use href="#finial2" x="25" y="20"/>
             <use href="#finial2" x="51" y="20"/>
             <use href="#finial2" x="77" y="20"/>
             <use href="#finial2" x="103" y="20"/>
             <use href="#finial2" x="129" y="20"/>
-
             <circle cx="25" cy="178" r="3.4" fill="url(#goldGrad2)"/>
             <circle cx="51" cy="178" r="3.4" fill="url(#goldGrad2)"/>
             <circle cx="77" cy="178" r="3.4" fill="url(#goldGrad2)"/>
             <circle cx="103" cy="178" r="3.4" fill="url(#goldGrad2)"/>
             <circle cx="129" cy="178" r="3.4" fill="url(#goldGrad2)"/>
-
             <rect x="15" y="40" width="120" height="6" rx="3" fill="url(#goldGrad2)"/>
             <rect x="15" y="80" width="120" height="6" rx="3" fill="url(#goldGrad2)"/>
             <rect x="15" y="120" width="120" height="6" rx="3" fill="url(#goldGrad2)"/>
             <rect x="15" y="160" width="120" height="6" rx="3" fill="url(#goldGrad2)"/>
-
             <use href="#rosette2" x="25" y="43"/>
             <use href="#rosette2" x="51" y="43"/>
             <use href="#rosette2" x="103" y="43"/>
             <use href="#rosette2" x="129" y="43"/>
-
             <use href="#rosette2" x="25" y="83"/>
             <use href="#rosette2" x="51" y="83"/>
             <use href="#rosette2" x="103" y="83"/>
             <use href="#rosette2" x="129" y="83"/>
-
             <use href="#rosette2" x="25" y="123"/>
             <use href="#rosette2" x="51" y="123"/>
             <use href="#rosette2" x="103" y="123"/>
             <use href="#rosette2" x="129" y="123"/>
-
             <use href="#rosette2" x="25" y="163"/>
             <use href="#rosette2" x="51" y="163"/>
             <use href="#rosette2" x="103" y="163"/>
             <use href="#rosette2" x="129" y="163"/>
-
             <path d="M77 74 C86 74 92 80 92 90 C92 100 86 106 77 106 C68 106 62 100 62 90 C62 80 68 74 77 74 Z" fill="none" stroke="url(#goldGrad2)" stroke-width="2.4" opacity="0.85"/>
             <circle cx="77" cy="90" r="10" fill="none" stroke="url(#goldGrad2)" stroke-width="3"/>
             <circle cx="77" cy="90" r="5" fill="url(#rubyGrad2)"/>
-
             <use href="#scroll2" x="25" y="176"/>
             <use href="#scrollR2" x="129" y="176"/>
           </svg>
@@ -231,7 +206,7 @@
   </div>
 
   <!-- APP PRINCIPAL -->
-  <div id="app">
+  <div id="app" role="main">
     <div id="app-top">
       <button type="button" id="back-link" class="top-btn" aria-label="Volver a la reja">↩</button>
       <span class="eyebrow gold-text">Te invito a mis XV años</span>
@@ -260,18 +235,27 @@
       <p class="fecha-fija gold-text" id="fecha-fija">Cargando...</p>
     </div>
 
-    <nav id="nav">
-      <button class="nav-btn" data-modal="modal-contador"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="13" r="8"/><path d="M12 9 L12 13 L15 15 M9 2 L15 2"/></svg><span>Cuenta</span></button>
-      <button class="nav-btn" data-modal="modal-detalles"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21 C12 21 4 14.5 4 9 C4 5 7.5 2 12 2 C16.5 2 20 5 20 9 C20 14.5 12 21 12 21 Z"/><circle cx="12" cy="9" r="2.4"/></svg><span>Lugares</span></button>
-      <button class="nav-btn" data-modal="modal-familia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21 C6 16.8 3 13.4 3 9.6 C3 6.6 5.3 4.5 8 4.5 C9.7 4.5 11.1 5.3 12 6.6 C12.9 5.3 14.3 4.5 16 4.5 C18.7 4.5 21 6.6 21 9.6 C21 13.4 18 16.8 12 21 Z"/></svg><span>Familia</span></button>
+    <nav id="nav" aria-label="Navegación principal">
+      <button class="nav-btn" data-modal="modal-contador" aria-label="Cuenta regresiva">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="13" r="8"/><path d="M12 9 L12 13 L15 15 M9 2 L15 2"/></svg>
+        <span>Cuenta</span>
+      </button>
+      <button class="nav-btn" data-modal="modal-detalles" aria-label="Lugares y horarios">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21 C12 21 4 14.5 4 9 C4 5 7.5 2 12 2 C16.5 2 20 5 20 9 C20 14.5 12 21 12 21 Z"/><circle cx="12" cy="9" r="2.4"/></svg>
+        <span>Lugares</span>
+      </button>
+      <button class="nav-btn" data-modal="modal-familia" aria-label="Familia">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21 C6 16.8 3 13.4 3 9.6 C3 6.6 5.3 4.5 8 4.5 C9.7 4.5 11.1 5.3 12 6.6 C12.9 5.3 14.3 4.5 16 4.5 C18.7 4.5 21 6.6 21 9.6 C21 13.4 18 16.8 12 21 Z"/></svg>
+        <span>Familia</span>
+      </button>
     </nav>
   </div>
 
   <!-- MODALES -->
-  <div class="modal-overlay" id="modal-contador">
+  <div class="modal-overlay" id="modal-contador" role="dialog" aria-modal="true" aria-labelledby="modal-contador-title">
     <div class="modal-card">
-      <button class="modal-close" data-close>&times;</button>
-      <h2 class="gold-text">Faltan para el gran día</h2>
+      <button class="modal-close" data-close aria-label="Cerrar">&times;</button>
+      <h2 id="modal-contador-title" class="gold-text">Faltan para el gran día</h2>
       <div class="clock calendar-style" id="clock">
         <div class="unit"><span class="num" id="d">00</span><span class="lbl gold-text">Días</span></div>
         <div class="unit"><span class="num" id="h">00</span><span class="lbl gold-text">Horas</span></div>
@@ -282,10 +266,10 @@
     </div>
   </div>
 
-  <div class="modal-overlay" id="modal-detalles">
+  <div class="modal-overlay" id="modal-detalles" role="dialog" aria-modal="true" aria-labelledby="modal-detalles-title">
     <div class="modal-card">
-      <button class="modal-close" data-close>&times;</button>
-      <h2 class="gold-text">Dónde y cuándo</h2>
+      <button class="modal-close" data-close aria-label="Cerrar">&times;</button>
+      <h2 id="modal-detalles-title" class="gold-text">Dónde y cuándo</h2>
       <div class="detalle-card">
         <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2 L12 8 M8 6 L16 6 M6 22 L18 22 L18 12 L6 12 Z M9 22 L9 16 L15 16 L15 22"/></svg>
         <h3 class="gold-text">Misa</h3>
@@ -304,10 +288,10 @@
     </div>
   </div>
 
-  <div class="modal-overlay" id="modal-familia">
+  <div class="modal-overlay" id="modal-familia" role="dialog" aria-modal="true" aria-labelledby="modal-familia-title">
     <div class="modal-card">
-      <button class="modal-close" data-close>&times;</button>
-      <h2 class="gold-text">Mi familia</h2>
+      <button class="modal-close" data-close aria-label="Cerrar">&times;</button>
+      <h2 id="modal-familia-title" class="gold-text">Mi familia</h2>
       <div class="familia-grupo">
         <h3 class="gold-text">Mis padres</h3>
         <p class="gold-text" id="padre1">--</p>
@@ -322,7 +306,7 @@
   </div>
 
   <!-- JUEGO -->
-  <div id="game-overlay">
+  <div id="game-overlay" role="dialog" aria-modal="true" aria-label="Juego de romper el hechizo">
     <div id="game-panel">
       <div id="game-header">
         <span id="lives" class="gold-text">♥ ♥ ♥</span>
@@ -339,7 +323,7 @@
           <button class="game-btn gold-text" id="game-restart">Jugar de nuevo</button>
         </div>
       </div>
-      <p class="game-help gold-text">Mueva con dedo, A/D o flechas del teclado</p>
+      <p class="game-help gold-text">Mueve con dedo, A/D o flechas del teclado</p>
     </div>
   </div>
 
