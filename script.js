@@ -5,10 +5,19 @@ let CONFIG = {};
 async function cargarConfig() {
   try {
     const res = await fetch(`config.json?t=${Date.now()}`);
-    CONFIG = await res.json();
-    return CONFIG;
+    if (!res.ok) throw new Error('HTTP error ' + res.status);
+    const data = await res.json();
+    // Validación básica
+    if (!data.nombre) throw new Error('Falta el campo "nombre"');
+    return data;
   } catch (e) {
-    console.warn('⚠️ Fallback config');
+    console.warn('⚠️ Error al cargar config.json:', e);
+    // Mostrar mensaje en la interfaz
+    const errorDiv = document.createElement('div');
+    errorDiv.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.8); color:#fff; padding:1rem 2rem; border-radius:12px; z-index:999; text-align:center; font-family:sans-serif;';
+    errorDiv.innerHTML = `<p>⚠️ No se pudo cargar la configuración.</p><p style="font-size:0.8rem; opacity:0.7;">Usando valores de respaldo.</p>`;
+    document.body.prepend(errorDiv);
+    // Fallback
     return {
       nombre: 'Dania',
       fechaTexto: '24 de octubre de 2026',
@@ -60,6 +69,11 @@ function rellenarDatos(config) {
   const padrino2 = document.getElementById('padrino2');
   if (padrino2) padrino2.textContent = config.madrina;
   document.title = `Mis XV años · ${config.nombre}`;
+  // Actualizar meta tags OG
+  const ogTitle = document.querySelector('meta[property="og:title"]');
+  if (ogTitle) ogTitle.content = `Invitación a los XV años de ${config.nombre}`;
+  const ogDesc = document.querySelector('meta[property="og:description"]');
+  if (ogDesc) ogDesc.content = `Te invitamos a celebrar los 15 años de ${config.nombre}. ¡No faltes!`;
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -86,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.resetMusic = resetMusic;
   } catch (e) { console.error('❌ Música:', e); }
 
-  // ===== Módulos de la app principal (se inicializan una sola vez) =====
+  // ===== Módulos de la app principal =====
   let appIniciada = false;
   async function iniciarApp() {
     if (appIniciada) return;
@@ -115,7 +129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // ===== Transición reja <-> app (todo en una sola página) =====
+  // ===== Transición reja <-> app =====
   const portal = document.getElementById('portal');
   const gateWrapper = document.getElementById('gate-wrapper');
   const app = document.getElementById('app');
@@ -144,10 +158,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 600);
   }
 
+  // Click o Enter en la reja
   if (gateWrapper) {
     gateWrapper.addEventListener('click', (e) => {
       e.preventDefault();
       abrirReja();
+    });
+    gateWrapper.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        abrirReja();
+      }
     });
   } else {
     console.error('❌ No se encontró #gate-wrapper');
