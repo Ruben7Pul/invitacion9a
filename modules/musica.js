@@ -8,8 +8,13 @@ export function initMusica(cfg) {
   audio = new Audio(config.audioFile);
   audio.loop = true;
   audio.volume = 0.8;
+  audio.addEventListener('error', (e) => {
+    console.warn('⚠️ Error al cargar el audio:', e);
+    // Mostrar un mensaje visual (opcional)
+    const toggle = document.getElementById('music-toggle');
+    if (toggle) toggle.style.opacity = '0.3';
+  });
   audio.load();
-  // Asegurar que el botón de mute se vea brillante al inicio
   const toggle = document.getElementById('music-toggle');
   if (toggle) toggle.style.opacity = '1';
   console.log('🎵 Audio cargado:', config.audioFile);
@@ -33,7 +38,7 @@ export function resetMusic() {
 export function toggleMusic() {
   if (!audio) return;
   if (audio.paused) {
-    audio.play();
+    audio.play().catch(() => {});
     document.getElementById('music-toggle').style.opacity = '1';
   } else {
     audio.pause();
