@@ -1,4 +1,4 @@
-console.log('📦 partículas (pétalos rojos con requestAnimationFrame)');
+console.log('📦 partículas (requestAnimationFrame)');
 
 let petals = [];
 let animationId = null;
