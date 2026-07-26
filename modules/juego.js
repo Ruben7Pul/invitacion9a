@@ -1,8 +1,8 @@
-console.log('📦 juego.js (30 FPS fijos, velocidad base 5, incremento 0.2)');
+console.log('📦 juego.js (60 FPS, 36 ladrillos, velocidad fija)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
-const BRICK_COUNT = 20;
+const BRICK_COUNT = 36; // 6x6
 const PADDLE_W = 60;
 const PADDLE_H = 8;
 const BALL_R = 4;
@@ -10,13 +10,11 @@ const STAGE_W = 300;
 const STAGE_H = 420;
 const TOP_OFFSET = 30;
 
-// Velocidad en píxeles por frame (30 FPS)
-const INITIAL_SPEED = 5;       // 5 px/frame
-const SPEED_INCREMENT = 0.2;   // incremento por ladrillo
-const MAX_SPEED = 12;          // máximo
+// Velocidad fija en píxeles por frame (a 60 FPS)
+const BALL_SPEED = 5; // 5 px/frame
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego con 30 FPS fijos');
+  console.log('🎮 Iniciando juego (60 FPS, 36 ladrillos, velocidad fija)');
 
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => { soundTap(); openGame(); });
@@ -40,8 +38,7 @@ export function initJuego(config) {
   let lives = 3;
   let running = false;
   let gameInterval = null;
-  let bricksBroken = 0;
-  let currentSpeed = INITIAL_SPEED;
+  let countdownInterval = null;
   let startTime = 0;
   let endTime = 0;
 
@@ -51,13 +48,12 @@ export function initJuego(config) {
 
   window.closeGame = closeGame;
 
-  // Generar disposición aleatoria de 20 ladrillos
   function generateBrickLayout() {
     const cols = 6;
-    const rows = 4;
-    const brickW = 40;
-    const brickH = 18;
-    const gap = 4;
+    const rows = 6;
+    const brickW = 38;
+    const brickH = 16;
+    const gap = 3;
     const totalWidth = cols * (brickW + gap) - gap;
     const startX = (STAGE_W - totalWidth) / 2;
     const startY = TOP_OFFSET;
@@ -73,32 +69,14 @@ export function initJuego(config) {
         });
       }
     }
-    const shuffled = grid.sort(() => Math.random() - 0.5);
-    const selected = shuffled.slice(0, BRICK_COUNT);
-    while (selected.length < BRICK_COUNT) {
-      const x = 10 + Math.random() * (STAGE_W - brickW - 20);
-      const y = TOP_OFFSET + Math.random() * (STAGE_H - TOP_OFFSET - brickH - 40);
-      let overlap = false;
-      for (const p of selected) {
-        if (x < p.x + p.w + 2 && x + brickW + 2 > p.x &&
-            y < p.y + p.h + 2 && y + brickH + 2 > p.y) {
-          overlap = true;
-          break;
-        }
-      }
-      if (!overlap) {
-        selected.push({ x, y, w: brickW, h: brickH });
-      }
-    }
-    return selected;
+    return grid;
   }
 
   function buildBricks() {
     inner.querySelectorAll('.brick').forEach(b => b.remove());
     bricks = [];
     const layout = generateBrickLayout();
-    // Colores vivos y brillantes
-    const colors = ['#FFD700', '#FF4500', '#00FF7F', '#1E90FF', '#FF1493', '#FFA500', '#7FFF00', '#FF00FF'];
+    const colors = ['#FFD700', '#FF4500', '#00FF7F', '#1E90FF', '#FF1493', '#FFA500', '#7FFF00', '#FF00FF', '#00FFFF', '#FF6347'];
     layout.forEach((pos, index) => {
       const el = document.createElement('div');
       el.className = 'brick';
@@ -137,8 +115,8 @@ export function initJuego(config) {
     ball.y = STAGE_H - 38;
     const dir = Math.random() < 0.5 ? -1 : 1;
     const angle = (Math.random() - 0.5) * 0.8;
-    ball.vx = Math.sin(angle) * currentSpeed * dir;
-    ball.vy = -Math.cos(angle) * currentSpeed;
+    ball.vx = Math.sin(angle) * BALL_SPEED * dir;
+    ball.vy = -Math.cos(angle) * BALL_SPEED;
   }
 
   function updateLives() {
@@ -156,23 +134,19 @@ export function initJuego(config) {
   function gameLoop() {
     if (!running) return;
 
-    // Movimiento de la paleta
     if (keys.left) paddle.x = Math.max(0, paddle.x - 7);
     if (keys.right) paddle.x = Math.min(STAGE_W - PADDLE_W, paddle.x + 7);
     if (touchActive) {
       paddle.x = Math.max(0, Math.min(STAGE_W - PADDLE_W, touchX));
     }
 
-    // Movimiento de la pelota
     ball.x += ball.vx;
     ball.y += ball.vy;
 
-    // Rebotes en paredes
     if (ball.x - BALL_R < 0) { ball.x = BALL_R; ball.vx = Math.abs(ball.vx); }
     if (ball.x + BALL_R > STAGE_W) { ball.x = STAGE_W - BALL_R; ball.vx = -Math.abs(ball.vx); }
     if (ball.y - BALL_R < 0) { ball.y = BALL_R; ball.vy = Math.abs(ball.vy); }
 
-    // Rebote en paleta
     const py = STAGE_H - 14;
     if (ball.vy > 0 && ball.y + BALL_R >= py && ball.y + BALL_R <= py + 10 &&
         ball.x >= paddle.x - BALL_R && ball.x <= paddle.x + PADDLE_W + BALL_R) {
@@ -180,11 +154,10 @@ export function initJuego(config) {
       let hit = (ball.x - (paddle.x + PADDLE_W / 2)) / (PADDLE_W / 2);
       hit = Math.max(-0.85, Math.min(0.85, hit));
       const angle = hit * 0.7;
-      ball.vx = Math.sin(angle) * currentSpeed;
-      ball.vy = -Math.cos(angle) * currentSpeed;
+      ball.vx = Math.sin(angle) * BALL_SPEED;
+      ball.vy = -Math.cos(angle) * BALL_SPEED;
     }
 
-    // Colisión con ladrillos
     for (const b of bricks) {
       if (!b.alive) continue;
       if (ball.x + BALL_R > b.x && ball.x - BALL_R < b.x + b.w &&
@@ -192,16 +165,6 @@ export function initJuego(config) {
         b.alive = false;
         b.el.classList.add('gone');
         soundBrick();
-        bricksBroken++;
-        currentSpeed = Math.min(MAX_SPEED, currentSpeed + SPEED_INCREMENT);
-        // Ajustar velocidad actual
-        const mag = Math.hypot(ball.vx, ball.vy);
-        if (mag > 0) {
-          const factor = currentSpeed / mag;
-          ball.vx *= factor;
-          ball.vy *= factor;
-        }
-        // Rebote simple
         const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
         const dx = ball.x - cx, dy = ball.y - cy;
         const overlapX = (BALL_R + b.w / 2) - Math.abs(dx);
@@ -212,7 +175,6 @@ export function initJuego(config) {
       }
     }
 
-    // Pérdida de vida
     if (ball.y - BALL_R > STAGE_H) {
       lives--;
       updateLives();
@@ -221,7 +183,6 @@ export function initJuego(config) {
       resetBall();
     }
 
-    // Victoria
     if (bricks.every(b => !b.alive)) {
       endTime = performance.now();
       endGame(true);
@@ -260,8 +221,6 @@ export function initJuego(config) {
 
   function startGame() {
     startTime = performance.now();
-    bricksBroken = 0;
-    currentSpeed = INITIAL_SPEED;
     lives = 3;
     updateLives();
     buildBricks();
@@ -272,10 +231,15 @@ export function initJuego(config) {
     layoutStage();
     draw();
     if (gameInterval) clearInterval(gameInterval);
-    gameInterval = setInterval(gameLoop, 33); // 30 FPS fijos
+    gameInterval = setInterval(gameLoop, 16);
   }
 
   function openGame() {
+    // Limpiar cualquier intervalo pendiente
+    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+    if (gameInterval) { clearInterval(gameInterval); gameInterval = null; }
+    running = false;
+
     overlay.classList.add('open');
     inner.querySelectorAll('.brick').forEach(b => b.remove());
     bricks = [];
@@ -291,12 +255,14 @@ export function initJuego(config) {
     let countdown = 3;
     msgText.textContent = countdown;
     msgEl.classList.add('show');
-    const timer = setInterval(() => {
+
+    countdownInterval = setInterval(() => {
       countdown--;
       if (countdown > 0) {
         msgText.textContent = countdown;
       } else {
-        clearInterval(timer);
+        clearInterval(countdownInterval);
+        countdownInterval = null;
         msgEl.classList.remove('show');
         startGame();
       }
@@ -307,8 +273,9 @@ export function initJuego(config) {
     overlay.classList.remove('open');
     running = false;
     if (gameInterval) { clearInterval(gameInterval); gameInterval = null; }
+    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
     soundClose();
-    console.log('🔚 Juego cerrado');
+    console.log('🔚 Juego cerrado (limpiado)');
   }
 
   document.getElementById('game-close').addEventListener('click', closeGame);
@@ -361,5 +328,5 @@ export function initJuego(config) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego con 30 FPS fijos listo');
+  console.log('✅ Juego listo (60 FPS, 36 bloques, velocidad fija)');
 }
