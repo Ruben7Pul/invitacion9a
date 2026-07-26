@@ -7,17 +7,14 @@ async function cargarConfig() {
     const res = await fetch(`config.json?t=${Date.now()}`);
     if (!res.ok) throw new Error('HTTP error ' + res.status);
     const data = await res.json();
-    // Validación básica
     if (!data.nombre) throw new Error('Falta el campo "nombre"');
     return data;
   } catch (e) {
     console.warn('⚠️ Error al cargar config.json:', e);
-    // Mostrar mensaje en la interfaz
     const errorDiv = document.createElement('div');
     errorDiv.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.8); color:#fff; padding:1rem 2rem; border-radius:12px; z-index:999; text-align:center; font-family:sans-serif;';
     errorDiv.innerHTML = `<p>⚠️ No se pudo cargar la configuración.</p><p style="font-size:0.8rem; opacity:0.7;">Usando valores de respaldo.</p>`;
     document.body.prepend(errorDiv);
-    // Fallback
     return {
       nombre: 'Dania',
       fechaTexto: '24 de octubre de 2026',
@@ -25,9 +22,11 @@ async function cargarConfig() {
       frase: 'Con la bendición de Dios...',
       horaMisa: '3:00 pm',
       ubicacionMisa: 'Iglesia',
+      direccionMisa: 'Calle Principal #123, Colonia Centro',
       mapaMisa: '#',
       horaFiesta: '1:00 pm',
       ubicacionFiesta: 'Salón',
+      direccionFiesta: 'Camino a la Rosaleda #456, Fracc. Real',
       mapaFiesta: '#',
       padre: 'Papá',
       madre: 'Mamá',
@@ -52,12 +51,16 @@ function rellenarDatos(config) {
   if (horaMisa) horaMisa.textContent = config.horaMisa;
   const lugarMisa = document.getElementById('lugar-misa');
   if (lugarMisa) lugarMisa.textContent = config.ubicacionMisa;
+  const dirMisa = document.getElementById('dir-misa');
+  if (dirMisa) dirMisa.textContent = config.direccionMisa || 'Calle Principal #123, Colonia Centro';
   const mapaMisa = document.getElementById('mapa-misa');
   if (mapaMisa) mapaMisa.href = config.mapaMisa;
   const horaFiesta = document.getElementById('hora-fiesta');
   if (horaFiesta) horaFiesta.textContent = config.horaFiesta;
   const lugarFiesta = document.getElementById('lugar-fiesta');
   if (lugarFiesta) lugarFiesta.textContent = config.ubicacionFiesta;
+  const dirFiesta = document.getElementById('dir-fiesta');
+  if (dirFiesta) dirFiesta.textContent = config.direccionFiesta || 'Camino a la Rosaleda #456, Fracc. Real';
   const mapaFiesta = document.getElementById('mapa-fiesta');
   if (mapaFiesta) mapaFiesta.href = config.mapaFiesta;
   const padre1 = document.getElementById('padre1');
@@ -69,7 +72,6 @@ function rellenarDatos(config) {
   const padrino2 = document.getElementById('padrino2');
   if (padrino2) padrino2.textContent = config.madrina;
   document.title = `Mis XV años · ${config.nombre}`;
-  // Actualizar meta tags OG
   const ogTitle = document.querySelector('meta[property="og:title"]');
   if (ogTitle) ogTitle.content = `Invitación a los XV años de ${config.nombre}`;
   const ogDesc = document.querySelector('meta[property="og:description"]');
@@ -81,7 +83,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.CONFIG = config;
   rellenarDatos(config);
 
-  // ===== Módulos comunes (siempre activos) =====
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
     initSonidos();
@@ -100,7 +101,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.resetMusic = resetMusic;
   } catch (e) { console.error('❌ Música:', e); }
 
-  // ===== Módulos de la app principal =====
   let appIniciada = false;
   async function iniciarApp() {
     if (appIniciada) return;
@@ -129,7 +129,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // ===== Transición reja <-> app =====
   const portal = document.getElementById('portal');
   const gateWrapper = document.getElementById('gate-wrapper');
   const app = document.getElementById('app');
@@ -158,7 +157,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 600);
   }
 
-  // Click o Enter en la reja
   if (gateWrapper) {
     gateWrapper.addEventListener('click', (e) => {
       e.preventDefault();
