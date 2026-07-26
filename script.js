@@ -67,10 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.CONFIG = config;
   rellenarDatos(config);
 
-  const isIndex = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname === '';
-  const isPrincipal = window.location.pathname.endsWith('principal.html');
-
-  // Módulos comunes
+  // ===== Módulos comunes (siempre activos) =====
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
     initSonidos();
@@ -89,13 +86,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.resetMusic = resetMusic;
   } catch (e) { console.error('❌ Música:', e); }
 
-  // Ahora la lógica de la reja está en un script inline en index.html,
-  // así que aquí solo manejamos principal.html
-  if (isPrincipal) {
-    console.log('📌 Pantalla principal (principal)');
-    if (window.playMusic) {
-      setTimeout(() => window.playMusic(), 200);
-    }
+  // ===== Módulos de la app principal (se inicializan una sola vez) =====
+  let appIniciada = false;
+  async function iniciarApp() {
+    if (appIniciada) return;
+    appIniciada = true;
 
     try {
       const { initContador } = await import('./modules/contador.js');
@@ -118,7 +113,50 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (window.toggleMusic) window.toggleMusic();
       });
     }
+  }
+
+  // ===== Transición reja <-> app (todo en una sola página) =====
+  const portal = document.getElementById('portal');
+  const gateWrapper = document.getElementById('gate-wrapper');
+  const app = document.getElementById('app');
+  const backBtn = document.getElementById('back-link');
+
+  function abrirReja() {
+    console.log('🔄 Abriendo la reja');
+    gateWrapper.classList.add('open');
+    setTimeout(() => {
+      portal.classList.add('hide');
+      app.classList.add('show');
+      iniciarApp();
+      if (window.playMusic) window.playMusic();
+    }, 800);
+  }
+
+  function cerrarReja() {
+    console.log('↩️ Volviendo a la reja');
+    app.classList.remove('show');
+    portal.classList.remove('hide');
+    portal.classList.add('closing');
+    gateWrapper.classList.remove('open');
+    if (window.resetMusic) window.resetMusic();
+    setTimeout(() => {
+      portal.classList.remove('closing');
+    }, 600);
+  }
+
+  if (gateWrapper) {
+    gateWrapper.addEventListener('click', (e) => {
+      e.preventDefault();
+      abrirReja();
+    });
   } else {
-    console.log('📌 Página de inicio - no se ejecuta lógica de reja aquí (ya está en HTML)');
+    console.error('❌ No se encontró #gate-wrapper');
+  }
+
+  if (backBtn) {
+    backBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      cerrarReja();
+    });
   }
 });

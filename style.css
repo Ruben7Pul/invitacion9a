@@ -104,142 +104,60 @@ body {
   height: 60vh;
   max-height: 500px;
   margin: 0 auto;
-  perspective: 1200px;
+  perspective: 1000px;
   cursor: pointer;
-  transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
-
-/* ===== ANIMACIÓN DE APERTURA ===== */
-.gate-wrapper.open {
-  transform: scale(0.95);
-}
-
 .gate-leaf {
   position: absolute;
   top: 0;
   width: 50%;
   height: 100%;
-  transition: transform 1s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.8s ease-in-out;
+  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
   backface-visibility: hidden;
-  will-change: transform, opacity;
 }
-
 .gate-leaf svg {
   width: 100%;
   height: 100%;
   display: block;
   filter: drop-shadow(0 0 20px rgba(201, 162, 77, 0.3));
-  pointer-events: auto;
 }
-
 .gate-left {
   left: 0;
-  transform-origin: center center;
+  transform-origin: left center;
 }
-
 .gate-right {
   right: 0;
-  transform-origin: center center;
+  transform-origin: right center;
 }
-
 .gate-right svg {
   transform: scaleX(-1);
 }
-
-/* ===== APERTURA DE PUERTAS (SUAVE) ===== */
 .gate-wrapper.open .gate-left {
-  animation: doorOpenLeft 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  transform: rotateY(-110deg) translateX(-20px);
+  opacity: 0.1;
 }
-
 .gate-wrapper.open .gate-right {
-  animation: doorOpenRight 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  transform: rotateY(110deg) translateX(20px);
+  opacity: 0.1;
 }
-
-@keyframes doorOpenLeft {
-  0% {
-    transform: rotateY(0deg) translateX(0);
-    opacity: 1;
-  }
-  100% {
-    transform: rotateY(-120deg) translateX(-30px);
-    opacity: 0.05;
-  }
-}
-
-@keyframes doorOpenRight {
-  0% {
-    transform: rotateY(0deg) translateX(0);
-    opacity: 1;
-  }
-  100% {
-    transform: rotateY(120deg) translateX(30px);
-    opacity: 0.05;
-  }
-}
-
-/* ===== CIERRE DE PUERTAS (INVERSO) ===== */
-.gate-wrapper.closing .gate-left {
-  animation: doorCloseLeft 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-.gate-wrapper.closing .gate-right {
-  animation: doorCloseRight 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-@keyframes doorCloseLeft {
-  0% {
-    transform: rotateY(-120deg) translateX(-30px);
-    opacity: 0.05;
-  }
-  100% {
-    transform: rotateY(0deg) translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes doorCloseRight {
-  0% {
-    transform: rotateY(120deg) translateX(30px);
-    opacity: 0.05;
-  }
-  100% {
-    transform: rotateY(0deg) translateX(0);
-    opacity: 1;
-  }
-}
-
-/* ===== BRILLO CENTRAL ===== */
 .gate-brillos {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(circle at center, rgba(255,215,0,0.5) 0%, rgba(255,215,0,0.2) 40%, transparent 80%);
+  background: radial-gradient(circle at center, rgba(255,215,0,0.4) 0%, transparent 70%);
   opacity: 0;
+  transition: opacity 0.4s ease;
   z-index: 10;
   border-radius: 50%;
 }
-
 .gate-wrapper.open .gate-brillos {
-  animation: brilloSuave 1s ease-out forwards;
+  opacity: 1;
+  animation: brilloSuave 0.8s ease forwards;
 }
-
 @keyframes brilloSuave {
-  0% {
-    opacity: 0;
-    transform: scale(0.3);
-  }
-  30% {
-    opacity: 0.8;
-    transform: scale(1.2);
-  }
-  60% {
-    opacity: 0.4;
-    transform: scale(1.5);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(2);
-  }
+  0% { opacity: 0; transform: scale(0.5); }
+  40% { opacity: 0.6; transform: scale(1.5); }
+  100% { opacity: 0; transform: scale(2); }
 }
 .portal-caption {
   margin-top: 1.5rem;
