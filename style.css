@@ -70,7 +70,7 @@ body {
   border-radius: 4px;
 }
 
-/* ===== PORTAL ===== */
+/* ===== PORTAL (fondo azul rey) ===== */
 #portal {
   position: fixed;
   inset: 0;
@@ -78,7 +78,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(ellipse at 50% 35%, #241a3a 0%, var(--ink) 75%);
+  background: radial-gradient(ellipse at 50% 35%, #0d1f4a 0%, #0a122a 75%);
   transition: opacity 0.8s ease 0.3s, visibility 0.8s ease 0.3s;
 }
 #portal.hide {
@@ -105,7 +105,7 @@ body {
   font-size: 0.9rem;
 }
 
-/* ===== REJA ===== */
+/* ===== REJA (sin cambios) ===== */
 .gate-wrapper {
   position: relative;
   width: 90vw;
@@ -376,16 +376,25 @@ h1#nombre-hero::before {
   color: #d4af37;
 }
 
-/* ===== CALENDARIO (estilo castillo) ===== */
+/* ===== CONTADOR (números en una misma fila) ===== */
+.clock {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: 0.4rem;
+}
 .calendar-style .unit {
   background: linear-gradient(180deg, #1a3559, #0c1e38);
   border: 2px solid #d4af37;
   border-radius: 14px;
-  padding: 0.7rem 0.2rem;
+  padding: 0.7rem 0.5rem;
   box-shadow: 0 4px 0 #6b4c1a, inset 0 0 20px rgba(212, 175, 55, 0.1);
   position: relative;
   transform: rotate(0deg);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  flex: 1;
+  min-width: 60px;
+  text-align: center;
 }
 .calendar-style .unit:hover {
   transform: translateY(-3px) scale(1.04);
@@ -396,6 +405,7 @@ h1#nombre-hero::before {
   font-size: 1.9rem !important;
   font-weight: 700;
   text-shadow: 0 0 15px #d4af37 !important;
+  display: block;
 }
 .calendar-style .lbl {
   color: #d4af37 !important;
@@ -403,6 +413,8 @@ h1#nombre-hero::before {
   letter-spacing: 0.15em;
   text-transform: uppercase;
   font-weight: 600;
+  display: block;
+  margin-top: 0.1rem;
 }
 .calendar-style .unit::before {
   content: '';
@@ -416,7 +428,7 @@ h1#nombre-hero::before {
   opacity: 0.6;
 }
 
-/* ===== MODALES ESTILO BELLA Y BESTIA ===== */
+/* ===== MODALES ===== */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -594,20 +606,6 @@ h1#nombre-hero::before {
   margin: 0.3rem 0 0.1rem;
   color: #e0d0b0;
 }
-.detalle-info .direccion {
-  font-size: 0.8rem;
-  opacity: 0.85;
-  color: #c0b090;
-  margin: 0.1rem 0;
-  font-style: italic;
-}
-.detalle-info .nota {
-  font-size: 0.7rem;
-  opacity: 0.7;
-  color: #d4af37;
-  margin: 0.2rem 0 0;
-  letter-spacing: 0.04em;
-}
 .btn-mapa {
   display: block;
   width: fit-content;
@@ -693,7 +691,8 @@ h1#nombre-hero::before {
 }
 .familia-detalle {
   text-align: center;
-  font-family: var(--script);
+  font-family: var(--serif-body);
+  font-style: italic;
   font-size: 1rem;
   color: #e0cfa0;
   opacity: 0.8;
@@ -743,8 +742,12 @@ h1#nombre-hero::before {
   border-radius: 12px;
   overflow: hidden;
   touch-action: none;
+  background-image: url('archivos/jueg1.jpg');
+  background-size: cover;
+  background-position: center;
 }
 #game-inner { position: absolute; top: 0; left: 0; }
+
 .brick {
   position: absolute;
   display: flex;
@@ -753,8 +756,12 @@ h1#nombre-hero::before {
   border-radius: 4px;
   transition: opacity 0.2s ease, transform 0.2s ease;
   will-change: transform, opacity;
+  color: #fff;
+  font-weight: bold;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 .brick.gone { opacity: 0; transform: scale(0.3); pointer-events: none; }
+
 #paddle {
   position: absolute;
   height: 8px;
@@ -856,7 +863,7 @@ h1#nombre-hero::before {
   .modal-card h2 { font-size: 0.9rem; }
   .modal-subtitle { font-size: 1rem; }
   .calendar-style .num { font-size: 1.5rem !important; }
-  .calendar-style .unit { padding: 0.4rem 0.1rem; }
+  .calendar-style .unit { padding: 0.4rem 0.1rem; min-width: 40px; }
   .detalle-card { padding: 0.8rem; }
   .familia-nombres p { font-size: 0.95rem; }
 }
