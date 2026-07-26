@@ -22,11 +22,9 @@ async function cargarConfig() {
       frase: 'Con la bendición de Dios...',
       horaMisa: '3:00 pm',
       ubicacionMisa: 'Iglesia',
-      direccionMisa: 'Calle Principal #123, Colonia Centro',
       mapaMisa: '#',
       horaFiesta: '1:00 pm',
       ubicacionFiesta: 'Salón',
-      direccionFiesta: 'Camino a la Rosaleda #456, Fracc. Real',
       mapaFiesta: '#',
       padre: 'Papá',
       madre: 'Mamá',
@@ -51,16 +49,12 @@ function rellenarDatos(config) {
   if (horaMisa) horaMisa.textContent = config.horaMisa;
   const lugarMisa = document.getElementById('lugar-misa');
   if (lugarMisa) lugarMisa.textContent = config.ubicacionMisa;
-  const dirMisa = document.getElementById('dir-misa');
-  if (dirMisa) dirMisa.textContent = config.direccionMisa || 'Calle Principal #123, Colonia Centro';
   const mapaMisa = document.getElementById('mapa-misa');
   if (mapaMisa) mapaMisa.href = config.mapaMisa;
   const horaFiesta = document.getElementById('hora-fiesta');
   if (horaFiesta) horaFiesta.textContent = config.horaFiesta;
   const lugarFiesta = document.getElementById('lugar-fiesta');
   if (lugarFiesta) lugarFiesta.textContent = config.ubicacionFiesta;
-  const dirFiesta = document.getElementById('dir-fiesta');
-  if (dirFiesta) dirFiesta.textContent = config.direccionFiesta || 'Camino a la Rosaleda #456, Fracc. Real';
   const mapaFiesta = document.getElementById('mapa-fiesta');
   if (mapaFiesta) mapaFiesta.href = config.mapaFiesta;
   const padre1 = document.getElementById('padre1');
