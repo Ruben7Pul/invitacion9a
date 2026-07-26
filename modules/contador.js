@@ -1,10 +1,8 @@
-console.log('📦 contador.js (usa fecha de config.json)');
+console.log('📦 contador.js');
 
 export function initContador(config) {
   console.log('🕒 Iniciando contador con fecha:', config.fechaISO);
-  
   const target = new Date(config.fechaISO).getTime();
-  
   if (isNaN(target)) {
     console.error('❌ Fecha inválida en config.json:', config.fechaISO);
     document.getElementById('clock').innerHTML = '<p style="color:#ff9999;">Error: fecha inválida en la configuración.</p>';
