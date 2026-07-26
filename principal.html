@@ -17,7 +17,7 @@
   <!-- APP PRINCIPAL -->
   <div id="app" class="show">
     <div id="app-top">
-      <a href="index.html" id="back-link" class="top-btn">↩</a>
+      <button id="back-link" class="top-btn" aria-label="Volver">↩</button>
       <span class="eyebrow gold-text">Te invito a mis XV años</span>
       <button id="music-toggle" aria-label="Silenciar o activar música" class="top-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
@@ -126,6 +126,46 @@
       <p class="game-help gold-text">Mueva con dedo, A/D o flechas del teclado</p>
     </div>
   </div>
+
+  <!-- Script inline para manejar la vuelta (ANIMACIÓN INVERSA) -->
+  <script>
+    (function() {
+      const backBtn = document.getElementById('back-link');
+      const app = document.getElementById('app');
+      
+      if (backBtn && app) {
+        backBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          console.log('↩️ VOLVIENDO AL PORTAL - Animación inversa');
+          
+          // 1. Parar música
+          if (window.resetMusic) {
+            window.resetMusic();
+            console.log('🔇 Música detenida');
+          }
+          
+          // 2. Cerrar juego si está abierto
+          if (window.closeGame) {
+            window.closeGame();
+          }
+          
+          // 3. Fade out + zoom in inverso (volver pequeño)
+          app.style.transition = 'opacity 0.7s ease-in, transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+          app.style.opacity = '0';
+          app.style.transform = 'scale(0.95)';
+          console.log('✨ Transición inversa: zoom in + fade');
+          
+          // 4. Esperar transición y navegar
+          setTimeout(function() {
+            console.log('🚪 Cargando index.html con animación de cierre');
+            window.location.href = 'index.html?closing=true';
+          }, 700);
+        });
+      }
+    })();
+  </script>
 
   <script type="module" src="script.js"></script>
 </body>
