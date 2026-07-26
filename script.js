@@ -131,24 +131,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   function abrirReja() {
     console.log('🔄 Abriendo la reja');
     gateWrapper.classList.add('open');
-    setTimeout(() => {
-      portal.classList.add('hide');
-      app.classList.add('show');
-      iniciarApp();
-      if (window.playMusic) window.playMusic();
-    }, 650);
+    // Transición inmediata: ocultamos portal y mostramos app sin esperar
+    portal.classList.add('hide');
+    app.classList.add('show');
+    iniciarApp();
+    if (window.playMusic) window.playMusic();
   }
 
   function cerrarReja() {
     console.log('↩️ Volviendo a la reja');
     app.classList.remove('show');
     portal.classList.remove('hide');
+    // Forzar clase closing para animación de cierre
     portal.classList.add('closing');
     gateWrapper.classList.remove('open');
     if (window.resetMusic) window.resetMusic();
     setTimeout(() => {
       portal.classList.remove('closing');
-    }, 600);
+    }, 700);
   }
 
   if (gateWrapper) {
