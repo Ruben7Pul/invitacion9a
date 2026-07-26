@@ -10,7 +10,6 @@ export function initMusica(cfg) {
   audio.volume = 0.8;
   audio.addEventListener('error', (e) => {
     console.warn('⚠️ Error al cargar el audio:', e);
-    // Mostrar un mensaje visual (opcional)
     const toggle = document.getElementById('music-toggle');
     if (toggle) toggle.style.opacity = '0.3';
   });
