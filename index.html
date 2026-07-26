@@ -65,6 +65,7 @@
                 <circle cx="0" cy="-13" r="2.3" fill="url(#goldGrad)"/>
               </g>
             </defs>
+
             <rect x="5" y="5" width="140" height="190" rx="8" fill="none" stroke="url(#goldGrad)" stroke-width="6" filter="url(#glow)"/>
             <rect x="12" y="12" width="126" height="176" rx="5" fill="none" stroke="rgba(255,215,0,0.2)" stroke-width="2"/>
             <path d="M22 20 Q75 -20 128 20" fill="none" stroke="url(#goldGrad)" stroke-width="6" filter="url(#glow)"/>
@@ -113,7 +114,7 @@
             <use href="#scrollR" x="129" y="176"/>
           </svg>
         </div>
-        <!-- Hoja derecha -->
+        <!-- Hoja derecha (reflejada) -->
         <div class="gate-leaf gate-right" aria-hidden="true">
           <svg viewBox="0 0 150 200" width="100%" height="100%">
             <defs>
@@ -251,56 +252,103 @@
     </nav>
   </div>
 
-  <!-- MODALES -->
+  <!-- ===== MODALES (ESTILO BELLA Y BESTIA) ===== -->
+
+  <!-- 1. CONTADOR -->
   <div class="modal-overlay" id="modal-contador" role="dialog" aria-modal="true" aria-labelledby="modal-contador-title">
     <div class="modal-card">
       <button class="modal-close" data-close aria-label="Cerrar">&times;</button>
-      <h2 id="modal-contador-title" class="gold-text">Faltan para el gran día</h2>
+      <h2 id="modal-contador-title" class="gold-text">⏳ El reloj del castillo</h2>
+      <p class="modal-subtitle gold-text">Faltan para el gran baile</p>
       <div class="clock calendar-style" id="clock">
         <div class="unit"><span class="num" id="d">00</span><span class="lbl gold-text">Días</span></div>
         <div class="unit"><span class="num" id="h">00</span><span class="lbl gold-text">Horas</span></div>
         <div class="unit"><span class="num" id="m">00</span><span class="lbl gold-text">Min</span></div>
         <div class="unit"><span class="num" id="s">00</span><span class="lbl gold-text">Seg</span></div>
       </div>
-      <p id="contador-terminado" class="gold-text">¡Hoy comienza el cuento!</p>
+      <p id="contador-terminado" class="gold-text">¡Hoy comienza el cuento de hadas!</p>
+      <div class="modal-seal">
+        <span class="gold-text">✦</span>
+        <span class="gold-text" style="font-family: var(--script); font-size: 1.2rem;">La rosa encantada</span>
+        <span class="gold-text">✦</span>
+      </div>
     </div>
   </div>
 
+  <!-- 2. LUGARES -->
   <div class="modal-overlay" id="modal-detalles" role="dialog" aria-modal="true" aria-labelledby="modal-detalles-title">
     <div class="modal-card">
       <button class="modal-close" data-close aria-label="Cerrar">&times;</button>
-      <h2 id="modal-detalles-title" class="gold-text">Dónde y cuándo</h2>
+      <h2 id="modal-detalles-title" class="gold-text">🏰 Dónde y cuándo</h2>
+      <p class="modal-subtitle gold-text">El pueblo y el castillo</p>
+      
       <div class="detalle-card">
         <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2 L12 8 M8 6 L16 6 M6 22 L18 22 L18 12 L6 12 Z M9 22 L9 16 L15 16 L15 22"/></svg>
-        <h3 class="gold-text">Misa</h3>
-        <p class="hora gold-text" id="hora-misa">--</p>
-        <p class="lugar gold-text" id="lugar-misa">--</p>
-        <a class="btn-mapa gold-text" id="mapa-misa" href="#" target="_blank" rel="noopener">Cómo llegar</a>
+        <h3 class="gold-text">Misa de acción de gracias</h3>
+        <div class="detalle-info">
+          <p class="hora gold-text" id="hora-misa">--</p>
+          <p class="lugar gold-text" id="lugar-misa">--</p>
+          <p class="direccion gold-text" id="dir-misa">Calle Real #123, Colonia Centro</p>
+          <p class="nota gold-text">* Favor de llegar puntual</p>
+        </div>
+        <a class="btn-mapa gold-text" id="mapa-misa" href="#" target="_blank" rel="noopener">📍 Ver en el mapa</a>
       </div>
-      <div class="divider-thin"></div>
+      
+      <div class="divider-thin" aria-hidden="true"></div>
+      
       <div class="detalle-card">
         <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 21 C12 21 4 14.5 4 9 C4 5 7.5 2 12 2 C16.5 2 20 5 20 9 C20 14.5 12 21 12 21 Z"/><circle cx="12" cy="9" r="2.4"/></svg>
-        <h3 class="gold-text">Recepción</h3>
-        <p class="hora gold-text" id="hora-fiesta">--</p>
-        <p class="lugar gold-text" id="lugar-fiesta">--</p>
-        <a class="btn-mapa gold-text" id="mapa-fiesta" href="#" target="_blank" rel="noopener">Cómo llegar</a>
+        <h3 class="gold-text">Recepción / Banquete</h3>
+        <div class="detalle-info">
+          <p class="hora gold-text" id="hora-fiesta">--</p>
+          <p class="lugar gold-text" id="lugar-fiesta">--</p>
+          <p class="direccion gold-text" id="dir-fiesta">Camino a la Rosaleda #456, Fracc. Real</p>
+          <p class="nota gold-text">* Estacionamiento disponible</p>
+        </div>
+        <a class="btn-mapa gold-text" id="mapa-fiesta" href="#" target="_blank" rel="noopener">📍 Ver en el mapa</a>
       </div>
     </div>
   </div>
 
+  <!-- 3. FAMILIA -->
   <div class="modal-overlay" id="modal-familia" role="dialog" aria-modal="true" aria-labelledby="modal-familia-title">
     <div class="modal-card">
       <button class="modal-close" data-close aria-label="Cerrar">&times;</button>
-      <h2 id="modal-familia-title" class="gold-text">Mi familia</h2>
+      <h2 id="modal-familia-title" class="gold-text">👑 Mi noble familia</h2>
+      <p class="modal-subtitle gold-text">La corte que me acompaña</p>
+      
       <div class="familia-grupo">
-        <h3 class="gold-text">Mis padres</h3>
-        <p class="gold-text" id="padre1">--</p>
-        <p class="gold-text" id="padre2">--</p>
+        <div class="familia-titulo">
+          <span class="corona">⚜️</span>
+          <h3 class="gold-text">Señores padres</h3>
+          <span class="corona">⚜️</span>
+        </div>
+        <div class="familia-nombres">
+          <p class="gold-text"><span class="tratamiento">Sr.</span> <span id="padre1">--</span></p>
+          <p class="gold-text"><span class="tratamiento">Sra.</span> <span id="padre2">--</span></p>
+        </div>
+        <p class="familia-detalle gold-text">"Su amor me ha dado alas"</p>
       </div>
+      
+      <div class="divider-thin" aria-hidden="true"></div>
+      
       <div class="familia-grupo">
-        <h3 class="gold-text">Mis padrinos</h3>
-        <p class="gold-text" id="padrino1">--</p>
-        <p class="gold-text" id="padrino2">--</p>
+        <div class="familia-titulo">
+          <span class="corona">🌹</span>
+          <h3 class="gold-text">Padrinos de honor</h3>
+          <span class="corona">🌹</span>
+        </div>
+        <div class="familia-nombres">
+          <p class="gold-text"><span class="tratamiento">Sr.</span> <span id="padrino1">--</span></p>
+          <p class="gold-text"><span class="tratamiento">Sra.</span> <span id="padrino2">--</span></p>
+        </div>
+        <p class="familia-detalle gold-text">"Su guía ilumina mi camino"</p>
+      </div>
+      
+      <div class="modal-seal">
+        <span class="gold-text">❤️</span>
+        <span class="gold-text" style="font-family: var(--script); font-size: 1.2rem;">Unidos para siempre</span>
+        <span class="gold-text">❤️</span>
       </div>
     </div>
   </div>
