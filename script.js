@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       app.classList.add('show');
       iniciarApp();
       if (window.playMusic) window.playMusic();
-    }, 800);
+    }, 650);
   }
 
   function cerrarReja() {
