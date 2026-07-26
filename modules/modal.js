@@ -1,4 +1,3 @@
-// modal.js - Abrir/cerrar modales
 console.log('📦 módulo modal.js cargado');
 
 import { soundOpen, soundClose, soundTap } from './sonidos.js';
