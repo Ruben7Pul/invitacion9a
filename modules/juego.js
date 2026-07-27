@@ -1,4 +1,4 @@
-console.log('📦 juego.js (60 FPS, 36 ladrillos, reseteo completo al abrir)');
+console.log('📦 juego.js (60 FPS lógicos con requestAnimationFrame y delta time)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
@@ -9,10 +9,11 @@ const BALL_R = 4;
 const STAGE_W = 300;
 const STAGE_H = 420;
 const TOP_OFFSET = 30;
-const BALL_SPEED = 5;
+// Velocidad en píxeles por segundo (300 px/s = 5 px/frame a 60 fps)
+const BALL_SPEED = 300;
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego (60 FPS, 36 ladrillos, velocidad fija)');
+  console.log('🎮 Iniciando juego (delta time, velocidad estable)');
 
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => { soundTap(); openGame(); });
@@ -35,7 +36,7 @@ export function initJuego(config) {
   let ball = { x: STAGE_W / 2, y: STAGE_H - 38, vx: 0, vy: 0 };
   let lives = 3;
   let running = false;
-  let gameInterval = null;
+  let animFrameId = null;
   let countdownInterval = null;
   let startTime = 0;
   let endTime = 0;
@@ -46,9 +47,8 @@ export function initJuego(config) {
 
   window.closeGame = closeGame;
 
-  // Reset completo del estado del juego
   function resetGameState() {
-    if (gameInterval) { clearInterval(gameInterval); gameInterval = null; }
+    if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
     if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
     running = false;
     bricks = [];
@@ -64,7 +64,6 @@ export function initJuego(config) {
     keys.right = false;
     touchActive = false;
     touchX = 0;
-    // Limpiar ladrillos del DOM
     inner.querySelectorAll('.brick').forEach(b => b.remove());
     msgEl.classList.remove('show');
     restartBtn.style.display = 'none';
@@ -154,22 +153,32 @@ export function initJuego(config) {
     ballEl.style.top = (ball.y - BALL_R) + 'px';
   }
 
-  function gameLoop() {
+  let lastTime = 0;
+
+  function gameLoop(timestamp) {
     if (!running) return;
 
+    // Delta time en segundos
+    const delta = lastTime ? Math.min((timestamp - lastTime) / 1000, 0.05) : 0.016;
+    lastTime = timestamp;
+
+    // Movimiento de la paleta (independiente del delta, velocidad fija)
     if (keys.left) paddle.x = Math.max(0, paddle.x - 7);
     if (keys.right) paddle.x = Math.min(STAGE_W - PADDLE_W, paddle.x + 7);
     if (touchActive) {
       paddle.x = Math.max(0, Math.min(STAGE_W - PADDLE_W, touchX));
     }
 
-    ball.x += ball.vx;
-    ball.y += ball.vy;
+    // Movimiento de la pelota con delta time
+    ball.x += ball.vx * delta;
+    ball.y += ball.vy * delta;
 
+    // Rebotes en paredes
     if (ball.x - BALL_R < 0) { ball.x = BALL_R; ball.vx = Math.abs(ball.vx); }
     if (ball.x + BALL_R > STAGE_W) { ball.x = STAGE_W - BALL_R; ball.vx = -Math.abs(ball.vx); }
     if (ball.y - BALL_R < 0) { ball.y = BALL_R; ball.vy = Math.abs(ball.vy); }
 
+    // Rebote en paleta
     const py = STAGE_H - 14;
     if (ball.vy > 0 && ball.y + BALL_R >= py && ball.y + BALL_R <= py + 10 &&
         ball.x >= paddle.x - BALL_R && ball.x <= paddle.x + PADDLE_W + BALL_R) {
@@ -181,6 +190,7 @@ export function initJuego(config) {
       ball.vy = -Math.cos(angle) * BALL_SPEED;
     }
 
+    // Colisión con ladrillos
     for (const b of bricks) {
       if (!b.alive) continue;
       if (ball.x + BALL_R > b.x && ball.x - BALL_R < b.x + b.w &&
@@ -198,6 +208,7 @@ export function initJuego(config) {
       }
     }
 
+    // Pérdida de vida
     if (ball.y - BALL_R > STAGE_H) {
       lives--;
       updateLives();
@@ -206,6 +217,7 @@ export function initJuego(config) {
       resetBall();
     }
 
+    // Victoria
     if (bricks.every(b => !b.alive)) {
       endTime = performance.now();
       endGame(true);
@@ -213,11 +225,12 @@ export function initJuego(config) {
     }
 
     draw();
+    animFrameId = requestAnimationFrame(gameLoop);
   }
 
   function endGame(win) {
     running = false;
-    if (gameInterval) { clearInterval(gameInterval); gameInterval = null; }
+    if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
     restartBtn.style.display = 'inline-block';
 
     let message = '';
@@ -243,7 +256,7 @@ export function initJuego(config) {
   }
 
   function startGame() {
-    resetGameState(); // Aseguramos estado limpio
+    resetGameState();
     startTime = performance.now();
     lives = 3;
     updateLives();
@@ -254,16 +267,14 @@ export function initJuego(config) {
     running = true;
     layoutStage();
     draw();
-    if (gameInterval) clearInterval(gameInterval);
-    gameInterval = setInterval(gameLoop, 16);
+    lastTime = 0;
+    if (animFrameId) cancelAnimationFrame(animFrameId);
+    animFrameId = requestAnimationFrame(gameLoop);
   }
 
   function openGame() {
-    // Resetear todo antes de abrir
     resetGameState();
-
     overlay.classList.add('open');
-    // Asegurar que no haya elementos de ladrillos
     inner.querySelectorAll('.brick').forEach(b => b.remove());
     bricks = [];
     msgEl.classList.remove('show');
@@ -289,7 +300,7 @@ export function initJuego(config) {
 
   function closeGame() {
     overlay.classList.remove('open');
-    resetGameState(); // Limpieza total al cerrar
+    resetGameState();
     soundClose();
     console.log('🔚 Juego cerrado y reiniciado');
   }
@@ -344,6 +355,6 @@ export function initJuego(config) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  resetGameState(); // Estado inicial limpio
-  console.log('✅ Juego listo (60 FPS, 36 bloques, velocidad fija)');
+  resetGameState();
+  console.log('✅ Juego listo (velocidad estable con delta time)');
 }
