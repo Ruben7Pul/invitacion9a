@@ -712,25 +712,6 @@ h1#nombre-hero {
   width: 100%;
   height: 100%;
 }
-#fog-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 75%;
-  pointer-events: none;
-  z-index: 5;
-  background: rgba(180, 190, 210, 0.75);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
-  display: none;
-  transition: opacity 0.5s ease;
-}
-#fog-overlay.active { display: block; }
-#fog-overlay.level-1 { opacity: 0.7; }
-#fog-overlay.level-2 { opacity: 0.85; }
-#fog-overlay.level-3 { opacity: 1; }
-
 .brick {
   position: absolute;
   display: flex;
@@ -743,7 +724,6 @@ h1#nombre-hero {
   font-weight: bold;
   text-shadow: 0 1px 2px rgba(0,0,0,0.5);
   border: 1px solid rgba(255,255,255,0.2);
-  z-index: 2;
 }
 .brick.dureza-1 { background: #b8860b; }
 .brick.dureza-2 { background: #8B7355; }
@@ -765,7 +745,7 @@ h1#nombre-hero {
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #fff, #ff6b6b, #cc1122);
   box-shadow: 0 0 20px #ff4444, 0 0 40px rgba(255, 50, 50, 0.6);
-  z-index: 12;
+  z-index: 10;
 }
 .game-object {
   position: absolute;
@@ -791,7 +771,7 @@ h1#nombre-hero {
   width: 26px;
   height: 26px;
   box-shadow: 0 0 30px rgba(68, 136, 255, 0.6);
-  z-index: 15;
+  z-index: 15; /* Siempre visible */
 }
 .game-object .obj-label {
   position: absolute;
@@ -805,6 +785,28 @@ h1#nombre-hero {
   font-weight: bold;
   letter-spacing: 0.05em;
 }
+
+/* NIEBLA - CAPA SUPERIOR */
+#fog-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70%; /* Cubre desde arriba hasta justo encima de la paleta */
+  pointer-events: none;
+  z-index: 5; /* Por debajo de la pelota y la paleta, pero por encima de ladrillos y objetos normales */
+  background: rgba(200, 210, 230, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: none;
+  transition: opacity 0.5s ease;
+}
+#fog-overlay.active {
+  display: block;
+}
+#fog-overlay.level-1 { opacity: 0.7; }
+#fog-overlay.level-2 { opacity: 0.85; }
+#fog-overlay.level-3 { opacity: 1; }
 
 #game-msg {
   position: absolute;
