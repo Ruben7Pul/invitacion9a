@@ -1,74 +1,19 @@
-console.log('📦 juego.js - Implementación completa ABSCIOD BONUS ARACDE v8.1');
+console.log('📦 juego.js (60 FPS lógicos con requestAnimationFrame y delta time)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
-// ============================================================
-// CONSTANTES Y CONFIGURACIÓN
-// ============================================================
-
-const ROWS = 6;
-const COLS = 6;
-const BRICK_COUNT = ROWS * COLS; // 36
-const PADDLE_W_BASE = 60;
-const PADDLE_H = 10;
-const BALL_R = 6;
+const BRICK_COUNT = 36;
+const PADDLE_W = 60;
+const PADDLE_H = 8;
+const BALL_R = 4;
 const STAGE_W = 300;
 const STAGE_H = 420;
 const TOP_OFFSET = 30;
-const BALL_SPEED_BASE = 220; // px/s (velocidad inicial)
-const SPEED_INCREMENT_PER_SECOND = 0.5; // px/s por segundo
-const MAX_SPEED = 800; // límite físico
-
-// Tipos de ladrillos (dureza y valor)
-const CLAY = { dureza: 1, valor: 1, nombre: 'Arcilla' };
-const WOOD = { dureza: 2, valor: 2, nombre: 'Madera' };
-const IRON = { dureza: 3, valor: 3, nombre: 'Hierro' };
-
-// Puntos base por destruir
-const PUNTOS_BASE = {
-  1: 100, // Arcilla
-  2: 200, // Madera
-  3: 300  // Hierro
-};
-
-// Probabilidades de soltar objeto por tipo
-const PROB_OBJETO = {
-  1: 0.05, // Arcilla 5%
-  2: 0.10, // Madera 10%
-  3: 0.20  // Hierro 20%
-};
-
-// Tabla de probabilidades Verde vs Rojo por minuto
-const PROB_VERDE = [
-  50.000, 46.875, 43.750, 40.625, 37.500, 34.375, 31.250, 28.125,
-  25.000, 21.875, 18.750, 15.625, 12.500, 9.375, 6.250, 3.125, 0.000
-];
-const PROB_ROJO = PROB_VERDE.map(v => 100 - v);
-
-// Pesos internos
-const PESOS_VERDES = {
-  'multibola': 15,
-  'pala_grande': 35,
-  'dureza': 50
-};
-const PESOS_ROJOS = {
-  'niebla': 10,
-  'pala_mini': 35,
-  'flaqueza': 55
-};
-
-// Umbral de recarga
-const UMBRAL_RECARGA = 12;
-
-// Umbral de vida extra
-const UMBRAL_VIDA_EXTRA = 3000;
-
-// ============================================================
-// ESTADO DEL JUEGO
-// ============================================================
+// Velocidad en píxeles por segundo (300 px/s = 5 px/frame a 60 fps)
+const BALL_SPEED = 300;
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego con diseño ABSCIOD v8.1');
+  console.log('🎮 Iniciando juego (delta time, velocidad estable)');
 
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => { soundTap(); openGame(); });
@@ -81,604 +26,99 @@ export function initJuego(config) {
   const msgEl = document.getElementById('game-msg');
   const msgText = document.getElementById('game-msg-text');
   const livesEl = document.getElementById('lives');
-  const scoreEl = document.getElementById('score');
-  const comboEl = document.getElementById('combo-display');
   const restartBtn = document.getElementById('game-restart');
-  const fogLayer = document.getElementById('fog-layer');
 
-  // Variables de estado
+  restartBtn.style.display = 'none';
+
   let scale = 1;
   let bricks = [];
-  let paddle = { x: (STAGE_W - PADDLE_W_BASE) / 2, w: PADDLE_W_BASE };
-  let balls = []; // array de bolas {x, y, vx, vy}
+  let paddle = { x: (STAGE_W - PADDLE_W) / 2 };
+  let ball = { x: STAGE_W / 2, y: STAGE_H - 38, vx: 0, vy: 0 };
   let lives = 3;
-  let score = 0;
-  let combo = 0;
-  let comboData = []; // para registrar durezas durante el combo
-  let comboActive = false;
-  let comboBonus = 0;
-  let gameRunning = false;
+  let running = false;
   let animFrameId = null;
   let countdownInterval = null;
   let startTime = 0;
-  let gameTime = 0; // segundos transcurridos
-  let currentSpeed = BALL_SPEED_BASE;
-  let lastTimestamp = 0;
+  let endTime = 0;
 
-  // Objetos en pantalla (power-ups/downgrades cayendo)
-  let objects = [];
-
-  // Estado de poderes
-  let powerups = {
-    pala_grande: false,
-    dureza_mejora: false, // se aplica al tocar un ladrillo
-    multibola: false,
-    pala_mini: false,
-    flaqueza: false,
-    niebla_nivel: 0,
-    niebla_timer: 0,
-    niebla_visible: true,
-    pelota_azul_disponible: false
-  };
-
-  // Control de teclado/táctil
   const keys = { left: false, right: false };
   let touchActive = false;
   let touchX = 0;
 
-  // ============================================================
-  // FUNCIONES AUXILIARES
-  // ============================================================
+  window.closeGame = closeGame;
 
-  function getTipoPorDureza(d) {
-    if (d === 1) return CLAY;
-    if (d === 2) return WOOD;
-    if (d === 3) return IRON;
-    return CLAY;
+  function resetGameState() {
+    if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+    running = false;
+    bricks = [];
+    paddle.x = (STAGE_W - PADDLE_W) / 2;
+    ball.x = STAGE_W / 2;
+    ball.y = STAGE_H - 38;
+    ball.vx = 0;
+    ball.vy = 0;
+    lives = 3;
+    startTime = 0;
+    endTime = 0;
+    keys.left = false;
+    keys.right = false;
+    touchActive = false;
+    touchX = 0;
+    inner.querySelectorAll('.brick').forEach(b => b.remove());
+    msgEl.classList.remove('show');
+    restartBtn.style.display = 'none';
+    updateLives();
+    draw();
   }
 
-  function sumarPuntosLadrillos() {
-    let s = 0;
-    for (const b of bricks) {
-      if (!b.alive) continue;
-      s += b.valor;
-    }
-    return s;
-  }
-
-  function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-
-  function distanciaEntrePuntos(x1, y1, x2, y2) {
-    return Math.hypot(x2 - x1, y2 - y1);
-  }
-
-  // ============================================================
-  // SISTEMA DE RECARGA DE LADRILLOS
-  // ============================================================
-
-  function recargarLadrillos() {
-    const S = sumarPuntosLadrillos();
-    if (S > UMBRAL_RECARGA) return;
-
-    // Generar combinación de ladrillos cuya suma de valores sea exactamente 12
-    const combinaciones = [];
-    for (let a = 0; a <= 12; a++) {
-      for (let m = 0; m <= 6; m++) {
-        for (let h = 0; h <= 4; h++) {
-          if (a * 1 + m * 2 + h * 3 === 12) {
-            combinaciones.push({ arcilla: a, madera: m, hierro: h });
-          }
-        }
-      }
-    }
-    const combo = combinaciones[Math.floor(Math.random() * combinaciones.length)];
-    const nuevos = [];
-    for (let i = 0; i < combo.arcilla; i++) nuevos.push({ dureza: 1, valor: 1, nombre: 'Arcilla' });
-    for (let i = 0; i < combo.madera; i++) nuevos.push({ dureza: 2, valor: 2, nombre: 'Madera' });
-    for (let i = 0; i < combo.hierro; i++) nuevos.push({ dureza: 3, valor: 3, nombre: 'Hierro' });
-
-    // Mezclar para que sea aleatorio
-    for (let i = nuevos.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [nuevos[i], nuevos[j]] = [nuevos[j], nuevos[i]];
-    }
-
-    // Obtener posiciones libres (lejos de la trayectoria de la bola)
-    const posicionesLibres = [];
-    const ocupadas = new Set();
-    for (const b of bricks) {
-      if (b.alive) {
-        const key = `${b.gridX},${b.gridY}`;
-        ocupadas.add(key);
-      }
-    }
-
-    // Calcular trayectoria de la bola (solo la primera bola)
-    const bola = balls.length > 0 ? balls[0] : null;
-    let trayectoria = [];
-    if (bola) {
-      // Simular 30 pasos
-      let x = bola.x, y = bola.y, vx = bola.vx, vy = bola.vy;
-      for (let i = 0; i < 30; i++) {
-        x += vx * 0.02;
-        y += vy * 0.02;
-        if (x < 0 || x > STAGE_W) vx = -vx;
-        if (y < 0) vy = -vy;
-        trayectoria.push({ x, y });
-      }
-    }
-
-    const gridCols = 6;
-    const gridRows = 6;
+  function generateBrickLayout() {
+    const cols = 6;
+    const rows = 6;
     const brickW = 38;
     const brickH = 16;
     const gap = 3;
-    const totalWidth = gridCols * (brickW + gap) - gap;
+    const totalWidth = cols * (brickW + gap) - gap;
     const startX = (STAGE_W - totalWidth) / 2;
     const startY = TOP_OFFSET;
-
-    // Buscar posiciones vacías
-    for (let r = 0; r < gridRows; r++) {
-      for (let c = 0; c < gridCols; c++) {
-        const key = `${c},${r}`;
-        if (!ocupadas.has(key)) {
-          const x = startX + c * (brickW + gap);
-          const y = startY + r * (brickH + gap);
-          // Verificar distancia a la trayectoria (mínimo 3 casillas)
-          let lejos = true;
-          if (bola) {
-            for (const p of trayectoria) {
-              const dist = distanciaEntrePuntos(x + brickW/2, y + brickH/2, p.x, p.y);
-              if (dist < 60) { // 3 casillas aprox
-                lejos = false;
-                break;
-              }
-            }
-          }
-          if (lejos) {
-            posicionesLibres.push({ x, y, c, r });
-          }
-        }
-      }
-    }
-
-    // Mezclar posiciones
-    for (let i = posicionesLibres.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [posicionesLibres[i], posicionesLibres[j]] = [posicionesLibres[j], posicionesLibres[i]];
-    }
-
-    // Colocar nuevos ladrillos
-    let colocados = 0;
-    for (const tipo of nuevos) {
-      if (colocados >= posicionesLibres.length) break;
-      const pos = posicionesLibres[colocados];
-      const el = document.createElement('div');
-      el.className = `brick dureza-${tipo.dureza}`;
-      el.style.left = pos.x + 'px';
-      el.style.top = pos.y + 'px';
-      el.style.width = brickW + 'px';
-      el.style.height = brickH + 'px';
-      el.style.borderRadius = '4px';
-      el.style.color = '#fff';
-      el.style.fontWeight = 'bold';
-      el.style.textShadow = '0 1px 2px rgba(0,0,0,0.5)';
-      el.style.border = '1px solid rgba(255,255,255,0.2)';
-      inner.appendChild(el);
-
-      bricks.push({
-        x: pos.x, y: pos.y, w: brickW, h: brickH,
-        gridX: pos.c, gridY: pos.r,
-        dureza: tipo.dureza,
-        valor: tipo.valor,
-        nombre: tipo.nombre,
-        el: el,
-        alive: true,
-        // Para combo
-        durezaInicial: tipo.dureza,
-        durezaFinal: tipo.dureza,
-        fueGolpeado: false
-      });
-      colocados++;
-    }
-  }
-
-  // ============================================================
-  // SISTEMA DE COMBO
-  // ============================================================
-
-  function iniciarCombo() {
-    combo = 0;
-    comboData = [];
-    comboActive = true;
-    comboBonus = 0;
-    for (const b of bricks) {
-      if (b.alive) {
-        b.durezaInicial = b.dureza;
-        b.durezaFinal = b.dureza;
-        b.fueGolpeado = false;
-      }
-    }
-    actualizarComboDisplay();
-  }
-
-  function registrarGolpeLadrillo(brick) {
-    if (!comboActive) return;
-    if (!brick.alive) return;
-    if (!brick.fueGolpeado) {
-      brick.fueGolpeado = true;
-      brick.durezaInicial = brick.dureza; // en el primer golpe
-    }
-    brick.durezaFinal = brick.dureza; // actualizar cada vez
-  }
-
-  function finalizarCombo() {
-    if (!comboActive) return;
-    comboActive = false;
-    // Calcular bonificación
-    let bote = 0;
-    for (const b of bricks) {
-      if (!b.fueGolpeado) continue;
-      const inicial = b.durezaInicial;
-      const final = b.durezaFinal;
-      if (final === 0) { // destruido
-        const tipo = getTipoPorDureza(inicial);
-        if (inicial === 1 && tipo.nombre === 'Arcilla') bote += 25;
-        else if (inicial === 1 && tipo.nombre === 'Madera') bote += 125;
-        else if (inicial === 2) bote += 200;
-        else if (inicial === 1 && tipo.nombre === 'Hierro') bote += 150;
-        else if (inicial === 2) bote += 300;
-        else if (inicial === 3) bote += 450;
-      } else { // no destruido
-        const tipo = getTipoPorDureza(final);
-        if (tipo.nombre === 'Madera') bote += 75;
-        else if (tipo.nombre === 'Hierro') bote += 75;
-        // Arcilla no da bonificación
-      }
-    }
-    // Añadir bote al marcador
-    score += bote;
-    actualizarScoreDisplay();
-    comboBonus = bote;
-    // Reiniciar combo
-    combo = 0;
-    actualizarComboDisplay();
-  }
-
-  // ============================================================
-  // GENERACIÓN DE OBJETOS
-  // ============================================================
-
-  function generarObjeto(brick) {
-    const prob = PROB_OBJETO[brick.dureza] || 0;
-    if (Math.random() > prob) return;
-
-    const minuto = Math.floor(gameTime / 60);
-    const idx = Math.min(minuto, 16);
-    const pVerde = PROB_VERDE[idx] / 100;
-    const pRojo = PROB_ROJO[idx] / 100;
-    let esVerde = false;
-    if (Math.random() < pVerde) esVerde = true;
-    else if (Math.random() < pRojo) esVerde = false;
-    else return; // no suelta nada
-
-    let objeto = null;
-    if (esVerde) {
-      // Seleccionar verde con pesos, comprobar bloqueos
-      const disponibles = [];
-      if (!powerups.pala_grande) disponibles.push('pala_grande');
-      // Multibola: si ya hay 9 bolas, bloqueado
-      if (balls.length < 9) disponibles.push('multibola');
-      // Dureza: si ya está activo, bloqueado
-      if (!powerups.dureza_mejora) disponibles.push('dureza');
-      if (disponibles.length === 0) return;
-      // Selección con pesos
-      let total = 0;
-      for (const d of disponibles) total += PESOS_VERDES[d];
-      let r = Math.random() * total;
-      for (const d of disponibles) {
-        r -= PESOS_VERDES[d];
-        if (r <= 0) { objeto = d; break; }
-      }
-      if (!objeto) objeto = disponibles[0];
-      // Crear objeto verde
-      crearObjetoVisual(brick.x + brick.w/2, brick.y, 'green', objeto);
-      // Aplicar efecto inmediato o almacenar para caída
-    } else {
-      // Seleccionar rojo con pesos y bloqueos
-      const disponibles = [];
-      if (powerups.niebla_nivel < 3) disponibles.push('niebla');
-      if (!powerups.pala_mini) disponibles.push('pala_mini');
-      if (!powerups.flaqueza) disponibles.push('flaqueza');
-      if (disponibles.length === 0) return;
-      let total = 0;
-      for (const d of disponibles) total += PESOS_ROJOS[d];
-      let r = Math.random() * total;
-      let objetoRojo = null;
-      for (const d of disponibles) {
-        r -= PESOS_ROJOS[d];
-        if (r <= 0) { objetoRojo = d; break; }
-      }
-      if (!objetoRojo) objetoRojo = disponibles[0];
-      crearObjetoVisual(brick.x + brick.w/2, brick.y, 'red', objetoRojo);
-    }
-  }
-
-  function crearObjetoVisual(x, y, color, tipo) {
-    const el = document.createElement('div');
-    el.className = `game-object ${color}`;
-    el.style.left = (x - 10) + 'px';
-    el.style.top = y + 'px';
-    const label = document.createElement('span');
-    label.className = 'obj-label';
-    let abrev = '';
-    if (tipo === 'pala_grande') abrev = 'PG';
-    else if (tipo === 'dureza') abrev = 'DU';
-    else if (tipo === 'multibola') abrev = 'MB';
-    else if (tipo === 'pala_mini') abrev = 'PM';
-    else if (tipo === 'flaqueza') abrev = 'FL';
-    else if (tipo === 'niebla') abrev = 'NB';
-    label.textContent = abrev;
-    el.appendChild(label);
-    inner.appendChild(el);
-    // Velocidad de caída: Verde rápida, Rojo lenta, Azul intermedia
-    let velocidad = 0;
-    if (color === 'green') velocidad = 120 + Math.random() * 60;
-    else if (color === 'red') velocidad = 40 + Math.random() * 30;
-    else velocidad = 80 + Math.random() * 40;
-    objects.push({
-      el: el,
-      x: x - 10,
-      y: y,
-      velocidad: velocidad,
-      color: color,
-      tipo: tipo,
-      activo: true
-    });
-  }
-
-  // ============================================================
-  // APLICACIÓN DE OBJETOS AL ATRAPARLOS
-  // ============================================================
-
-  function atraparObjeto(obj) {
-    if (!obj.activo) return;
-    obj.activo = false;
-    obj.el.remove();
-
-    if (obj.color === 'green') {
-      switch (obj.tipo) {
-        case 'pala_grande':
-          powerups.pala_grande = true;
-          paddle.w = PADDLE_W_BASE * 1.3;
-          actualizarPaddle();
-          break;
-        case 'dureza':
-          powerups.dureza_mejora = true;
-          // Mejorar un ladrillo al azar (arcilla→madera→hierro)
-          const vivos = bricks.filter(b => b.alive && b.dureza < 3);
-          if (vivos.length > 0) {
-            const target = vivos[Math.floor(Math.random() * vivos.length)];
-            target.dureza++;
-            target.valor++;
-            target.nombre = getTipoPorDureza(target.dureza).nombre;
-            target.el.className = `brick dureza-${target.dureza}`;
-          }
-          break;
-        case 'multibola':
-          // Multiplicar bolas ×3 hasta máximo 9
-          const nuevas = [];
-          for (let i = 0; i < balls.length; i++) {
-            if (balls.length >= 9) break;
-            const b = balls[i];
-            const ang = (Math.random() - 0.5) * 1.2;
-            const spd = Math.hypot(b.vx, b.vy);
-            const newVx = Math.sin(ang) * spd;
-            const newVy = -Math.cos(ang) * spd;
-            nuevas.push({
-              x: b.x + (Math.random() - 0.5) * 10,
-              y: b.y + (Math.random() - 0.5) * 10,
-              vx: newVx,
-              vy: newVy
-            });
-          }
-          balls.push(...nuevas);
-          break;
-      }
-    } else if (obj.color === 'red') {
-      switch (obj.tipo) {
-        case 'pala_mini':
-          powerups.pala_mini = true;
-          paddle.w = PADDLE_W_BASE * 0.7;
-          actualizarPaddle();
-          break;
-        case 'flaqueza':
-          powerups.flaqueza = true;
-          // Degradar un ladrillo al azar (hierro→madera→arcilla)
-          const vivos = bricks.filter(b => b.alive && b.dureza > 1);
-          if (vivos.length > 0) {
-            const target = vivos[Math.floor(Math.random() * vivos.length)];
-            target.dureza--;
-            target.valor--;
-            target.nombre = getTipoPorDureza(target.dureza).nombre;
-            target.el.className = `brick dureza-${target.dureza}`;
-          }
-          break;
-        case 'niebla':
-          powerups.niebla_nivel = Math.min(3, powerups.niebla_nivel + 1);
-          actualizarNiebla();
-          break;
-      }
-    } else if (obj.color === 'blue') {
-      // Pelota Azul: elimina downgrades, da power-up aleatorio y 500 pts
-      powerups.pala_mini = false;
-      powerups.flaqueza = false;
-      powerups.niebla_nivel = 0;
-      actualizarNiebla();
-      if (paddle.w < PADDLE_W_BASE) {
-        paddle.w = PADDLE_W_BASE;
-        actualizarPaddle();
-      }
-      // Dar power-up aleatorio (verde) que esté disponible
-      const verdes = ['pala_grande', 'dureza', 'multibola'];
-      const disponibles = verdes.filter(v => {
-        if (v === 'pala_grande' && powerups.pala_grande) return false;
-        if (v === 'dureza' && powerups.dureza_mejora) return false;
-        if (v === 'multibola' && balls.length >= 9) return false;
-        return true;
-      });
-      if (disponibles.length > 0) {
-        const elegido = disponibles[Math.floor(Math.random() * disponibles.length)];
-        // Simular que se atrapa ese verde
-        const objFalso = { color: 'green', tipo: elegido, activo: true };
-        atraparObjeto(objFalso);
-      }
-      score += 500;
-      actualizarScoreDisplay();
-    }
-  }
-
-  function actualizarPaddle() {
-    const el = document.getElementById('paddle');
-    if (el) el.style.width = paddle.w + 'px';
-  }
-
-  function actualizarNiebla() {
-    const nivel = powerups.niebla_nivel;
-    const fog = document.getElementById('fog-layer');
-    if (nivel > 0) {
-      fog.classList.add('active');
-      fog.className = `active level-${nivel}`;
-      if (nivel === 1) {
-        // Niebla constante
-        powerups.niebla_visible = false;
-      } else if (nivel === 2) {
-        // Invisible 1s, visible 3s
-        powerups.niebla_timer = 0;
-        powerups.niebla_visible = false;
-      } else if (nivel === 3) {
-        // Invisible 2s, visible 3s
-        powerups.niebla_timer = 0;
-        powerups.niebla_visible = false;
-      }
-    } else {
-      fog.classList.remove('active');
-      fog.className = '';
-      powerups.niebla_visible = true;
-    }
-  }
-
-  // ============================================================
-  // SISTEMA DE VIDAS Y PELOTA AZUL
-  // ============================================================
-
-  function perderVida() {
-    // Entregar bote del combo antes de resetear
-    if (comboActive) finalizarCombo();
-    lives--;
-    if (lives <= 0) {
-      endGame(false);
-      return;
-    }
-    // Resetear poderes (excepto velocidad base)
-    powerups.pala_grande = false;
-    powerups.pala_mini = false;
-    powerups.dureza_mejora = false;
-    powerups.flaqueza = false;
-    powerups.niebla_nivel = 0;
-    powerups.niebla_visible = true;
-    paddle.w = PADDLE_W_BASE;
-    actualizarPaddle();
-    actualizarNiebla();
-    // Resetear bolas a 1
-    const bola = balls[0] || { x: STAGE_W/2, y: STAGE_H - 38 };
-    balls = [{
-      x: STAGE_W/2,
-      y: STAGE_H - 38,
-      vx: (Math.random() - 0.5) * 2 * currentSpeed,
-      vy: -Math.sqrt(currentSpeed*currentSpeed - (Math.random()-0.5)**2 * 4)
-    }];
-    actualizarVidasDisplay();
-  }
-
-  function actualizarVidasDisplay() {
-    livesEl.textContent = '♥ '.repeat(Math.max(lives, 0)).trim() || '—';
-  }
-
-  function actualizarScoreDisplay() {
-    scoreEl.textContent = Math.floor(score);
-    // Verificar umbral de vida extra
-    const vidasExtra = Math.floor(score / UMBRAL_VIDA_EXTRA);
-    if (vidasExtra > 0) {
-      if (lives < 3) {
-        lives = Math.min(3, lives + 1);
-        actualizarVidasDisplay();
-        // Resetear contador de vidas extra para no repetir
-        score = score % UMBRAL_VIDA_EXTRA;
-        actualizarScoreDisplay();
-      } else {
-        // Ya tiene 3 vidas: aparece Pelota Azul
-        if (!powerups.pelota_azul_disponible) {
-          powerups.pelota_azul_disponible = true;
-          // Aparecerá en la siguiente colisión
-        }
-      }
-    }
-  }
-
-  function actualizarComboDisplay() {
-    comboEl.textContent = `Combo: ${combo}`;
-  }
-
-  // ============================================================
-  // INICIALIZACIÓN DEL TABLERO
-  // ============================================================
-
-  function initBoard() {
-    const brickW = 38;
-    const brickH = 16;
-    const gap = 3;
-    const totalWidth = COLS * (brickW + gap) - gap;
-    const startX = (STAGE_W - totalWidth) / 2;
-    const startY = TOP_OFFSET;
-
-    for (let r = 0; r < ROWS; r++) {
-      for (let c = 0; c < COLS; c++) {
-        const x = startX + c * (brickW + gap);
-        const y = startY + r * (brickH + gap);
-        const el = document.createElement('div');
-        el.className = 'brick dureza-1';
-        el.style.left = x + 'px';
-        el.style.top = y + 'px';
-        el.style.width = brickW + 'px';
-        el.style.height = brickH + 'px';
-        el.style.borderRadius = '4px';
-        el.style.color = '#fff';
-        el.style.fontWeight = 'bold';
-        el.style.textShadow = '0 1px 2px rgba(0,0,0,0.5)';
-        el.style.border = '1px solid rgba(255,255,255,0.2)';
-        inner.appendChild(el);
-        bricks.push({
-          x: x, y: y, w: brickW, h: brickH,
-          gridX: c, gridY: r,
-          dureza: 1,
-          valor: 1,
-          nombre: 'Arcilla',
-          el: el,
-          alive: true,
-          durezaInicial: 1,
-          durezaFinal: 1,
-          fueGolpeado: false
+    const grid = [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        grid.push({
+          x: startX + c * (brickW + gap),
+          y: startY + r * (brickH + gap),
+          w: brickW,
+          h: brickH
         });
       }
     }
+    return grid;
   }
 
-  // ============================================================
-  // FUNCIONES DE DIBUJO Y LAYOUT
-  // ============================================================
+  function buildBricks() {
+    inner.querySelectorAll('.brick').forEach(b => b.remove());
+    bricks = [];
+    const layout = generateBrickLayout();
+    const colors = ['#FFD700', '#FF4500', '#00FF7F', '#1E90FF', '#FF1493', '#FFA500', '#7FFF00', '#FF00FF', '#00FFFF', '#FF6347'];
+    layout.forEach((pos, index) => {
+      const el = document.createElement('div');
+      el.className = 'brick';
+      el.style.left = pos.x + 'px';
+      el.style.top = pos.y + 'px';
+      el.style.width = pos.w + 'px';
+      el.style.height = pos.h + 'px';
+      el.style.background = colors[index % colors.length];
+      el.style.borderRadius = '4px';
+      el.style.boxShadow = '0 2px 6px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.3)';
+      el.style.color = '#000';
+      el.style.fontWeight = 'bold';
+      el.style.textShadow = '0 1px 2px rgba(255,255,255,0.2)';
+      inner.appendChild(el);
+      bricks.push({
+        x: pos.x, y: pos.y, w: pos.w, h: pos.h,
+        el, alive: true
+      });
+    });
+  }
 
   function layoutStage() {
     const availW = Math.min(window.innerWidth * 0.92, 420);
@@ -692,246 +132,139 @@ export function initJuego(config) {
     inner.style.transformOrigin = 'top left';
   }
 
-  function draw() {
-    // Paddle
-    const paddleEl = document.getElementById('paddle');
-    paddleEl.style.left = paddle.x + 'px';
-    paddleEl.style.top = (STAGE_H - 16) + 'px';
-    paddleEl.style.width = paddle.w + 'px';
-    // Bolas
-    const ballEls = document.querySelectorAll('.ball-instance');
-    ballEls.forEach(el => el.remove());
-    for (const b of balls) {
-      const el = document.createElement('div');
-      el.className = 'ball-instance';
-      el.style.position = 'absolute';
-      el.style.width = (BALL_R * 2) + 'px';
-      el.style.height = (BALL_R * 2) + 'px';
-      el.style.borderRadius = '50%';
-      el.style.background = 'radial-gradient(circle at 35% 30%, #fff, #ff6b6b, #cc1122)';
-      el.style.boxShadow = '0 0 20px #ff4444, 0 0 40px rgba(255, 50, 50, 0.6)';
-      el.style.left = (b.x - BALL_R) + 'px';
-      el.style.top = (b.y - BALL_R) + 'px';
-      el.style.zIndex = '10';
-      inner.appendChild(el);
-    }
+  function resetBall() {
+    ball.x = STAGE_W / 2;
+    ball.y = STAGE_H - 38;
+    const dir = Math.random() < 0.5 ? -1 : 1;
+    const angle = (Math.random() - 0.5) * 0.8;
+    ball.vx = Math.sin(angle) * BALL_SPEED * dir;
+    ball.vy = -Math.cos(angle) * BALL_SPEED;
   }
 
-  // ============================================================
-  // LÓGICA PRINCIPAL DEL JUEGO (LOOP CON DELTA TIME)
-  // ============================================================
+  function updateLives() {
+    livesEl.textContent = '♥ '.repeat(Math.max(lives, 0)).trim() || '—';
+  }
+
+  function draw() {
+    paddleEl.style.left = paddle.x + 'px';
+    paddleEl.style.top = (STAGE_H - 14) + 'px';
+    paddleEl.style.width = PADDLE_W + 'px';
+    ballEl.style.left = (ball.x - BALL_R) + 'px';
+    ballEl.style.top = (ball.y - BALL_R) + 'px';
+  }
 
   let lastTime = 0;
 
   function gameLoop(timestamp) {
-    if (!gameRunning) return;
+    if (!running) return;
 
+    // Delta time en segundos
     const delta = lastTime ? Math.min((timestamp - lastTime) / 1000, 0.05) : 0.016;
     lastTime = timestamp;
 
-    // Actualizar tiempo de juego
-    gameTime += delta;
-    // Actualizar velocidad base
-    currentSpeed = Math.min(MAX_SPEED, BALL_SPEED_BASE + gameTime * SPEED_INCREMENT_PER_SECOND);
-
-    // Movimiento de la paleta
-    if (keys.left) paddle.x = Math.max(0, paddle.x - 5);
-    if (keys.right) paddle.x = Math.min(STAGE_W - paddle.w, paddle.x + 5);
+    // Movimiento de la paleta (independiente del delta, velocidad fija)
+    if (keys.left) paddle.x = Math.max(0, paddle.x - 7);
+    if (keys.right) paddle.x = Math.min(STAGE_W - PADDLE_W, paddle.x + 7);
     if (touchActive) {
-      paddle.x = Math.max(0, Math.min(STAGE_W - paddle.w, touchX));
+      paddle.x = Math.max(0, Math.min(STAGE_W - PADDLE_W, touchX));
     }
 
-    // Movimiento de bolas
-    for (const b of balls) {
-      b.x += b.vx * delta;
-      b.y += b.vy * delta;
+    // Movimiento de la pelota con delta time
+    ball.x += ball.vx * delta;
+    ball.y += ball.vy * delta;
 
-      // Rebotes en paredes
-      if (b.x - BALL_R < 0) { b.x = BALL_R; b.vx = Math.abs(b.vx); }
-      if (b.x + BALL_R > STAGE_W) { b.x = STAGE_W - BALL_R; b.vx = -Math.abs(b.vx); }
-      if (b.y - BALL_R < 0) { b.y = BALL_R; b.vy = Math.abs(b.vy); }
+    // Rebotes en paredes
+    if (ball.x - BALL_R < 0) { ball.x = BALL_R; ball.vx = Math.abs(ball.vx); }
+    if (ball.x + BALL_R > STAGE_W) { ball.x = STAGE_W - BALL_R; ball.vx = -Math.abs(ball.vx); }
+    if (ball.y - BALL_R < 0) { ball.y = BALL_R; ball.vy = Math.abs(ball.vy); }
 
-      // Rebote en paleta
-      const py = STAGE_H - 16;
-      if (b.vy > 0 && b.y + BALL_R >= py && b.y + BALL_R <= py + 12 &&
-          b.x >= paddle.x - BALL_R && b.x <= paddle.x + paddle.w + BALL_R) {
-        b.y = py - BALL_R;
-        let hit = (b.x - (paddle.x + paddle.w / 2)) / (paddle.w / 2);
-        hit = Math.max(-0.85, Math.min(0.85, hit));
-        const angle = hit * 0.7;
-        const spd = currentSpeed;
-        b.vx = Math.sin(angle) * spd;
-        b.vy = -Math.cos(angle) * spd;
-        // Comprobar si el rebote fue vacío (no golpeó ladrillo)
-        // Esto se maneja más abajo con un flag
-        // Si no golpea ningún ladrillo en este fotograma, se considera rebote vacío
-        let golpeo = false;
-        // Colisión con ladrillos
-        for (const brick of bricks) {
-          if (!brick.alive) continue;
-          if (b.x + BALL_R > brick.x && b.x - BALL_R < brick.x + brick.w &&
-              b.y + BALL_R > brick.y && b.y - BALL_R < brick.y + brick.h) {
-            // Golpeó un ladrillo
-            golpeo = true;
-            // Registrar para combo
-            if (comboActive) {
-              registrarGolpeLadrillo(brick);
-              combo++;
-              actualizarComboDisplay();
-            } else {
-              iniciarCombo();
-              combo++;
-              actualizarComboDisplay();
-            }
-            // Dañar ladrillo (reducir dureza en 1)
-            brick.dureza--;
-            brick.valor--;
-            if (brick.dureza <= 0) {
-              // Destruido
-              brick.alive = false;
-              brick.el.classList.add('gone');
-              // Sumar puntos base
-              const puntosBase = PUNTOS_BASE[brick.durezaInicial] || 0;
-              score += puntosBase;
-              actualizarScoreDisplay();
-              // Generar objeto
-              generarObjeto(brick);
-              // Comprobar recarga
-              recargarLadrillos();
-            } else {
-              brick.nombre = getTipoPorDureza(brick.dureza).nombre;
-              brick.el.className = `brick dureza-${brick.dureza}`;
-            }
-            // Rebote de la bola
-            const cx = brick.x + brick.w / 2, cy = brick.y + brick.h / 2;
-            const dx = b.x - cx, dy = b.y - cy;
-            const overlapX = (BALL_R + brick.w / 2) - Math.abs(dx);
-            const overlapY = (BALL_R + brick.h / 2) - Math.abs(dy);
-            if (overlapX < overlapY) b.vx = -b.vx;
-            else b.vy = -b.vy;
-            break;
-          }
-        }
-        // Si no golpeó ningún ladrillo y el combo estaba activo, finalizar combo
-        if (!golpeo && comboActive) {
-          finalizarCombo();
-        }
-      }
+    // Rebote en paleta
+    const py = STAGE_H - 14;
+    if (ball.vy > 0 && ball.y + BALL_R >= py && ball.y + BALL_R <= py + 10 &&
+        ball.x >= paddle.x - BALL_R && ball.x <= paddle.x + PADDLE_W + BALL_R) {
+      ball.y = py - BALL_R;
+      let hit = (ball.x - (paddle.x + PADDLE_W / 2)) / (PADDLE_W / 2);
+      hit = Math.max(-0.85, Math.min(0.85, hit));
+      const angle = hit * 0.7;
+      ball.vx = Math.sin(angle) * BALL_SPEED;
+      ball.vy = -Math.cos(angle) * BALL_SPEED;
+    }
 
-      // Si la bola cae abajo
-      if (b.y - BALL_R > STAGE_H) {
-        // Eliminar esta bola
-        b.active = false;
+    // Colisión con ladrillos
+    for (const b of bricks) {
+      if (!b.alive) continue;
+      if (ball.x + BALL_R > b.x && ball.x - BALL_R < b.x + b.w &&
+          ball.y + BALL_R > b.y && ball.y - BALL_R < b.y + b.h) {
+        b.alive = false;
+        b.el.classList.add('gone');
+        soundBrick();
+        const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+        const dx = ball.x - cx, dy = ball.y - cy;
+        const overlapX = (BALL_R + b.w / 2) - Math.abs(dx);
+        const overlapY = (BALL_R + b.h / 2) - Math.abs(dy);
+        if (overlapX < overlapY) { ball.vx = -ball.vx; }
+        else { ball.vy = -ball.vy; }
+        break;
       }
     }
 
-    // Eliminar bolas caídas
-    balls = balls.filter(b => b.active !== false);
-    if (balls.length === 0) {
-      perderVida();
+    // Pérdida de vida
+    if (ball.y - BALL_R > STAGE_H) {
+      lives--;
+      updateLives();
+      soundLose();
+      if (lives <= 0) { endGame(false); return; }
+      resetBall();
+    }
+
+    // Victoria
+    if (bricks.every(b => !b.alive)) {
+      endTime = performance.now();
+      endGame(true);
       return;
     }
 
-    // Actualizar objetos cayendo
-    for (const obj of objects) {
-      if (!obj.activo) continue;
-      obj.y += obj.velocidad * delta;
-      obj.el.style.top = obj.y + 'px';
-      // Colisión con la paleta
-      const py = STAGE_H - 16;
-      if (obj.y + 10 >= py && obj.y - 10 <= py + 12 &&
-          obj.x + 10 >= paddle.x && obj.x - 10 <= paddle.x + paddle.w) {
-        atraparObjeto(obj);
-      }
-      // Si cae fuera
-      if (obj.y > STAGE_H + 20) {
-        obj.activo = false;
-        obj.el.remove();
-      }
-    }
-    objects = objects.filter(o => o.activo);
-
-    // Actualizar niebla (cambios de visibilidad)
-    if (powerups.niebla_nivel >= 2) {
-      const ciclo = powerups.niebla_nivel === 2 ? 4 : 5; // 4s para nivel2, 5s para nivel3
-      const invisible = powerups.niebla_nivel === 2 ? 1 : 2;
-      powerups.niebla_timer += delta;
-      if (powerups.niebla_timer > ciclo) {
-        powerups.niebla_timer = 0;
-        powerups.niebla_visible = !powerups.niebla_visible;
-        // Aplicar visibilidad a ladrillos y objetos
-        const visible = powerups.niebla_visible;
-        for (const b of bricks) {
-          if (b.alive) {
-            b.el.style.opacity = visible ? 1 : 0.1;
-          }
-        }
-        for (const o of objects) {
-          if (o.activo) {
-            o.el.style.opacity = visible ? 1 : 0.1;
-          }
-        }
-        // La pelota azul siempre visible
-        // (se maneja aparte)
-      }
-    }
-
-    // Comprobar Pelota Azul (si está disponible y hay 3 vidas)
-    if (powerups.pelota_azul_disponible && lives === 3) {
-      // Aparecer en una posición aleatoria cerca de la paleta
-      const x = paddle.x + Math.random() * paddle.w;
-      const y = STAGE_H - 40 - Math.random() * 20;
-      crearObjetoVisual(x, y, 'blue', 'pelota_azul');
-      powerups.pelota_azul_disponible = false;
-    }
-
-    // Dibujar todo
     draw();
-
-    // Continuar loop
     animFrameId = requestAnimationFrame(gameLoop);
   }
 
-  // ============================================================
-  // CONTROL DE JUEGO (INICIO, FIN, REINICIO)
-  // ============================================================
+  function endGame(win) {
+    running = false;
+    if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+    restartBtn.style.display = 'inline-block';
+
+    let message = '';
+    if (win) {
+      const elapsed = (endTime - startTime) / 1000;
+      const vidas = lives;
+      if (elapsed < 15 && vidas === 3) {
+        message = `👑 ¡${config.nombre} se convierte en el PRÍNCIPE TRANSFORMADO!\n✨ Tiempo: ${elapsed.toFixed(1)}s, ${vidas} vidas. ¡Perfecto!`;
+        soundWin();
+      } else if (elapsed < 25 && vidas >= 2) {
+        message = `🤴 ¡${config.nombre} es el PRÍNCIPE!\n⏱️ Tiempo: ${elapsed.toFixed(1)}s, ${vidas} vidas. ¡Muy bien!`;
+        soundWin();
+      } else {
+        message = `🐻 ${config.nombre} sigue siendo la BESTIA...\n⏱️ Tiempo: ${elapsed.toFixed(1)}s, ${vidas} vidas. ¡Sigue intentando!`;
+        soundWin();
+      }
+    } else {
+      message = `🎩 ¡${config.nombre} se convierte en GASTÓN!\n💔 ¡Has perdido todas las vidas! Vuelve a intentarlo.`;
+      soundLose();
+    }
+    msgText.textContent = message;
+    msgEl.classList.add('show');
+  }
 
   function startGame() {
     resetGameState();
     startTime = performance.now();
-    gameTime = 0;
-    currentSpeed = BALL_SPEED_BASE;
     lives = 3;
-    score = 0;
-    combo = 0;
-    comboActive = false;
-    powerups = {
-      pala_grande: false,
-      dureza_mejora: false,
-      multibola: false,
-      pala_mini: false,
-      flaqueza: false,
-      niebla_nivel: 0,
-      niebla_timer: 0,
-      niebla_visible: true,
-      pelota_azul_disponible: false
-    };
-    paddle.w = PADDLE_W_BASE;
-    paddle.x = (STAGE_W - paddle.w) / 2;
-    balls = [{
-      x: STAGE_W/2,
-      y: STAGE_H - 38,
-      vx: (Math.random() - 0.5) * 2 * currentSpeed,
-      vy: -Math.sqrt(currentSpeed*currentSpeed - (Math.random()-0.5)**2 * 4)
-    }];
-    objects = [];
-    actualizarVidasDisplay();
-    actualizarScoreDisplay();
-    actualizarComboDisplay();
-    actualizarPaddle();
-    actualizarNiebla();
+    updateLives();
+    buildBricks();
+    resetBall();
+    paddle.x = (STAGE_W - PADDLE_W) / 2;
     msgEl.classList.remove('show');
-    gameRunning = true;
+    running = true;
     layoutStage();
     draw();
     lastTime = 0;
@@ -939,48 +272,14 @@ export function initJuego(config) {
     animFrameId = requestAnimationFrame(gameLoop);
   }
 
-  function resetGameState() {
-    gameRunning = false;
-    if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
-    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
-    // Limpiar ladrillos
-    inner.querySelectorAll('.brick').forEach(b => b.remove());
-    inner.querySelectorAll('.game-object').forEach(o => o.remove());
-    inner.querySelectorAll('.ball-instance').forEach(b => b.remove());
-    bricks = [];
-    objects = [];
-    balls = [];
-    paddle.x = (STAGE_W - PADDLE_W_BASE) / 2;
-    paddle.w = PADDLE_W_BASE;
-    actualizarPaddle();
-    msgEl.classList.remove('show');
-    restartBtn.style.display = 'none';
-  }
-
-  function endGame(win) {
-    gameRunning = false;
-    if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
-    restartBtn.style.display = 'inline-block';
-
-    let message = '';
-    if (win) {
-      message = `👑 ¡${config.nombre} ha roto el hechizo!\n✨ Puntuación: ${Math.floor(score)} pts`;
-      soundWin();
-    } else {
-      message = `🎩 ¡${config.nombre} ha perdido!\n💔 Puntuación final: ${Math.floor(score)} pts`;
-      soundLose();
-    }
-    msgText.textContent = message;
-    msgEl.classList.add('show');
-  }
-
   function openGame() {
     resetGameState();
     overlay.classList.add('open');
-    // Inicializar tablero
-    initBoard();
-    // Recarga inicial (siempre se ejecuta)
-    recargarLadrillos();
+    inner.querySelectorAll('.brick').forEach(b => b.remove());
+    bricks = [];
+    msgEl.classList.remove('show');
+    restartBtn.style.display = 'none';
+    draw();
 
     let countdown = 3;
     msgText.textContent = countdown;
@@ -1003,19 +302,15 @@ export function initJuego(config) {
     overlay.classList.remove('open');
     resetGameState();
     soundClose();
-    console.log('🔚 Juego cerrado');
+    console.log('🔚 Juego cerrado y reiniciado');
   }
 
-  // ============================================================
-  // EVENTOS Y CONTROLES
-  // ============================================================
-
   document.getElementById('game-close').addEventListener('click', closeGame);
-  restartBtn.addEventListener('click', () => { soundTap(); openGame(); });
+  restartBtn.addEventListener('click', () => { soundTap(); startGame(); });
   overlay.addEventListener('click', e => { if (e.target === overlay) closeGame(); });
 
   document.addEventListener('keydown', (e) => {
-    if (!gameRunning) return;
+    if (!running) return;
     if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
       keys.left = true;
       e.preventDefault();
@@ -1035,23 +330,23 @@ export function initJuego(config) {
   });
 
   stage.addEventListener('touchstart', (e) => {
-    if (!gameRunning) return;
+    if (!running) return;
     const touch = e.touches[0];
     if (touch) {
       const rect = stage.getBoundingClientRect();
       const localX = (touch.clientX - rect.left) / scale;
-      touchX = Math.min(Math.max(localX - paddle.w / 2, 0), STAGE_W - paddle.w);
+      touchX = Math.min(Math.max(localX - PADDLE_W / 2, 0), STAGE_W - PADDLE_W);
       touchActive = true;
     }
   }, { passive: true });
   stage.addEventListener('touchmove', (e) => {
-    if (!gameRunning) return;
+    if (!running) return;
     e.preventDefault();
     const touch = e.touches[0];
     if (touch) {
       const rect = stage.getBoundingClientRect();
       const localX = (touch.clientX - rect.left) / scale;
-      touchX = Math.min(Math.max(localX - paddle.w / 2, 0), STAGE_W - paddle.w);
+      touchX = Math.min(Math.max(localX - PADDLE_W / 2, 0), STAGE_W - PADDLE_W);
       touchActive = true;
     }
   }, { passive: false });
@@ -1061,5 +356,5 @@ export function initJuego(config) {
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
   resetGameState();
-  console.log('✅ Juego ABSCIOD v8.1 implementado');
+  console.log('✅ Juego listo (velocidad estable con delta time)');
 }
