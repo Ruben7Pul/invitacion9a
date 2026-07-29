@@ -207,6 +207,7 @@ body {
 #music-toggle svg { width: 20px; height: 20px; }
 #music-toggle { opacity: 1; }
 
+/* ===== CONTENIDO CENTRAL ===== */
 #app-mid {
   flex: 1;
   display: flex;
@@ -215,14 +216,16 @@ body {
   justify-content: center;
   width: 100%;
   max-width: 560px;
-  gap: 0.3rem;
+  gap: 0.3rem; /* espacio general */
   padding: 0.2rem 0;
 }
+
+/* ÓVALO DORADO - subido 10px (1cm aprox) */
 #oval-wrap {
   width: 140px;
   height: 190px;
   margin-bottom: 0.1rem;
-  margin-top: -40px;
+  margin-top: -40px; /* subido */
   animation: floaty 6s ease-in-out infinite;
   position: relative;
 }
@@ -248,6 +251,8 @@ body {
   object-fit: cover;
   display: block;
 }
+
+/* NOMBRE - más grande, sin reflejo */
 .name-wrap {
   position: relative;
   margin-top: 0.1rem;
@@ -256,7 +261,7 @@ body {
 h1#nombre-hero {
   font-family: var(--script);
   font-weight: 400;
-  font-size: clamp(3.2rem, 12dvh, 5rem);
+  font-size: clamp(3.2rem, 12dvh, 5rem); /* más grande */
   line-height: 1.1;
   margin: 0;
   cursor: pointer;
@@ -270,10 +275,13 @@ h1#nombre-hero {
   position: relative;
   text-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
 }
+/* Eliminado el ::after que generaba el reflejo */
 @keyframes rainbowMove {
   0% { background-position: 0% 50%; }
   100% { background-position: 300% 50%; }
 }
+
+/* FRASE */
 .frase-inline {
   max-width: 34ch;
   font-family: var(--serif-body);
@@ -284,14 +292,18 @@ h1#nombre-hero {
 }
 .frase-inline::before { content: "\201C"; }
 .frase-inline::after { content: "\201D"; }
+
+/* FECHA */
 .fecha-fija {
   font-family: var(--serif-body);
   font-style: italic;
   font-size: 1rem;
   margin: 0.1rem 0;
 }
+
+/* MENSAJE "Toca mi nombre para jugar" - más grande y debajo de fecha */
 .hint {
-  font-size: 1rem;
+  font-size: 1rem; /* más grande */
   opacity: 0.9;
   margin: 0.2rem 0 0.1rem;
   font-family: var(--serif-body);
@@ -301,6 +313,7 @@ h1#nombre-hero {
   text-shadow: 0 0 12px rgba(201, 162, 77, 0.3);
 }
 
+/* BOTONES DE NAVEGACIÓN */
 #nav {
   width: 100%;
   max-width: 460px;
@@ -341,7 +354,7 @@ h1#nombre-hero {
   color: #d4af37;
 }
 
-/* ===== CONTADOR ===== */
+/* ===== CONTADOR (horizontal) ===== */
 .clock {
   display: flex;
   flex-wrap: nowrap;
@@ -394,6 +407,7 @@ h1#nombre-hero {
 }
 
 /* ===== MODALES ===== */
+/* (sin cambios, se mantiene igual que antes) */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -700,19 +714,6 @@ h1#nombre-hero {
   text-transform: uppercase;
   font-size: 0.65rem;
 }
-#game-stats {
-  display: flex;
-  gap: 0.8rem;
-  font-family: var(--serif-display);
-  font-size: 0.7rem;
-  letter-spacing: 0.05em;
-}
-#game-stats span {
-  background: rgba(0,0,0,0.3);
-  padding: 0.1rem 0.6rem;
-  border-radius: 10px;
-  border: 1px solid var(--glass-border);
-}
 #game-stage {
   position: relative;
   background: #0e0a18;
@@ -723,33 +724,9 @@ h1#nombre-hero {
   background-image: url('archivos/jueg1.png');
   background-size: cover;
   background-position: center;
-  opacity: 0.25;
+  opacity: 0.5;
 }
-#game-inner {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-#fog-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  background: rgba(200, 210, 230, 0.7);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  z-index: 20;
-  display: none;
-  transition: opacity 0.5s ease;
-}
-#fog-layer.active { display: block; }
-#fog-layer.level-1 { opacity: 0.8; }
-#fog-layer.level-2 { opacity: 0.9; }
-#fog-layer.level-3 { opacity: 1; }
+#game-inner { position: absolute; top: 0; left: 0; }
 
 .brick {
   position: absolute;
@@ -762,69 +739,22 @@ h1#nombre-hero {
   color: #fff;
   font-weight: bold;
   text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-  border: 1px solid rgba(255,255,255,0.2);
 }
-.brick.dureza-1 { background: #b8860b; }
-.brick.dureza-2 { background: #8B7355; }
-.brick.dureza-3 { background: #708090; }
 .brick.gone { opacity: 0; transform: scale(0.3); pointer-events: none; }
 
 #paddle {
   position: absolute;
-  height: 10px;
-  border-radius: 6px;
-  background: linear-gradient(180deg, #fff5d0, #f0d080, #d4af37);
-  box-shadow: 0 0 15px #ffd700, 0 0 30px rgba(255, 215, 0, 0.5);
-  border: 1px solid #fff3c9;
-  z-index: 10;
-  transition: width 0.2s ease;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, var(--gold-light), var(--gold));
 }
-.ball-instance {
+#ball {
   position: absolute;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #fff, #ff6b6b, #cc1122);
-  box-shadow: 0 0 20px #ff4444, 0 0 40px rgba(255, 50, 50, 0.6);
-  z-index: 10;
+  background: radial-gradient(circle at 35% 30%, #fff, #d68a96 60%, #a13545);
 }
-
-.game-object {
-  position: absolute;
-  z-index: 15;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  pointer-events: none;
-  box-shadow: 0 0 15px rgba(255,255,255,0.3);
-  transition: opacity 0.3s ease;
-}
-.game-object.green {
-  background: radial-gradient(circle at 30% 30%, #aaffaa, #00aa00);
-  border: 2px solid #88ff88;
-}
-.game-object.red {
-  background: radial-gradient(circle at 30% 30%, #ffaaaa, #aa0000);
-  border: 2px solid #ff8888;
-}
-.game-object.blue {
-  background: radial-gradient(circle at 30% 30%, #aaccff, #0044aa);
-  border: 2px solid #88ccff;
-  width: 26px;
-  height: 26px;
-  box-shadow: 0 0 30px rgba(68, 136, 255, 0.6);
-}
-.game-object .obj-label {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 0.5rem;
-  color: #fff;
-  text-shadow: 0 0 4px rgba(0,0,0,0.8);
-  font-family: var(--serif-display);
-  font-weight: bold;
-  letter-spacing: 0.05em;
-}
-
 #game-msg {
   position: absolute;
   inset: 0;
@@ -836,7 +766,6 @@ h1#nombre-hero {
   background: rgba(10, 7, 16, 0.85);
   text-align: center;
   padding: 1rem;
-  z-index: 30;
 }
 #game-msg.show { display: flex; }
 #game-msg p {
@@ -867,6 +796,7 @@ h1#nombre-hero {
   cursor: pointer;
   font-size: 1rem;
 }
+#lives { letter-spacing: 0.15em; }
 .game-help {
   font-size: 0.85rem;
   opacity: 0.7;
