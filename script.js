@@ -1,4 +1,4 @@
-console.log('🚀 script.js - Versión completa con juego ABSCIOD v8.1');
+console.log('🚀 script.js - Versión final con niebla por capa');
 
 // ============================================================
 // CONFIGURACIÓN
@@ -150,7 +150,7 @@ function toggleMusic() {
 }
 
 // ============================================================
-// PARTÍCULAS (PÉTALOS)
+// PARTÍCULAS
 // ============================================================
 function initParticulas() {
   const layer = document.getElementById('petals-layer');
@@ -202,10 +202,10 @@ function initParticulas() {
 }
 
 // ============================================================
-// JUEGO ABSCIOD v8.1 (TODA LA LÓGICA)
+// JUEGO ABSCIOD v8.1 (CON NIEBLA POR CAPA)
 // ============================================================
 function initJuego(config) {
-  console.log('🎮 Inicializando juego ABSCIOD v8.1');
+  console.log('🎮 Iniciando juego con niebla por capa');
 
   const nombreEl = document.getElementById('nombre-hero');
   const overlay = document.getElementById('game-overlay');
@@ -216,16 +216,15 @@ function initJuego(config) {
   const msgText = document.getElementById('game-msg-text');
   const livesEl = document.getElementById('lives');
   const scoreEl = document.getElementById('score');
-  const comboEl = document.getElementById('combo-display');
   const restartBtn = document.getElementById('game-restart');
-  const fogLayer = document.getElementById('fog-layer');
+  const fogOverlay = document.getElementById('fog-overlay');
 
   // Constantes
   const ROWS = 6, COLS = 6;
   const PADDLE_W_BASE = 60, PADDLE_H = 10, BALL_R = 6;
   const STAGE_W = 300, STAGE_H = 420, TOP_OFFSET = 30;
   const BALL_SPEED_BASE = 220;
-  const SPEED_INCREMENT = 0.5; // px/s por segundo
+  const SPEED_INCREMENT = 0.5;
   const MAX_SPEED = 800;
   const UMBRAL_RECARGA = 12;
   const UMBRAL_VIDA = 3000;
@@ -238,12 +237,17 @@ function initJuego(config) {
   let bricks = [], objects = [], balls = [];
   let paddle = { x: (STAGE_W - PADDLE_W_BASE)/2, w: PADDLE_W_BASE };
   let lives = 3, score = 0, combo = 0, comboActive = false, comboData = [];
-  let gameRunning = false, animFrameId = null, countdownInterval = null;
+  let gameRunning = false, animFrameId = null;
   let gameTime = 0, currentSpeed = BALL_SPEED_BASE, lastTime = 0;
-  let powerups = { pala_grande:false, dureza_mejora:false, multibola:false,
-                   pala_mini:false, flaqueza:false, niebla_nivel:0, niebla_timer:0,
-                   niebla_visible:true, pelota_azul_disponible:false };
-  let keys = { left:false, right:false }, touchActive = false, touchX = 0;
+  let bolaPegada = true;
+  let powerups = {
+    pala_grande: false, dureza_mejora: false, multibola: false,
+    pala_mini: false, flaqueza: false,
+    niebla_nivel: 0, niebla_timer: 0, niebla_visible: true,
+    pelota_azul_disponible: false
+  };
+  let keys = { left: false, right: false };
+  let touchActive = false, touchX = 0;
   let scale = 1;
 
   // Funciones auxiliares
@@ -258,9 +262,8 @@ function initJuego(config) {
     return s;
   }
   function distancia(x1,y1,x2,y2) { return Math.hypot(x2-x1, y2-y1); }
-  function aleatorio(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
-  // Recarga de ladrillos
+  // Recarga
   function recargarLadrillos() {
     if (sumarPuntos() > UMBRAL_RECARGA) return;
     const combos = [];
@@ -277,14 +280,13 @@ function initJuego(config) {
       const j = Math.floor(Math.random() * (i+1));
       [nuevos[i], nuevos[j]] = [nuevos[j], nuevos[i]];
     }
-    // Posiciones libres lejos de la trayectoria
     const ocupadas = new Set();
     for (const b of bricks) if (b.alive) ocupadas.add(`${b.gridX},${b.gridY}`);
     const brickW = 38, brickH = 16, gap = 3;
     const totalW = COLS * (brickW + gap) - gap;
     const startX = (STAGE_W - totalW)/2, startY = TOP_OFFSET;
     let trayectoria = [];
-    if (balls.length > 0) {
+    if (balls.length > 0 && !bolaPegada) {
       let x = balls[0].x, y = balls[0].y, vx = balls[0].vx, vy = balls[0].vy;
       for (let i=0; i<30; i++) {
         x += vx * 0.02; y += vy * 0.02;
@@ -344,12 +346,12 @@ function initJuego(config) {
     for (const b of bricks) {
       if (b.alive) { b.durezaInicial = b.dureza; b.durezaFinal = b.dureza; b.fueGolpeado = false; }
     }
-    actualizarComboDisplay();
   }
   function registrarGolpe(brick) {
     if (!comboActive || !brick.alive) return;
     if (!brick.fueGolpeado) { brick.fueGolpeado = true; brick.durezaInicial = brick.dureza; }
     brick.durezaFinal = brick.dureza;
+    combo++;
   }
   function finalizarCombo() {
     if (!comboActive) return;
@@ -363,14 +365,12 @@ function initJuego(config) {
         else if (ini === 2) bote += 200;
         else if (ini === 3) bote += 450;
       } else {
-        if (fin === 2) bote += 75;
-        else if (fin === 3) bote += 75;
+        if (fin === 2 || fin === 3) bote += 75;
       }
     }
     score += bote;
     actualizarScoreDisplay();
     combo = 0;
-    actualizarComboDisplay();
   }
 
   // Generación de objetos
@@ -487,13 +487,15 @@ function initJuego(config) {
         }
       } else if (obj.tipo === 'niebla') {
         powerups.niebla_nivel = Math.min(3, powerups.niebla_nivel + 1);
+        powerups.niebla_timer = 0;
+        powerups.niebla_visible = true;
         actualizarNiebla();
       }
     } else if (obj.color === 'blue') {
-      // Pelota Azul
       powerups.pala_mini = false;
       powerups.flaqueza = false;
       powerups.niebla_nivel = 0;
+      powerups.niebla_visible = true;
       actualizarNiebla();
       if (paddle.w < PADDLE_W_BASE) { paddle.w = PADDLE_W_BASE; actualizarPaddle(); }
       const verdes = ['pala_grande', 'dureza', 'multibola'];
@@ -519,13 +521,13 @@ function initJuego(config) {
   function actualizarNiebla() {
     const nivel = powerups.niebla_nivel;
     if (nivel > 0) {
-      fogLayer.classList.add('active');
-      fogLayer.className = `active level-${nivel}`;
-      powerups.niebla_visible = false;
+      fogOverlay.classList.add('active');
+      fogOverlay.className = `active level-${nivel}`;
+      fogOverlay.style.opacity = nivel === 1 ? '0.7' : nivel === 2 ? '0.85' : '1';
     } else {
-      fogLayer.classList.remove('active');
-      fogLayer.className = '';
-      powerups.niebla_visible = true;
+      fogOverlay.classList.remove('active');
+      fogOverlay.className = '';
+      fogOverlay.style.opacity = '0';
     }
   }
   function actualizarVidasDisplay() {
@@ -546,9 +548,6 @@ function initJuego(config) {
         }
       }
     }
-  }
-  function actualizarComboDisplay() {
-    comboEl.textContent = `Combo: ${combo}`;
   }
 
   // Inicializar tablero
@@ -593,6 +592,7 @@ function initJuego(config) {
     inner.style.transform = 'scale(' + scale + ')';
     inner.style.transformOrigin = 'top left';
   }
+
   function draw() {
     paddleEl.style.left = paddle.x + 'px';
     paddleEl.style.top = (STAGE_H - 16) + 'px';
@@ -610,6 +610,8 @@ function initJuego(config) {
   }
 
   // Loop principal
+  let lanzarBola = false;
+
   function gameLoop(timestamp) {
     if (!gameRunning) return;
     const delta = lastTime ? Math.min((timestamp - lastTime) / 1000, 0.05) : 0.016;
@@ -622,8 +624,25 @@ function initJuego(config) {
     if (keys.right) paddle.x = Math.min(STAGE_W - paddle.w, paddle.x + 5);
     if (touchActive) paddle.x = Math.max(0, Math.min(STAGE_W - paddle.w, touchX));
 
+    // Bola pegada
+    if (bolaPegada && balls.length === 1) {
+      const b = balls[0];
+      b.x = paddle.x + paddle.w/2;
+      b.y = STAGE_H - 16 - BALL_R - 2;
+      b.vx = 0;
+      b.vy = 0;
+      if (keys.left || keys.right || touchActive || lanzarBola) {
+        bolaPegada = false;
+        const ang = (Math.random() - 0.5) * 0.8;
+        b.vx = Math.sin(ang) * currentSpeed;
+        b.vy = -Math.cos(ang) * currentSpeed;
+        lanzarBola = false;
+      }
+    }
+
     // Movimiento bolas
     for (const b of balls) {
+      if (bolaPegada) break;
       b.x += b.vx * delta;
       b.y += b.vy * delta;
       if (b.x - BALL_R < 0) { b.x = BALL_R; b.vx = Math.abs(b.vx); }
@@ -644,15 +663,8 @@ function initJuego(config) {
           if (b.x + BALL_R > brick.x && b.x - BALL_R < brick.x + brick.w &&
               b.y + BALL_R > brick.y && b.y - BALL_R < brick.y + brick.h) {
             golpeo = true;
-            if (comboActive) {
-              registrarGolpe(brick);
-              combo++;
-              actualizarComboDisplay();
-            } else {
-              iniciarCombo();
-              combo++;
-              actualizarComboDisplay();
-            }
+            if (!comboActive) iniciarCombo();
+            registrarGolpe(brick);
             brick.dureza--;
             brick.valor--;
             if (brick.dureza <= 0) {
@@ -685,7 +697,7 @@ function initJuego(config) {
       return;
     }
 
-    // Actualizar objetos cayendo
+    // Objetos cayendo
     for (const obj of objects) {
       if (!obj.activo) continue;
       obj.y += obj.velocidad * delta;
@@ -699,22 +711,22 @@ function initJuego(config) {
     }
     objects = objects.filter(o => o.activo);
 
-    // Niebla
+    // Ciclo de niebla niveles 2 y 3
     if (powerups.niebla_nivel >= 2) {
       const ciclo = powerups.niebla_nivel === 2 ? 4 : 5;
-      const invisible = powerups.niebla_nivel === 2 ? 1 : 2;
       powerups.niebla_timer += delta;
       if (powerups.niebla_timer > ciclo) {
         powerups.niebla_timer = 0;
         powerups.niebla_visible = !powerups.niebla_visible;
-        const vis = powerups.niebla_visible;
-        for (const b of bricks) {
-          if (b.alive) b.el.style.opacity = vis ? 1 : 0.1;
-        }
-        for (const o of objects) {
-          if (o.activo) o.el.style.opacity = vis ? 1 : 0.1;
+        if (powerups.niebla_visible) {
+          fogOverlay.style.opacity = powerups.niebla_nivel === 2 ? '0.85' : '1';
+        } else {
+          fogOverlay.style.opacity = '0.1'; // casi transparente (sin niebla)
         }
       }
+    } else if (powerups.niebla_nivel === 1) {
+      // Nivel 1: niebla fija
+      fogOverlay.style.opacity = '0.7';
     }
 
     // Pelota Azul
@@ -753,14 +765,15 @@ function initJuego(config) {
     paddle.w = PADDLE_W_BASE;
     actualizarPaddle();
     actualizarNiebla();
-    const bola = balls[0] || { x: STAGE_W/2, y: STAGE_H - 38 };
     balls = [{
-      x: STAGE_W/2,
-      y: STAGE_H - 38,
-      vx: (Math.random() - 0.5) * 2 * currentSpeed,
-      vy: -Math.sqrt(currentSpeed*currentSpeed - (Math.random()-0.5)**2 * 4),
+      x: paddle.x + paddle.w/2,
+      y: STAGE_H - 16 - BALL_R - 2,
+      vx: 0,
+      vy: 0,
       active: true
     }];
+    bolaPegada = true;
+    lanzarBola = false;
     actualizarVidasDisplay();
   }
 
@@ -783,22 +796,26 @@ function initJuego(config) {
     score = 0;
     combo = 0;
     comboActive = false;
-    powerups = { pala_grande:false, dureza_mejora:false, multibola:false,
-                 pala_mini:false, flaqueza:false, niebla_nivel:0, niebla_timer:0,
-                 niebla_visible:true, pelota_azul_disponible:false };
+    powerups = {
+      pala_grande: false, dureza_mejora: false, multibola: false,
+      pala_mini: false, flaqueza: false,
+      niebla_nivel: 0, niebla_timer: 0, niebla_visible: true,
+      pelota_azul_disponible: false
+    };
     paddle.w = PADDLE_W_BASE;
     paddle.x = (STAGE_W - paddle.w)/2;
     balls = [{
-      x: STAGE_W/2,
-      y: STAGE_H - 38,
-      vx: (Math.random() - 0.5) * 2 * currentSpeed,
-      vy: -Math.sqrt(currentSpeed*currentSpeed - (Math.random()-0.5)**2 * 4),
+      x: paddle.x + paddle.w/2,
+      y: STAGE_H - 16 - BALL_R - 2,
+      vx: 0,
+      vy: 0,
       active: true
     }];
+    bolaPegada = true;
+    lanzarBola = false;
     objects = [];
     actualizarVidasDisplay();
     actualizarScoreDisplay();
-    actualizarComboDisplay();
     actualizarPaddle();
     actualizarNiebla();
     msgEl.classList.remove('show');
@@ -813,7 +830,6 @@ function initJuego(config) {
   function resetGameState() {
     gameRunning = false;
     if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
-    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
     inner.querySelectorAll('.brick').forEach(b => b.remove());
     inner.querySelectorAll('.game-object').forEach(o => o.remove());
     inner.querySelectorAll('.ball-instance').forEach(b => b.remove());
@@ -825,6 +841,9 @@ function initJuego(config) {
     actualizarPaddle();
     msgEl.classList.remove('show');
     restartBtn.style.display = 'none';
+    fogOverlay.classList.remove('active');
+    fogOverlay.className = '';
+    fogOverlay.style.opacity = '0';
   }
 
   function openGame() {
@@ -832,20 +851,7 @@ function initJuego(config) {
     overlay.classList.add('open');
     initBoard();
     recargarLadrillos();
-    let countdown = 3;
-    msgText.textContent = countdown;
-    msgEl.classList.add('show');
-    countdownInterval = setInterval(() => {
-      countdown--;
-      if (countdown > 0) {
-        msgText.textContent = countdown;
-      } else {
-        clearInterval(countdownInterval);
-        countdownInterval = null;
-        msgEl.classList.remove('show');
-        startGame();
-      }
-    }, 1000);
+    startGame();
   }
 
   function closeGame() {
@@ -864,9 +870,11 @@ function initJuego(config) {
     if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
       keys.left = true;
       e.preventDefault();
+      if (bolaPegada) lanzarBola = true;
     } else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') {
       keys.right = true;
       e.preventDefault();
+      if (bolaPegada) lanzarBola = true;
     }
   });
   document.addEventListener('keyup', (e) => {
@@ -887,6 +895,7 @@ function initJuego(config) {
       const localX = (touch.clientX - rect.left) / scale;
       touchX = Math.min(Math.max(localX - paddle.w/2, 0), STAGE_W - paddle.w);
       touchActive = true;
+      if (bolaPegada) lanzarBola = true;
     }
   }, { passive: true });
   stage.addEventListener('touchmove', (e) => {
@@ -906,7 +915,7 @@ function initJuego(config) {
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
   resetGameState();
-  console.log('✅ Juego ABSCIOD v8.1 listo');
+  console.log('✅ Juego final con niebla por capa listo');
 }
 
 // ============================================================
@@ -924,10 +933,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   initModal();
   initJuego(config);
 
-  // Botón de música
   document.getElementById('music-toggle').addEventListener('click', toggleMusic);
 
-  // Transición reja
   const portal = document.getElementById('portal');
   const gateWrapper = document.getElementById('gate-wrapper');
   const app = document.getElementById('app');
