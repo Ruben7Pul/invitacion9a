@@ -113,7 +113,7 @@
             <use href="#scrollR" x="129" y="176"/>
           </svg>
         </div>
-        <!-- Hoja derecha (reflejada) -->
+        <!-- Hoja derecha -->
         <div class="gate-leaf gate-right" aria-hidden="true">
           <svg viewBox="0 0 150 200" width="100%" height="100%">
             <defs>
@@ -219,7 +219,6 @@
     </div>
 
     <div id="app-mid">
-      <!-- Óvalo dorado -->
       <div id="oval-wrap">
         <div class="oval-frame">
           <div class="oval-mask">
@@ -227,23 +226,14 @@
           </div>
         </div>
       </div>
-
-      <!-- Nombre (más grande, sin reflejo) -->
       <div class="name-wrap">
         <h1 id="nombre-hero">X</h1>
       </div>
-
-      <!-- Frase -->
       <p class="frase-inline gold-text" id="frase-texto">Cargando...</p>
-
-      <!-- Fecha -->
       <p class="fecha-fija gold-text" id="fecha-fija">Cargando...</p>
-
-      <!-- Mensaje "Toca mi nombre para jugar" -->
       <p class="hint gold-text" id="hint-juego">👆 Toca mi nombre para jugar</p>
     </div>
 
-    <!-- Botones de navegación -->
     <nav id="nav" aria-label="Navegación principal">
       <button class="nav-btn" data-modal="modal-contador" aria-label="Cuenta regresiva">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="13" r="8"/><path d="M12 9 L12 13 L15 15 M9 2 L15 2"/></svg>
@@ -260,9 +250,7 @@
     </nav>
   </div>
 
-  <!-- ===== MODALES (COMPLETOS) ===== -->
-
-  <!-- 1. CONTADOR -->
+  <!-- MODALES -->
   <div class="modal-overlay" id="modal-contador" role="dialog" aria-modal="true" aria-labelledby="modal-contador-title">
     <div class="modal-card">
       <button class="modal-close" data-close aria-label="Cerrar">&times;</button>
@@ -282,7 +270,6 @@
     </div>
   </div>
 
-  <!-- 2. LUGARES -->
   <div class="modal-overlay" id="modal-detalles" role="dialog" aria-modal="true" aria-labelledby="modal-detalles-title">
     <div class="modal-card">
       <button class="modal-close" data-close aria-label="Cerrar">&times;</button>
@@ -309,13 +296,11 @@
     </div>
   </div>
 
-  <!-- 3. FAMILIA -->
   <div class="modal-overlay" id="modal-familia" role="dialog" aria-modal="true" aria-labelledby="modal-familia-title">
     <div class="modal-card">
       <button class="modal-close" data-close aria-label="Cerrar">&times;</button>
       <h2 id="modal-familia-title" class="gold-text">👑 Mi noble familia</h2>
       <p class="modal-subtitle gold-text">La corte que me acompaña</p>
-      
       <div class="familia-grupo">
         <div class="familia-titulo">
           <span class="corona">⚜️</span>
@@ -328,9 +313,7 @@
         </div>
         <p class="familia-detalle gold-text" style="font-family: var(--serif-body); font-style: italic;">"Su amor me ha dado alas"</p>
       </div>
-      
       <div class="divider-thin" aria-hidden="true"></div>
-      
       <div class="familia-grupo">
         <div class="familia-titulo">
           <span class="corona">🌹</span>
@@ -350,14 +333,19 @@
   <div id="game-overlay" role="dialog" aria-modal="true" aria-label="Juego de romper el hechizo">
     <div id="game-panel">
       <div id="game-header">
-        <span id="lives" class="gold-text">♥ ♥ ♥</span>
+        <div id="game-stats">
+          <span id="lives" class="gold-text">♥ ♥ ♥</span>
+          <span id="score" class="gold-text">0</span>
+          <span id="combo-display" class="gold-text">Combo: 0</span>
+        </div>
         <span class="gold-text">Rompe el hechizo</span>
         <button id="game-close" aria-label="Cerrar juego">&times;</button>
       </div>
       <div id="game-stage">
         <div id="game-inner">
           <div id="paddle"></div>
-          <div id="ball"></div>
+          <div id="fog-layer"></div>
+          <!-- Las bolas y objetos se crearán dinámicamente -->
         </div>
         <div id="game-msg">
           <p id="game-msg-text" class="gold-text">¡Has roto el hechizo!</p>
