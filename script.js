@@ -1,4 +1,4 @@
-console.log('🚀 script.js - Versión final con niebla por capa');
+console.log('🚀 script.js - Versión final con niebla corregida');
 
 // ============================================================
 // CONFIGURACIÓN
@@ -202,10 +202,10 @@ function initParticulas() {
 }
 
 // ============================================================
-// JUEGO ABSCIOD v8.1 (CON NIEBLA POR CAPA)
+// JUEGO ABSCIOD v8.1 (FINAL)
 // ============================================================
 function initJuego(config) {
-  console.log('🎮 Iniciando juego con niebla por capa');
+  console.log('🎮 Iniciando juego (niebla corregida)');
 
   const nombreEl = document.getElementById('nombre-hero');
   const overlay = document.getElementById('game-overlay');
@@ -286,7 +286,7 @@ function initJuego(config) {
     const totalW = COLS * (brickW + gap) - gap;
     const startX = (STAGE_W - totalW)/2, startY = TOP_OFFSET;
     let trayectoria = [];
-    if (balls.length > 0 && !bolaPegada) {
+    if (balls.length > 0) {
       let x = balls[0].x, y = balls[0].y, vx = balls[0].vx, vy = balls[0].vy;
       for (let i=0; i<30; i++) {
         x += vx * 0.02; y += vy * 0.02;
@@ -340,7 +340,7 @@ function initJuego(config) {
     }
   }
 
-  // Combo
+  // Combo (interno)
   function iniciarCombo() {
     combo = 0; comboData = []; comboActive = true;
     for (const b of bricks) {
@@ -486,12 +486,15 @@ function initJuego(config) {
           target.el.className = `brick dureza-${target.dureza}`;
         }
       } else if (obj.tipo === 'niebla') {
+        // Activación de la niebla
         powerups.niebla_nivel = Math.min(3, powerups.niebla_nivel + 1);
         powerups.niebla_timer = 0;
         powerups.niebla_visible = true;
         actualizarNiebla();
+        console.log('🌫️ Nivel de niebla:', powerups.niebla_nivel);
       }
     } else if (obj.color === 'blue') {
+      // Pelota Azul
       powerups.pala_mini = false;
       powerups.flaqueza = false;
       powerups.niebla_nivel = 0;
@@ -523,11 +526,11 @@ function initJuego(config) {
     if (nivel > 0) {
       fogOverlay.classList.add('active');
       fogOverlay.className = `active level-${nivel}`;
-      fogOverlay.style.opacity = nivel === 1 ? '0.7' : nivel === 2 ? '0.85' : '1';
+      // Para nivel 2 y 3 se maneja el ciclo en el loop
     } else {
       fogOverlay.classList.remove('active');
       fogOverlay.className = '';
-      fogOverlay.style.opacity = '0';
+      fogOverlay.style.opacity = ''; // reset
     }
   }
   function actualizarVidasDisplay() {
@@ -597,6 +600,7 @@ function initJuego(config) {
     paddleEl.style.left = paddle.x + 'px';
     paddleEl.style.top = (STAGE_H - 16) + 'px';
     paddleEl.style.width = paddle.w + 'px';
+
     document.querySelectorAll('.ball-instance').forEach(el => el.remove());
     for (const b of balls) {
       const el = document.createElement('div');
@@ -640,7 +644,7 @@ function initJuego(config) {
       }
     }
 
-    // Movimiento bolas
+    // Movimiento bolas (si no están pegadas)
     for (const b of balls) {
       if (bolaPegada) break;
       b.x += b.vx * delta;
@@ -697,7 +701,7 @@ function initJuego(config) {
       return;
     }
 
-    // Objetos cayendo
+    // Actualizar objetos cayendo
     for (const obj of objects) {
       if (!obj.activo) continue;
       obj.y += obj.velocidad * delta;
@@ -711,7 +715,7 @@ function initJuego(config) {
     }
     objects = objects.filter(o => o.activo);
 
-    // Ciclo de niebla niveles 2 y 3
+    // Ciclo de niebla para niveles 2 y 3 (parpadeo)
     if (powerups.niebla_nivel >= 2) {
       const ciclo = powerups.niebla_nivel === 2 ? 4 : 5;
       powerups.niebla_timer += delta;
@@ -719,13 +723,15 @@ function initJuego(config) {
         powerups.niebla_timer = 0;
         powerups.niebla_visible = !powerups.niebla_visible;
         if (powerups.niebla_visible) {
+          // Niebla visible (más opaca)
           fogOverlay.style.opacity = powerups.niebla_nivel === 2 ? '0.85' : '1';
         } else {
-          fogOverlay.style.opacity = '0.1'; // casi transparente (sin niebla)
+          // Niebla casi transparente (parpadeo)
+          fogOverlay.style.opacity = '0.2';
         }
       }
     } else if (powerups.niebla_nivel === 1) {
-      // Nivel 1: niebla fija
+      // Nivel 1: siempre visible con opacidad fija
       fogOverlay.style.opacity = '0.7';
     }
 
@@ -756,6 +762,7 @@ function initJuego(config) {
     if (comboActive) finalizarCombo();
     lives--;
     if (lives <= 0) { endGame(false); return; }
+    // Resetear poderes (menos velocidad)
     powerups.pala_grande = false;
     powerups.pala_mini = false;
     powerups.dureza_mejora = false;
@@ -764,7 +771,8 @@ function initJuego(config) {
     powerups.niebla_visible = true;
     paddle.w = PADDLE_W_BASE;
     actualizarPaddle();
-    actualizarNiebla();
+    actualizarNiebla(); // Desactiva la niebla
+    // Bola pegada a la paleta
     balls = [{
       x: paddle.x + paddle.w/2,
       y: STAGE_H - 16 - BALL_R - 2,
@@ -775,6 +783,7 @@ function initJuego(config) {
     bolaPegada = true;
     lanzarBola = false;
     actualizarVidasDisplay();
+    console.log('💔 Vida perdida, niebla reset');
   }
 
   function endGame(win) {
@@ -817,7 +826,7 @@ function initJuego(config) {
     actualizarVidasDisplay();
     actualizarScoreDisplay();
     actualizarPaddle();
-    actualizarNiebla();
+    actualizarNiebla(); // Asegura que no haya niebla
     msgEl.classList.remove('show');
     gameRunning = true;
     layoutStage();
@@ -841,9 +850,11 @@ function initJuego(config) {
     actualizarPaddle();
     msgEl.classList.remove('show');
     restartBtn.style.display = 'none';
+    // Limpiar niebla
     fogOverlay.classList.remove('active');
     fogOverlay.className = '';
-    fogOverlay.style.opacity = '0';
+    fogOverlay.style.opacity = '';
+    powerups.niebla_nivel = 0;
   }
 
   function openGame() {
@@ -851,7 +862,7 @@ function initJuego(config) {
     overlay.classList.add('open');
     initBoard();
     recargarLadrillos();
-    startGame();
+    startGame(); // Directo, sin contador
   }
 
   function closeGame() {
@@ -915,7 +926,7 @@ function initJuego(config) {
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
   resetGameState();
-  console.log('✅ Juego final con niebla por capa listo');
+  console.log('✅ Juego final listo');
 }
 
 // ============================================================
