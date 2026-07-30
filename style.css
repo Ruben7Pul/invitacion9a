@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – Estilos principales (optimizado + animaciones)
+   🌹 INVITACIÓN XV – Estilos principales (optimizado + sutileza)
    ============================================================ */
 
 /* ---------- Variables globales ---------- */
@@ -307,7 +307,7 @@ body {
   padding: 0.2rem 0;
 }
 
-/* ===== ÓVALO DORADO CON MARCO DECORADO ===== */
+/* ===== ÓVALO DORADO – ADORNOS SUTILES ===== */
 #oval-wrap {
   width: 140px;
   height: 190px;
@@ -323,69 +323,48 @@ body {
   height: 100%;
 }
 
-/* El marco decorativo se aplica al contenedor */
+/* Borde sutil alrededor del óvalo */
 .oval-frame::before {
   content: '';
   position: absolute;
-  inset: -12px;
+  inset: -8px;
   border-radius: 50%;
-  background: transparent;
-  border: 3px solid #d4af37;
+  border: 1px solid rgba(212, 175, 55, 0.3);
   box-shadow: 
-    0 0 0 6px rgba(212, 175, 55, 0.15),
-    0 0 0 10px rgba(212, 175, 55, 0.05),
-    inset 0 0 30px rgba(212, 175, 55, 0.1);
+    0 0 0 2px rgba(212, 175, 55, 0.1),
+    0 0 20px rgba(212, 175, 55, 0.05);
   z-index: 1;
-  animation: pulseGlow 3s ease-in-out infinite;
 }
 
-/* Adornos de esquinas (puntos) */
-.oval-frame::after {
-  content: '✦ ✦ ✦';
-  position: absolute;
-  top: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.8rem;
-  letter-spacing: 0.6em;
-  color: #d4af37;
-  background: var(--bg-deep);
-  padding: 0 8px;
-  border-radius: 12px;
-  z-index: 3;
-  text-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
-  white-space: nowrap;
-}
-
-/* Pequeñas joyas alrededor (con box-shadow múltiple) */
+/* Pequeños puntos de luz alrededor (12 puntos) */
 .oval-deco {
   position: absolute;
-  inset: -20px;
+  inset: -18px;
   border-radius: 50%;
   pointer-events: none;
   z-index: 0;
   background: transparent;
   box-shadow: 
-    -18px -10px 0 -2px #d4af37,
-    18px -10px 0 -2px #d4af37,
-    -22px 10px 0 -2px #d4af37,
-    22px 10px 0 -2px #d4af37,
-    -10px -22px 0 -2px #d4af37,
-    10px -22px 0 -2px #d4af37,
-    0 -28px 0 -2px #d4af37,
-    0 28px 0 -2px #d4af37;
-  animation: twinkle 4s ease-in-out infinite;
-}
-
-/* Animación del brillo */
-@keyframes pulseGlow {
-  0%, 100% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.15), 0 0 0 10px rgba(212, 175, 55, 0.05), inset 0 0 30px rgba(212, 175, 55, 0.1); }
-  50% { opacity: 1; box-shadow: 0 0 0 6px rgba(212, 175, 55, 0.25), 0 0 0 14px rgba(212, 175, 55, 0.08), inset 0 0 40px rgba(212, 175, 55, 0.2); }
+    -16px -10px 0 0 #d4af37,
+    16px -10px 0 0 #d4af37,
+    -20px 8px 0 0 #d4af37,
+    20px 8px 0 0 #d4af37,
+    -8px -20px 0 0 #d4af37,
+    8px -20px 0 0 #d4af37,
+    0 -26px 0 0 #d4af37,
+    0 26px 0 0 #d4af37,
+    -22px -2px 0 0 #d4af37,
+    22px -2px 0 0 #d4af37,
+    -2px -22px 0 0 #d4af37,
+    2px -22px 0 0 #d4af37;
+  background-size: 2px 2px;
+  animation: twinkle 3s ease-in-out infinite;
+  opacity: 0.6;
 }
 
 @keyframes twinkle {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.05); }
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.05); }
 }
 
 /* El óvalo en sí */
@@ -394,8 +373,8 @@ body {
   height: 100%;
   border-radius: 50%;
   overflow: hidden;
-  border: 4px solid var(--gold);
-  box-shadow: 0 0 30px rgba(201, 162, 77, 0.4);
+  border: 3px solid var(--gold);
+  box-shadow: 0 0 30px rgba(201, 162, 77, 0.3);
   background: var(--bg-deep);
   position: relative;
   z-index: 2;
@@ -586,7 +565,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   MODALES – CON ANIMACIÓN SUTIL
+   MODALES – CON RESPLANDOR Y ANIMACIÓN DE FONDO
    ============================================================ */
 .modal-overlay {
   position: fixed;
@@ -609,7 +588,38 @@ h1#nombre-hero {
   visibility: visible;
 }
 
-/* Tarjeta del modal con animación de entrada */
+/* Fondo animado con estrellas dentro del overlay */
+.modal-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(1px 1px at 10% 20%, rgba(255,215,0,0.6), transparent),
+    radial-gradient(1px 1px at 30% 70%, rgba(255,215,0,0.4), transparent),
+    radial-gradient(1.5px 1.5px at 50% 10%, rgba(255,215,0,0.8), transparent),
+    radial-gradient(1px 1px at 70% 40%, rgba(255,215,0,0.5), transparent),
+    radial-gradient(1px 1px at 90% 80%, rgba(255,215,0,0.7), transparent),
+    radial-gradient(1px 1px at 20% 90%, rgba(255,215,0,0.4), transparent),
+    radial-gradient(1.5px 1.5px at 60% 60%, rgba(255,215,0,0.6), transparent);
+  background-size: 200px 200px;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  pointer-events: none;
+  z-index: 0;
+  animation: none;
+}
+
+.modal-overlay.open::before {
+  opacity: 1;
+  animation: starField 8s linear infinite;
+}
+
+@keyframes starField {
+  0% { background-position: 0 0; }
+  100% { background-position: 200px 200px; }
+}
+
+/* Tarjeta del modal con resplandor exterior */
 .modal-card {
   width: 100%;
   max-width: 420px;
@@ -624,15 +634,26 @@ h1#nombre-hero {
   opacity: 0;
   transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
   box-shadow: 0 0 60px rgba(212, 175, 55, 0.15), inset 0 0 80px rgba(25, 60, 120, 0.4);
+  z-index: 1;
 }
 
-/* Cuando se abre, la tarjeta se despliega */
+/* Resplandor pulsante alrededor del modal */
 .modal-overlay.open .modal-card {
   transform: scale(1) translateY(0);
   opacity: 1;
+  box-shadow: 
+    0 0 40px rgba(212, 175, 55, 0.2),
+    0 0 80px rgba(212, 175, 55, 0.1),
+    inset 0 0 80px rgba(25, 60, 120, 0.4);
+  animation: glowPulse 3s ease-in-out infinite;
 }
 
-/* Elementos internos con retraso escalonado */
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 40px rgba(212, 175, 55, 0.2), 0 0 80px rgba(212, 175, 55, 0.1), inset 0 0 80px rgba(25, 60, 120, 0.4); }
+  50% { box-shadow: 0 0 60px rgba(212, 175, 55, 0.4), 0 0 120px rgba(212, 175, 55, 0.2), inset 0 0 80px rgba(25, 60, 120, 0.4); }
+}
+
+/* Elementos internos con retraso escalonado (se mantiene) */
 .modal-card > * {
   opacity: 0;
   transform: translateY(12px);
@@ -644,25 +665,16 @@ h1#nombre-hero {
   transform: translateY(0);
 }
 
-/* Retrasos individuales */
-.modal-overlay.open .modal-card h2 {
-  transition-delay: 0.05s;
-}
-.modal-overlay.open .modal-card .modal-subtitle {
-  transition-delay: 0.10s;
-}
+.modal-overlay.open .modal-card h2 { transition-delay: 0.05s; }
+.modal-overlay.open .modal-card .modal-subtitle { transition-delay: 0.10s; }
 .modal-overlay.open .modal-card .clock,
 .modal-overlay.open .modal-card .detalle-card,
-.modal-overlay.open .modal-card .familia-grupo {
-  transition-delay: 0.15s;
-}
+.modal-overlay.open .modal-card .familia-grupo { transition-delay: 0.15s; }
 .modal-overlay.open .modal-card .modal-seal,
 .modal-overlay.open .modal-card .btn-mapa,
-.modal-overlay.open .modal-card .divider-thin {
-  transition-delay: 0.20s;
-}
+.modal-overlay.open .modal-card .divider-thin { transition-delay: 0.20s; }
 
-/* Estilos del modal (decoraciones) */
+/* Resto de estilos de modales (sin cambios) */
 .modal-card::before {
   content: '';
   position: absolute;
@@ -692,7 +704,6 @@ h1#nombre-hero {
   font-family: var(--serif-display);
 }
 
-/* Botón cerrar */
 .modal-close {
   position: absolute;
   top: 0.8rem;
@@ -717,7 +728,6 @@ h1#nombre-hero {
   transform: rotate(90deg);
 }
 
-/* Títulos y subtítulos */
 .modal-card h2 {
   font-family: var(--serif-display);
   text-align: center;
@@ -742,7 +752,6 @@ h1#nombre-hero {
   letter-spacing: 0.05em;
 }
 
-/* Sello decorativo */
 .modal-seal {
   margin-top: 1.2rem;
   padding-top: 0.8rem;
@@ -760,7 +769,6 @@ h1#nombre-hero {
   letter-spacing: 0.1em;
 }
 
-/* ---------- Detalles (lugares) ---------- */
 .detalle-card {
   background: rgba(10, 26, 47, 0.7);
   border: 1px solid #b8860b;
@@ -849,7 +857,6 @@ h1#nombre-hero {
   box-shadow: 0 2px 0 #6b4c1a;
 }
 
-/* Divisor */
 .divider-thin {
   height: 2px;
   background: linear-gradient(90deg, transparent, #d4af37, #fae3a0, #d4af37, transparent);
@@ -858,7 +865,6 @@ h1#nombre-hero {
   box-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
 }
 
-/* ---------- Familia ---------- */
 .familia-grupo {
   background: rgba(10, 26, 47, 0.5);
   border: 1px solid #b8860b;
@@ -994,7 +1000,6 @@ h1#nombre-hero {
   left: 0;
 }
 
-/* Ladrillos (creados por JS) */
 .brick {
   position: absolute;
   display: flex;
@@ -1014,7 +1019,6 @@ h1#nombre-hero {
   pointer-events: none;
 }
 
-/* Paleta y pelota - se mueven con transform */
 #paddle,
 #ball {
   position: absolute;
@@ -1028,7 +1032,7 @@ h1#nombre-hero {
   height: 8px;
   border-radius: 4px;
   background: linear-gradient(180deg, var(--gold-light), var(--gold));
-  top: 406px; /* STAGE_H - 14 = 406, ajusta si cambias STAGE_H */
+  top: 406px;
 }
 
 #ball {
@@ -1038,7 +1042,6 @@ h1#nombre-hero {
   background: radial-gradient(circle at 35% 30%, #fff, #d68a96 60%, #a13545);
 }
 
-/* Mensaje de fin de juego */
 #game-msg {
   position: absolute;
   inset: 0;
@@ -1104,116 +1107,50 @@ h1#nombre-hero {
    ANIMACIONES
    ============================================================ */
 @keyframes floaty {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 
 /* ============================================================
    RESPONSIVE
    ============================================================ */
 @media (max-width: 768px) {
-  .gate-wrapper {
-    max-width: 300px;
-    height: 50vh;
-  }
-  .portal-inner .eyebrow {
-    font-size: 0.7rem;
-  }
-  .portal-caption {
-    font-size: 0.7rem;
-  }
+  .gate-wrapper { max-width: 300px; height: 50vh; }
+  .portal-inner .eyebrow { font-size: 0.7rem; }
+  .portal-caption { font-size: 0.7rem; }
 
-  .modal-card {
-    padding: 1.2rem 0.8rem;
-  }
-  .modal-card h2 {
-    font-size: 0.9rem;
-  }
-  .modal-subtitle {
-    font-size: 1rem;
-  }
+  .modal-card { padding: 1.2rem 0.8rem; }
+  .modal-card h2 { font-size: 0.9rem; }
+  .modal-subtitle { font-size: 1rem; }
 
-  .calendar-style .num {
-    font-size: 1.5rem !important;
-  }
-  .calendar-style .unit {
-    padding: 0.4rem 0.1rem;
-    min-width: 40px;
-  }
+  .calendar-style .num { font-size: 1.5rem !important; }
+  .calendar-style .unit { padding: 0.4rem 0.1rem; min-width: 40px; }
 
-  .detalle-card {
-    padding: 0.8rem;
-  }
-  .familia-nombres p {
-    font-size: 0.95rem;
-  }
+  .detalle-card { padding: 0.8rem; }
+  .familia-nombres p { font-size: 0.95rem; }
 
-  #oval-wrap {
-    width: 120px;
-    height: 165px;
-    margin-top: -30px;
-  }
-  h1#nombre-hero {
-    font-size: clamp(2.8rem, 10dvh, 4rem);
-  }
+  #oval-wrap { width: 120px; height: 165px; margin-top: -30px; }
+  h1#nombre-hero { font-size: clamp(2.8rem, 10dvh, 4rem); }
 }
 
 @media (max-width: 480px) {
-  .gate-wrapper {
-    max-width: 200px;
-    height: 40vh;
-  }
-  .portal-inner .eyebrow {
-    font-size: 0.6rem;
-  }
-  .portal-caption {
-    font-size: 0.6rem;
-  }
+  .gate-wrapper { max-width: 200px; height: 40vh; }
+  .portal-inner .eyebrow { font-size: 0.6rem; }
+  .portal-caption { font-size: 0.6rem; }
 
-  #oval-wrap {
-    width: 100px;
-    height: 140px;
-    margin-top: -20px;
-  }
-  h1#nombre-hero {
-    font-size: clamp(2.4rem, 8dvh, 3.2rem);
-  }
+  #oval-wrap { width: 100px; height: 140px; margin-top: -20px; }
+  h1#nombre-hero { font-size: clamp(2.4rem, 8dvh, 3.2rem); }
 
-  #app-top .eyebrow {
-    font-size: 0.55rem;
-  }
-  .top-btn {
-    font-size: 1rem;
-  }
+  #app-top .eyebrow { font-size: 0.55rem; }
+  .top-btn { font-size: 1rem; }
 
-  .game-help {
-    font-size: 0.7rem;
-  }
-  .hint {
-    font-size: 0.85rem;
-  }
-  .frase-inline {
-    font-size: 0.8rem;
-  }
-  .fecha-fija {
-    font-size: 0.85rem;
-  }
+  .game-help { font-size: 0.7rem; }
+  .hint { font-size: 0.85rem; }
+  .frase-inline { font-size: 0.8rem; }
+  .fecha-fija { font-size: 0.85rem; }
 
-  .calendar-style .num {
-    font-size: 1.2rem !important;
-  }
+  .calendar-style .num { font-size: 1.2rem !important; }
 }
 
-/* ---------- Scrollbar personalizada ---------- */
-::-webkit-scrollbar {
-  width: 4px;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--glass-border);
-  border-radius: 3px;
-}
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 3px; }
