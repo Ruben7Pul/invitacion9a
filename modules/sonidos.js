@@ -1,4 +1,4 @@
-console.log('📦 sonidos (fallback)');
+console.log('📦 sonidos (con AudioContext cacheado)');
 
 let audioCtx = null;
 let soundEnabled = true;
@@ -31,7 +31,7 @@ function chime(freqs, dur) {
       osc.type = 'sine';
       osc.frequency.value = f;
       gain.gain.setValueAtTime(0, now + i * 0.05);
-      gain.gain.linearRampToValueAtTime(0.04, now + i * 0.05 + 0.02);
+      gain.gain.linearRampToValueAtTime(0.03, now + i * 0.05 + 0.02);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.05 + dur);
       osc.connect(gain).connect(ctx.destination);
       osc.start(now + i * 0.05);
