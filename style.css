@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – Estilos principales (corregido)
+   🌹 INVITACIÓN XV – Estilos principales (modales corregidos)
    ============================================================ */
 
 /* ---------- Variables globales ---------- */
@@ -307,7 +307,7 @@ body {
   padding: 0.2rem 0;
 }
 
-/* ===== ÓVALO DORADO (VERSIÓN ORIGINAL) ===== */
+/* ===== ÓVALO DORADO – ESTADO ORIGINAL (SIN ADORNOS) ===== */
 #oval-wrap {
   width: 140px;
   height: 190px;
@@ -323,6 +323,7 @@ body {
   height: 100%;
 }
 
+/* Sin adornos extra, solo el borde original */
 .oval-mask {
   width: 100%;
   height: 100%;
@@ -341,8 +342,6 @@ body {
   object-fit: cover;
   display: block;
 }
-
-/* ===== SIN ADORNOS EXTRA ===== */
 
 /* Nombre */
 .name-wrap {
@@ -522,7 +521,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   MODALES – CORREGIDOS (sin bug de cuadros)
+   MODALES – CORREGIDOS (sin errores de parpadeo)
    ============================================================ */
 .modal-overlay {
   position: fixed;
@@ -545,37 +544,37 @@ h1#nombre-hero {
   visibility: visible;
 }
 
-/* Fondo de estrellas (sin parpadeos) */
+/* Fondo con estrellas animadas */
 .modal-overlay::before {
   content: '';
   position: absolute;
   inset: 0;
-  pointer-events: none;
-  z-index: 0;
   background-image: 
-    radial-gradient(1.5px 1.5px at 10% 20%, rgba(255,215,0,0.5), transparent),
-    radial-gradient(1px 1px at 30% 70%, rgba(255,215,0,0.3), transparent),
-    radial-gradient(2px 2px at 50% 10%, rgba(255,215,0,0.6), transparent),
-    radial-gradient(1px 1px at 70% 40%, rgba(255,215,0,0.4), transparent),
-    radial-gradient(1.5px 1.5px at 90% 80%, rgba(255,215,0,0.5), transparent),
-    radial-gradient(1px 1px at 20% 90%, rgba(255,215,0,0.3), transparent),
-    radial-gradient(1.5px 1.5px at 60% 60%, rgba(255,215,0,0.4), transparent);
-  background-size: 300px 300px;
+    radial-gradient(1px 1px at 10% 20%, rgba(255,215,0,0.6), transparent),
+    radial-gradient(1px 1px at 30% 70%, rgba(255,215,0,0.4), transparent),
+    radial-gradient(1.5px 1.5px at 50% 10%, rgba(255,215,0,0.8), transparent),
+    radial-gradient(1px 1px at 70% 40%, rgba(255,215,0,0.5), transparent),
+    radial-gradient(1px 1px at 90% 80%, rgba(255,215,0,0.7), transparent),
+    radial-gradient(1px 1px at 20% 90%, rgba(255,215,0,0.4), transparent),
+    radial-gradient(1.5px 1.5px at 60% 60%, rgba(255,215,0,0.6), transparent);
+  background-size: 200px 200px;
   opacity: 0;
   transition: opacity 0.8s ease;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .modal-overlay.open::before {
   opacity: 1;
-  animation: starField 12s linear infinite;
+  animation: starField 8s linear infinite;
 }
 
 @keyframes starField {
   0% { background-position: 0 0; }
-  100% { background-position: 300px 300px; }
+  100% { background-position: 200px 200px; }
 }
 
-/* Tarjeta del modal – sin box-shadow conflictiva */
+/* Tarjeta del modal – la animación de entrada se aplica solo aquí */
 .modal-card {
   width: 100%;
   max-width: 420px;
@@ -589,10 +588,13 @@ h1#nombre-hero {
   transform: scale(0.92) translateY(20px);
   opacity: 0;
   transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
-  box-shadow: 0 0 60px rgba(212, 175, 55, 0.15);
+  box-shadow: 0 0 60px rgba(212, 175, 55, 0.15), inset 0 0 80px rgba(25, 60, 120, 0.4);
   z-index: 1;
+  /* Asegura que el scroll no rompa la animación */
+  -webkit-overflow-scrolling: touch;
 }
 
+/* Al abrir, la tarjeta se despliega y resplandece */
 .modal-overlay.open .modal-card {
   transform: scale(1) translateY(0);
   opacity: 1;
@@ -600,22 +602,21 @@ h1#nombre-hero {
 }
 
 @keyframes glowPulse {
-  0%, 100% { box-shadow: 0 0 30px rgba(212, 175, 55, 0.2), 0 0 60px rgba(212, 175, 55, 0.1); }
-  50% { box-shadow: 0 0 50px rgba(212, 175, 55, 0.4), 0 0 100px rgba(212, 175, 55, 0.2); }
+  0%, 100% { box-shadow: 0 0 40px rgba(212, 175, 55, 0.2), 0 0 80px rgba(212, 175, 55, 0.1), inset 0 0 80px rgba(25, 60, 120, 0.4); }
+  50% { box-shadow: 0 0 60px rgba(212, 175, 55, 0.4), 0 0 120px rgba(212, 175, 55, 0.2), inset 0 0 80px rgba(25, 60, 120, 0.4); }
 }
 
-/* Elementos internos con retraso escalonado */
+/* Los hijos solo usan opacidad para evitar conflictos con overflow */
 .modal-card > * {
   opacity: 0;
-  transform: translateY(12px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transition: opacity 0.4s ease;
 }
 
 .modal-overlay.open .modal-card > * {
   opacity: 1;
-  transform: translateY(0);
 }
 
+/* Retrasos escalonados (sin transform) */
 .modal-overlay.open .modal-card h2 { transition-delay: 0.05s; }
 .modal-overlay.open .modal-card .modal-subtitle { transition-delay: 0.10s; }
 .modal-overlay.open .modal-card .clock,
@@ -625,7 +626,7 @@ h1#nombre-hero {
 .modal-overlay.open .modal-card .btn-mapa,
 .modal-overlay.open .modal-card .divider-thin { transition-delay: 0.20s; }
 
-/* Decoraciones internas del modal (sin conflictos) */
+/* Resto de estilos de modales (sin cambios) */
 .modal-card::before {
   content: '';
   position: absolute;
@@ -633,9 +634,10 @@ h1#nombre-hero {
   left: 12px;
   right: 12px;
   bottom: 12px;
-  border: 1px solid rgba(212, 175, 55, 0.2);
+  border: 1px solid rgba(212, 175, 55, 0.25);
   border-radius: 16px;
   pointer-events: none;
+  box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.05);
 }
 
 .modal-card::after {
@@ -654,7 +656,6 @@ h1#nombre-hero {
   font-family: var(--serif-display);
 }
 
-/* Botón cerrar */
 .modal-close {
   position: absolute;
   top: 0.8rem;
