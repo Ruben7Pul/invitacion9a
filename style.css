@@ -1,3 +1,8 @@
+/* ============================================================
+   🌹 INVITACIÓN XV – Estilos principales (optimizado)
+   ============================================================ */
+
+/* ---------- Variables globales ---------- */
 :root {
   --bg-deep: #0b0818;
   --bg-panel: rgba(29, 23, 48, 0.75);
@@ -13,8 +18,19 @@
   --script: 'Pinyon Script', cursive;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; overflow: hidden; }
+/* ---------- Reset y base ---------- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   margin: 0;
   font-family: var(--serif-body);
@@ -24,6 +40,7 @@ body {
   inset: 0;
 }
 
+/* ---------- Fondo y capa de pétalos ---------- */
 #bg {
   position: fixed;
   inset: 0;
@@ -35,6 +52,7 @@ body {
   background-repeat: no-repeat;
   background-color: var(--bg-deep);
 }
+
 #bg::after {
   content: '';
   position: absolute;
@@ -48,29 +66,40 @@ body {
   pointer-events: none;
   z-index: 3;
   overflow: hidden;
+  contain: layout style paint;
 }
+
 .petal {
   position: absolute;
   border-radius: 60% 0 60% 0;
   opacity: 0.6;
-  will-change: transform, top, left;
+  will-change: transform;
+  transform-origin: 0 0;
 }
 
+/* ---------- Utilidades de texto ---------- */
 .gold-text {
   color: var(--gold-light);
   text-shadow: 0 0 8px rgba(201, 162, 77, 0.2);
 }
-.frase-inline, .fecha-fija, .hint, .portal-caption {
-  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+
+.frase-inline,
+.fecha-fija,
+.hint,
+.portal-caption {
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
+/* ---------- Enfoque accesible ---------- */
 :focus-visible {
   outline: 2px solid var(--gold-light);
   outline-offset: 2px;
   border-radius: 4px;
 }
 
-/* ===== PORTAL ===== */
+/* ============================================================
+   PORTAL / REJA
+   ============================================================ */
 #portal {
   position: fixed;
   inset: 0;
@@ -81,11 +110,13 @@ body {
   background: radial-gradient(ellipse at 50% 35%, #0d1f4a 0%, #0a122a 75%);
   transition: opacity 0.5s ease, visibility 0.5s ease;
 }
+
 #portal.hide {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
 }
+
 .portal-inner {
   text-align: center;
   padding: 2rem;
@@ -96,6 +127,7 @@ body {
   align-items: center;
   justify-content: center;
 }
+
 .portal-inner .eyebrow {
   display: block;
   margin-bottom: 1.5rem;
@@ -105,7 +137,7 @@ body {
   font-size: 0.9rem;
 }
 
-/* ===== REJA ===== */
+/* --- Reja --- */
 .gate-wrapper {
   position: relative;
   width: 90vw;
@@ -116,6 +148,7 @@ body {
   perspective: 1000px;
   cursor: pointer;
 }
+
 .gate-leaf {
   position: absolute;
   top: 0;
@@ -124,29 +157,66 @@ body {
   transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
   backface-visibility: hidden;
 }
+
 .gate-leaf svg {
   width: 100%;
   height: 100%;
   display: block;
   filter: drop-shadow(0 0 20px rgba(201, 162, 77, 0.3));
 }
+
 .gate-left {
   left: 0;
   transform-origin: left center;
 }
+
 .gate-right {
   right: 0;
   transform-origin: right center;
 }
+
 .gate-right svg {
   transform: scaleX(-1);
 }
+
+/* Apertura de la reja (animación inversa) */
 .gate-wrapper.open .gate-left {
   animation: closeLeft 0.6s ease reverse forwards;
 }
 .gate-wrapper.open .gate-right {
   animation: closeRight 0.6s ease reverse forwards;
 }
+
+/* Cierre */
+#portal.closing .gate-left {
+  animation: closeLeft 0.6s ease forwards;
+}
+#portal.closing .gate-right {
+  animation: closeRight 0.6s ease forwards;
+}
+
+@keyframes closeLeft {
+  0% {
+    transform: rotateY(-110deg) translateX(-20px);
+    opacity: 0.2;
+  }
+  100% {
+    transform: rotateY(0deg) translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes closeRight {
+  0% {
+    transform: rotateY(110deg) translateX(20px);
+    opacity: 0.2;
+  }
+  100% {
+    transform: rotateY(0deg) translateX(0);
+    opacity: 1;
+  }
+}
+
 .portal-caption {
   margin-top: 1.5rem;
   font-family: var(--serif-display);
@@ -156,7 +226,9 @@ body {
   color: var(--gold-light);
 }
 
-/* ===== APP ===== */
+/* ============================================================
+   APP PRINCIPAL
+   ============================================================ */
 #app {
   position: fixed;
   inset: 0;
@@ -170,11 +242,15 @@ body {
   transition: opacity 0.4s ease;
   text-align: center;
   pointer-events: none;
+  contain: layout style paint;
 }
+
 #app.show {
   opacity: 1;
   pointer-events: auto;
 }
+
+/* ---------- Barra superior ---------- */
 #app-top {
   width: 100%;
   max-width: 560px;
@@ -183,6 +259,7 @@ body {
   align-items: center;
   padding: 0 0.2rem;
 }
+
 #app-top .eyebrow {
   flex: 1;
   text-align: center;
@@ -191,6 +268,7 @@ body {
   text-transform: uppercase;
   font-size: 0.7rem;
 }
+
 .top-btn {
   background: none;
   border: none;
@@ -203,11 +281,20 @@ body {
   justify-content: center;
   transition: opacity 0.3s ease;
 }
-.top-btn:hover { opacity: 0.7; }
-#music-toggle svg { width: 20px; height: 20px; }
-#music-toggle { opacity: 1; }
 
-/* ===== CONTENIDO CENTRAL ===== */
+.top-btn:hover {
+  opacity: 0.7;
+}
+
+#music-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+#music-toggle {
+  opacity: 1;
+}
+
+/* ---------- Contenido central ---------- */
 #app-mid {
   flex: 1;
   display: flex;
@@ -216,24 +303,26 @@ body {
   justify-content: center;
   width: 100%;
   max-width: 560px;
-  gap: 0.3rem; /* espacio general */
+  gap: 0.3rem;
   padding: 0.2rem 0;
 }
 
-/* ÓVALO DORADO - subido 10px (1cm aprox) */
+/* Óvalo dorado */
 #oval-wrap {
   width: 140px;
   height: 190px;
   margin-bottom: 0.1rem;
-  margin-top: -40px; /* subido */
+  margin-top: -40px;
   animation: floaty 6s ease-in-out infinite;
   position: relative;
 }
+
 .oval-frame {
   position: relative;
   width: 100%;
   height: 100%;
 }
+
 .oval-mask {
   width: 100%;
   height: 100%;
@@ -245,6 +334,7 @@ body {
   position: relative;
   z-index: 2;
 }
+
 .gif-central {
   width: 100%;
   height: 100%;
@@ -252,16 +342,17 @@ body {
   display: block;
 }
 
-/* NOMBRE - más grande, sin reflejo */
+/* Nombre */
 .name-wrap {
   position: relative;
   margin-top: 0.1rem;
   margin-bottom: 0.1rem;
 }
+
 h1#nombre-hero {
   font-family: var(--script);
   font-weight: 400;
-  font-size: clamp(3.2rem, 12dvh, 5rem); /* más grande */
+  font-size: clamp(3.2rem, 12dvh, 5rem);
   line-height: 1.1;
   margin: 0;
   cursor: pointer;
@@ -275,13 +366,17 @@ h1#nombre-hero {
   position: relative;
   text-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
 }
-/* Eliminado el ::after que generaba el reflejo */
+
 @keyframes rainbowMove {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 300% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 300% 50%;
+  }
 }
 
-/* FRASE */
+/* Frase */
 .frase-inline {
   max-width: 34ch;
   font-family: var(--serif-body);
@@ -290,10 +385,15 @@ h1#nombre-hero {
   line-height: 1.5;
   margin: 0.1rem 0;
 }
-.frase-inline::before { content: "\201C"; }
-.frase-inline::after { content: "\201D"; }
 
-/* FECHA */
+.frase-inline::before {
+  content: "\201C";
+}
+.frase-inline::after {
+  content: "\201D";
+}
+
+/* Fecha */
 .fecha-fija {
   font-family: var(--serif-body);
   font-style: italic;
@@ -301,9 +401,9 @@ h1#nombre-hero {
   margin: 0.1rem 0;
 }
 
-/* MENSAJE "Toca mi nombre para jugar" - más grande y debajo de fecha */
+/* Mensaje "Toca mi nombre..." */
 .hint {
-  font-size: 1rem; /* más grande */
+  font-size: 1rem;
   opacity: 0.9;
   margin: 0.2rem 0 0.1rem;
   font-family: var(--serif-body);
@@ -313,7 +413,7 @@ h1#nombre-hero {
   text-shadow: 0 0 12px rgba(201, 162, 77, 0.3);
 }
 
-/* BOTONES DE NAVEGACIÓN */
+/* ---------- Navegación inferior ---------- */
 #nav {
   width: 100%;
   max-width: 460px;
@@ -327,6 +427,7 @@ h1#nombre-hero {
   margin-top: 0.3rem;
   box-shadow: 0 0 30px rgba(212, 175, 55, 0.1);
 }
+
 .nav-btn {
   background: none;
   border: none;
@@ -339,13 +440,18 @@ h1#nombre-hero {
   border-radius: 16px;
   cursor: pointer;
 }
-.nav-btn:active { transform: scale(0.95); }
+
+.nav-btn:active {
+  transform: scale(0.95);
+}
+
 .nav-btn svg {
   width: 24px;
   height: 24px;
   color: #fae3a0;
   filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.2));
 }
+
 .nav-btn span {
   font-family: var(--serif-display);
   font-size: 0.6rem;
@@ -354,13 +460,16 @@ h1#nombre-hero {
   color: #d4af37;
 }
 
-/* ===== CONTADOR (horizontal) ===== */
+/* ============================================================
+   CONTADOR (estilo calendario)
+   ============================================================ */
 .clock {
   display: flex;
   flex-wrap: nowrap;
   justify-content: center;
   gap: 0.4rem;
 }
+
 .calendar-style .unit {
   background: linear-gradient(180deg, #1a3559, #0c1e38);
   border: 2px solid #d4af37;
@@ -374,10 +483,12 @@ h1#nombre-hero {
   min-width: 60px;
   text-align: center;
 }
+
 .calendar-style .unit:hover {
   transform: translateY(-3px) scale(1.04);
   box-shadow: 0 6px 0 #6b4c1a, 0 0 30px rgba(212, 175, 55, 0.2);
 }
+
 .calendar-style .num {
   color: #fae3a0 !important;
   font-size: 1.9rem !important;
@@ -385,6 +496,7 @@ h1#nombre-hero {
   text-shadow: 0 0 15px #d4af37 !important;
   display: block;
 }
+
 .calendar-style .lbl {
   color: #d4af37 !important;
   font-size: 0.55rem !important;
@@ -394,6 +506,7 @@ h1#nombre-hero {
   display: block;
   margin-top: 0.1rem;
 }
+
 .calendar-style .unit::before {
   content: '';
   position: absolute;
@@ -406,13 +519,14 @@ h1#nombre-hero {
   opacity: 0.6;
 }
 
-/* ===== MODALES ===== */
-/* (sin cambios, se mantiene igual que antes) */
+/* ============================================================
+   MODALES
+   ============================================================ */
 .modal-overlay {
   position: fixed;
   inset: 0;
   z-index: 70;
-  background: rgba(6, 10, 25, 0.85) !important;
+  background: rgba(6, 10, 25, 0.85);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   display: flex;
@@ -423,8 +537,13 @@ h1#nombre-hero {
   visibility: hidden;
   transition: opacity 0.4s ease, visibility 0.4s ease;
 }
-.modal-overlay.open { opacity: 1; visibility: visible; }
 
+.modal-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Tarjeta del modal */
 .modal-card {
   width: 100%;
   max-width: 420px;
@@ -440,8 +559,13 @@ h1#nombre-hero {
   opacity: 0;
   box-shadow: 0 0 60px rgba(212, 175, 55, 0.15), inset 0 0 80px rgba(25, 60, 120, 0.4);
 }
-.modal-overlay.open .modal-card { transform: scale(1); opacity: 1; }
 
+.modal-overlay.open .modal-card {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Bordes decorativos */
 .modal-card::before {
   content: '';
   position: absolute;
@@ -454,6 +578,7 @@ h1#nombre-hero {
   pointer-events: none;
   box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.05);
 }
+
 .modal-card::after {
   content: '✦ ✦ ✦';
   position: absolute;
@@ -470,6 +595,7 @@ h1#nombre-hero {
   font-family: var(--serif-display);
 }
 
+/* Botón cerrar */
 .modal-close {
   position: absolute;
   top: 0.8rem;
@@ -488,11 +614,13 @@ h1#nombre-hero {
   transition: background 0.2s, transform 0.2s;
   z-index: 10;
 }
+
 .modal-close:hover {
   background: rgba(212, 175, 55, 0.25);
   transform: rotate(90deg);
 }
 
+/* Títulos y subtítulos */
 .modal-card h2 {
   font-family: var(--serif-display);
   text-align: center;
@@ -506,6 +634,7 @@ h1#nombre-hero {
   padding-bottom: 0.6rem;
   display: block;
 }
+
 .modal-subtitle {
   font-family: var(--script);
   font-size: 1.2rem;
@@ -516,6 +645,7 @@ h1#nombre-hero {
   letter-spacing: 0.05em;
 }
 
+/* Sello decorativo */
 .modal-seal {
   margin-top: 1.2rem;
   padding-top: 0.8rem;
@@ -527,24 +657,28 @@ h1#nombre-hero {
   font-size: 0.7rem;
   color: #b8860b;
 }
+
 .modal-seal span {
   font-family: var(--serif-display);
   letter-spacing: 0.1em;
 }
 
+/* ---------- Detalles (lugares) ---------- */
 .detalle-card {
   background: rgba(10, 26, 47, 0.7);
   border: 1px solid #b8860b;
   border-radius: 18px;
   padding: 1.2rem 1.2rem 1rem;
   margin-bottom: 1rem;
-  box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.04), 0 4px 20px rgba(0,0,0,0.3);
+  box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.04), 0 4px 20px rgba(0, 0, 0, 0.3);
   transition: border-color 0.3s, box-shadow 0.3s;
 }
+
 .detalle-card:hover {
   border-color: #fae3a0;
-  box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.1), 0 4px 30px rgba(0,0,0,0.5);
+  box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.1), 0 4px 30px rgba(0, 0, 0, 0.5);
 }
+
 .detalle-card .icono {
   width: 30px;
   height: 30px;
@@ -552,8 +686,9 @@ h1#nombre-hero {
   color: #d4af37;
   display: block;
   stroke-width: 1.8;
-  filter: drop-shadow(0 0 6px rgba(212,175,55,0.4));
+  filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.4));
 }
+
 .detalle-card h3 {
   font-family: var(--serif-display);
   text-align: center;
@@ -564,10 +699,12 @@ h1#nombre-hero {
   color: #fae3a0;
   text-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
 }
+
 .detalle-info {
   text-align: center;
   margin-bottom: 0.8rem;
 }
+
 .detalle-info .hora {
   font-family: var(--serif-body);
   font-weight: 600;
@@ -579,12 +716,14 @@ h1#nombre-hero {
   display: inline-block;
   border: 1px solid rgba(212, 175, 55, 0.1);
 }
+
 .detalle-info .lugar {
   font-size: 1rem;
   font-weight: 500;
   margin: 0.3rem 0 0.1rem;
   color: #e0d0b0;
 }
+
 .btn-mapa {
   display: block;
   width: fit-content;
@@ -599,18 +738,21 @@ h1#nombre-hero {
   border-radius: 30px;
   text-decoration: none;
   border: 1px solid #fae3a0;
-  box-shadow: 0 4px 0 #6b4c1a, 0 2px 10px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 0 #6b4c1a, 0 2px 10px rgba(0, 0, 0, 0.3);
   transition: transform 0.15s, box-shadow 0.15s;
 }
+
 .btn-mapa:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 0 #6b4c1a, 0 4px 20px rgba(212, 175, 55, 0.3);
 }
+
 .btn-mapa:active {
   transform: translateY(2px);
   box-shadow: 0 2px 0 #6b4c1a;
 }
 
+/* Divisor */
 .divider-thin {
   height: 2px;
   background: linear-gradient(90deg, transparent, #d4af37, #fae3a0, #d4af37, transparent);
@@ -619,6 +761,7 @@ h1#nombre-hero {
   box-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
 }
 
+/* ---------- Familia ---------- */
 .familia-grupo {
   background: rgba(10, 26, 47, 0.5);
   border: 1px solid #b8860b;
@@ -626,8 +769,9 @@ h1#nombre-hero {
   padding: 1rem 1.2rem 0.8rem;
   margin-bottom: 1rem;
   position: relative;
-  box-shadow: inset 0 0 30px rgba(0,0,0,0.2);
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.2);
 }
+
 .familia-titulo {
   display: flex;
   align-items: center;
@@ -635,11 +779,13 @@ h1#nombre-hero {
   gap: 0.6rem;
   margin-bottom: 0.3rem;
 }
+
 .familia-titulo .corona {
   font-size: 1rem;
   color: #d4af37;
   opacity: 0.7;
 }
+
 .familia-grupo h3 {
   font-family: var(--serif-display);
   text-align: center;
@@ -651,16 +797,19 @@ h1#nombre-hero {
   border-bottom: 1px dashed rgba(212, 175, 55, 0.2);
   padding-bottom: 0.3rem;
 }
+
 .familia-nombres {
   text-align: center;
   margin: 0.6rem 0 0.2rem;
 }
+
 .familia-nombres p {
   margin: 0.15rem 0;
   font-size: 1.05rem;
   color: #f0e0c0;
   font-weight: 500;
 }
+
 .familia-nombres .tratamiento {
   font-size: 0.75rem;
   font-family: var(--serif-display);
@@ -668,6 +817,7 @@ h1#nombre-hero {
   opacity: 0.7;
   margin-right: 0.2rem;
 }
+
 .familia-detalle {
   text-align: center;
   font-family: var(--serif-body);
@@ -680,12 +830,14 @@ h1#nombre-hero {
   padding-top: 0.4rem;
 }
 
-/* ===== JUEGO ===== */
+/* ============================================================
+   JUEGO (breakout)
+   ============================================================ */
 #game-overlay {
   position: fixed;
   inset: 0;
   z-index: 90;
-  background: rgba(6, 4, 10, 0.95) !important;
+  background: rgba(6, 4, 10, 0.95);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -693,7 +845,12 @@ h1#nombre-hero {
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
 }
-#game-overlay.open { opacity: 1; visibility: visible; }
+
+#game-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
 #game-panel {
   display: flex;
   flex-direction: column;
@@ -704,7 +861,12 @@ h1#nombre-hero {
   transition: transform 0.3s ease, opacity 0.3s ease;
   max-width: 96vw;
 }
-#game-overlay.open #game-panel { transform: scale(1); opacity: 1; }
+
+#game-overlay.open #game-panel {
+  transform: scale(1);
+  opacity: 1;
+}
+
 #game-header {
   display: flex;
   align-items: center;
@@ -714,6 +876,7 @@ h1#nombre-hero {
   text-transform: uppercase;
   font-size: 0.65rem;
 }
+
 #game-stage {
   position: relative;
   background: #0e0a18;
@@ -725,9 +888,16 @@ h1#nombre-hero {
   background-size: cover;
   background-position: center;
   opacity: 0.5;
+  contain: layout style paint;
 }
-#game-inner { position: absolute; top: 0; left: 0; }
 
+#game-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* Ladrillos (creados por JS) */
 .brick {
   position: absolute;
   display: flex;
@@ -738,23 +908,40 @@ h1#nombre-hero {
   will-change: transform, opacity;
   color: #fff;
   font-weight: bold;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
-.brick.gone { opacity: 0; transform: scale(0.3); pointer-events: none; }
+
+.brick.gone {
+  opacity: 0;
+  transform: scale(0.3);
+  pointer-events: none;
+}
+
+/* Paleta y pelota - se mueven con transform */
+#paddle,
+#ball {
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+  transform-origin: 0 0;
+}
 
 #paddle {
-  position: absolute;
   height: 8px;
   border-radius: 4px;
   background: linear-gradient(180deg, var(--gold-light), var(--gold));
+  top: 406px; /* STAGE_H - 14 = 406, ajusta si cambias STAGE_H */
 }
+
 #ball {
-  position: absolute;
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #fff, #d68a96 60%, #a13545);
 }
+
+/* Mensaje de fin de juego */
 #game-msg {
   position: absolute;
   inset: 0;
@@ -767,13 +954,18 @@ h1#nombre-hero {
   text-align: center;
   padding: 1rem;
 }
-#game-msg.show { display: flex; }
+
+#game-msg.show {
+  display: flex;
+}
+
 #game-msg p {
   font-family: var(--serif-display);
   color: var(--gold-light);
   font-size: 0.9rem;
   white-space: pre-line;
 }
+
 .game-btn {
   font-family: var(--serif-display);
   font-size: 0.65rem;
@@ -786,6 +978,7 @@ h1#nombre-hero {
   border-radius: 22px;
   cursor: pointer;
 }
+
 #game-close {
   background: none;
   border: 1px solid var(--glass-border);
@@ -796,7 +989,11 @@ h1#nombre-hero {
   cursor: pointer;
   font-size: 1rem;
 }
-#lives { letter-spacing: 0.15em; }
+
+#lives {
+  letter-spacing: 0.15em;
+}
+
 .game-help {
   font-size: 0.85rem;
   opacity: 0.7;
@@ -806,56 +1003,120 @@ h1#nombre-hero {
   text-shadow: 0 0 10px rgba(201, 162, 77, 0.2);
 }
 
+/* ============================================================
+   ANIMACIONES
+   ============================================================ */
 @keyframes floaty {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
-/* ===== CIERRE DE REJAS ===== */
-#portal.closing .gate-left {
-  animation: closeLeft 0.6s ease forwards;
-}
-#portal.closing .gate-right {
-  animation: closeRight 0.6s ease forwards;
-}
-@keyframes closeLeft {
-  0% { transform: rotateY(-110deg) translateX(-20px); opacity: 0.2; }
-  100% { transform: rotateY(0deg) translateX(0); opacity: 1; }
-}
-@keyframes closeRight {
-  0% { transform: rotateY(110deg) translateX(20px); opacity: 0.2; }
-  100% { transform: rotateY(0deg) translateX(0); opacity: 1; }
-}
-
-/* ===== RESPONSIVE ===== */
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
 @media (max-width: 768px) {
-  .gate-wrapper { max-width: 300px; height: 50vh; }
-  .portal-inner .eyebrow { font-size: 0.7rem; }
-  .portal-caption { font-size: 0.7rem; }
-  .modal-card { padding: 1.2rem 0.8rem; }
-  .modal-card h2 { font-size: 0.9rem; }
-  .modal-subtitle { font-size: 1rem; }
-  .calendar-style .num { font-size: 1.5rem !important; }
-  .calendar-style .unit { padding: 0.4rem 0.1rem; min-width: 40px; }
-  .detalle-card { padding: 0.8rem; }
-  .familia-nombres p { font-size: 0.95rem; }
-  #oval-wrap { width: 120px; height: 165px; margin-top: -30px; }
-  h1#nombre-hero { font-size: clamp(2.8rem, 10dvh, 4rem); }
+  .gate-wrapper {
+    max-width: 300px;
+    height: 50vh;
+  }
+  .portal-inner .eyebrow {
+    font-size: 0.7rem;
+  }
+  .portal-caption {
+    font-size: 0.7rem;
+  }
+
+  .modal-card {
+    padding: 1.2rem 0.8rem;
+  }
+  .modal-card h2 {
+    font-size: 0.9rem;
+  }
+  .modal-subtitle {
+    font-size: 1rem;
+  }
+
+  .calendar-style .num {
+    font-size: 1.5rem !important;
+  }
+  .calendar-style .unit {
+    padding: 0.4rem 0.1rem;
+    min-width: 40px;
+  }
+
+  .detalle-card {
+    padding: 0.8rem;
+  }
+  .familia-nombres p {
+    font-size: 0.95rem;
+  }
+
+  #oval-wrap {
+    width: 120px;
+    height: 165px;
+    margin-top: -30px;
+  }
+  h1#nombre-hero {
+    font-size: clamp(2.8rem, 10dvh, 4rem);
+  }
 }
+
 @media (max-width: 480px) {
-  .gate-wrapper { max-width: 200px; height: 40vh; }
-  .portal-inner .eyebrow { font-size: 0.6rem; }
-  .portal-caption { font-size: 0.6rem; }
-  #oval-wrap { width: 100px; height: 140px; margin-top: -20px; }
-  h1#nombre-hero { font-size: clamp(2.4rem, 8dvh, 3.2rem); }
-  .clock .num { font-size: 1rem; }
-  #app-top .eyebrow { font-size: 0.55rem; }
-  .top-btn { font-size: 1rem; }
-  .game-help { font-size: 0.7rem; }
-  .hint { font-size: 0.85rem; }
-  .frase-inline { font-size: 0.8rem; }
-  .fecha-fija { font-size: 0.85rem; }
-  .calendar-style .num { font-size: 1.2rem !important; }
+  .gate-wrapper {
+    max-width: 200px;
+    height: 40vh;
+  }
+  .portal-inner .eyebrow {
+    font-size: 0.6rem;
+  }
+  .portal-caption {
+    font-size: 0.6rem;
+  }
+
+  #oval-wrap {
+    width: 100px;
+    height: 140px;
+    margin-top: -20px;
+  }
+  h1#nombre-hero {
+    font-size: clamp(2.4rem, 8dvh, 3.2rem);
+  }
+
+  #app-top .eyebrow {
+    font-size: 0.55rem;
+  }
+  .top-btn {
+    font-size: 1rem;
+  }
+
+  .game-help {
+    font-size: 0.7rem;
+  }
+  .hint {
+    font-size: 0.85rem;
+  }
+  .frase-inline {
+    font-size: 0.8rem;
+  }
+  .fecha-fija {
+    font-size: 0.85rem;
+  }
+
+  .calendar-style .num {
+    font-size: 1.2rem !important;
+  }
 }
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 3px; }
+
+/* ---------- Scrollbar personalizada ---------- */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: 3px;
+}
