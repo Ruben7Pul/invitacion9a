@@ -1,4 +1,4 @@
-console.log('📦 juego.js (con delta time y transform)');
+console.log('📦 juego.js (con lanzamiento controlado)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
@@ -13,7 +13,7 @@ const BALL_SPEED = 300;        // píxeles por segundo
 const PADDLE_SPEED = 300;      // píxeles por segundo
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego (delta time, transform)');
+  console.log('🎮 Iniciando juego (lanzamiento controlado)');
 
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => { soundTap(); openGame(); });
@@ -36,6 +36,7 @@ export function initJuego(config) {
   let ball = { x: STAGE_W / 2, y: STAGE_H - 38, vx: 0, vy: 0 };
   let lives = 3;
   let running = false;
+  let launched = false; // controla si la pelota ya fue lanzada
   let animFrameId = null;
   let countdownInterval = null;
   let startTime = 0;
@@ -47,10 +48,21 @@ export function initJuego(config) {
 
   window.closeGame = closeGame;
 
+  // Función para lanzar la pelota
+  function launchBall() {
+    if (launched) return;
+    const dir = Math.random() < 0.5 ? -1 : 1;
+    const angle = (Math.random() - 0.5) * 0.8;
+    ball.vx = Math.sin(angle) * BALL_SPEED * dir;
+    ball.vy = -Math.cos(angle) * BALL_SPEED;
+    launched = true;
+  }
+
   function resetGameState() {
     if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
     if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
     running = false;
+    launched = false;
     bricks = [];
     paddle.x = (STAGE_W - PADDLE_W) / 2;
     ball.x = STAGE_W / 2;
@@ -133,12 +145,12 @@ export function initJuego(config) {
   }
 
   function resetBall() {
-    ball.x = STAGE_W / 2;
-    ball.y = STAGE_H - 38;
-    const dir = Math.random() < 0.5 ? -1 : 1;
-    const angle = (Math.random() - 0.5) * 0.8;
-    ball.vx = Math.sin(angle) * BALL_SPEED * dir;
-    ball.vy = -Math.cos(angle) * BALL_SPEED;
+    // Coloca la pelota sobre la paleta y la detiene
+    ball.x = paddle.x + PADDLE_W / 2;
+    ball.y = STAGE_H - 14 - BALL_R;
+    ball.vx = 0;
+    ball.vy = 0;
+    launched = false;
   }
 
   function updateLives() {
@@ -146,6 +158,7 @@ export function initJuego(config) {
   }
 
   function draw() {
+    paddleEl.style.width = PADDLE_W + 'px';
     paddleEl.style.transform = 'translateX(' + paddle.x + 'px)';
     ballEl.style.transform = 'translate(' + ball.x + 'px, ' + ball.y + 'px)';
   }
@@ -158,23 +171,38 @@ export function initJuego(config) {
     const delta = lastTime ? Math.min((timestamp - lastTime) / 1000, 0.05) : 0.016;
     lastTime = timestamp;
 
-    // Paleta con delta time
-    if (keys.left) paddle.x = Math.max(0, paddle.x - PADDLE_SPEED * delta);
-    if (keys.right) paddle.x = Math.min(STAGE_W - PADDLE_W, paddle.x + PADDLE_SPEED * delta);
+    // Movimiento de la paleta
+    let paddleMoved = false;
+    if (keys.left) { paddle.x = Math.max(0, paddle.x - PADDLE_SPEED * delta); paddleMoved = true; }
+    if (keys.right) { paddle.x = Math.min(STAGE_W - PADDLE_W, paddle.x + PADDLE_SPEED * delta); paddleMoved = true; }
     if (touchActive) {
       paddle.x = Math.max(0, Math.min(STAGE_W - PADDLE_W, touchX));
+      paddleMoved = true;
     }
 
-    // Pelota
+    // Si la pelota no está lanzada, sigue a la paleta
+    if (!launched) {
+      ball.x = paddle.x + PADDLE_W / 2;
+      ball.y = STAGE_H - 14 - BALL_R;
+      // Si el jugador movió la paleta, lanzamos la pelota
+      if (paddleMoved) {
+        launchBall();
+      }
+      draw();
+      animFrameId = requestAnimationFrame(gameLoop);
+      return;
+    }
+
+    // --- Pelota en movimiento ---
     ball.x += ball.vx * delta;
     ball.y += ball.vy * delta;
 
-    // Rebotes paredes
+    // Rebotes en paredes
     if (ball.x - BALL_R < 0) { ball.x = BALL_R; ball.vx = Math.abs(ball.vx); }
     if (ball.x + BALL_R > STAGE_W) { ball.x = STAGE_W - BALL_R; ball.vx = -Math.abs(ball.vx); }
     if (ball.y - BALL_R < 0) { ball.y = BALL_R; ball.vy = Math.abs(ball.vy); }
 
-    // Rebote paleta
+    // Rebote en paleta
     const py = STAGE_H - 14;
     if (ball.vy > 0 && ball.y + BALL_R >= py && ball.y + BALL_R <= py + 10 &&
         ball.x >= paddle.x - BALL_R && ball.x <= paddle.x + PADDLE_W + BALL_R) {
@@ -186,7 +214,7 @@ export function initJuego(config) {
       ball.vy = -Math.cos(angle) * BALL_SPEED;
     }
 
-    // Colisión ladrillos
+    // Colisión con ladrillos
     for (const b of bricks) {
       if (!b.alive) continue;
       if (ball.x + BALL_R > b.x && ball.x - BALL_R < b.x + b.w &&
@@ -210,7 +238,10 @@ export function initJuego(config) {
       updateLives();
       soundLose();
       if (lives <= 0) { endGame(false); return; }
-      resetBall();
+      resetBall();       // pelota vuelve a la paleta
+      draw();
+      animFrameId = requestAnimationFrame(gameLoop);
+      return;
     }
 
     // Victoria
@@ -257,7 +288,7 @@ export function initJuego(config) {
     lives = 3;
     updateLives();
     buildBricks();
-    resetBall();
+    resetBall();          // pelota sobre la paleta, esperando lanzamiento
     paddle.x = (STAGE_W - PADDLE_W) / 2;
     msgEl.classList.remove('show');
     running = true;
@@ -305,6 +336,13 @@ export function initJuego(config) {
   restartBtn.addEventListener('click', () => { soundTap(); startGame(); });
   overlay.addEventListener('click', e => { if (e.target === overlay) closeGame(); });
 
+  // También se puede lanzar la pelota haciendo clic en el área de juego
+  stage.addEventListener('click', (e) => {
+    if (running && !launched) {
+      launchBall();
+    }
+  });
+
   document.addEventListener('keydown', (e) => {
     if (!running) return;
     if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
@@ -333,6 +371,10 @@ export function initJuego(config) {
       const localX = (touch.clientX - rect.left) / scale;
       touchX = Math.min(Math.max(localX - PADDLE_W / 2, 0), STAGE_W - PADDLE_W);
       touchActive = true;
+      // Si la pelota no está lanzada y se toca la pantalla, se lanza
+      if (!launched) {
+        launchBall();
+      }
     }
   }, { passive: true });
   stage.addEventListener('touchmove', (e) => {
@@ -352,5 +394,5 @@ export function initJuego(config) {
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
   resetGameState();
-  console.log('✅ Juego listo (velocidad estable con delta time y transform)');
+  console.log('✅ Juego listo (lanzamiento controlado y paleta visible)');
 }
