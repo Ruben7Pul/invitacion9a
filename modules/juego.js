@@ -1,4 +1,4 @@
-console.log('📦 juego.js (60 FPS lógicos con requestAnimationFrame y delta time)');
+console.log('📦 juego.js (con delta time y transform)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
@@ -9,11 +9,11 @@ const BALL_R = 4;
 const STAGE_W = 300;
 const STAGE_H = 420;
 const TOP_OFFSET = 30;
-// Velocidad en píxeles por segundo (300 px/s = 5 px/frame a 60 fps)
-const BALL_SPEED = 300;
+const BALL_SPEED = 300;        // píxeles por segundo
+const PADDLE_SPEED = 300;      // píxeles por segundo
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego (delta time, velocidad estable)');
+  console.log('🎮 Iniciando juego (delta time, transform)');
 
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => { soundTap(); openGame(); });
@@ -146,11 +146,8 @@ export function initJuego(config) {
   }
 
   function draw() {
-    paddleEl.style.left = paddle.x + 'px';
-    paddleEl.style.top = (STAGE_H - 14) + 'px';
-    paddleEl.style.width = PADDLE_W + 'px';
-    ballEl.style.left = (ball.x - BALL_R) + 'px';
-    ballEl.style.top = (ball.y - BALL_R) + 'px';
+    paddleEl.style.transform = 'translateX(' + paddle.x + 'px)';
+    ballEl.style.transform = 'translate(' + ball.x + 'px, ' + ball.y + 'px)';
   }
 
   let lastTime = 0;
@@ -158,27 +155,26 @@ export function initJuego(config) {
   function gameLoop(timestamp) {
     if (!running) return;
 
-    // Delta time en segundos
     const delta = lastTime ? Math.min((timestamp - lastTime) / 1000, 0.05) : 0.016;
     lastTime = timestamp;
 
-    // Movimiento de la paleta (independiente del delta, velocidad fija)
-    if (keys.left) paddle.x = Math.max(0, paddle.x - 7);
-    if (keys.right) paddle.x = Math.min(STAGE_W - PADDLE_W, paddle.x + 7);
+    // Paleta con delta time
+    if (keys.left) paddle.x = Math.max(0, paddle.x - PADDLE_SPEED * delta);
+    if (keys.right) paddle.x = Math.min(STAGE_W - PADDLE_W, paddle.x + PADDLE_SPEED * delta);
     if (touchActive) {
       paddle.x = Math.max(0, Math.min(STAGE_W - PADDLE_W, touchX));
     }
 
-    // Movimiento de la pelota con delta time
+    // Pelota
     ball.x += ball.vx * delta;
     ball.y += ball.vy * delta;
 
-    // Rebotes en paredes
+    // Rebotes paredes
     if (ball.x - BALL_R < 0) { ball.x = BALL_R; ball.vx = Math.abs(ball.vx); }
     if (ball.x + BALL_R > STAGE_W) { ball.x = STAGE_W - BALL_R; ball.vx = -Math.abs(ball.vx); }
     if (ball.y - BALL_R < 0) { ball.y = BALL_R; ball.vy = Math.abs(ball.vy); }
 
-    // Rebote en paleta
+    // Rebote paleta
     const py = STAGE_H - 14;
     if (ball.vy > 0 && ball.y + BALL_R >= py && ball.y + BALL_R <= py + 10 &&
         ball.x >= paddle.x - BALL_R && ball.x <= paddle.x + PADDLE_W + BALL_R) {
@@ -190,7 +186,7 @@ export function initJuego(config) {
       ball.vy = -Math.cos(angle) * BALL_SPEED;
     }
 
-    // Colisión con ladrillos
+    // Colisión ladrillos
     for (const b of bricks) {
       if (!b.alive) continue;
       if (ball.x + BALL_R > b.x && ball.x - BALL_R < b.x + b.w &&
@@ -356,5 +352,5 @@ export function initJuego(config) {
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
   resetGameState();
-  console.log('✅ Juego listo (velocidad estable con delta time)');
+  console.log('✅ Juego listo (velocidad estable con delta time y transform)');
 }
