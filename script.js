@@ -1,7 +1,5 @@
 console.log('🚀 script.js');
 
-let CONFIG = {};
-
 async function cargarConfig() {
   try {
     const res = await fetch(`config.json?t=${Date.now()}`);
@@ -74,7 +72,6 @@ function rellenarDatos(config) {
 
 document.addEventListener('DOMContentLoaded', async () => {
   const config = await cargarConfig();
-  window.CONFIG = config;
   rellenarDatos(config);
 
   try {
