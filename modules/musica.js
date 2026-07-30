@@ -1,7 +1,21 @@
-console.log('📦 música');
+console.log('📦 música con icono dinámico');
 
 let audio = null;
 let config = null;
+const muteBtn = document.getElementById('music-toggle');
+
+// Iconos SVG
+const iconSound = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+  <path d="M4 9 L4 15 L8 15 L13 20 L13 4 L8 9 Z"/>
+  <path d="M16.5 8.5 a6 6 0 0 1 0 7"/>
+  <path d="M19 6 a10 10 0 0 1 0 12"/>
+</svg>`;
+const iconMute = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+  <path d="M4 9 L4 15 L8 15 L13 20 L13 4 L8 9 Z"/>
+  <line x1="17" y1="7" x2="22" y2="12"/>
+  <line x1="22" y1="7" x2="17" y2="12"/>
+  <line x1="2" y1="2" x2="22" y2="22" stroke="currentColor" stroke-width="1.2"/>
+</svg>`;
 
 export function initMusica(cfg) {
   config = cfg;
@@ -10,12 +24,17 @@ export function initMusica(cfg) {
   audio.volume = 0.8;
   audio.addEventListener('error', (e) => {
     console.warn('⚠️ Error al cargar el audio:', e);
-    const toggle = document.getElementById('music-toggle');
-    if (toggle) toggle.style.opacity = '0.3';
+    if (muteBtn) {
+      muteBtn.style.opacity = '0.3';
+      muteBtn.title = 'Error al cargar la música';
+    }
   });
   audio.load();
-  const toggle = document.getElementById('music-toggle');
-  if (toggle) toggle.style.opacity = '1';
+  if (muteBtn) {
+    muteBtn.style.opacity = '1';
+    muteBtn.innerHTML = iconSound;
+    muteBtn.title = 'Silenciar música';
+  }
   console.log('🎵 Audio cargado:', config.audioFile);
 }
 
@@ -23,14 +42,22 @@ export function playMusic() {
   if (!audio) return;
   if (!audio.paused) return;
   audio.play().catch(() => {});
-  document.getElementById('music-toggle').style.opacity = '1';
+  if (muteBtn) {
+    muteBtn.style.opacity = '1';
+    muteBtn.innerHTML = iconSound;
+    muteBtn.title = 'Silenciar música';
+  }
 }
 
 export function resetMusic() {
   if (!audio) return;
   audio.pause();
   audio.currentTime = 0;
-  document.getElementById('music-toggle').style.opacity = '1';
+  if (muteBtn) {
+    muteBtn.style.opacity = '1';
+    muteBtn.innerHTML = iconSound;
+    muteBtn.title = 'Silenciar música';
+  }
   console.log('⏹️ Música reiniciada y pausada');
 }
 
@@ -38,9 +65,17 @@ export function toggleMusic() {
   if (!audio) return;
   if (audio.paused) {
     audio.play().catch(() => {});
-    document.getElementById('music-toggle').style.opacity = '1';
+    if (muteBtn) {
+      muteBtn.style.opacity = '1';
+      muteBtn.innerHTML = iconSound;
+      muteBtn.title = 'Silenciar música';
+    }
   } else {
     audio.pause();
-    document.getElementById('music-toggle').style.opacity = '0.5';
+    if (muteBtn) {
+      muteBtn.style.opacity = '0.5';
+      muteBtn.innerHTML = iconMute;
+      muteBtn.title = 'Activar música';
+    }
   }
 }
