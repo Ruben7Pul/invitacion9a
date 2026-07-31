@@ -1,4 +1,4 @@
-console.log('📦 juego.js (colisión corregida, arcilla roja)');
+console.log('📦 juego.js (sin tiempo, mouse, fracturas, 18 puntos)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
@@ -10,19 +10,26 @@ const STAGE_H = 420;
 const TOP_OFFSET = 30;
 const BALL_SPEED = 300;
 const PADDLE_SPEED = 300;
-const TARGET_GAME_POINTS = 12;
+const TARGET_GAME_POINTS = 18;  // Ahora 18 puntos de área
 const REGEN_THRESHOLD = 9;
 const BALL_LOW_Y = STAGE_H - 60;
 
 // Definición de tipos de ladrillos con colores
 const BRICK_TYPES = {
-  CLAY:   { value: 1, playerPoints: 100, hits: 1, color: '#d9534f', label: 'arcilla' },  // rojo
-  WOOD:   { value: 2, playerPoints: 200, hits: 2, color: '#8b5a2b', label: 'madera' },   // café
-  IRON:   { value: 3, playerPoints: 300, hits: 3, color: '#a0a0a0', label: 'hierro' }    // gris
+  CLAY:   { value: 1, playerPoints: 100, hits: 1, color: '#d9534f', label: 'arcilla' },
+  WOOD:   { value: 2, playerPoints: 200, hits: 2, color: '#8b5a2b', label: 'madera' },
+  IRON:   { value: 3, playerPoints: 300, hits: 3, color: '#a0a0a0', label: 'hierro' }
+};
+
+// Símbolos de fractura según los golpes restantes
+const FRACTURE_SYMBOLS = {
+  1: '|',
+  2: '||',
+  3: '|||'
 };
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego con colisión corregida');
+  console.log('🎮 Iniciando juego (sin tiempo, mouse, 18 puntos)');
 
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => { soundTap(); openGame(); });
@@ -36,8 +43,11 @@ export function initJuego(config) {
   const msgText = document.getElementById('game-msg-text');
   const livesEl = document.getElementById('lives');
   const scoreEl = document.getElementById('game-score');
-  const timeEl = document.getElementById('game-time');
   const restartBtn = document.getElementById('game-restart');
+
+  // Eliminar el elemento de tiempo del DOM
+  const timeEl = document.getElementById('game-time');
+  if (timeEl) timeEl.style.display = 'none';
 
   restartBtn.style.display = 'none';
 
@@ -50,11 +60,13 @@ export function initJuego(config) {
   let launched = false;
   let animFrameId = null;
   let countdownInterval = null;
-  let startTime = 0;
-  let elapsedTime = 0;
   let playerScore = 0;
   let gamePoints = 0;
   let pendingRegeneration = false;
+
+  // Control con mouse
+  let mouseActive = false;
+  let mouseX = 0;
 
   const keys = { left: false, right: false };
   let touchActive = false;
@@ -64,6 +76,7 @@ export function initJuego(config) {
 
   // --- Funciones de ladrillos ---
 
+  // Genera valores que suman exactamente TARGET_GAME_POINTS (18)
   function generateBrickValues() {
     const total = TARGET_GAME_POINTS;
     const values = [];
@@ -151,7 +164,8 @@ export function initJuego(config) {
       el.style.display = 'flex';
       el.style.alignItems = 'center';
       el.style.justifyContent = 'center';
-      el.textContent = type.hits;
+      // Mostrar fracturas en lugar de números
+      el.textContent = FRACTURE_SYMBOLS[type.hits] || '|';
 
       inner.appendChild(el);
 
@@ -224,8 +238,6 @@ export function initJuego(config) {
     ball.vx = 0;
     ball.vy = 0;
     lives = 3;
-    startTime = 0;
-    elapsedTime = 0;
     playerScore = 0;
     gamePoints = 0;
     pendingRegeneration = false;
@@ -233,6 +245,8 @@ export function initJuego(config) {
     keys.right = false;
     touchActive = false;
     touchX = 0;
+    mouseActive = false;
+    mouseX = 0;
     inner.querySelectorAll('.brick').forEach(b => b.remove());
     msgEl.classList.remove('show');
     restartBtn.style.display = 'none';
@@ -243,7 +257,7 @@ export function initJuego(config) {
   function updateUI() {
     livesEl.textContent = '♥ '.repeat(Math.max(lives, 0)).trim() || '—';
     scoreEl.textContent = `Puntos: ${playerScore}`;
-    timeEl.textContent = `Tiempo: ${elapsedTime.toFixed(1)}s`;
+    // El tiempo ya no se muestra
   }
 
   function draw() {
@@ -260,18 +274,25 @@ export function initJuego(config) {
     const delta = lastTime ? Math.min((timestamp - lastTime) / 1000, 0.05) : 0.016;
     lastTime = timestamp;
 
-    elapsedTime += delta;
     updateUI();
 
     let paddleMoved = false;
+    // Teclado
     if (keys.left) { paddle.x = Math.max(0, paddle.x - PADDLE_SPEED * delta); paddleMoved = true; }
     if (keys.right) { paddle.x = Math.min(STAGE_W - PADDLE_W, paddle.x + PADDLE_SPEED * delta); paddleMoved = true; }
+    // Touch
     if (touchActive) {
       paddle.x = Math.max(0, Math.min(STAGE_W - PADDLE_W, touchX));
       paddleMoved = true;
     }
+    // Mouse (arrastre)
+    if (mouseActive) {
+      paddle.x = Math.max(0, Math.min(STAGE_W - PADDLE_W, mouseX));
+      paddleMoved = true;
+    }
 
     if (!launched) {
+      // Pelota pegada a la paleta
       ball.x = paddle.x + PADDLE_W / 2;
       ball.y = STAGE_H - 14 - BALL_R;
       if (paddleMoved) {
@@ -307,15 +328,12 @@ export function initJuego(config) {
     let hitBrick = false;
     for (const b of bricks) {
       if (!b.alive) continue;
-      // Colisión entre pelota y ladrillo (detección AABB)
       if (ball.x + BALL_R > b.x && ball.x - BALL_R < b.x + b.w &&
           ball.y + BALL_R > b.y && ball.y - BALL_R < b.y + b.h) {
 
-        // Reposicionar la pelota para que quede justo fuera del ladrillo
-        // Calcular la penetración en cada eje
+        // Reposicionar la pelota
         const overlapX = Math.min(ball.x + BALL_R - b.x, b.x + b.w - (ball.x - BALL_R));
         const overlapY = Math.min(ball.y + BALL_R - b.y, b.y + b.h - (ball.y - BALL_R));
-        // Empujar la pelota fuera del ladrillo en el eje de menor penetración
         if (overlapX < overlapY) {
           if (ball.x < b.x + b.w / 2) {
             ball.x = b.x - BALL_R;
@@ -332,7 +350,7 @@ export function initJuego(config) {
           ball.vy = -ball.vy;
         }
 
-        // Reducir hits del ladrillo
+        // Reducir hits
         b.hits--;
         soundBrick();
         if (b.hits <= 0) {
@@ -345,10 +363,11 @@ export function initJuego(config) {
             requestRegeneration();
           }
         } else {
-          b.el.textContent = b.hits;
+          // Actualizar fractura
+          b.el.textContent = FRACTURE_SYMBOLS[b.hits] || '|';
         }
         hitBrick = true;
-        break; // Salir del bucle para procesar solo un ladrillo por frame
+        break;
       }
     }
 
@@ -365,6 +384,7 @@ export function initJuego(config) {
         endGame();
         return;
       }
+      // Reiniciar pelota pegada a la paleta
       launched = false;
       ball.x = paddle.x + PADDLE_W / 2;
       ball.y = STAGE_H - 14 - BALL_R;
@@ -381,16 +401,13 @@ export function initJuego(config) {
     running = false;
     if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
     restartBtn.style.display = 'inline-block';
-    msgText.textContent = `Game Over\nPuntaje final: ${playerScore}\nTiempo: ${elapsedTime.toFixed(1)}s`;
+    msgText.textContent = `Game Over\nPuntaje final: ${playerScore}`;
     msgEl.classList.add('show');
     soundLose();
   }
 
   function startGame() {
     resetGameState();
-    startTime = performance.now();
-    elapsedTime = 0;
-    lives = 3;
     playerScore = 0;
     gamePoints = 0;
 
@@ -462,15 +479,45 @@ export function initJuego(config) {
   }
 
   document.getElementById('game-close').addEventListener('click', closeGame);
-  restartBtn.addEventListener('click', () => { soundTap(); startGame(); });
+  restartBtn.addEventListener('click', () => { 
+    soundTap(); 
+    // Al reiniciar, la pelota debe empezar pegada a la paleta
+    startGame(); // startGame ya coloca la pelota sin lanzar
+  });
   overlay.addEventListener('click', e => { if (e.target === overlay) closeGame(); });
 
+  // --- Eventos de mouse para mover la paleta ---
+  stage.addEventListener('mousedown', (e) => {
+    if (!running) return;
+    const rect = stage.getBoundingClientRect();
+    const localX = (e.clientX - rect.left) / scale;
+    mouseX = Math.min(Math.max(localX - PADDLE_W / 2, 0), STAGE_W - PADDLE_W);
+    mouseActive = true;
+    // Si la pelota no está lanzada, se lanza al hacer clic
+    if (!launched) {
+      launchBall();
+    }
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!running || !mouseActive) return;
+    const rect = stage.getBoundingClientRect();
+    const localX = (e.clientX - rect.left) / scale;
+    mouseX = Math.min(Math.max(localX - PADDLE_W / 2, 0), STAGE_W - PADDLE_W);
+  });
+
+  document.addEventListener('mouseup', () => {
+    mouseActive = false;
+  });
+
+  // También se puede hacer clic en el área para lanzar
   stage.addEventListener('click', (e) => {
     if (running && !launched) {
       launchBall();
     }
   });
 
+  // Teclado
   document.addEventListener('keydown', (e) => {
     if (!running) return;
     if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
@@ -491,6 +538,7 @@ export function initJuego(config) {
     }
   });
 
+  // Touch
   stage.addEventListener('touchstart', (e) => {
     if (!running) return;
     const touch = e.touches[0];
@@ -521,5 +569,5 @@ export function initJuego(config) {
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
   resetGameState();
-  console.log('✅ Juego listo (arcilla roja, colisión mejorada)');
+  console.log('✅ Juego listo (sin tiempo, mouse, 18 puntos, fracturas)');
 }
