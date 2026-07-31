@@ -2,7 +2,6 @@
    🌹 INVITACIÓN XV – Estilos principales
    ============================================================ */
 
-/* ---------- Variables globales ---------- */
 :root {
   --bg-deep: #0b0818;
   --bg-panel: rgba(29, 23, 48, 0.75);
@@ -18,15 +17,13 @@
   --script: 'Pinyon Script', cursive;
 }
 
-/* ---------- Reset y base ---------- */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-html,
-body {
+html, body {
   height: 100%;
   overflow: hidden;
 }
@@ -40,7 +37,6 @@ body {
   inset: 0;
 }
 
-/* ---------- Fondo y capa de pétalos ---------- */
 #bg {
   position: fixed;
   inset: 0;
@@ -52,7 +48,6 @@ body {
   background-repeat: no-repeat;
   background-color: var(--bg-deep);
 }
-
 #bg::after {
   content: '';
   position: absolute;
@@ -68,7 +63,6 @@ body {
   overflow: hidden;
   contain: layout style paint;
 }
-
 .petal {
   position: absolute;
   border-radius: 60% 0 60% 0;
@@ -77,29 +71,21 @@ body {
   transform-origin: 0 0;
 }
 
-/* ---------- Utilidades de texto ---------- */
 .gold-text {
   color: var(--gold-light);
   text-shadow: 0 0 8px rgba(201, 162, 77, 0.2);
 }
-
-.frase-inline,
-.fecha-fija,
-.hint,
-.portal-caption {
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+.frase-inline, .fecha-fija, .hint, .portal-caption {
+  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
 }
 
-/* ---------- Enfoque accesible ---------- */
 :focus-visible {
   outline: 2px solid var(--gold-light);
   outline-offset: 2px;
   border-radius: 4px;
 }
 
-/* ============================================================
-   PORTAL / REJA
-   ============================================================ */
+/* PORTAL */
 #portal {
   position: fixed;
   inset: 0;
@@ -110,13 +96,11 @@ body {
   background: radial-gradient(ellipse at 50% 35%, #0d1f4a 0%, #0a122a 75%);
   transition: opacity 0.5s ease, visibility 0.5s ease;
 }
-
 #portal.hide {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
 }
-
 .portal-inner {
   text-align: center;
   padding: 2rem;
@@ -127,7 +111,6 @@ body {
   align-items: center;
   justify-content: center;
 }
-
 .portal-inner .eyebrow {
   display: block;
   margin-bottom: 1.5rem;
@@ -136,8 +119,6 @@ body {
   text-transform: uppercase;
   font-size: 0.9rem;
 }
-
-/* --- Reja --- */
 .gate-wrapper {
   position: relative;
   width: 90vw;
@@ -148,7 +129,6 @@ body {
   perspective: 1000px;
   cursor: pointer;
 }
-
 .gate-leaf {
   position: absolute;
   top: 0;
@@ -157,41 +137,20 @@ body {
   transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
   backface-visibility: hidden;
 }
-
 .gate-leaf svg {
   width: 100%;
   height: 100%;
   display: block;
   filter: drop-shadow(0 0 20px rgba(201, 162, 77, 0.3));
 }
+.gate-left { left: 0; transform-origin: left center; }
+.gate-right { right: 0; transform-origin: right center; }
+.gate-right svg { transform: scaleX(-1); }
 
-.gate-left {
-  left: 0;
-  transform-origin: left center;
-}
-
-.gate-right {
-  right: 0;
-  transform-origin: right center;
-}
-
-.gate-right svg {
-  transform: scaleX(-1);
-}
-
-.gate-wrapper.open .gate-left {
-  animation: closeLeft 0.6s ease reverse forwards;
-}
-.gate-wrapper.open .gate-right {
-  animation: closeRight 0.6s ease reverse forwards;
-}
-
-#portal.closing .gate-left {
-  animation: closeLeft 0.6s ease forwards;
-}
-#portal.closing .gate-right {
-  animation: closeRight 0.6s ease forwards;
-}
+.gate-wrapper.open .gate-left { animation: closeLeft 0.6s ease reverse forwards; }
+.gate-wrapper.open .gate-right { animation: closeRight 0.6s ease reverse forwards; }
+#portal.closing .gate-left { animation: closeLeft 0.6s ease forwards; }
+#portal.closing .gate-right { animation: closeRight 0.6s ease forwards; }
 
 @keyframes closeLeft {
   0% { transform: rotateY(-110deg) translateX(-20px); opacity: 0.2; }
@@ -211,9 +170,7 @@ body {
   color: var(--gold-light);
 }
 
-/* ============================================================
-   APP PRINCIPAL
-   ============================================================ */
+/* APP */
 #app {
   position: fixed;
   inset: 0;
@@ -229,12 +186,10 @@ body {
   pointer-events: none;
   contain: layout style paint;
 }
-
 #app.show {
   opacity: 1;
   pointer-events: auto;
 }
-
 #app-top {
   width: 100%;
   max-width: 560px;
@@ -243,7 +198,6 @@ body {
   align-items: center;
   padding: 0 0.2rem;
 }
-
 #app-top .eyebrow {
   flex: 1;
   text-align: center;
@@ -252,7 +206,6 @@ body {
   text-transform: uppercase;
   font-size: 0.7rem;
 }
-
 .top-btn {
   background: none;
   border: none;
@@ -265,18 +218,9 @@ body {
   justify-content: center;
   transition: opacity 0.3s ease;
 }
-
-.top-btn:hover {
-  opacity: 0.7;
-}
-
-#music-toggle svg {
-  width: 20px;
-  height: 20px;
-}
-#music-toggle {
-  opacity: 1;
-}
+.top-btn:hover { opacity: 0.7; }
+#music-toggle svg { width: 20px; height: 20px; }
+#music-toggle { opacity: 1; }
 
 #app-mid {
   flex: 1;
@@ -290,7 +234,6 @@ body {
   padding: 0.2rem 0;
 }
 
-/* ===== ÓVALO DORADO – ORIGINAL ===== */
 #oval-wrap {
   width: 140px;
   height: 190px;
@@ -299,13 +242,11 @@ body {
   animation: floaty 6s ease-in-out infinite;
   position: relative;
 }
-
 .oval-frame {
   position: relative;
   width: 100%;
   height: 100%;
 }
-
 .oval-mask {
   width: 100%;
   height: 100%;
@@ -317,7 +258,6 @@ body {
   position: relative;
   z-index: 2;
 }
-
 .gif-central {
   width: 100%;
   height: 100%;
@@ -325,13 +265,11 @@ body {
   display: block;
 }
 
-/* Nombre */
 .name-wrap {
   position: relative;
   margin-top: 0.1rem;
   margin-bottom: 0.1rem;
 }
-
 h1#nombre-hero {
   font-family: var(--script);
   font-weight: 400;
@@ -349,7 +287,6 @@ h1#nombre-hero {
   position: relative;
   text-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
 }
-
 @keyframes rainbowMove {
   0% { background-position: 0% 50%; }
   100% { background-position: 300% 50%; }
@@ -372,7 +309,6 @@ h1#nombre-hero {
   font-size: 1rem;
   margin: 0.1rem 0;
 }
-
 .hint {
   font-size: 1rem;
   opacity: 0.9;
@@ -397,7 +333,6 @@ h1#nombre-hero {
   margin-top: 0.3rem;
   box-shadow: 0 0 30px rgba(212, 175, 55, 0.1);
 }
-
 .nav-btn {
   background: none;
   border: none;
@@ -425,9 +360,7 @@ h1#nombre-hero {
   color: #d4af37;
 }
 
-/* ============================================================
-   CONTADOR
-   ============================================================ */
+/* CONTADOR */
 .clock {
   display: flex;
   flex-wrap: nowrap;
@@ -478,9 +411,7 @@ h1#nombre-hero {
   opacity: 0.6;
 }
 
-/* ============================================================
-   MODALES – SIN ESTRELLAS NI RESPLANDOR
-   ============================================================ */
+/* MODALES */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -500,7 +431,6 @@ h1#nombre-hero {
   opacity: 1;
   visibility: visible;
 }
-
 .modal-card {
   width: 100%;
   max-width: 420px;
@@ -522,7 +452,6 @@ h1#nombre-hero {
   transform: scale(1) translateY(0);
   opacity: 1;
 }
-
 .modal-card > * {
   opacity: 0;
   transition: opacity 0.4s ease;
@@ -530,7 +459,6 @@ h1#nombre-hero {
 .modal-overlay.open .modal-card > * {
   opacity: 1;
 }
-
 .modal-overlay.open .modal-card h2 { transition-delay: 0.05s; }
 .modal-overlay.open .modal-card .modal-subtitle { transition-delay: 0.10s; }
 .modal-overlay.open .modal-card .clock,
@@ -777,9 +705,7 @@ h1#nombre-hero {
   padding-top: 0.4rem;
 }
 
-/* ============================================================
-   JUEGO
-   ============================================================ */
+/* JUEGO */
 #game-overlay {
   position: fixed;
   inset: 0;
@@ -796,7 +722,6 @@ h1#nombre-hero {
   opacity: 1;
   visibility: visible;
 }
-
 #game-panel {
   display: flex;
   flex-direction: column;
@@ -843,7 +768,6 @@ h1#nombre-hero {
   opacity: 0.5;
   contain: layout style paint;
 }
-
 #game-inner {
   position: absolute;
   top: 0;
@@ -860,7 +784,7 @@ h1#nombre-hero {
   will-change: transform, opacity;
   color: #fff;
   font-weight: bold;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 .brick.gone {
   opacity: 0;
@@ -868,8 +792,7 @@ h1#nombre-hero {
   pointer-events: none;
 }
 
-#paddle,
-#ball {
+#paddle, #ball {
   position: absolute;
   top: 0;
   left: 0;
@@ -937,7 +860,6 @@ h1#nombre-hero {
   cursor: pointer;
   font-size: 1rem;
 }
-
 #lives {
   letter-spacing: 0.15em;
 }
@@ -951,9 +873,6 @@ h1#nombre-hero {
   text-shadow: 0 0 10px rgba(201, 162, 77, 0.2);
 }
 
-/* ============================================================
-   ANIMACIONES Y RESPONSIVE
-   ============================================================ */
 @keyframes floaty {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
@@ -973,7 +892,6 @@ h1#nombre-hero {
   #oval-wrap { width: 120px; height: 165px; margin-top: -30px; }
   h1#nombre-hero { font-size: clamp(2.8rem, 10dvh, 4rem); }
 }
-
 @media (max-width: 480px) {
   .gate-wrapper { max-width: 200px; height: 40vh; }
   .portal-inner .eyebrow { font-size: 0.6rem; }
@@ -988,6 +906,5 @@ h1#nombre-hero {
   .fecha-fija { font-size: 0.85rem; }
   .calendar-style .num { font-size: 1.2rem !important; }
 }
-
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 3px; }
