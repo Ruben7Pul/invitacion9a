@@ -1,4 +1,4 @@
-console.log('📦 juego.js (nuevo sistema de puntos y ladrillos)');
+console.log('📦 juego.js (colisión corregida, arcilla roja)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
@@ -10,18 +10,19 @@ const STAGE_H = 420;
 const TOP_OFFSET = 30;
 const BALL_SPEED = 300;
 const PADDLE_SPEED = 300;
-const TARGET_GAME_POINTS = 12; // puntos de área a regenerar
-const REGEN_THRESHOLD = 9;     // cuando los puntos de área son ≤ 9 se regenera
+const TARGET_GAME_POINTS = 12;
+const REGEN_THRESHOLD = 9;
+const BALL_LOW_Y = STAGE_H - 60;
 
-// Definición de tipos de ladrillos
+// Definición de tipos de ladrillos con colores
 const BRICK_TYPES = {
-  CLAY:   { value: 1, playerPoints: 100, hits: 1, color: '#b5651d', label: 'arcilla' },
-  WOOD:   { value: 2, playerPoints: 200, hits: 2, color: '#8b5a2b', label: 'madera' },
-  IRON:   { value: 3, playerPoints: 300, hits: 3, color: '#a0a0a0', label: 'hierro' }
+  CLAY:   { value: 1, playerPoints: 100, hits: 1, color: '#d9534f', label: 'arcilla' },  // rojo
+  WOOD:   { value: 2, playerPoints: 200, hits: 2, color: '#8b5a2b', label: 'madera' },   // café
+  IRON:   { value: 3, playerPoints: 300, hits: 3, color: '#a0a0a0', label: 'hierro' }    // gris
 };
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego con nuevo sistema de puntos');
+  console.log('🎮 Iniciando juego con colisión corregida');
 
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => { soundTap(); openGame(); });
@@ -52,7 +53,8 @@ export function initJuego(config) {
   let startTime = 0;
   let elapsedTime = 0;
   let playerScore = 0;
-  let gamePoints = 0; // suma de los puntos de área de todos los ladrillos vivos
+  let gamePoints = 0;
+  let pendingRegeneration = false;
 
   const keys = { left: false, right: false };
   let touchActive = false;
@@ -62,30 +64,30 @@ export function initJuego(config) {
 
   // --- Funciones de ladrillos ---
 
-  // Genera una lista de valores (1,2,3) que sumen exactamente 12
   function generateBrickValues() {
-    let remaining = TARGET_GAME_POINTS;
+    const total = TARGET_GAME_POINTS;
     const values = [];
+    let remaining = total;
     while (remaining > 0) {
       let max = Math.min(3, remaining);
       let val = Math.floor(Math.random() * max) + 1;
-      // Evitar que quede un remanente que no se pueda completar (1 o 2)
-      // Si remaining - val es 1 o 2 y no se puede completar, ajustar.
-      if (remaining - val === 1 && remaining > 1) {
-        // Si queda 1 y podemos cambiar a 2 (si val era 1), o a 3 (si val era 2)
-        if (val === 1 && remaining >= 2) {
-          val = 2;
-        } else if (val === 2 && remaining >= 3) {
-          val = 3;
-        }
+      const rest = remaining - val;
+      if (rest === 1 && remaining > 2) {
+        if (remaining >= 3) val = 2;
+        else val = 2;
+      } else if (rest === 2 && remaining > 3) {
+        if (remaining >= 4) val = 3;
       }
       values.push(val);
       remaining -= val;
     }
+    const sum = values.reduce((a, b) => a + b, 0);
+    if (sum !== total) {
+      return generateBrickValues();
+    }
     return values;
   }
 
-  // Obtiene celdas libres en la cuadrícula (6x6)
   function getFreeCells() {
     const cols = 6;
     const rows = 6;
@@ -105,7 +107,6 @@ export function initJuego(config) {
     return free;
   }
 
-  // Coloca nuevos ladrillos con los valores dados en celdas libres
   function placeBricks(values) {
     const cols = 6;
     const brickW = 38;
@@ -117,13 +118,15 @@ export function initJuego(config) {
 
     const freeCells = getFreeCells();
     if (freeCells.length === 0) {
-      console.warn('⚠️ No hay celdas libres para colocar ladrillos');
+      console.warn('⚠️ No hay celdas libres');
       return;
     }
 
-    // Mezclar celdas libres
     const shuffled = freeCells.sort(() => Math.random() - 0.5);
     const toPlace = Math.min(values.length, shuffled.length);
+    if (toPlace < values.length) {
+      console.warn(`⚠️ Solo ${toPlace} celdas libres para ${values.length} ladrillos`);
+    }
     for (let i = 0; i < toPlace; i++) {
       const cell = shuffled[i];
       const row = Math.floor(cell / cols);
@@ -148,7 +151,7 @@ export function initJuego(config) {
       el.style.display = 'flex';
       el.style.alignItems = 'center';
       el.style.justifyContent = 'center';
-      el.textContent = type.hits; // mostrar toques restantes
+      el.textContent = type.hits;
 
       inner.appendChild(el);
 
@@ -169,20 +172,36 @@ export function initJuego(config) {
     console.log('🔄 Nuevos ladrillos colocados, puntos de área:', gamePoints);
   }
 
-  // Función para regenerar ladrillos cuando los puntos de área son ≤ REGEN_THRESHOLD
-  function regenerateBricks() {
-    if (!running) return;
-    // Solo regenerar si hay al menos una celda libre
+  function requestRegeneration() {
+    if (pendingRegeneration) return;
     const free = getFreeCells();
     if (free.length === 0) {
       console.warn('⚠️ No hay celdas libres para regenerar');
       return;
     }
-    const values = generateBrickValues();
-    placeBricks(values);
+    pendingRegeneration = true;
+    console.log('⏳ Regeneración pendiente');
   }
 
-  // --- Fin funciones de ladrillos ---
+  function checkAndRegenerate() {
+    if (!pendingRegeneration) return;
+    if (!running) return;
+    if (launched && ball.y < BALL_LOW_Y) {
+      return;
+    }
+    const free = getFreeCells();
+    if (free.length === 0) {
+      console.warn('⚠️ Sin celdas libres, cancelando');
+      pendingRegeneration = false;
+      return;
+    }
+    const values = generateBrickValues();
+    placeBricks(values);
+    pendingRegeneration = false;
+    console.log('✅ Regeneración completada');
+  }
+
+  // --- Funciones del juego ---
 
   function launchBall() {
     if (launched) return;
@@ -209,6 +228,7 @@ export function initJuego(config) {
     elapsedTime = 0;
     playerScore = 0;
     gamePoints = 0;
+    pendingRegeneration = false;
     keys.left = false;
     keys.right = false;
     touchActive = false;
@@ -262,7 +282,7 @@ export function initJuego(config) {
       return;
     }
 
-    // Movimiento de la pelota
+    // Mover pelota
     ball.x += ball.vx * delta;
     ball.y += ball.vy * delta;
 
@@ -283,38 +303,58 @@ export function initJuego(config) {
       ball.vy = -Math.cos(angle) * BALL_SPEED;
     }
 
-    // Colisión con ladrillos
+    // Colisión con ladrillos (máximo 1 por frame)
+    let hitBrick = false;
     for (const b of bricks) {
       if (!b.alive) continue;
+      // Colisión entre pelota y ladrillo (detección AABB)
       if (ball.x + BALL_R > b.x && ball.x - BALL_R < b.x + b.w &&
           ball.y + BALL_R > b.y && ball.y - BALL_R < b.y + b.h) {
-        // Reducir hits
+
+        // Reposicionar la pelota para que quede justo fuera del ladrillo
+        // Calcular la penetración en cada eje
+        const overlapX = Math.min(ball.x + BALL_R - b.x, b.x + b.w - (ball.x - BALL_R));
+        const overlapY = Math.min(ball.y + BALL_R - b.y, b.y + b.h - (ball.y - BALL_R));
+        // Empujar la pelota fuera del ladrillo en el eje de menor penetración
+        if (overlapX < overlapY) {
+          if (ball.x < b.x + b.w / 2) {
+            ball.x = b.x - BALL_R;
+          } else {
+            ball.x = b.x + b.w + BALL_R;
+          }
+          ball.vx = -ball.vx;
+        } else {
+          if (ball.y < b.y + b.h / 2) {
+            ball.y = b.y - BALL_R;
+          } else {
+            ball.y = b.y + b.h + BALL_R;
+          }
+          ball.vy = -ball.vy;
+        }
+
+        // Reducir hits del ladrillo
         b.hits--;
         soundBrick();
         if (b.hits <= 0) {
-          // Destruir ladrillo
           b.alive = false;
           b.el.classList.add('gone');
           playerScore += b.playerPoints;
           gamePoints -= b.value;
           updateUI();
-          // Verificar si hay que regenerar
           if (gamePoints <= REGEN_THRESHOLD) {
-            regenerateBricks();
+            requestRegeneration();
           }
         } else {
-          // Actualizar texto del ladrillo con los toques restantes
           b.el.textContent = b.hits;
         }
-        // Rebote de la pelota
-        const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
-        const dx = ball.x - cx, dy = ball.y - cy;
-        const overlapX = (BALL_R + b.w / 2) - Math.abs(dx);
-        const overlapY = (BALL_R + b.h / 2) - Math.abs(dy);
-        if (overlapX < overlapY) { ball.vx = -ball.vx; }
-        else { ball.vy = -ball.vy; }
-        break;
+        hitBrick = true;
+        break; // Salir del bucle para procesar solo un ladrillo por frame
       }
+    }
+
+    // Verificar regeneración pendiente
+    if (pendingRegeneration) {
+      checkAndRegenerate();
     }
 
     // Pérdida de vida
@@ -325,7 +365,6 @@ export function initJuego(config) {
         endGame();
         return;
       }
-      // Reiniciar pelota sobre la paleta
       launched = false;
       ball.x = paddle.x + PADDLE_W / 2;
       ball.y = STAGE_H - 14 - BALL_R;
@@ -355,11 +394,11 @@ export function initJuego(config) {
     playerScore = 0;
     gamePoints = 0;
 
-    // Colocar 36 ladrillos de arcilla (valor 1 cada uno)
+    // 36 ladrillos de arcilla
     const clayValues = new Array(36).fill(1);
-    placeBricks(clayValues); // Esto colocará 36 ladrillos de arcilla
-    // Nota: placeBricks usa getFreeCells() que ahora está vacío, pero como no hay ladrillos,
-    // todas las celdas están libres, así que colocará los 36.
+    inner.querySelectorAll('.brick').forEach(b => b.remove());
+    bricks = [];
+    placeBricks(clayValues);
 
     paddle.x = (STAGE_W - PADDLE_W) / 2;
     launched = false;
@@ -407,10 +446,9 @@ export function initJuego(config) {
     overlay.classList.remove('open');
     resetGameState();
     soundClose();
-    console.log('🔚 Juego cerrado y reiniciado');
+    console.log('🔚 Juego cerrado');
   }
 
-  // Layout y eventos
   function layoutStage() {
     const availW = Math.min(window.innerWidth * 0.92, 420);
     const availH = Math.min(window.innerHeight * 0.72, 560);
@@ -483,5 +521,5 @@ export function initJuego(config) {
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
   resetGameState();
-  console.log('✅ Juego con nuevo sistema de puntos listo');
+  console.log('✅ Juego listo (arcilla roja, colisión mejorada)');
 }
