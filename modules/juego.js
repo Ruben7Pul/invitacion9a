@@ -1,29 +1,29 @@
 // ============================================================
-// juego.js – con mejoras visuales y regeneración inteligente
+// juego.js – con lógica inteligente de power‑ups, textura y arcade
 // ============================================================
-console.log('📦 juego.js (neón, texturas, poder rojo reducido)');
+console.log('📦 juego.js (arcade, textura, lógica de powerups)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
-// Constantes base
+// Constantes
 const PADDLE_W_BASE = 72;
 const PADDLE_H = 10;
 const BALL_R = 6;
 const STAGE_W = 300;
 const STAGE_H = 420;
 const TOP_OFFSET = 30;
-const BALL_SPEED = 240;
+const BALL_SPEED = 264; // +10% (antes 240)
 const PADDLE_SPEED = 300;
 const TARGET_GAME_POINTS = 18;
 const REGEN_THRESHOLD = 9;
 const BALL_LOW_Y = STAGE_H - 60;
 const MAX_NIEBLA = 3;
 
-// Tipos de ladrillos
+// Tipos de ladrillos (con textura)
 const BRICK_TYPES = {
-  CLAY:   { value: 1, playerPoints: 100, hits: 1, color: '#d9534f', label: 'CLAY' },
+  CLAY:   { value: 1, playerPoints: 100, hits: 1, color: '#b87333', label: 'CLAY' },
   WOOD:   { value: 2, playerPoints: 200, hits: 2, color: '#8b5a2b', label: 'WOOD' },
-  IRON:   { value: 3, playerPoints: 300, hits: 3, color: '#a0a0a0', label: 'IRON' }
+  IRON:   { value: 3, playerPoints: 300, hits: 3, color: '#7a8a9a', label: 'IRON' }
 };
 
 const FRACTURE_SYMBOLS = {
@@ -32,7 +32,7 @@ const FRACTURE_SYMBOLS = {
   3: '|||'
 };
 
-// Tabla de probabilidad de verde según minuto
+// Probabilidades
 const GREEN_PROB_TABLE = [
   50.000, 46.875, 43.750, 40.625, 37.500, 34.375, 31.250, 28.125,
   25.000, 21.875, 18.750, 15.625, 12.500, 9.375, 6.250, 3.125, 0.000
@@ -42,7 +42,16 @@ const GREEN_WEIGHTS = { MULTIBOLA: 15, PALA_GRANDE: 35, DUREZA: 50 };
 const RED_WEIGHTS   = { BOLA_NIEBLA: 10, PALA_MINI: 35, FLAQUESA: 55 };
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego con neón y texturas');
+  console.log('🎮 Iniciando juego arcade');
+
+  // Cargar fuente pixelada
+  if (!document.querySelector('#pixel-font')) {
+    const link = document.createElement('link');
+    link.id = 'pixel-font';
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap';
+    document.head.appendChild(link);
+  }
 
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => { soundTap(); openGame(); });
@@ -58,7 +67,7 @@ export function initJuego(config) {
   const scoreEl = document.getElementById('game-score');
   const restartBtn = document.getElementById('game-restart');
 
-  // Estilo neón para la pala (se inyecta en el elemento paddle)
+  // Pala neón (sin líneas)
   paddleEl.style.cssText += `
     background: linear-gradient(90deg, #ff00cc, #3333ff, #00ffcc, #ffcc00, #ff00cc);
     background-size: 300% 100%;
@@ -67,7 +76,6 @@ export function initJuego(config) {
     box-shadow: 0 0 20px rgba(255,255,255,0.6);
     border-radius: 6px;
   `;
-  // Añadir keyframes si no existen
   if (!document.querySelector('#neon-style')) {
     const style = document.createElement('style');
     style.id = 'neon-style';
@@ -78,6 +86,30 @@ export function initJuego(config) {
       }
     `;
     document.head.appendChild(style);
+  }
+
+  // Estilo arcade para vidas y puntuación
+  livesEl.style.fontFamily = "'Press Start 2P', monospace";
+  livesEl.style.fontSize = '1.2rem';
+  livesEl.style.letterSpacing = '0.1em';
+  scoreEl.style.fontFamily = "'Press Start 2P', monospace";
+  scoreEl.style.fontSize = '0.9rem';
+  scoreEl.style.background = 'linear-gradient(90deg, #ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #8800ff)';
+  scoreEl.style.backgroundSize = '300% 100%';
+  scoreEl.style.animation = 'rainbowScore 3s linear infinite';
+  scoreEl.style.webkitBackgroundClip = 'text';
+  scoreEl.style.backgroundClip = 'text';
+  scoreEl.style.color = 'transparent';
+  if (!document.querySelector('#rainbow-score')) {
+    const style2 = document.createElement('style');
+    style2.id = 'rainbow-score';
+    style2.textContent = `
+      @keyframes rainbowScore {
+        0% { background-position: 0% 50%; }
+        100% { background-position: 300% 50%; }
+      }
+    `;
+    document.head.appendChild(style2);
   }
 
   // Elemento para la niebla
@@ -110,7 +142,6 @@ export function initJuego(config) {
   let gamePoints = 0;
   let pendingRegeneration = false;
 
-  // Dureza de la pelota (1-3)
   let ballDurability = 1;
   let paddleSizeMultiplier = 1;
   let paddleWidth = PADDLE_W_BASE;
@@ -126,7 +157,7 @@ export function initJuego(config) {
   window.closeGame = closeGame;
 
   // ------------------------------------------------------------
-  // Funciones de ladrillos
+  // Funciones de ladrillos con textura
   // ------------------------------------------------------------
   function getBrickTypeFromValue(val) {
     if (val === 1) return BRICK_TYPES.CLAY;
@@ -137,8 +168,29 @@ export function initJuego(config) {
   function updateBrickVisual(brick) {
     const el = brick.el;
     const type = brick.type;
-    el.style.background = type.color;
+    // Fondo con textura de ladrillo
+    el.style.background = `
+      linear-gradient(135deg, ${type.color} 0%, ${adjustColor(type.color, -20)} 50%, ${type.color} 100%)
+    `;
+    el.style.backgroundSize = '200% 200%';
+    el.style.boxShadow = 'inset 0 -3px 0 rgba(0,0,0,0.3), inset 0 3px 0 rgba(255,255,255,0.2)';
     el.textContent = FRACTURE_SYMBOLS[brick.hits] || '|';
+  }
+
+  function adjustColor(hex, percent) {
+    // Simple ajuste de brillo para textura
+    let r = parseInt(hex.slice(1,2), 16) * 17;
+    let g = parseInt(hex.slice(2,3), 16) * 17;
+    let b = parseInt(hex.slice(3,4), 16) * 17;
+    if (hex.length === 7) {
+      r = parseInt(hex.slice(1,3), 16);
+      g = parseInt(hex.slice(3,5), 16);
+      b = parseInt(hex.slice(5,7), 16);
+    }
+    r = Math.min(255, Math.max(0, r + percent));
+    g = Math.min(255, Math.max(0, g + percent));
+    b = Math.min(255, Math.max(0, b + percent));
+    return `rgb(${r},${g},${b})`;
   }
 
   function upgradeBrickType(brick) {
@@ -185,7 +237,7 @@ export function initJuego(config) {
   }
 
   // ------------------------------------------------------------
-  // Generación de ladrillos (con exclusión de celdas con pelotas)
+  // Generación de ladrillos
   // ------------------------------------------------------------
   function generateBrickValues() {
     const total = TARGET_GAME_POINTS;
@@ -213,7 +265,6 @@ export function initJuego(config) {
     const cols = 6, rows = 6;
     const used = new Set();
     bricks.forEach(b => { if (b.alive) used.add(b.cell); });
-    // Añadir celdas excluidas (donde hay pelotas)
     for (const cell of excludeCells) used.add(cell);
     const free = [];
     for (let r = 0; r < rows; r++) {
@@ -226,7 +277,6 @@ export function initJuego(config) {
   }
 
   function getCellsWithBalls() {
-    // Devuelve un Set de índices de celdas que contienen pelotas
     const cols = 6, rows = 6;
     const brickW = 38, brickH = 16, gap = 3;
     const totalWidth = cols * (brickW + gap) - gap;
@@ -234,12 +284,10 @@ export function initJuego(config) {
     const startY = TOP_OFFSET;
     const cells = new Set();
     for (const b of balls) {
-      // Encontrar la celda donde está la pelota
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
           const x = startX + c * (brickW + gap);
           const y = startY + r * (brickH + gap);
-          // Comprobar si la pelota está dentro de esta celda (con margen)
           if (b.x > x - 10 && b.x < x + brickW + 10 &&
               b.y > y - 10 && b.y < y + brickH + 10) {
             cells.add(r * cols + c);
@@ -276,16 +324,14 @@ export function initJuego(config) {
       el.style.top = y + 'px';
       el.style.width = brickW + 'px';
       el.style.height = brickH + 'px';
-      el.style.background = type.color;
       el.style.borderRadius = '4px';
-      el.style.boxShadow = '0 2px 6px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.3)';
-      el.style.color = '#fff';
-      el.style.fontWeight = 'bold';
-      el.style.textShadow = '0 1px 2px rgba(0,0,0,0.5)';
+      el.style.border = '1px solid rgba(0,0,0,0.3)';
       el.style.display = 'flex';
       el.style.alignItems = 'center';
       el.style.justifyContent = 'center';
-      el.textContent = FRACTURE_SYMBOLS[type.hits] || '|';
+      el.style.color = '#fff';
+      el.style.fontWeight = 'bold';
+      el.style.textShadow = '0 1px 2px rgba(0,0,0,0.5)';
 
       inner.appendChild(el);
 
@@ -304,6 +350,7 @@ export function initJuego(config) {
       };
       bricks.push(brick);
       gamePoints += type.value;
+      updateBrickVisual(brick); // aplica textura
     }
   }
 
@@ -316,9 +363,7 @@ export function initJuego(config) {
   function checkAndRegenerate() {
     if (!pendingRegeneration || !running) return;
 
-    // Si hay más de una pelota, regenerar siempre (sin esperar a que estén lejos)
     if (balls.length > 1) {
-      // Regenerar evitando celdas con pelotas
       const exclude = getCellsWithBalls();
       const values = generateBrickValues();
       placeBricks(values, exclude);
@@ -326,18 +371,15 @@ export function initJuego(config) {
       return;
     }
 
-    // Si solo hay una pelota, respetar la regla de distancia
     if (launched && balls.some(b => b.y < BALL_LOW_Y)) {
-      // La pelota está lejos, regenerar
       const values = generateBrickValues();
       placeBricks(values);
       pendingRegeneration = false;
     }
-    // Si la pelota está cerca, no regenerar aún (se reintentará en el próximo frame)
   }
 
   // ------------------------------------------------------------
-  // Power‑ups con nuevos símbolos y tamaños
+  // Power‑ups con lógica inteligente
   // ------------------------------------------------------------
   function getGreenProbability(minutes) {
     if (minutes < 0) return GREEN_PROB_TABLE[0];
@@ -358,6 +400,36 @@ export function initJuego(config) {
     return Object.keys(weights)[0];
   }
 
+  // Determina si un tipo está saturado (máximo alcanzado)
+  function isSaturated(typeKey) {
+    switch (typeKey) {
+      case 'PALA_GRANDE': return paddleSizeMultiplier > 1;
+      case 'PALA_MINI': return paddleSizeMultiplier < 1;
+      case 'DUREZA': return ballDurability === 3;
+      case 'FLAQUESA': return ballDurability === 1;
+      case 'MULTIBOLA': return balls.length >= 3;
+      case 'BOLA_NIEBLA': return nieblaLevel === 3;
+      default: return false;
+    }
+  }
+
+  // Obtiene lista de tipos de una categoría (verde/rojo) que no están saturados
+  function getAvailableTypes(color) {
+    const types = color === 'verde' ? Object.keys(GREEN_WEIGHTS) : Object.keys(RED_WEIGHTS);
+    return types.filter(t => !isSaturated(t));
+  }
+
+  // Selecciona un power‑up alternativo de la misma categoría si el actual está saturado
+  function getAlternativeType(color, currentType) {
+    const available = getAvailableTypes(color);
+    // Si el actual no está saturado, devolverlo
+    if (!isSaturated(currentType)) return currentType;
+    // Si no hay disponibles, devolver null
+    if (available.length === 0) return null;
+    // Elegir uno aleatorio de los disponibles
+    return available[Math.floor(Math.random() * available.length)];
+  }
+
   function spawnPowerup(brick) {
     let prob = 0;
     if (brick.type === BRICK_TYPES.CLAY) prob = 0.20;
@@ -369,12 +441,19 @@ export function initJuego(config) {
     const minutes = (now - gameStartTime) / 60000;
     const greenProb = getGreenProbability(minutes);
     const color = Math.random() * 100 < greenProb ? 'verde' : 'rojo';
-    const typeKey = selectPowerupByColor(color);
-    const isGreen = color === 'verde';
+    let typeKey = selectPowerupByColor(color);
 
+    // Aplicar lógica de no repetición y alternativas
+    const alternative = getAlternativeType(color, typeKey);
+    if (alternative === null) {
+      // No hay ningún power‑up de esta categoría disponible, no soltar nada
+      return;
+    }
+    typeKey = alternative;
+
+    const isGreen = color === 'verde';
     console.log(`⚡ Powerup generado: ${typeKey} (${color})`);
 
-    // Tamaños: verde 24px, rojo 36px (mitad de 72)
     const size = isGreen ? 24 : 36;
     const speed = isGreen ? 120 : 40;
 
@@ -395,7 +474,6 @@ export function initJuego(config) {
       transform: translate(-50%, -50%);
       text-shadow: 0 0 6px rgba(0,0,0,0.8);
     `;
-    // Símbolos intuitivos
     let symbol = '';
     switch (typeKey) {
       case 'MULTIBOLA': symbol = '🌀'; break;
@@ -422,16 +500,20 @@ export function initJuego(config) {
   }
 
   // ------------------------------------------------------------
-  // Aplicar power‑up
+  // Aplicar power‑up con lógica de anulación
   // ------------------------------------------------------------
   function applyPowerup(pu) {
     const type = pu.type;
     switch (type) {
       case 'PALA_GRANDE':
+        // Si tenemos mini, primero normal
+        if (paddleSizeMultiplier < 1) paddleSizeMultiplier = 1;
         paddleSizeMultiplier = 1.3;
         break;
       case 'PALA_MINI':
-        paddleSizeMultiplier = 0.85; // menos reducción (antes 0.7)
+        // Si tenemos grande, primero normal
+        if (paddleSizeMultiplier > 1) paddleSizeMultiplier = 1;
+        paddleSizeMultiplier = 0.85;
         break;
       case 'MULTIBOLA': {
         const count = balls.length;
@@ -454,53 +536,32 @@ export function initJuego(config) {
         }
         break;
       }
-      case 'DUREZA': {
+      case 'DUREZA':
         if (ballDurability < 3) {
           ballDurability++;
           updateDurabilityVisual();
         }
         break;
-      }
-      case 'FLAQUESA': {
+      case 'FLAQUESA':
         if (ballDurability > 1) {
           ballDurability--;
           updateDurabilityVisual();
         }
         break;
-      }
-      case 'BOLA_NIEBLA': {
-        nieblaLevel = Math.min(MAX_NIEBLA, nieblaLevel + 1);
-        updateNiebla();
+      case 'BOLA_NIEBLA':
+        if (nieblaLevel < MAX_NIEBLA) {
+          nieblaLevel++;
+          updateNiebla();
+        }
         break;
-      }
     }
   }
 
   // ------------------------------------------------------------
-  // Visuales: dureza, niebla, pelota
+  // Visuales: dureza (solo pelota), niebla
   // ------------------------------------------------------------
   function updateDurabilityVisual() {
-    // Líneas en la pala
-    const lines = paddleEl.querySelectorAll('.paddle-line');
-    lines.forEach(l => l.remove());
-    for (let i = 0; i < ballDurability; i++) {
-      const line = document.createElement('div');
-      line.className = 'paddle-line';
-      line.style.cssText = `
-        position: absolute;
-        bottom: ${2 + i * 4}px;
-        left: 15%;
-        width: 70%;
-        height: 2px;
-        background: #fff;
-        border-radius: 2px;
-        opacity: 0.8;
-        box-shadow: 0 0 4px #0ff;
-      `;
-      paddleEl.appendChild(line);
-    }
-
-    // Actualizar textura de la pelota según dureza
+    // Actualizar textura de la pelota
     const ballElements = inner.querySelectorAll('.ball-dynamic');
     for (const el of ballElements) {
       updateBallStyle(el);
@@ -649,7 +710,15 @@ export function initJuego(config) {
   }
 
   function updateUI() {
-    livesEl.textContent = '♥ '.repeat(Math.max(lives, 0)).trim() || '—';
+    // Vidas con colores alternos
+    let hearts = '';
+    for (let i = 0; i < lives; i++) {
+      const colors = ['#ff0000', '#ffcc00', '#ff00ff', '#00ffcc'];
+      const col = colors[i % colors.length];
+      hearts += `<span style="color:${col}; text-shadow:0 0 8px ${col};">♥</span>`;
+    }
+    livesEl.innerHTML = hearts || '—';
+    // Puntuación ya tiene estilo arcade
     scoreEl.textContent = `Puntos: ${playerScore}`;
   }
 
@@ -955,5 +1024,5 @@ export function initJuego(config) {
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
   resetGameState();
-  console.log('✅ Juego listo – neón, texturas y regeneración mejorada');
+  console.log('✅ Juego arcade listo');
 }
