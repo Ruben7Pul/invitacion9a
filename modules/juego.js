@@ -1,5 +1,7 @@
-// juego.js - versión con power‑ups, downgrades, niebla y múltiples bolas
-console.log('📦 juego.js (power‑ups + downgrades + niebla)');
+// ============================================================
+// juego.js – Versión definitiva con power‑ups, niebla y multibola
+// ============================================================
+console.log('🎮 juego.js (power‑ups + niebla + multibola)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
@@ -12,31 +14,10 @@ const STAGE_H = 420;
 const TOP_OFFSET = 30;
 const BALL_SPEED = 300;
 const PADDLE_SPEED = 300;
-const TARGET_GAME_POINTS = 18;
-const REGEN_THRESHOLD = 9;
-const BALL_LOW_Y = STAGE_H - 60;
 const MAX_BALLS = 9;
+const DROP_PROB = { CLAY: 0.05, WOOD: 0.10, IRON: 0.20 };
 
-// Tipos de ladrillos
-const BRICK_TYPES = {
-  CLAY:   { value: 1, playerPoints: 100, hits: 1, color: '#d9534f', label: 'arcilla' },
-  WOOD:   { value: 2, playerPoints: 200, hits: 2, color: '#8b5a2b', label: 'madera' },
-  IRON:   { value: 3, playerPoints: 300, hits: 3, color: '#a0a0a0', label: 'hierro' }
-};
-const FRACTURE_SYMBOLS = {
-  1: '|',
-  2: '||',
-  3: '|||'
-};
-
-// Probabilidades de soltar power‑up por tipo de ladrillo
-const DROP_PROB = {
-  CLAY: 0.05,
-  WOOD: 0.10,
-  IRON: 0.20
-};
-
-// Pesos para elegir el poder dentro de cada categoría
+// Pesos para elegir poder dentro de cada categoría
 const GREEN_WEIGHTS = [
   { name: 'multiball', weight: 15 },
   { name: 'bigPaddle', weight: 35 },
@@ -48,87 +29,50 @@ const RED_WEIGHTS = [
   { name: 'weakness', weight: 55 }
 ];
 
-// Velocidad de caída y radio de colisión para verdes y rojos
 const POWERUP_SPEED = { GREEN: 180, RED: 80 };   // píxeles/segundo
 const POWERUP_RADIUS = { GREEN: 8, RED: 16 };
 
-// ========== VARIABLES DE ESTADO ==========
-let balls = [];
-let paddle = { x: 0, width: PADDLE_BASE_W };
+// ========== ELEMENTOS DOM ==========
+let stage, inner, paddleEl, ballContainer, msgEl, msgText, livesEl, scoreEl, restartBtn, fogOverlay;
+let overlay;
+let scale = 1;
+
+// ========== ESTADO DEL JUEGO ==========
 let bricks = [];
+let balls = [];
 let powerups = [];
+let paddle = { x: 0, width: PADDLE_BASE_W };
 let fogLevel = 0;
 let gameStartTime = 0;
 let lives = 3;
 let playerScore = 0;
-let gamePoints = 0;
+let gamePoints = 0;          // suma de valores de ladrillos vivos
 let running = false;
 let launched = false;
 let animFrameId = null;
 let countdownInterval = null;
 let pendingRegeneration = false;
-let basePaddleWidth = PADDLE_BASE_W;  // referencia para resetear
-
-// Elementos DOM
-let stage, inner, paddleEl, ballContainer, msgEl, msgText, livesEl, scoreEl, restartBtn, fogOverlay;
-let overlay;
-let scale = 1;
+let basePaddleWidth = PADDLE_BASE_W;
+let lastTime = 0;
 
 // Controles
 let keys = { left: false, right: false };
 let touchActive = false, touchX = 0;
 let mouseActive = false, mouseX = 0;
 
-// ========== FUNCIONES DE UTILIDAD ==========
+// ========== FUNCIONES AUXILIARES ==========
 function getRandomColor() {
   const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd', '#1dd1a1', '#f368e0'];
   return colors[Math.floor(Math.random() * colors.length)];
 }
 
-// ========== GESTIÓN DE BOLAS ==========
-function createBallDOM(x, y, color) {
-  const el = document.createElement('div');
-  el.className = 'ball';
-  el.style.width = (BALL_R * 2) + 'px';
-  el.style.height = (BALL_R * 2) + 'px';
-  el.style.borderRadius = '50%';
-  el.style.background = color || 'radial-gradient(circle at 35% 30%, #fff, #d68a96 60%, #a13545)';
-  el.style.boxShadow = '0 0 8px rgba(255,200,200,0.3)';
-  el.style.position = 'absolute';
-  el.style.transform = `translate(${x - BALL_R}px, ${y - BALL_R}px)`;
-  el.style.willChange = 'transform';
-  inner.appendChild(el);
-  return el;
-}
-
-function createBall(x, y, vx = 0, vy = 0, color = null) {
-  const el = createBallDOM(x, y, color);
-  return { x, y, vx, vy, el, color: color || '#ff6b6b' };
-}
-
-function removeBall(ball) {
-  if (ball.el && ball.el.parentNode) ball.el.parentNode.removeChild(ball.el);
-  const idx = balls.indexOf(ball);
-  if (idx !== -1) balls.splice(idx, 1);
-}
-
-function resetBallsToSingle() {
-  // eliminar todas las bolas existentes
-  balls.forEach(b => { if (b.el && b.el.parentNode) b.el.parentNode.removeChild(b.el); });
-  balls = [];
-  const color = getRandomColor();
-  const b = createBall(paddle.x + paddle.width / 2, STAGE_H - 14 - BALL_R, 0, 0, color);
-  balls.push(b);
-  launched = false;
-}
-
-// ========== GESTIÓN DE LADRILLOS ==========
 function getBrickTypeByHits(hits) {
-  if (hits === 1) return BRICK_TYPES.CLAY;
-  if (hits === 2) return BRICK_TYPES.WOOD;
-  if (hits >= 3) return BRICK_TYPES.IRON;
-  return BRICK_TYPES.CLAY;
+  if (hits === 1) return { value: 1, playerPoints: 100, hits: 1, color: '#d9534f', label: 'arcilla' };
+  if (hits === 2) return { value: 2, playerPoints: 200, hits: 2, color: '#8b5a2b', label: 'madera' };
+  return { value: 3, playerPoints: 300, hits: 3, color: '#a0a0a0', label: 'hierro' };
 }
+
+const FRACTURE_SYMBOLS = { 1: '|', 2: '||', 3: '|||' };
 
 function updateBrickAppearance(brick) {
   const type = getBrickTypeByHits(brick.hits);
@@ -138,25 +82,20 @@ function updateBrickAppearance(brick) {
   brick.playerPoints = type.playerPoints;
 }
 
+// ========== LADRILLOS ==========
 function generateBrickValues() {
-  const total = TARGET_GAME_POINTS;
+  const total = 18; // TARGET_GAME_POINTS
   const values = [];
   let remaining = total;
   while (remaining > 0) {
     let max = Math.min(3, remaining);
     let val = Math.floor(Math.random() * max) + 1;
     const rest = remaining - val;
-    if (rest === 1 && remaining > 2) {
-      if (remaining >= 3) val = 2;
-      else val = 2;
-    } else if (rest === 2 && remaining > 3) {
-      if (remaining >= 4) val = 3;
-    }
+    if (rest === 1 && remaining > 2) val = 2;
+    else if (rest === 2 && remaining > 3) val = 3;
     values.push(val);
     remaining -= val;
   }
-  const sum = values.reduce((a, b) => a + b, 0);
-  if (sum !== total) return generateBrickValues();
   return values;
 }
 
@@ -196,33 +135,22 @@ function placeBricks(values) {
 
     const el = document.createElement('div');
     el.className = 'brick';
-    el.style.left = x + 'px';
-    el.style.top = y + 'px';
-    el.style.width = brickW + 'px';
-    el.style.height = brickH + 'px';
-    el.style.background = type.color;
-    el.style.borderRadius = '4px';
-    el.style.boxShadow = '0 2px 6px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.3)';
-    el.style.color = '#fff';
-    el.style.fontWeight = 'bold';
-    el.style.textShadow = '0 1px 2px rgba(0,0,0,0.5)';
-    el.style.display = 'flex';
-    el.style.alignItems = 'center';
-    el.style.justifyContent = 'center';
+    Object.assign(el.style, {
+      left: x + 'px', top: y + 'px',
+      width: brickW + 'px', height: brickH + 'px',
+      background: type.color,
+      borderRadius: '4px',
+      boxShadow: '0 2px 6px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.3)',
+      color: '#fff', fontWeight: 'bold', textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center'
+    });
     el.textContent = FRACTURE_SYMBOLS[hits] || '|';
-
     inner.appendChild(el);
 
     bricks.push({
-      x, y, w: brickW, h: brickH,
-      el,
-      alive: true,
-      hits: hits,
-      maxHits: type.hits,
-      value: type.value,
-      playerPoints: type.playerPoints,
-      cell: cell,
-      type: type
+      x, y, w: brickW, h: brickH, el, alive: true,
+      hits: hits, maxHits: type.hits, value: type.value,
+      playerPoints: type.playerPoints, cell: cell
     });
     gamePoints += type.value;
   }
@@ -236,23 +164,65 @@ function requestRegeneration() {
 
 function checkAndRegenerate() {
   if (!pendingRegeneration || !running) return;
-  // si hay bolas en juego y alguna está por debajo de BALL_LOW_Y, esperar
-  if (launched && balls.some(b => b.y < BALL_LOW_Y)) return;
-  if (getFreeCells().length === 0) {
-    pendingRegeneration = false;
-    return;
-  }
+  if (launched && balls.some(b => b.y < STAGE_H - 60)) return;
+  if (getFreeCells().length === 0) { pendingRegeneration = false; return; }
   const values = generateBrickValues();
   placeBricks(values);
   pendingRegeneration = false;
 }
 
-// ========== POWER‑UPS / DOWNGRADES ==========
+// ========== BOLAS ==========
+function createBallDOM(x, y, color) {
+  const el = document.createElement('div');
+  el.className = 'ball';
+  Object.assign(el.style, {
+    position: 'absolute',
+    width: (BALL_R * 2) + 'px',
+    height: (BALL_R * 2) + 'px',
+    borderRadius: '50%',
+    background: color || 'radial-gradient(circle at 35% 30%, #fff, #d68a96 60%, #a13545)',
+    boxShadow: '0 0 8px rgba(255,200,200,0.3)',
+    transform: `translate(${x - BALL_R}px, ${y - BALL_R}px)`,
+    willChange: 'transform'
+  });
+  inner.appendChild(el);
+  return el;
+}
+
+function createBall(x, y, vx = 0, vy = 0, color = null) {
+  const el = createBallDOM(x, y, color);
+  return { x, y, vx, vy, el, color: color || '#ff6b6b' };
+}
+
+function removeBall(ball) {
+  if (ball.el && ball.el.parentNode) ball.el.parentNode.removeChild(ball.el);
+  const idx = balls.indexOf(ball);
+  if (idx !== -1) balls.splice(idx, 1);
+}
+
+function resetBallsToSingle() {
+  balls.forEach(b => { if (b.el && b.el.parentNode) b.el.parentNode.removeChild(b.el); });
+  balls = [];
+  const color = getRandomColor();
+  const b = createBall(paddle.x + paddle.width / 2, STAGE_H - 14 - BALL_R, 0, 0, color);
+  balls.push(b);
+  launched = false;
+}
+
+function launchBall() {
+  if (launched || balls.length === 0) return;
+  const b = balls[0];
+  const dir = Math.random() < 0.5 ? -1 : 1;
+  const angle = (Math.random() - 0.5) * 0.8;
+  b.vx = Math.sin(angle) * BALL_SPEED * dir;
+  b.vy = -Math.cos(angle) * BALL_SPEED;
+  launched = true;
+}
+
+// ========== POWER‑UPS ==========
 function spawnPowerup(x, y, type) {
-  // type: 'GREEN' o 'RED'
   const isGreen = (type === 'GREEN');
   const pool = isGreen ? GREEN_WEIGHTS : RED_WEIGHTS;
-  // elegir según pesos
   const totalWeight = pool.reduce((s, p) => s + p.weight, 0);
   let rand = Math.random() * totalWeight;
   let chosen = pool[0].name;
@@ -265,27 +235,25 @@ function spawnPowerup(x, y, type) {
   const radius = isGreen ? POWERUP_RADIUS.GREEN : POWERUP_RADIUS.RED;
   const color = isGreen ? '#2ecc71' : '#e74c3c';
   const el = document.createElement('div');
-  el.style.position = 'absolute';
-  el.style.width = (radius * 2) + 'px';
-  el.style.height = (radius * 2) + 'px';
-  el.style.borderRadius = '50%';
-  el.style.background = color;
-  el.style.boxShadow = isGreen ? '0 0 12px rgba(46,204,113,0.6)' : '0 0 12px rgba(231,76,60,0.6)';
-  el.style.border = '2px solid #fff';
-  el.style.display = 'flex';
-  el.style.alignItems = 'center';
-  el.style.justifyContent = 'center';
-  el.style.fontSize = '12px';
-  el.style.fontWeight = 'bold';
-  el.style.color = '#fff';
-  el.style.textShadow = '0 1px 2px rgba(0,0,0,0.5)';
-  el.textContent = chosen.charAt(0).toUpperCase(); // inicial
-  el.style.transform = `translate(${x - radius}px, ${y - radius}px)`;
+  Object.assign(el.style, {
+    position: 'absolute',
+    width: (radius * 2) + 'px',
+    height: (radius * 2) + 'px',
+    borderRadius: '50%',
+    background: color,
+    boxShadow: isGreen ? '0 0 12px rgba(46,204,113,0.6)' : '0 0 12px rgba(231,76,60,0.6)',
+    border: '2px solid #fff',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontSize: '12px', fontWeight: 'bold', color: '#fff',
+    textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+    transform: `translate(${x - radius}px, ${y - radius}px)`
+  });
+  el.textContent = chosen.charAt(0).toUpperCase();
   inner.appendChild(el);
 
   const powerup = {
     x, y,
-    vx: (Math.random() - 0.5) * 20, // ligero desplazamiento horizontal
+    vx: (Math.random() - 0.5) * 20,
     vy: speed,
     radius,
     el,
@@ -300,27 +268,22 @@ function applyPowerup(power) {
   const name = power.name;
   console.log('💥 Aplicando:', name);
   switch (name) {
-    case 'bigPaddle': {
+    case 'bigPaddle':
       paddle.width = basePaddleWidth * 1.3;
       updatePaddleDOM();
       break;
-    }
-    case 'miniPaddle': {
+    case 'miniPaddle':
       paddle.width = basePaddleWidth * 0.7;
       updatePaddleDOM();
       break;
-    }
     case 'durability': {
-      // elegir un ladrillo vivo al azar y subir su dureza si es < 3
       const alive = bricks.filter(b => b.alive);
       if (alive.length === 0) break;
       const brick = alive[Math.floor(Math.random() * alive.length)];
       if (brick.hits < 3) {
+        const oldVal = brick.value;
         brick.hits++;
         updateBrickAppearance(brick);
-        // actualizar gamePoints? No, porque gamePoints es la suma de valores de ladrillos vivos
-        // pero al cambiar el valor, debemos ajustar gamePoints
-        const oldVal = brick.value;
         const newType = getBrickTypeByHits(brick.hits);
         brick.value = newType.value;
         brick.playerPoints = newType.playerPoints;
@@ -347,7 +310,6 @@ function applyPowerup(power) {
       const currentCount = balls.length;
       if (currentCount >= MAX_BALLS) break;
       let newCount = Math.min(currentCount * 3, MAX_BALLS);
-      // clonar bolas existentes con pequeñas variaciones de velocidad
       const existing = balls.slice();
       const target = newCount - currentCount;
       for (let i = 0; i < target; i++) {
@@ -372,7 +334,6 @@ function applyPowerup(power) {
       }
       break;
     }
-    default: break;
   }
 }
 
@@ -387,22 +348,19 @@ function updatePaddleDOM() {
   paddleEl.style.transform = `translateX(${paddle.x}px)`;
 }
 
-// ========== LÓGICA PRINCIPAL DEL JUEGO ==========
+// ========== ACTUALIZACIÓN DEL JUEGO ==========
 function updateBalls(delta) {
-  if (!running) return;
   const ballsToRemove = [];
-
   for (const ball of balls) {
-    // Movimiento
     ball.x += ball.vx * delta;
     ball.y += ball.vy * delta;
 
-    // Rebotes en paredes
+    // Rebotes paredes
     if (ball.x - BALL_R < 0) { ball.x = BALL_R; ball.vx = Math.abs(ball.vx); }
     if (ball.x + BALL_R > STAGE_W) { ball.x = STAGE_W - BALL_R; ball.vx = -Math.abs(ball.vx); }
     if (ball.y - BALL_R < 0) { ball.y = BALL_R; ball.vy = Math.abs(ball.vy); }
 
-    // Rebote en la pala
+    // Rebote pala
     const py = STAGE_H - 14;
     if (ball.vy > 0 && ball.y + BALL_R >= py && ball.y + BALL_R <= py + 10 &&
         ball.x >= paddle.x - BALL_R && ball.x <= paddle.x + paddle.width + BALL_R) {
@@ -419,7 +377,6 @@ function updateBalls(delta) {
       if (!b.alive) continue;
       if (ball.x + BALL_R > b.x && ball.x - BALL_R < b.x + b.w &&
           ball.y + BALL_R > b.y && ball.y - BALL_R < b.y + b.h) {
-
         // Reposicionar
         const overlapX = Math.min(ball.x + BALL_R - b.x, b.x + b.w - (ball.x - BALL_R));
         const overlapY = Math.min(ball.y + BALL_R - b.y, b.y + b.h - (ball.y - BALL_R));
@@ -433,7 +390,6 @@ function updateBalls(delta) {
           ball.vy = -ball.vy;
         }
 
-        // Golpear ladrillo
         soundBrick();
         b.hits--;
         if (b.hits <= 0) {
@@ -442,58 +398,43 @@ function updateBalls(delta) {
           playerScore += b.playerPoints;
           gamePoints -= b.value;
           updateUI();
-          if (gamePoints <= REGEN_THRESHOLD) requestRegeneration();
+          if (gamePoints <= 9) requestRegeneration();
         } else {
           updateBrickAppearance(b);
         }
 
         // Probabilidad de soltar power‑up
+        const hitsBefore = b.hits + 1;
         let prob = 0;
-        const type = getBrickTypeByHits(b.hits + 1); // hits original antes de reducir
-        if (type === BRICK_TYPES.CLAY) prob = DROP_PROB.CLAY;
-        else if (type === BRICK_TYPES.WOOD) prob = DROP_PROB.WOOD;
-        else if (type === BRICK_TYPES.IRON) prob = DROP_PROB.IRON;
+        if (hitsBefore === 1) prob = DROP_PROB.CLAY;
+        else if (hitsBefore === 2) prob = DROP_PROB.WOOD;
+        else if (hitsBefore >= 3) prob = DROP_PROB.IRON;
         if (Math.random() < prob) {
-          // decidir verde o rojo según tiempo
-          const elapsed = (Date.now() - gameStartTime) / 60000; // minutos
+          const elapsed = (Date.now() - gameStartTime) / 60000;
           const minutes = Math.min(elapsed, 16);
-          const greenProb = 50 - (minutes * 3.125); // 50, 46.875, ... 0
+          const greenProb = 50 - (minutes * 3.125);
           const isGreen = Math.random() < (greenProb / 100);
           spawnPowerup(b.x + b.w/2, b.y, isGreen ? 'GREEN' : 'RED');
         }
-
-        break; // solo un ladrillo por frame
+        break;
       }
     }
 
-    // Verificar si la bola se perdió
     if (ball.y - BALL_R > STAGE_H) {
       ballsToRemove.push(ball);
     }
   }
 
-  // Eliminar bolas perdidas
-  for (const ball of ballsToRemove) {
-    removeBall(ball);
-  }
+  for (const ball of ballsToRemove) removeBall(ball);
 
-  // Si no hay bolas, perder vida
   if (balls.length === 0 && running) {
     loseLife();
   }
 
-  // Actualizar posición visual de las bolas
+  // Actualizar posiciones visuales
   for (const ball of balls) {
     ball.el.style.transform = `translate(${ball.x - BALL_R}px, ${ball.y - BALL_R}px)`;
   }
-
-  // Actualizar power‑ups
-  updatePowerups(delta);
-
-  // Regenerar si es necesario
-  if (pendingRegeneration) checkAndRegenerate();
-
-  updateUI();
 }
 
 function updatePowerups(delta) {
@@ -503,16 +444,13 @@ function updatePowerups(delta) {
     p.x += p.vx * delta;
     p.el.style.transform = `translate(${p.x - p.radius}px, ${p.y - p.radius}px)`;
 
-    // Colisión con la pala
     const paddleY = STAGE_H - 14;
     if (p.y + p.radius >= paddleY && p.y - p.radius <= paddleY + PADDLE_H &&
         p.x >= paddle.x - p.radius && p.x <= paddle.x + paddle.width + p.radius) {
-      // Atrapado
       applyPowerup(p);
       toRemove.push(p);
       soundTap();
     } else if (p.y - p.radius > STAGE_H) {
-      // Se perdió
       toRemove.push(p);
     }
   }
@@ -530,39 +468,26 @@ function loseLife() {
     endGame();
     return;
   }
-  // Resetear estado del jugador (no ladrillos)
-  resetPlayerState();
-  // Mantener los ladrillos actuales
-  // Asegurarse de que hay al menos una bola
-  if (balls.length === 0) {
-    resetBallsToSingle();
-  }
+  // Resetear efectos del jugador (pala, niebla, bolas)
+  paddle.width = basePaddleWidth;
+  paddle.x = (STAGE_W - paddle.width) / 2;
+  updatePaddleDOM();
+  fogLevel = 0;
+  updateFog();
+  resetBallsToSingle();
   launched = false;
+  // Limpiar powerups en pantalla
+  powerups.forEach(p => { if (p.el && p.el.parentNode) p.el.parentNode.removeChild(p.el); });
+  powerups = [];
   // Colocar bola sobre la pala
-  const b = balls[0];
-  if (b) {
+  if (balls.length > 0) {
+    const b = balls[0];
     b.x = paddle.x + paddle.width / 2;
     b.y = STAGE_H - 14 - BALL_R;
     b.vx = 0; b.vy = 0;
   }
   updateUI();
   draw();
-}
-
-function resetPlayerState() {
-  // Resetear pala
-  paddle.width = basePaddleWidth;
-  paddle.x = (STAGE_W - paddle.width) / 2;
-  updatePaddleDOM();
-  // Resetear niebla
-  fogLevel = 0;
-  updateFog();
-  // Resetear bolas a una sola
-  resetBallsToSingle();
-  launched = false;
-  // Limpiar powerups en pantalla
-  powerups.forEach(p => { if (p.el && p.el.parentNode) p.el.parentNode.removeChild(p.el); });
-  powerups = [];
 }
 
 function endGame() {
@@ -574,8 +499,55 @@ function endGame() {
   soundLose();
 }
 
+// ========== BUCLE PRINCIPAL ==========
+function gameLoop(timestamp) {
+  if (!running) return;
+  const delta = lastTime ? Math.min((timestamp - lastTime) / 1000, 0.05) : 0.016;
+  lastTime = timestamp;
+
+  // Movimiento de pala
+  if (keys.left) paddle.x = Math.max(0, paddle.x - PADDLE_SPEED * delta);
+  if (keys.right) paddle.x = Math.min(STAGE_W - paddle.width, paddle.x + PADDLE_SPEED * delta);
+  if (touchActive) paddle.x = Math.max(0, Math.min(STAGE_W - paddle.width, touchX));
+  if (mouseActive) paddle.x = Math.max(0, Math.min(STAGE_W - paddle.width, mouseX));
+
+  // Lanzar bola si se mueve la pala
+  if (!launched && balls.length > 0) {
+    const b = balls[0];
+    b.x = paddle.x + paddle.width / 2;
+    b.y = STAGE_H - 14 - BALL_R;
+    if (keys.left || keys.right || touchActive || mouseActive) {
+      launchBall();
+    }
+  }
+
+  updateBalls(delta);
+  updatePowerups(delta);
+  if (pendingRegeneration) checkAndRegenerate();
+
+  paddleEl.style.transform = `translateX(${paddle.x}px)`;
+  updateUI();
+  animFrameId = requestAnimationFrame(gameLoop);
+}
+
+function draw() {
+  paddleEl.style.transform = `translateX(${paddle.x}px)`;
+  for (const ball of balls) {
+    ball.el.style.transform = `translate(${ball.x - BALL_R}px, ${ball.y - BALL_R}px)`;
+  }
+  for (const p of powerups) {
+    p.el.style.transform = `translate(${p.x - p.radius}px, ${p.y - p.radius}px)`;
+  }
+}
+
+function updateUI() {
+  livesEl.textContent = '♥ '.repeat(Math.max(lives, 0)).trim() || '—';
+  scoreEl.textContent = `Puntos: ${playerScore}`;
+}
+
+// ========== INICIO Y REINICIO ==========
 function startGame() {
-  // Limpiar todo
+  // Limpiar escenario
   inner.querySelectorAll('.brick, .ball, .powerup').forEach(el => el.remove());
   bricks = [];
   powerups = [];
@@ -589,11 +561,10 @@ function startGame() {
   paddle.x = (STAGE_W - paddle.width) / 2;
   updatePaddleDOM();
 
-  // Generar ladrillos iniciales (todos arcilla, valor 1)
+  // Ladrillos iniciales (todos arcilla)
   const initialValues = new Array(36).fill(1);
   placeBricks(initialValues);
 
-  // Crear bola inicial
   resetBallsToSingle();
   const b = balls[0];
   if (b) {
@@ -613,72 +584,36 @@ function startGame() {
   animFrameId = requestAnimationFrame(gameLoop);
 }
 
-// ========== LOOP PRINCIPAL ==========
-let lastTime = 0;
-function gameLoop(timestamp) {
-  if (!running) return;
-  const delta = lastTime ? Math.min((timestamp - lastTime) / 1000, 0.05) : 0.016;
-  lastTime = timestamp;
-
-  // Movimiento de la pala
-  let paddleMoved = false;
-  if (keys.left) { paddle.x = Math.max(0, paddle.x - PADDLE_SPEED * delta); paddleMoved = true; }
-  if (keys.right) { paddle.x = Math.min(STAGE_W - paddle.width, paddle.x + PADDLE_SPEED * delta); paddleMoved = true; }
-  if (touchActive) {
-    paddle.x = Math.max(0, Math.min(STAGE_W - paddle.width, touchX));
-    paddleMoved = true;
-  }
-  if (mouseActive) {
-    paddle.x = Math.max(0, Math.min(STAGE_W - paddle.width, mouseX));
-    paddleMoved = true;
-  }
-
-  // Si no lanzado, la bola sigue a la pala
-  if (!launched && balls.length > 0) {
-    const b = balls[0];
-    b.x = paddle.x + paddle.width / 2;
-    b.y = STAGE_H - 14 - BALL_R;
-    if (paddleMoved) {
-      // Lanzar la bola al mover la pala (como antes)
-      launchBall();
+function openGame() {
+  resetBallsToSingle();
+  overlay.classList.add('open');
+  let countdown = 3;
+  msgText.textContent = countdown;
+  msgEl.classList.add('show');
+  if (countdownInterval) clearInterval(countdownInterval);
+  countdownInterval = setInterval(() => {
+    countdown--;
+    if (countdown > 0) {
+      msgText.textContent = countdown;
+    } else {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+      msgEl.classList.remove('show');
+      startGame();
     }
-  }
-
-  // Actualizar bolas y power‑ups
-  updateBalls(delta);
-
-  // Actualizar UI
-  updateUI();
-
-  // Dibujar pala
-  paddleEl.style.transform = `translateX(${paddle.x}px)`;
-  animFrameId = requestAnimationFrame(gameLoop);
+  }, 1000);
 }
 
-function launchBall() {
-  if (launched) return;
-  if (balls.length === 0) return;
-  const b = balls[0];
-  const dir = Math.random() < 0.5 ? -1 : 1;
-  const angle = (Math.random() - 0.5) * 0.8;
-  b.vx = Math.sin(angle) * BALL_SPEED * dir;
-  b.vy = -Math.cos(angle) * BALL_SPEED;
-  launched = true;
-}
-
-function draw() {
-  paddleEl.style.transform = `translateX(${paddle.x}px)`;
-  for (const ball of balls) {
-    ball.el.style.transform = `translate(${ball.x - BALL_R}px, ${ball.y - BALL_R}px)`;
-  }
-  for (const p of powerups) {
-    p.el.style.transform = `translate(${p.x - p.radius}px, ${p.y - p.radius}px)`;
-  }
-}
-
-function updateUI() {
-  livesEl.textContent = '♥ '.repeat(Math.max(lives, 0)).trim() || '—';
-  scoreEl.textContent = `Puntos: ${playerScore}`;
+function closeGame() {
+  overlay.classList.remove('open');
+  running = false;
+  if (animFrameId) cancelAnimationFrame(animFrameId);
+  if (countdownInterval) clearInterval(countdownInterval);
+  soundClose();
+  inner.querySelectorAll('.brick, .ball, .powerup').forEach(el => el.remove());
+  bricks = [];
+  powerups = [];
+  resetBallsToSingle();
 }
 
 function layoutStage() {
@@ -693,11 +628,11 @@ function layoutStage() {
   inner.style.transformOrigin = 'top left';
 }
 
-// ========== INICIALIZACIÓN Y EXPORTACIÓN ==========
+// ========== EXPORTACIÓN E INICIALIZACIÓN ==========
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego con power‑ups y niebla');
+  console.log('🎮 Inicializando juego con power‑ups');
 
-  // Obtener elementos DOM
+  // Obtener referencias DOM
   overlay = document.getElementById('game-overlay');
   stage = document.getElementById('game-stage');
   inner = document.getElementById('game-inner');
@@ -711,27 +646,26 @@ export function initJuego(config) {
 
   // Crear overlay de niebla
   fogOverlay = document.createElement('div');
-  fogOverlay.style.position = 'absolute';
-  fogOverlay.style.top = '0';
-  fogOverlay.style.left = '0';
-  fogOverlay.style.width = '100%';
-  fogOverlay.style.height = '100%';
-  fogOverlay.style.background = 'rgba(0,0,0,0.6)';
-  fogOverlay.style.pointerEvents = 'none';
-  fogOverlay.style.opacity = '0';
-  fogOverlay.style.transition = 'opacity 0.5s ease';
-  fogOverlay.style.zIndex = '10';
+  Object.assign(fogOverlay.style, {
+    position: 'absolute', top: '0', left: '0',
+    width: '100%', height: '100%',
+    background: 'rgba(0,0,0,0.6)',
+    pointerEvents: 'none',
+    opacity: '0',
+    transition: 'opacity 0.5s ease',
+    zIndex: '10'
+  });
   stage.appendChild(fogOverlay);
 
-  // Ocultar elemento de tiempo si existe
+  // Ocultar tiempo si existe
   const timeEl = document.getElementById('game-time');
   if (timeEl) timeEl.style.display = 'none';
 
-  // Asignar evento al nombre para abrir el juego
+  // Evento de clic en el nombre para abrir juego
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => { soundTap(); openGame(); });
 
-  // Eventos de control
+  // Controles
   document.addEventListener('keydown', (e) => {
     if (!running) return;
     if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') { keys.left = true; e.preventDefault(); }
@@ -758,9 +692,7 @@ export function initJuego(config) {
   });
   document.addEventListener('mouseup', () => { mouseActive = false; });
 
-  stage.addEventListener('click', (e) => {
-    if (running && !launched) launchBall();
-  });
+  stage.addEventListener('click', () => { if (running && !launched) launchBall(); });
 
   stage.addEventListener('touchstart', (e) => {
     if (!running) return;
@@ -793,44 +725,9 @@ export function initJuego(config) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
 
-  // Inicializar estado
-  resetPlayerState();
+  // Estado inicial
+  resetBallsToSingle();
   layoutStage();
-  startGame(); // arranca automáticamente después del conteo
-
-  console.log('✅ Juego listo con power‑ups');
-}
-
-function openGame() {
-  resetPlayerState();
-  overlay.classList.add('open');
-  // Contador de 3 segundos antes de empezar
-  let countdown = 3;
-  msgText.textContent = countdown;
-  msgEl.classList.add('show');
-  if (countdownInterval) clearInterval(countdownInterval);
-  countdownInterval = setInterval(() => {
-    countdown--;
-    if (countdown > 0) {
-      msgText.textContent = countdown;
-    } else {
-      clearInterval(countdownInterval);
-      countdownInterval = null;
-      msgEl.classList.remove('show');
-      startGame();
-    }
-  }, 1000);
-}
-
-function closeGame() {
-  overlay.classList.remove('open');
-  running = false;
-  if (animFrameId) cancelAnimationFrame(animFrameId);
-  if (countdownInterval) clearInterval(countdownInterval);
-  soundClose();
-  // limpiar elementos
-  inner.querySelectorAll('.brick, .ball, .powerup').forEach(el => el.remove());
-  bricks = [];
-  powerups = [];
-  resetPlayerState();
+  // No iniciar automáticamente; se inicia al abrir el juego
+  console.log('✅ Juego listo');
 }
