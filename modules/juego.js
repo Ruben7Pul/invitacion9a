@@ -1026,3 +1026,6 @@ export function initJuego(config) {
   resetGameState();
   console.log('✅ Juego arcade listo');
 }
+
+
+
