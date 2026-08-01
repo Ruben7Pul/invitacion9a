@@ -778,3 +778,4 @@ export function initJuego(config) {
   resetGameState();
   console.log('✅ Juego listo con power-ups mejorados');
 }
+    
