@@ -860,7 +860,7 @@ h1#nombre-hero {
    RESPONSIVE EXTRA (SOLO PARA MÓVILES MUY PEQUEÑOS)
    ============================================================ */
 @media (max-width: 400px) {
-  #app { padding: 1rem 2rem; }
+  #app { padding: 0.6rem 0.8rem; }
   #app-top .eyebrow { font-size: 0.6rem; }
   .top-btn { font-size: 1.2rem; }
   #oval-wrap { width: 90px; height: 120px; }
