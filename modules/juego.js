@@ -758,3 +758,4 @@ export function initJuego(config) {
   resetGameState();
   console.log('✅ Juego listo (colisión corregida, drops activos 1)');
 }
+   
