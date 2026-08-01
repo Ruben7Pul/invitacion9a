@@ -1,5 +1,5 @@
 // ============================================================
-// juego.js – arcade con sistema inteligente y optimizado
+// juego.js – arcade con sistema inteligente y optimizado (corregido)
 // ============================================================
 console.log('📦 juego.js (optimizado y con detección de duplicados)');
 
@@ -134,7 +134,7 @@ export function initJuego(config) {
   let bricks = [];
   let balls = [];
   let powerups = [];
-  let ballElements = []; // referencia a elementos DOM de bolas
+  let ballElements = [];
   let paddle = { x: (STAGE_W - PADDLE_W_BASE) / 2 };
   let lives = 3;
   let running = false;
@@ -143,9 +143,9 @@ export function initJuego(config) {
   let playerScore = 0;
   let gamePoints = 0;
   let pendingRegeneration = false;
-  let regenerating = false;
+  let regenerating = false; // declarada una sola vez
   let nextLifeThreshold = POINTS_PER_LIFE;
-  let lastUIUpdate = 0; // para actualizar UI solo cuando cambia
+  let lastUIUpdate = 0;
 
   let ballDurability = 1;
   let paddleSizeMultiplier = 1;
@@ -158,9 +158,6 @@ export function initJuego(config) {
   const keys = { left: false, right: false };
   let touchActive = false;
   let touchX = 0;
-
-  // Bandera para evitar regeneración simultánea
-  let regenerating = false;
 
   window.closeGame = closeGame;
 
@@ -406,7 +403,6 @@ export function initJuego(config) {
   }
 
   function spawnBlueBall() {
-    // Evitar duplicados: si ya hay una bola azul cayendo, no crear otra
     for (const pu of powerups) {
       if (pu.type === 'BOLA_AZUL' && pu.alive) return;
     }
@@ -435,11 +431,9 @@ export function initJuego(config) {
 
   function applyBlueBall() {
     playerScore += 2000;
-    // Eliminar poderes negativos
     if (paddleSizeMultiplier < 1) paddleSizeMultiplier = 1;
     nieblaLevel = 0;
     updateNiebla();
-    // Dar un poder positivo aleatorio no poseído
     const positiveTypes = ['PALA_GRANDE', 'DUREZA', 'MULTIBOLA'];
     const available = positiveTypes.filter(type => {
       if (type === 'PALA_GRANDE' && paddleSizeMultiplier > 1) return false;
@@ -553,7 +547,6 @@ export function initJuego(config) {
     if (alternative === null) return;
     typeKey = alternative;
 
-    // Verificar si ya hay uno de este tipo cayendo
     if (isPowerupFalling(typeKey)) return;
 
     const isGreen = color === 'verde';
@@ -653,7 +646,6 @@ export function initJuego(config) {
         applyBlueBall();
         break;
     }
-    // Actualizar UI si cambia puntuación o vidas
     updateUI();
   }
 
@@ -716,12 +708,10 @@ export function initJuego(config) {
     running = false;
     launched = false;
     bricks = [];
-    // Limpiar powerups (incluye bolas azules)
     for (const pu of powerups) {
       if (pu.el && pu.el.parentNode) pu.el.remove();
     }
     powerups = [];
-    // Limpiar bolas
     for (const el of ballElements) {
       if (el.parentNode) el.remove();
     }
@@ -746,14 +736,11 @@ export function initJuego(config) {
     mouseX = 0;
     gameStartTime = 0;
 
-    // Eliminar ladrillos
     inner.querySelectorAll('.brick').forEach(el => el.remove());
 
-    // Crear bola inicial
     const initialX = paddle.x + paddleWidth / 2;
     const initialY = STAGE_H - 14 - BALL_R;
     balls.push({ x: initialX, y: initialY, vx: 0, vy: 0 });
-    // Crear elemento de bola
     const el = document.createElement('div');
     el.className = 'ball-dynamic';
     el.style.cssText = `
@@ -781,12 +768,10 @@ export function initJuego(config) {
     ballDurability = 1;
     nieblaLevel = 0;
     updateNiebla();
-    // Eliminar powerups en caída (incluyendo bola azul)
     for (const pu of powerups) {
       if (pu.el && pu.el.parentNode) pu.el.remove();
     }
     powerups = [];
-    // Mantener solo una bola pegada a la pala
     for (const el of ballElements) {
       if (el.parentNode) el.remove();
     }
@@ -821,7 +806,6 @@ export function initJuego(config) {
 
   function startGame() {
     resetGameState();
-    // Colocar ladrillos iniciales (todos arcilla)
     const clayValues = new Array(36).fill(1);
     inner.querySelectorAll('.brick').forEach(el => el.remove());
     bricks = [];
@@ -847,7 +831,6 @@ export function initJuego(config) {
   }
 
   function updateUI() {
-    // Vidas con colores alternos
     let hearts = '';
     for (let i = 0; i < lives; i++) {
       const colors = ['#ff0000', '#ffcc00', '#ff00ff', '#00ffcc'];
@@ -864,14 +847,12 @@ export function initJuego(config) {
     paddleEl.style.width = paddleWidth + 'px';
     paddleEl.style.transform = 'translateX(' + paddle.x + 'px)';
 
-    // Actualizar posiciones de las bolas (elementos ya existen)
     for (let i = 0; i < balls.length && i < ballElements.length; i++) {
       const el = ballElements[i];
       el.style.left = balls[i].x + 'px';
       el.style.top = balls[i].y + 'px';
     }
 
-    // Dibujar powerups
     for (const pu of powerups) {
       pu.el.style.left = pu.x + 'px';
       pu.el.style.top = pu.y + 'px';
@@ -879,7 +860,7 @@ export function initJuego(config) {
   }
 
   // ------------------------------------------------------------
-  // Bucle principal con velocidad progresiva y optimizaciones
+  // Bucle principal con velocidad progresiva
   // ------------------------------------------------------------
   let lastTime = 0;
 
@@ -889,12 +870,10 @@ export function initJuego(config) {
     const delta = lastTime ? Math.min((timestamp - lastTime) / 1000, 0.05) : 0.016;
     lastTime = timestamp;
 
-    // Calcular multiplicador de velocidad según tiempo transcurrido
     const elapsedMinutes = (performance.now() - gameStartTime) / 60000;
     const speedMultiplier = 1 + Math.min(4, (elapsedMinutes / 15) ** 2);
     const currentBallSpeed = BALL_SPEED_BASE * speedMultiplier;
 
-    // Movimiento de la pala
     let paddleMoved = false;
     if (keys.left) { paddle.x = Math.max(0, paddle.x - PADDLE_SPEED * delta); paddleMoved = true; }
     if (keys.right) { paddle.x = Math.min(STAGE_W - paddleWidth, paddle.x + PADDLE_SPEED * delta); paddleMoved = true; }
@@ -919,7 +898,6 @@ export function initJuego(config) {
       return;
     }
 
-    // Movimiento de bolas
     for (let i = balls.length - 1; i >= 0; i--) {
       const b = balls[i];
       const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
@@ -985,7 +963,6 @@ export function initJuego(config) {
 
       if (b.y - BALL_R > STAGE_H) {
         balls.splice(i, 1);
-        // Eliminar el elemento de bola correspondiente
         if (i < ballElements.length) {
           const el = ballElements[i];
           if (el.parentNode) el.remove();
@@ -1020,7 +997,6 @@ export function initJuego(config) {
       }
     }
 
-    // Movimiento de powerups
     for (let i = powerups.length - 1; i >= 0; i--) {
       const pu = powerups[i];
       pu.y += pu.vy * delta;
@@ -1059,10 +1035,8 @@ export function initJuego(config) {
   // Abrir / cerrar juego (sin countdown)
   // ------------------------------------------------------------
   function openGame() {
-    // Reiniciar completamente
     resetGameState();
     overlay.classList.add('open');
-    // Limpiar todo lo anterior
     inner.querySelectorAll('.brick').forEach(el => el.remove());
     bricks = [];
     for (const pu of powerups) {
@@ -1095,7 +1069,7 @@ export function initJuego(config) {
   }
 
   // ------------------------------------------------------------
-  // Eventos (sin cambios)
+  // Eventos
   // ------------------------------------------------------------
   document.getElementById('game-close').addEventListener('click', closeGame);
   restartBtn.addEventListener('click', (e) => {
@@ -1165,7 +1139,3 @@ export function initJuego(config) {
   resetGameState();
   console.log('✅ Juego arcade optimizado listo');
 }
-
-
-
-
