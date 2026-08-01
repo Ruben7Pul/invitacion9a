@@ -30,7 +30,7 @@ const FRACTURE_SYMBOLS = {
 // ----------------- SISTEMA DE DROPS -----------------
 // % de soltar power/downgrade al golpear cada tipo de ladrillo
 const DROP_CHANCE_BY_VALUE = {
-  1: 0.05, // arcilla -> 5%
+  1: 1, // arcilla -> 5%
   2: 0.10, // madera  -> 10%
   3: 0.20  // hierro  -> 20%
 };
