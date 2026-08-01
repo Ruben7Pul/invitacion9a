@@ -756,5 +756,5 @@ export function initJuego(config) {
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
   resetGameState();
-  console.log('✅ Juego listo (colisión corregida, drops activos)');
+  console.log('✅ Juego listo (colisión corregida, drops activos 1)');
 }
