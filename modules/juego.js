@@ -1,11 +1,11 @@
 // ============================================================
-// juego.js – Dureza de la PELOTA, reinicio sin regenerar ladrillos
+// juego.js – con mejoras visuales y regeneración inteligente
 // ============================================================
-console.log('📦 juego.js (dureza en pelota, reinicio sin regenerar)');
+console.log('📦 juego.js (neón, texturas, poder rojo reducido)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
-// Constantes base (ajustadas)
+// Constantes base
 const PADDLE_W_BASE = 72;
 const PADDLE_H = 10;
 const BALL_R = 6;
@@ -32,7 +32,7 @@ const FRACTURE_SYMBOLS = {
   3: '|||'
 };
 
-// Tabla de probabilidad de verde según minuto (0..16)
+// Tabla de probabilidad de verde según minuto
 const GREEN_PROB_TABLE = [
   50.000, 46.875, 43.750, 40.625, 37.500, 34.375, 31.250, 28.125,
   25.000, 21.875, 18.750, 15.625, 12.500, 9.375, 6.250, 3.125, 0.000
@@ -42,7 +42,7 @@ const GREEN_WEIGHTS = { MULTIBOLA: 15, PALA_GRANDE: 35, DUREZA: 50 };
 const RED_WEIGHTS   = { BOLA_NIEBLA: 10, PALA_MINI: 35, FLAQUESA: 55 };
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego con dureza de pelota');
+  console.log('🎮 Iniciando juego con neón y texturas');
 
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => { soundTap(); openGame(); });
@@ -57,6 +57,28 @@ export function initJuego(config) {
   const livesEl = document.getElementById('lives');
   const scoreEl = document.getElementById('game-score');
   const restartBtn = document.getElementById('game-restart');
+
+  // Estilo neón para la pala (se inyecta en el elemento paddle)
+  paddleEl.style.cssText += `
+    background: linear-gradient(90deg, #ff00cc, #3333ff, #00ffcc, #ffcc00, #ff00cc);
+    background-size: 300% 100%;
+    animation: neonPaddle 2s linear infinite;
+    border: 2px solid #fff;
+    box-shadow: 0 0 20px rgba(255,255,255,0.6);
+    border-radius: 6px;
+  `;
+  // Añadir keyframes si no existen
+  if (!document.querySelector('#neon-style')) {
+    const style = document.createElement('style');
+    style.id = 'neon-style';
+    style.textContent = `
+      @keyframes neonPaddle {
+        0% { background-position: 0% 50%; }
+        100% { background-position: 300% 50%; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
 
   // Elemento para la niebla
   const nieblaEl = document.createElement('div');
@@ -88,8 +110,8 @@ export function initJuego(config) {
   let gamePoints = 0;
   let pendingRegeneration = false;
 
-  // ---- Dureza de la pelota (1-3) ----
-  let ballDurability = 1;          // nivel de dureza
+  // Dureza de la pelota (1-3)
+  let ballDurability = 1;
   let paddleSizeMultiplier = 1;
   let paddleWidth = PADDLE_W_BASE;
   let nieblaLevel = 0;
@@ -104,7 +126,7 @@ export function initJuego(config) {
   window.closeGame = closeGame;
 
   // ------------------------------------------------------------
-  // Funciones de ladrillos (sin cambios)
+  // Funciones de ladrillos
   // ------------------------------------------------------------
   function getBrickTypeFromValue(val) {
     if (val === 1) return BRICK_TYPES.CLAY;
@@ -151,7 +173,6 @@ export function initJuego(config) {
     return true;
   }
 
-  // Esta función solo se usa al reiniciar completamente el juego (no al perder vida)
   function resetBricksToOriginal() {
     for (const b of bricks) {
       b.type = b.originalType;
@@ -164,7 +185,7 @@ export function initJuego(config) {
   }
 
   // ------------------------------------------------------------
-  // Generación de ladrillos (sin cambios)
+  // Generación de ladrillos (con exclusión de celdas con pelotas)
   // ------------------------------------------------------------
   function generateBrickValues() {
     const total = TARGET_GAME_POINTS;
@@ -188,10 +209,12 @@ export function initJuego(config) {
     return values;
   }
 
-  function getFreeCells() {
+  function getFreeCells(excludeCells = new Set()) {
     const cols = 6, rows = 6;
     const used = new Set();
     bricks.forEach(b => { if (b.alive) used.add(b.cell); });
+    // Añadir celdas excluidas (donde hay pelotas)
+    for (const cell of excludeCells) used.add(cell);
     const free = [];
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
@@ -202,13 +225,38 @@ export function initJuego(config) {
     return free;
   }
 
-  function placeBricks(values) {
+  function getCellsWithBalls() {
+    // Devuelve un Set de índices de celdas que contienen pelotas
+    const cols = 6, rows = 6;
+    const brickW = 38, brickH = 16, gap = 3;
+    const totalWidth = cols * (brickW + gap) - gap;
+    const startX = (STAGE_W - totalWidth) / 2;
+    const startY = TOP_OFFSET;
+    const cells = new Set();
+    for (const b of balls) {
+      // Encontrar la celda donde está la pelota
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const x = startX + c * (brickW + gap);
+          const y = startY + r * (brickH + gap);
+          // Comprobar si la pelota está dentro de esta celda (con margen)
+          if (b.x > x - 10 && b.x < x + brickW + 10 &&
+              b.y > y - 10 && b.y < y + brickH + 10) {
+            cells.add(r * cols + c);
+          }
+        }
+      }
+    }
+    return cells;
+  }
+
+  function placeBricks(values, excludeCells = new Set()) {
     const cols = 6, brickW = 38, brickH = 16, gap = 3;
     const totalWidth = cols * (brickW + gap) - gap;
     const startX = (STAGE_W - totalWidth) / 2;
     const startY = TOP_OFFSET;
 
-    const freeCells = getFreeCells();
+    const freeCells = getFreeCells(excludeCells);
     if (freeCells.length === 0) return;
 
     const shuffled = freeCells.sort(() => Math.random() - 0.5);
@@ -261,24 +309,35 @@ export function initJuego(config) {
 
   function requestRegeneration() {
     if (pendingRegeneration) return;
-    if (getFreeCells().length === 0) return;
+    if (getFreeCells().size === 0) return;
     pendingRegeneration = true;
   }
 
   function checkAndRegenerate() {
     if (!pendingRegeneration || !running) return;
-    if (launched && balls.some(b => b.y < BALL_LOW_Y)) return;
-    if (getFreeCells().length === 0) {
+
+    // Si hay más de una pelota, regenerar siempre (sin esperar a que estén lejos)
+    if (balls.length > 1) {
+      // Regenerar evitando celdas con pelotas
+      const exclude = getCellsWithBalls();
+      const values = generateBrickValues();
+      placeBricks(values, exclude);
       pendingRegeneration = false;
       return;
     }
-    const values = generateBrickValues();
-    placeBricks(values);
-    pendingRegeneration = false;
+
+    // Si solo hay una pelota, respetar la regla de distancia
+    if (launched && balls.some(b => b.y < BALL_LOW_Y)) {
+      // La pelota está lejos, regenerar
+      const values = generateBrickValues();
+      placeBricks(values);
+      pendingRegeneration = false;
+    }
+    // Si la pelota está cerca, no regenerar aún (se reintentará en el próximo frame)
   }
 
   // ------------------------------------------------------------
-  // Power‑ups (tamaños y símbolos ajustados)
+  // Power‑ups con nuevos símbolos y tamaños
   // ------------------------------------------------------------
   function getGreenProbability(minutes) {
     if (minutes < 0) return GREEN_PROB_TABLE[0];
@@ -315,8 +374,8 @@ export function initJuego(config) {
 
     console.log(`⚡ Powerup generado: ${typeKey} (${color})`);
 
-    // Tamaños: verde 24px, rojo 72px
-    const size = isGreen ? 24 : 72;
+    // Tamaños: verde 24px, rojo 36px (mitad de 72)
+    const size = isGreen ? 24 : 36;
     const speed = isGreen ? 120 : 40;
 
     const cx = brick.x + brick.w / 2;
@@ -327,23 +386,24 @@ export function initJuego(config) {
       position: absolute;
       width: ${size}px; height: ${size}px;
       border-radius: 50%;
-      background: ${isGreen ? '#2ecc71' : '#e74c3c'};
-      border: 3px solid ${isGreen ? '#fff' : '#ff0'};
-      box-shadow: 0 0 20px rgba(0,0,0,0.7);
+      background: ${isGreen ? 'rgba(46, 204, 113, 0.7)' : 'rgba(231, 76, 60, 0.7)'};
+      border: 3px solid ${isGreen ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,0,0.8)'};
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
       display: flex; align-items: center; justify-content: center;
-      color: #fff; font-weight: bold; font-size: ${size * 0.4}px;
+      color: #fff; font-weight: bold; font-size: ${size * 0.5}px;
       pointer-events: none; z-index: 15;
       transform: translate(-50%, -50%);
       text-shadow: 0 0 6px rgba(0,0,0,0.8);
     `;
+    // Símbolos intuitivos
     let symbol = '';
     switch (typeKey) {
-      case 'MULTIBOLA': symbol = '✦'; break;
-      case 'PALA_GRANDE': symbol = '⬛'; break;
-      case 'DUREZA': symbol = '⬆'; break;
-      case 'BOLA_NIEBLA': symbol = '☁'; break;
-      case 'PALA_MINI': symbol = '▭'; break;
-      case 'FLAQUESA': symbol = '⬇'; break;
+      case 'MULTIBOLA': symbol = '🌀'; break;
+      case 'PALA_GRANDE': symbol = '📏'; break;
+      case 'DUREZA': symbol = '⚡'; break;
+      case 'BOLA_NIEBLA': symbol = '🌫️'; break;
+      case 'PALA_MINI': symbol = '📐'; break;
+      case 'FLAQUESA': symbol = '⬇️'; break;
     }
     el.textContent = symbol;
     inner.appendChild(el);
@@ -362,7 +422,7 @@ export function initJuego(config) {
   }
 
   // ------------------------------------------------------------
-  // Aplicar power‑up (modifica la dureza de la pelota)
+  // Aplicar power‑up
   // ------------------------------------------------------------
   function applyPowerup(pu) {
     const type = pu.type;
@@ -371,7 +431,7 @@ export function initJuego(config) {
         paddleSizeMultiplier = 1.3;
         break;
       case 'PALA_MINI':
-        paddleSizeMultiplier = 0.7;
+        paddleSizeMultiplier = 0.85; // menos reducción (antes 0.7)
         break;
       case 'MULTIBOLA': {
         const count = balls.length;
@@ -395,7 +455,6 @@ export function initJuego(config) {
         break;
       }
       case 'DUREZA': {
-        // Aumenta la dureza de la pelota (máx 3)
         if (ballDurability < 3) {
           ballDurability++;
           updateDurabilityVisual();
@@ -403,7 +462,6 @@ export function initJuego(config) {
         break;
       }
       case 'FLAQUESA': {
-        // Disminuye la dureza de la pelota (mín 1)
         if (ballDurability > 1) {
           ballDurability--;
           updateDurabilityVisual();
@@ -419,10 +477,10 @@ export function initJuego(config) {
   }
 
   // ------------------------------------------------------------
-  // Visuales: dureza en la pala y niebla
+  // Visuales: dureza, niebla, pelota
   // ------------------------------------------------------------
   function updateDurabilityVisual() {
-    // Mostrar líneas en la pala que indican la dureza de la pelota
+    // Líneas en la pala
     const lines = paddleEl.querySelectorAll('.paddle-line');
     lines.forEach(l => l.remove());
     for (let i = 0; i < ballDurability; i++) {
@@ -441,6 +499,36 @@ export function initJuego(config) {
       `;
       paddleEl.appendChild(line);
     }
+
+    // Actualizar textura de la pelota según dureza
+    const ballElements = inner.querySelectorAll('.ball-dynamic');
+    for (const el of ballElements) {
+      updateBallStyle(el);
+    }
+  }
+
+  function updateBallStyle(el) {
+    let bg, border, shadow;
+    switch (ballDurability) {
+      case 1:
+        bg = 'radial-gradient(circle at 35% 30%, #b0b0b0, #606060 60%, #303030)';
+        border = '2px solid #888';
+        shadow = '0 0 10px rgba(100,100,100,0.5)';
+        break;
+      case 2:
+        bg = 'radial-gradient(circle at 35% 30%, #ffaa00, #ff3300 60%, #990000)';
+        border = '2px solid #ff6600';
+        shadow = '0 0 20px rgba(255,100,0,0.8)';
+        break;
+      case 3:
+        bg = 'radial-gradient(circle at 35% 30%, #88ddff, #0066ff 60%, #0000aa)';
+        border = '2px solid #00ccff';
+        shadow = '0 0 25px rgba(0,150,255,0.9)';
+        break;
+    }
+    el.style.background = bg;
+    el.style.border = border;
+    el.style.boxShadow = shadow;
   }
 
   function updateNiebla() {
@@ -464,7 +552,6 @@ export function initJuego(config) {
     launched = true;
   }
 
-  // Reinicio completo (al abrir el juego o al pulsar "Jugar de nuevo")
   function resetGameState() {
     if (animFrameId) cancelAnimationFrame(animFrameId);
     if (countdownInterval) clearInterval(countdownInterval);
@@ -476,7 +563,7 @@ export function initJuego(config) {
     paddle.x = (STAGE_W - PADDLE_W_BASE) / 2;
     paddleSizeMultiplier = 1;
     paddleWidth = PADDLE_W_BASE;
-    ballDurability = 1;                  // reinicia dureza
+    ballDurability = 1;
     nieblaLevel = 0;
     updateNiebla();
     lives = 3;
@@ -494,7 +581,6 @@ export function initJuego(config) {
     powerups.forEach(p => p.el.remove());
     powerups = [];
 
-    // Colocar una bola pegada a la pala
     const initialX = paddle.x + paddleWidth / 2;
     const initialY = STAGE_H - 14 - BALL_R;
     balls.push({ x: initialX, y: initialY, vx: 0, vy: 0 });
@@ -506,23 +592,19 @@ export function initJuego(config) {
     draw();
   }
 
-  // Pérdida de vida: NO se restauran ladrillos, solo se reinician efectos
   function loseLife() {
     lives--;
     if (lives <= 0) {
       endGame();
       return;
     }
-    // Reiniciar efectos, pero dejar los ladrillos como están
     paddleSizeMultiplier = 1;
     paddleWidth = PADDLE_W_BASE;
     ballDurability = 1;
     nieblaLevel = 0;
     updateNiebla();
-    // Eliminar power-ups en caída
     powerups.forEach(p => p.el.remove());
     powerups = [];
-    // Colocar la bola pegada a la pala
     const newX = paddle.x + paddleWidth / 2;
     const newY = STAGE_H - 14 - BALL_R;
     balls = [{ x: newX, y: newY, vx: 0, vy: 0 }];
@@ -543,7 +625,6 @@ export function initJuego(config) {
 
   function startGame() {
     resetGameState();
-    // Colocar ladrillos iniciales (todos arcilla)
     const clayValues = new Array(36).fill(1);
     inner.querySelectorAll('.brick').forEach(b => b.remove());
     bricks = [];
@@ -577,7 +658,7 @@ export function initJuego(config) {
     paddleEl.style.width = paddleWidth + 'px';
     paddleEl.style.transform = 'translateX(' + paddle.x + 'px)';
 
-    // Dibujar bolas
+    // Actualizar bolas
     let ballElements = inner.querySelectorAll('.ball-dynamic');
     while (ballElements.length < balls.length) {
       const el = document.createElement('div');
@@ -585,12 +666,10 @@ export function initJuego(config) {
       el.style.cssText = `
         position: absolute; width: ${BALL_R * 2}px; height: ${BALL_R * 2}px;
         border-radius: 50%;
-        background: radial-gradient(circle at 35% 30%, #ffdddd, #ff6666 60%, #cc0000);
-        border: 2px solid #fff;
-        box-shadow: 0 0 15px rgba(255,200,200,0.8);
         pointer-events: none;
         transform: translate(-50%, -50%);
       `;
+      updateBallStyle(el);
       inner.appendChild(el);
       ballElements = inner.querySelectorAll('.ball-dynamic');
     }
@@ -624,7 +703,6 @@ export function initJuego(config) {
 
     updateUI();
 
-    // Movimiento de la pala
     let paddleMoved = false;
     if (keys.left) { paddle.x = Math.max(0, paddle.x - PADDLE_SPEED * delta); paddleMoved = true; }
     if (keys.right) { paddle.x = Math.min(STAGE_W - paddleWidth, paddle.x + PADDLE_SPEED * delta); paddleMoved = true; }
@@ -649,7 +727,6 @@ export function initJuego(config) {
       return;
     }
 
-    // Movimiento de bolas
     for (let i = balls.length - 1; i >= 0; i--) {
       const b = balls[i];
       b.x += b.vx * delta;
@@ -670,7 +747,6 @@ export function initJuego(config) {
         b.vy = -Math.cos(angle) * BALL_SPEED;
       }
 
-      // Colisión con ladrillos
       for (const br of bricks) {
         if (!br.alive) continue;
         if (b.x + BALL_R > br.x && b.x - BALL_R < br.x + br.w &&
@@ -688,7 +764,6 @@ export function initJuego(config) {
             b.vy = -b.vy;
           }
 
-          // Daño = dureza de la pelota
           const damage = ballDurability;
           br.hits -= damage;
           soundBrick();
@@ -711,13 +786,12 @@ export function initJuego(config) {
         balls.splice(i, 1);
         soundLose();
         if (balls.length === 0) {
-          loseLife();  // <-- aquí NO se restauran ladrillos
+          loseLife();
           if (lives <= 0) {
             draw();
             animFrameId = requestAnimationFrame(gameLoop);
             return;
           }
-          // Colocar una bola pegada
           const newX = paddle.x + paddleWidth / 2;
           const newY = STAGE_H - 14 - BALL_R;
           balls = [{ x: newX, y: newY, vx: 0, vy: 0 }];
@@ -730,7 +804,6 @@ export function initJuego(config) {
       }
     }
 
-    // Movimiento de powerups
     for (let i = powerups.length - 1; i >= 0; i--) {
       const pu = powerups[i];
       pu.y += pu.vy * delta;
@@ -882,6 +955,5 @@ export function initJuego(config) {
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
   resetGameState();
-  console.log('✅ Juego listo – dureza de pelota, reinicio sin regenerar ladrillos');
+  console.log('✅ Juego listo – neón, texturas y regeneración mejorada');
 }
-
