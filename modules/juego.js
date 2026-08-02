@@ -1,7 +1,7 @@
 // ============================================================
 // juego.js – CORREGIDO (bug pelota y resumeParticulas)
 // ============================================================
-console.log('📦 juego hj.js (corregido: bug pelota y resumeParticulas)');
+console.log('📦 juego z.js (corregido: bug pelota y resumeParticulas)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
@@ -49,13 +49,51 @@ const POWERUP_PROBS = {
   IRON: 0.24
 };
 
+// Control de ritmo: evita que caigan varios power-ups juntos (racha) y
+// evita también que pasen demasiados segundos sin que caiga ninguno (sequía).
+const POWERUP_MIN_GAP_MS = 3500;  // mínimo entre dos power-ups normales
+const POWERUP_PITY_GAP_MS = 11000; // si pasa esto sin ninguno, se fuerza el próximo
+
+// Patrones de forma para variar cómo se ven las regeneraciones de ladrillos.
+// Cada uno es una función (fila, columna) -> boolean sobre la grilla 6x6.
+// Al regenerar se elige uno al azar y se prioriza ubicar los ladrillos ahí;
+// si no alcanzan celdas del patrón, se completa con celdas libres normales
+// (nunca se bloquea la partida por falta de espacio del patrón elegido).
+const BRICK_PATTERNS = [
+  (r, c) => Math.abs(r - 2.5) + Math.abs(c - 2.5) <= 2.5, // diamante
+  (r, c) => (r === 2 || r === 3) || (c === 2 || c === 3),  // cruz
+  (r, c) => r === 0 || r === 5 || c === 0 || c === 5,       // marco
+  (r, c) => c % 2 === 0,                                    // columnas
+  (r, c) => (r + c) % 2 === 0                                // ajedrez
+];
+
+function buildPatternCells(predicate) {
+  const cols = 6, rows = 6;
+  const cells = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (predicate(r, c)) cells.push(r * cols + c);
+    }
+  }
+  return cells;
+}
+
+// Ladrillo dorado: ocasional, mismo comportamiento pero da 50% más de puntos.
+const GOLDEN_BRICK_CHANCE = 0.08;
+
+// Racha/combo: cada ladrillo seguido sin perder una vida suma bonus de
+// puntos, con un techo para que no se desbalancee (máx. +50%).
+const COMBO_BONUS_PER_HIT = 0.02;
+const COMBO_BONUS_CAP = 0.5;
+const COMBO_MIN_TO_SHOW = 3;
+
 const GREEN_PROB_TABLE = [
-  50.000, 46.875, 43.750, 40.625, 37.500, 34.375, 31.250, 28.125,
-  25.000, 21.875, 18.750, 15.625, 12.500, 9.375, 6.250, 3.125, 0.000
+  75.000, 70.3125, 65.625, 60.9375, 56.250, 51.5625, 46.875, 42.1875,
+  37.500, 32.8125, 28.125, 23.4375, 18.750, 14.0625, 9.375, 4.6875, 0.000
 ];
 
 const GREEN_WEIGHTS = { MULTIBOLA: 15, PALA_GRANDE: 35, DUREZA: 50 };
-const RED_WEIGHTS   = { BOLA_NIEBLA: 98, PALA_MINI: 1, FLAQUESA: 1 };
+const RED_WEIGHTS   = { BOLA_NIEBLA: 10, PALA_MINI: 35, FLAQUESA: 55 };
 
 const SCORE_MESSAGES = [
   "¡Ánimo! Cada punto cuenta.",
@@ -187,6 +225,20 @@ export function initJuego(config) {
   pauseBtn.style.display = 'none';
   menuBtn.style.display = 'none';
 
+  // Indicador de racha/combo: chico, discreto, junto al puntaje.
+  const comboEl = document.createElement('span');
+  comboEl.id = 'combo-indicator';
+  comboEl.style.cssText = `
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.65rem;
+    color: #ffd700;
+    text-shadow: 0 0 8px rgba(255,215,0,0.8);
+    margin-left: 6px;
+    display: none;
+    vertical-align: middle;
+  `;
+  if (scoreEl.parentNode) scoreEl.parentNode.insertBefore(comboEl, scoreEl.nextSibling);
+
   if (!document.querySelector('#rainbow-score')) {
     const style2 = document.createElement('style');
     style2.id = 'rainbow-score';
@@ -204,12 +256,16 @@ export function initJuego(config) {
   nieblaEl.style.cssText = `
     position: absolute; left: 0; top: 0; width: 100%; height: 0px;
     pointer-events: none;
-    background: linear-gradient(to bottom,
-      #ffffff 0,
-      #ffffff calc(100% - ${NIEBLA_FEATHER}px),
-      rgba(255,255,255,0.55) calc(100% - ${Math.round(NIEBLA_FEATHER * 0.4)}px),
-      rgba(255,255,255,0) 100%);
-    filter: blur(2px);
+    background:
+      radial-gradient(ellipse 42px 24px at 8% 100%, rgba(255,255,255,0.95) 40%, rgba(255,255,255,0) 100%),
+      radial-gradient(ellipse 50px 28px at 30% 100%, rgba(255,255,255,0.95) 40%, rgba(255,255,255,0) 100%),
+      radial-gradient(ellipse 46px 26px at 52% 100%, rgba(255,255,255,0.95) 40%, rgba(255,255,255,0) 100%),
+      radial-gradient(ellipse 52px 28px at 74% 100%, rgba(255,255,255,0.95) 40%, rgba(255,255,255,0) 100%),
+      radial-gradient(ellipse 44px 24px at 94% 100%, rgba(255,255,255,0.95) 40%, rgba(255,255,255,0) 100%),
+      linear-gradient(to bottom,
+        #ffffff 0,
+        #ffffff calc(100% - ${NIEBLA_FEATHER}px),
+        rgba(255,255,255,0) 100%);
     transition: height 0.6s ease, opacity 0.6s ease;
     opacity: 0; z-index: 20;
   `;
@@ -240,6 +296,9 @@ export function initJuego(config) {
   let gamePoints = 0;
   let pendingRegeneration = false;
   let ladrillosRotos = 0;
+  let lastPowerupTime = 0;
+  let pendingBlueBall = false;
+  let comboCount = 0;
   let lastScoreMilestone = 0;
   let blueBallActive = false;
 
@@ -395,6 +454,7 @@ export function initJuego(config) {
     showMenu(false);
     livesEl.style.display = 'none';
     scoreEl.style.display = 'none';
+    comboEl.style.display = 'none';
     pauseBtn.style.display = 'none';
     menuBtn.style.display = 'none';
     running = false;
@@ -415,6 +475,7 @@ export function initJuego(config) {
     showMenu(false);
     livesEl.style.display = 'none';
     scoreEl.style.display = 'none';
+    comboEl.style.display = 'none';
     pauseBtn.style.display = 'none';
     menuBtn.style.display = 'none';
     running = false;
@@ -430,6 +491,7 @@ export function initJuego(config) {
     showMenu(false);
     livesEl.style.display = 'none';
     scoreEl.style.display = 'none';
+    comboEl.style.display = 'none';
     pauseBtn.style.display = 'none';
     menuBtn.style.display = 'none';
     running = false;
@@ -487,7 +549,13 @@ export function initJuego(config) {
       linear-gradient(135deg, ${type.color} 0%, ${adjustColor(type.color, -20)} 50%, ${type.color} 100%)
     `;
     el.style.backgroundSize = '200% 200%';
-    el.style.boxShadow = 'inset 0 -3px 0 rgba(0,0,0,0.3), inset 0 3px 0 rgba(255,255,255,0.2)';
+    if (brick.isGolden) {
+      el.style.boxShadow = 'inset 0 -3px 0 rgba(0,0,0,0.3), inset 0 3px 0 rgba(255,255,255,0.2), 0 0 10px 2px rgba(255,215,0,0.85)';
+      el.style.border = '2px solid #ffd700';
+    } else {
+      el.style.boxShadow = 'inset 0 -3px 0 rgba(0,0,0,0.3), inset 0 3px 0 rgba(255,255,255,0.2)';
+      el.style.border = '1px solid rgba(0,0,0,0.3)';
+    }
     el.textContent = FRACTURE_SYMBOLS[brick.hits] ?? '';
   }
 
@@ -604,7 +672,7 @@ export function initJuego(config) {
     return cells;
   }
 
-  function placeBricks(values, excludeCells = new Set()) {
+  function placeBricks(values, excludeCells = new Set(), preferredCells = null) {
     const cols = 6, brickW = 38, brickH = 16, gap = 3;
     const totalWidth = cols * (brickW + gap) - gap;
     const startX = (STAGE_W - totalWidth) / 2;
@@ -613,7 +681,15 @@ export function initJuego(config) {
     const freeCells = getFreeCells(excludeCells);
     if (freeCells.length === 0) return;
 
-    const shuffled = freeCells.sort(() => Math.random() - 0.5);
+    let shuffled;
+    if (preferredCells && preferredCells.length > 0) {
+      const preferredSet = new Set(preferredCells);
+      const inPattern = freeCells.filter(c => preferredSet.has(c)).sort(() => Math.random() - 0.5);
+      const outPattern = freeCells.filter(c => !preferredSet.has(c)).sort(() => Math.random() - 0.5);
+      shuffled = inPattern.concat(outPattern);
+    } else {
+      shuffled = freeCells.sort(() => Math.random() - 0.5);
+    }
     const toPlace = Math.min(values.length, shuffled.length);
     for (let i = 0; i < toPlace; i++) {
       const cell = shuffled[i];
@@ -653,7 +729,8 @@ export function initJuego(config) {
         cell: cell,
         type: type,
         originalType: type,
-        originalHits: type.hits
+        originalHits: type.hits,
+        isGolden: false
       };
       bricks.push(brick);
       gamePoints += type.value;
@@ -667,27 +744,69 @@ export function initJuego(config) {
     pendingRegeneration = true;
   }
 
+  function maybeMakeGolden(fromIndex) {
+    if (Math.random() >= GOLDEN_BRICK_CHANCE) return;
+    const recent = bricks.slice(fromIndex);
+    if (recent.length === 0) return;
+    const chosen = recent[Math.floor(Math.random() * recent.length)];
+    chosen.isGolden = true;
+    updateBrickVisual(chosen);
+  }
+
   function checkAndRegenerate() {
     if (!pendingRegeneration || !running) return;
+    const pattern = BRICK_PATTERNS[Math.floor(Math.random() * BRICK_PATTERNS.length)];
+    const preferredCells = buildPatternCells(pattern);
     if (balls.length > 1) {
       const exclude = getCellsWithBalls();
       const values = generateBrickValues();
-      placeBricks(values, exclude);
+      const before = bricks.length;
+      placeBricks(values, exclude, preferredCells);
+      maybeMakeGolden(before);
       pendingRegeneration = false;
       return;
     }
     if (launched && balls.some(b => b.y < BALL_LOW_Y)) {
       const values = generateBrickValues();
-      placeBricks(values);
+      const before = bricks.length;
+      placeBricks(values, undefined, preferredCells);
+      maybeMakeGolden(before);
       pendingRegeneration = false;
     }
   }
 
+  function getElapsedMinutes() {
+    if (!gameTimeActive || gameStartTime <= 0) return 0;
+    const now = performance.now();
+    return Math.max(0, (now - gameStartTime - pausedTime) / 60000);
+  }
+
+  // Multiplicador de velocidad de la pelota según el tiempo jugado.
+  // Sube poco a poco al principio, llega muy difícil (~1.9x) cerca del
+  // minuto 8, y sigue subiendo (más lento) hasta volverse prácticamente
+  // imposible (~2.7x) alrededor del minuto 14, donde se estabiliza. El
+  // juego nunca termina por esto: solo se vuelve cada vez más difícil
+  // sostener el ritmo de puntos.
+  const BALL_SPEED_RAMP_MINUTES = 14;
+  const BALL_SPEED_MAX_MULT = 2.7;
+  function getSpeedMultiplier(minutes) {
+    const t = Math.min(minutes, BALL_SPEED_RAMP_MINUTES) / BALL_SPEED_RAMP_MINUTES;
+    const eased = t * t * (3 - 2 * t); // smoothstep: crecimiento suave, no lineal
+    return 1 + eased * (BALL_SPEED_MAX_MULT - 1);
+  }
+
+  function getCurrentBallSpeed() {
+    return BALL_SPEED * getSpeedMultiplier(getElapsedMinutes());
+  }
+
   function getGreenProbability(minutes) {
-    if (minutes < 0) return GREEN_PROB_TABLE[0];
-    if (minutes >= GREEN_PROB_TABLE.length - 1) return GREEN_PROB_TABLE[GREEN_PROB_TABLE.length - 1];
-    const idx = Math.floor(minutes);
-    const frac = minutes - idx;
+    // La tabla avanza cada 0.5 minutos (17 entradas = minuto 0 al 8), así que
+    // el índice real es minutes*2, no minutes directo.
+    const step = minutes * 2;
+    if (step <= 0) return GREEN_PROB_TABLE[0];
+    if (step >= GREEN_PROB_TABLE.length - 1) return GREEN_PROB_TABLE[GREEN_PROB_TABLE.length - 1];
+    const idx = Math.floor(step);
+    const frac = step - idx;
     return GREEN_PROB_TABLE[idx] + (GREEN_PROB_TABLE[idx + 1] - GREEN_PROB_TABLE[idx]) * frac;
   }
 
@@ -730,13 +849,25 @@ export function initJuego(config) {
     if (ladrillosRotos <= 36) return;
     if (powerupsInAir >= 2) return;
 
-    let prob = 0;
-    if (brick.type === BRICK_TYPES.CLAY) prob = POWERUP_PROBS.CLAY;
-    else if (brick.type === BRICK_TYPES.WOOD) prob = POWERUP_PROBS.WOOD;
-    else if (brick.type === BRICK_TYPES.IRON) prob = POWERUP_PROBS.IRON;
-    if (Math.random() >= prob) return;
-
     const now = performance.now();
+    const sinceLast = lastPowerupTime === 0 ? Infinity : now - lastPowerupTime;
+
+    // Racha: si cayó un power-up hace muy poco, no dejamos que caiga otro
+    // enseguida, sin importar la tirada de probabilidad.
+    if (sinceLast < POWERUP_MIN_GAP_MS) return;
+
+    // Sequía: si ya pasó demasiado tiempo sin ninguno, forzamos que este
+    // ladrillo sí suelte uno (nos saltamos la tirada de probabilidad normal).
+    const forced = sinceLast >= POWERUP_PITY_GAP_MS;
+
+    if (!forced) {
+      let prob = 0;
+      if (brick.type === BRICK_TYPES.CLAY) prob = POWERUP_PROBS.CLAY;
+      else if (brick.type === BRICK_TYPES.WOOD) prob = POWERUP_PROBS.WOOD;
+      else if (brick.type === BRICK_TYPES.IRON) prob = POWERUP_PROBS.IRON;
+      if (Math.random() >= prob) return;
+    }
+
     let elapsed = 0;
     if (gameTimeActive && gameStartTime > 0) {
       elapsed = (now - gameStartTime - pausedTime) / 60000;
@@ -752,6 +883,7 @@ export function initJuego(config) {
 
     activePowerupTypes.add(typeKey);
     powerupsInAir++;
+    lastPowerupTime = now;
 
     const isGreen = color === 'verde';
     console.log(`⚡ Powerup generado: ${typeKey} (${color})`);
@@ -892,12 +1024,13 @@ export function initJuego(config) {
 
   function launchBall() {
     if (launched) return;
+    const speed = getCurrentBallSpeed();
     for (const b of balls) {
       if (b.vx === 0 && b.vy === 0) {
         const dir = Math.random() < 0.5 ? -1 : 1;
         const angle = (Math.random() - 0.5) * 0.8;
-        b.vx = Math.sin(angle) * BALL_SPEED * dir;
-        b.vy = -Math.cos(angle) * BALL_SPEED;
+        b.vx = Math.sin(angle) * speed * dir;
+        b.vy = -Math.cos(angle) * speed;
       }
     }
     launched = true;
@@ -927,6 +1060,9 @@ export function initJuego(config) {
     gamePoints = 0;
     pendingRegeneration = false;
     ladrillosRotos = 0;
+    lastPowerupTime = 0;
+    pendingBlueBall = false;
+    comboCount = 0;
     lastScoreMilestone = 0;
     blueBallActive = false;
     gameTimeActive = false;
@@ -937,6 +1073,7 @@ export function initJuego(config) {
     pauseBtn.textContent = '⏸️';
     livesEl.style.display = 'none';
     scoreEl.style.display = 'none';
+    comboEl.style.display = 'none';
     pauseBtn.style.display = 'none';
     menuBtn.style.display = 'none';
     msgEl.classList.remove('show');
@@ -969,6 +1106,9 @@ export function initJuego(config) {
     gamePoints = 0;
     pendingRegeneration = false;
     ladrillosRotos = 0;
+    lastPowerupTime = 0;
+    pendingBlueBall = false;
+    comboCount = 0;
     lastScoreMilestone = 0;
     blueBallActive = false;
     keys.left = keys.right = false;
@@ -1020,6 +1160,7 @@ export function initJuego(config) {
     lives--;
     animateHeartLoss();
     gameTimeActive = false;
+    comboCount = 0;
 
     // Detener la pelota inmediatamente
     launched = false;
@@ -1069,6 +1210,7 @@ export function initJuego(config) {
     showMenu(true, playerScore);
     livesEl.style.display = 'none';
     scoreEl.style.display = 'none';
+    comboEl.style.display = 'none';
     pauseBtn.style.display = 'none';
     menuBtn.style.display = 'none';
     soundLose();
@@ -1097,6 +1239,7 @@ export function initJuego(config) {
     layoutStage();
     livesEl.style.display = 'block';
     scoreEl.style.display = 'block';
+    comboEl.style.display = 'none';
     pauseBtn.style.display = 'block';
     menuBtn.style.display = 'block';
     updateUI();
@@ -1111,6 +1254,13 @@ export function initJuego(config) {
     updateLivesUI();
     scoreEl.textContent = `${playerScore}`;
 
+    if (comboCount >= COMBO_MIN_TO_SHOW) {
+      comboEl.textContent = `x${comboCount}`;
+      comboEl.style.display = 'inline';
+    } else {
+      comboEl.style.display = 'none';
+    }
+
     const milestone = Math.floor(playerScore / SCORE_PER_LIFE);
     if (milestone > lastScoreMilestone && milestone > 0) {
       lastScoreMilestone = milestone;
@@ -1119,8 +1269,15 @@ export function initJuego(config) {
         lives++;
         updateLivesUI();
       } else {
-        if (!blueBallActive) spawnBlueBall();
+        if (!blueBallActive) pendingBlueBall = true;
       }
+    }
+
+    // No sueltes la bola azul mientras ya hay un power-up normal cayendo:
+    // así evitamos que el jugador tenga que atender 3 cosas a la vez.
+    if (pendingBlueBall && !blueBallActive && powerupsInAir <= 1) {
+      pendingBlueBall = false;
+      spawnBlueBall();
     }
   }
 
@@ -1263,8 +1420,9 @@ export function initJuego(config) {
         let hit = (b.x - (paddle.x + paddleWidth / 2)) / (paddleWidth / 2);
         hit = Math.max(-0.85, Math.min(0.85, hit));
         const angle = hit * 0.7;
-        b.vx = Math.sin(angle) * BALL_SPEED;
-        b.vy = -Math.cos(angle) * BALL_SPEED;
+        const speed = getCurrentBallSpeed();
+        b.vx = Math.sin(angle) * speed;
+        b.vy = -Math.cos(angle) * speed;
       }
 
       for (const br of bricks) {
@@ -1290,7 +1448,10 @@ export function initJuego(config) {
           if (br.hits <= 0) {
             br.alive = false;
             br.el.classList.add('gone');
-            playerScore += br.playerPoints;
+            comboCount++;
+            const comboMult = 1 + Math.min(comboCount * COMBO_BONUS_PER_HIT, COMBO_BONUS_CAP);
+            const basePoints = br.isGolden ? Math.round(br.playerPoints * 1.5) : br.playerPoints;
+            playerScore += Math.round(basePoints * comboMult);
             gamePoints -= br.value;
             ladrillosRotos++;
             updateUI();
@@ -1413,6 +1574,7 @@ export function initJuego(config) {
     updateDurabilityVisual();
     livesEl.style.display = 'none';
     scoreEl.style.display = 'none';
+    comboEl.style.display = 'none';
     pauseBtn.style.display = 'none';
     menuBtn.style.display = 'none';
     running = false;
