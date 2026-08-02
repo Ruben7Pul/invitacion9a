@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – CORRECCIÓN FINAL: 8500 pts, sin mensajes, botón salida, reglas
+// juego.js – CON BOTÓN DE MENÚ, REGLAS Y SALIDA
 // ============================================================
-console.log('📦 juego.js (8500 pts, sin mensajes, salida y reglas)');
+console.log('📦 juego.js (con botón de menú y reglas)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
@@ -19,7 +19,7 @@ const REGEN_THRESHOLD = 9;
 const BALL_LOW_Y = STAGE_H - 60;
 const MAX_NIEBLA = 3;
 const MAX_LIVES = 3;
-const SCORE_PER_LIFE = 8500; // AHORA 8500
+const SCORE_PER_LIFE = 8500; // Ahora 8500 puntos exactos
 const TOP_SCORES_COUNT = 5;
 
 const BRICK_TYPES = {
@@ -92,7 +92,7 @@ function getRandomName() {
 }
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego (8500 pts, sin mensajes)');
+  console.log('🎮 Iniciando juego (con botón de menú y reglas)');
 
   if (!document.querySelector('#pixel-font')) {
     const link = document.createElement('link');
@@ -117,8 +117,8 @@ export function initJuego(config) {
   const livesEl = document.getElementById('lives');
   const scoreEl = document.getElementById('game-score');
   const pauseBtn = document.getElementById('pause-btn');
+  const menuBtn = document.getElementById('menu-btn'); // nuevo botón volver al menú
 
-  // Elementos del menú
   const menuEl = document.getElementById('game-menu');
   const menuContent = document.getElementById('menu-content');
   const menuPlay = document.getElementById('menu-play');
@@ -134,10 +134,10 @@ export function initJuego(config) {
   const gameoverMenuBtn = document.getElementById('gameover-menu-btn');
   const nameError = document.getElementById('name-error');
   const menuResetTops = document.getElementById('menu-reset-tops');
-  const menuRulesBtn = document.getElementById('menu-rules-btn');
-  const menuRules = document.getElementById('menu-rules');
-  const menuRulesBack = document.getElementById('menu-rules-back');
   const menuExit = document.getElementById('menu-exit');
+  const menuRules = document.getElementById('menu-rules');
+  const modalRules = document.getElementById('modal-rules');
+  const rulesClose = document.getElementById('rules-close');
 
   // Ocultar título "MENÚ"
   const menuTitle = menuEl?.querySelector('h2');
@@ -177,6 +177,7 @@ export function initJuego(config) {
   scoreEl.style.color = 'transparent';
   scoreEl.style.display = 'none';
   pauseBtn.style.display = 'none';
+  menuBtn.style.display = 'none';
 
   if (!document.querySelector('#rainbow-score')) {
     const style2 = document.createElement('style');
@@ -271,7 +272,6 @@ export function initJuego(config) {
       pendingHighScore = false;
     }
     menuScoresList.style.display = 'none';
-    menuRules.style.display = 'none';
   }
 
   function hideMenu() {
@@ -282,7 +282,6 @@ export function initJuego(config) {
     menuGameover.style.display = 'none';
     gameoverInputContainer.style.display = 'none';
     gameoverMenuBtn.style.display = 'none';
-    menuRules.style.display = 'none';
   }
 
   function updateScoresList() {
@@ -325,24 +324,20 @@ export function initJuego(config) {
     menuContent.style.display = 'flex';
   });
 
-  menuRulesBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    soundTap();
-    menuContent.style.display = 'none';
-    menuRules.style.display = 'block';
-  });
-
-  menuRulesBack.addEventListener('click', (e) => {
-    e.stopPropagation();
-    soundTap();
-    menuRules.style.display = 'none';
-    menuContent.style.display = 'flex';
-  });
-
   menuExit.addEventListener('click', (e) => {
     e.stopPropagation();
     soundTap();
-    closeGame();
+    closeGame(); // Cierra el juego y vuelve a la invitación
+  });
+
+  menuRules.addEventListener('click', (e) => {
+    e.stopPropagation();
+    soundTap();
+    if (modalRules) modalRules.classList.add('open');
+  });
+
+  rulesClose.addEventListener('click', () => {
+    if (modalRules) modalRules.classList.remove('open');
   });
 
   if (menuResetTops) {
@@ -376,6 +371,7 @@ export function initJuego(config) {
     livesEl.style.display = 'none';
     scoreEl.style.display = 'none';
     pauseBtn.style.display = 'none';
+    menuBtn.style.display = 'none';
     running = false;
     gameOver = false;
     if (animFrameId) cancelAnimationFrame(animFrameId);
@@ -395,6 +391,23 @@ export function initJuego(config) {
     livesEl.style.display = 'none';
     scoreEl.style.display = 'none';
     pauseBtn.style.display = 'none';
+    menuBtn.style.display = 'none';
+    running = false;
+    gameOver = false;
+    if (animFrameId) cancelAnimationFrame(animFrameId);
+  });
+
+  // ---- Botón "Volver al menú" en la partida ----
+  menuBtn.addEventListener('click', () => {
+    if (!running && !gameOver) return;
+    soundTap();
+    cleanGameState();
+    hideMenu();
+    showMenu(false);
+    livesEl.style.display = 'none';
+    scoreEl.style.display = 'none';
+    pauseBtn.style.display = 'none';
+    menuBtn.style.display = 'none';
     running = false;
     gameOver = false;
     if (animFrameId) cancelAnimationFrame(animFrameId);
@@ -436,7 +449,7 @@ export function initJuego(config) {
     if (document.hidden && running && !paused && !gameOver) togglePause();
   });
 
-  // ---- FUNCIONES DEL JUEGO ----
+  // ---- FUNCIONES DEL JUEGO (sin cambios relevantes) ----
   function getBrickTypeFromValue(val) {
     if (val === 1) return BRICK_TYPES.CLAY;
     if (val === 2) return BRICK_TYPES.WOOD;
@@ -787,8 +800,7 @@ export function initJuego(config) {
       type: 'BOLA_AZUL', el: el, alive: true, isBlue: true
     });
     powerupsInAir++;
-
-    // SIN MENSAJE DE BOLA AZUL
+    // No mostrar mensaje flotante
   }
 
   function applyBlueBall() {
@@ -829,13 +841,11 @@ export function initJuego(config) {
       }
     }
     updateUI();
-    // SIN MENSAJE DE +2000
     blueBallActive = false;
+    // No mostrar mensaje flotante
   }
 
   function showFloatingMessage(text, color = '#fff') {
-    // Esta función ya no se usa para vida extra ni bola azul, pero se mantiene por si acaso
-    // (se usa para mensajes de puntuación y de ánimo)
     const el = document.createElement('div');
     el.style.cssText = `
       position: absolute;
@@ -905,6 +915,7 @@ export function initJuego(config) {
     livesEl.style.display = 'none';
     scoreEl.style.display = 'none';
     pauseBtn.style.display = 'none';
+    menuBtn.style.display = 'none';
     msgEl.classList.remove('show');
     updateUI();
     draw();
@@ -1018,6 +1029,7 @@ export function initJuego(config) {
     livesEl.style.display = 'none';
     scoreEl.style.display = 'none';
     pauseBtn.style.display = 'none';
+    menuBtn.style.display = 'none';
     soundLose();
   }
 
@@ -1045,6 +1057,7 @@ export function initJuego(config) {
     livesEl.style.display = 'block';
     scoreEl.style.display = 'block';
     pauseBtn.style.display = 'block';
+    menuBtn.style.display = 'block'; // Mostrar botón de volver al menú
     updateUI();
     updateDurabilityVisual();
     draw();
@@ -1060,20 +1073,19 @@ export function initJuego(config) {
     const milestone = Math.floor(playerScore / SCORE_PER_LIFE);
     if (milestone > lastScoreMilestone && milestone > 0) {
       lastScoreMilestone = milestone;
-      // Mostrar mensaje de ánimo (pero no de vida extra ni bola azul)
+      // Mostrar mensaje de ánimo (opcional)
       const msgIndex = Math.min(milestone - 1, SCORE_MESSAGES.length - 1);
       const msg = SCORE_MESSAGES[msgIndex];
       showFloatingMessage(msg, '#ffcc00');
 
-      // Recompensa: vida extra o bola azul (sin mensaje)
+      // Recompensa exacta cada 8500 puntos: vida o bola azul
       if (lives < MAX_LIVES) {
         lives++;
         updateLivesUI();
-        // SIN MENSAJE DE VIDA EXTRA
+        // No mostrar mensaje de vida extra
       } else {
-        if (!blueBallActive) {
-          spawnBlueBall(); // sin mensaje
-        }
+        if (!blueBallActive) spawnBlueBall();
+        // No mostrar mensaje de bola azul
       }
     }
   }
@@ -1359,6 +1371,7 @@ export function initJuego(config) {
     livesEl.style.display = 'none';
     scoreEl.style.display = 'none';
     pauseBtn.style.display = 'none';
+    menuBtn.style.display = 'none';
     running = false;
     gameOver = false;
     if (animFrameId) cancelAnimationFrame(animFrameId);
@@ -1452,6 +1465,6 @@ export function initJuego(config) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  // NO se abre automáticamente
-  console.log('✅ Juego inicializado (8500 pts, sin mensajes, salida y reglas)');
+  // No se abre automáticamente
+  console.log('✅ Juego inicializado con nuevas funciones');
 }
