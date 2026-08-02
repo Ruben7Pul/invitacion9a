@@ -30,7 +30,6 @@ body {
   color: var(--cream);
   position: fixed;
   inset: 0;
-  /* Tamaño base: en móvil será 18px, en escritorio 16px */
   font-size: clamp(16px, 2.2vw, 20px);
 }
 
@@ -229,9 +228,6 @@ body {
   max-width: 560px;
   gap: 0.2rem;
   padding: 0.2rem 0;
-  /* Convierte #app-mid en "contenedor de referencia": todo lo que use
-     unidades cqw dentro de aquí se mide contra ESTE ancho (máx 560px),
-     no contra el ancho de toda la ventana/monitor. */
   container-type: inline-size;
   container-name: tarjeta;
 }
@@ -725,6 +721,7 @@ h1#nombre-hero {
   opacity: 1;
 }
 
+/* ---- HEADER DEL JUEGO (FIJADO) ---- */
 #game-header {
   display: flex;
   align-items: center;
@@ -737,7 +734,24 @@ h1#nombre-hero {
   gap: 0.5rem;
 }
 #game-header span { white-space: nowrap; }
-#game-score { font-size: clamp(0.7rem, 2vw, 0.9rem); }
+#game-score {
+  font-size: clamp(0.7rem, 2vw, 0.9rem);
+  min-width: 120px;          /* Evita que se mueva al cambiar el texto */
+  text-align: center;
+  flex-shrink: 0;
+}
+#pause-btn, #game-close {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--gold-light);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 #game-stage {
   position: relative;
@@ -862,7 +876,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   RESPONSIVE EXTRA (SOLO PARA MÓVILES MUY PEQUEÑOS)
+   RESPONSIVE EXTRA
    ============================================================ */
 @media (max-width: 400px) {
   #app { padding: 0.6rem 0.8rem; }
@@ -880,9 +894,6 @@ h1#nombre-hero {
   #ball { width: 7px; height: 7px; }
 }
 
-/* ============================================================
-   ESCRITORIO (AJUSTES FINOS)
-   ============================================================ */
 @media (min-width: 768px) {
   #app { padding: 1rem 2rem; }
   #nav { max-width: 550px; }
