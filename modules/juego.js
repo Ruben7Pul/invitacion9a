@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – CORRECCIÓN FINAL (Game Over sin menú principal)
+// juego.js – CORRECCIÓN FINAL (no se abre automáticamente)
 // ============================================================
-console.log('📦 juego.js (Game Over corregido)');
+console.log('📦 juego.js (no abre automáticamente)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
@@ -92,7 +92,7 @@ function getRandomName() {
 }
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego (Game Over corregido)');
+  console.log('🎮 Iniciando juego (no abre automáticamente)');
 
   if (!document.querySelector('#pixel-font')) {
     const link = document.createElement('link');
@@ -103,7 +103,10 @@ export function initJuego(config) {
   }
 
   const nombreEl = document.getElementById('nombre-hero');
-  nombreEl.addEventListener('click', () => { soundTap(); openGame(); });
+  nombreEl.addEventListener('click', () => {
+    soundTap();
+    openGame(); // Solo se abre al hacer clic en el nombre
+  });
 
   const overlay = document.getElementById('game-overlay');
   const stage = document.getElementById('game-stage');
@@ -236,11 +239,9 @@ export function initJuego(config) {
     if (!menuEl) return;
     menuEl.style.display = 'flex';
     if (showGameOver) {
-      // Modo GAME OVER: ocultar menú principal, mostrar solo gameover
       menuGameover.style.display = 'block';
       menuContent.style.display = 'none';
       gameoverScore.textContent = `Puntuación: ${score}`;
-      // Ocultar estadísticas
       const statsEl = document.getElementById('gameover-stats');
       if (statsEl) statsEl.style.display = 'none';
 
@@ -259,7 +260,6 @@ export function initJuego(config) {
         gameoverMenuBtn.textContent = '🏠 Volver al menú';
       }
     } else {
-      // Modo MENÚ PRINCIPAL: mostrar menú, ocultar gameover
       menuGameover.style.display = 'none';
       menuContent.style.display = 'flex';
       gameoverInputContainer.style.display = 'none';
@@ -297,28 +297,31 @@ export function initJuego(config) {
   }
 
   // ---- Eventos del menú ----
-  menuPlay.addEventListener('click', () => {
+  menuPlay.addEventListener('click', (e) => {
+    e.stopPropagation();
     soundTap();
     hideMenu();
     startGame();
   });
 
-  menuScores.addEventListener('click', () => {
+  menuScores.addEventListener('click', (e) => {
+    e.stopPropagation();
     soundTap();
     updateScoresList();
     menuContent.style.display = 'none';
     menuScoresList.style.display = 'block';
   });
 
-  menuScoresBack.addEventListener('click', () => {
+  menuScoresBack.addEventListener('click', (e) => {
+    e.stopPropagation();
     soundTap();
     menuScoresList.style.display = 'none';
     menuContent.style.display = 'flex';
   });
 
-  // Botón temporal para reiniciar tops
   if (menuResetTops) {
-    menuResetTops.addEventListener('click', () => {
+    menuResetTops.addEventListener('click', (e) => {
+      e.stopPropagation();
       if (confirm('¿Seguro que quieres reiniciar las mejores puntuaciones?')) {
         saveHighScores([]);
         updateScoresList();
@@ -331,7 +334,8 @@ export function initJuego(config) {
     return /^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/.test(name);
   }
 
-  gameoverSave.addEventListener('click', () => {
+  gameoverSave.addEventListener('click', (e) => {
+    e.stopPropagation();
     const name = playerNameInput.value.trim();
     if (!isValidName(name) || name === '') {
       nameError.style.display = 'block';
@@ -356,7 +360,8 @@ export function initJuego(config) {
     if (e.key === 'Enter') gameoverSave.click();
   });
 
-  gameoverMenuBtn.addEventListener('click', () => {
+  gameoverMenuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
     soundTap();
     cleanGameState();
     hideMenu();
@@ -1310,6 +1315,7 @@ export function initJuego(config) {
     activePowerupTypes.delete(type);
   }
 
+  // ---- ABRIR Y CERRAR JUEGO ----
   function openGame() {
     cleanGameState();
     overlay.classList.add('open');
@@ -1356,6 +1362,7 @@ export function initJuego(config) {
   closeBtn.addEventListener('click', closeGame);
 
   stage.addEventListener('mousedown', (e) => {
+    if (e.target.closest('#game-menu')) return;
     if (!running || paused || gameOver) return;
     const rect = stage.getBoundingClientRect();
     const localX = (e.clientX - rect.left) / scale;
@@ -1363,6 +1370,7 @@ export function initJuego(config) {
     mouseActive = true;
     if (!launched) launchBall();
   });
+
   document.addEventListener('mousemove', (e) => {
     if (!running || !mouseActive || paused || gameOver) return;
     const rect = stage.getBoundingClientRect();
@@ -1372,6 +1380,7 @@ export function initJuego(config) {
   document.addEventListener('mouseup', () => { mouseActive = false; });
 
   stage.addEventListener('click', (e) => {
+    if (e.target.closest('#game-menu')) return;
     if (running && !launched && !paused && !gameOver) launchBall();
   });
 
@@ -1386,6 +1395,7 @@ export function initJuego(config) {
   });
 
   stage.addEventListener('touchstart', (e) => {
+    if (e.target.closest('#game-menu')) return;
     if (!running || paused || gameOver) return;
     const touch = e.touches[0];
     if (touch) {
@@ -1412,6 +1422,6 @@ export function initJuego(config) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  openGame();
-  console.log('✅ Juego corregido (Game Over sin menú principal)');
+  // NO llamamos a openGame() aquí. Solo se abre cuando el usuario hace clic en #nombre-hero.
+  console.log('✅ Juego inicializado (no se abre automáticamente)');
 }
