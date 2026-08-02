@@ -1,7 +1,7 @@
 // ============================================================
 // juego.js – CORREGIDO: bug pelota y resumeParticulas
 // ============================================================
-console.log('📦 juego b1.js (corregido)');
+console.log('📦 juego c3.js (corregido)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose, soundClay, soundWood, soundIron } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
@@ -1251,6 +1251,17 @@ export function initJuego(config) {
             updateUI();
             spawnPowerup(br);
             if (gamePoints <= REGEN_THRESHOLD) requestRegeneration();
+            // Quitar el ladrillo del DOM y del arreglo una vez termina su
+            // animación de desaparición (misma animación que usa arcilla),
+            // para que no quede un "fantasma" invisible ocupando esa celda
+            // ni se acumulen ladrillos muertos que luego se vean duplicados
+            // cuando el juego reutilice esa celda para un ladrillo nuevo.
+            const deadEl = br.el;
+            setTimeout(() => {
+              deadEl.remove();
+              const idx = bricks.indexOf(br);
+              if (idx !== -1) bricks.splice(idx, 1);
+            }, 250);
           } else {
             updateBrickVisual(br);
           }
