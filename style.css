@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS DEFINITIVOS (MÓVIL + ESCRITORIO)
+   🌹 INVITACIÓN XV – ESTILOS DEFINITIVOS
    ============================================================ */
 
 :root {
@@ -17,7 +17,6 @@
   --script: 'Pinyon Script', cursive;
 }
 
-/* ---- Reset y base ---- */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
   height: 100%;
@@ -33,7 +32,6 @@ body {
   font-size: clamp(16px, 2.2vw, 20px);
 }
 
-/* ---- Fondo y pétalos ---- */
 #bg {
   position: fixed;
   inset: 0;
@@ -65,7 +63,6 @@ body {
   transform-origin: 0 0;
 }
 
-/* ---- Utilidades ---- */
 .gold-text {
   color: var(--gold-light);
   text-shadow: 0 0 8px rgba(201, 162, 77, 0.2);
@@ -79,9 +76,7 @@ body {
   border-radius: 4px;
 }
 
-/* ============================================================
-   PORTAL / REJA
-   ============================================================ */
+/* PORTAL */
 #portal {
   position: fixed;
   inset: 0;
@@ -165,9 +160,7 @@ body {
   color: var(--gold-light);
 }
 
-/* ============================================================
-   APP PRINCIPAL
-   ============================================================ */
+/* APP */
 #app {
   position: fixed;
   inset: 0;
@@ -232,7 +225,6 @@ body {
   container-name: tarjeta;
 }
 
-/* ---- Óvalo ---- */
 #oval-wrap {
   width: clamp(170px, 30cqw, 170px);
   height: clamp(221px, 39cqw, 221px);
@@ -256,7 +248,6 @@ body {
   display: block;
 }
 
-/* ---- Nombre ---- */
 h1#nombre-hero {
   font-family: var(--script);
   font-weight: 400;
@@ -277,7 +268,6 @@ h1#nombre-hero {
   100% { background-position: 300% 50%; }
 }
 
-/* ---- Frase, fecha, hint ---- */
 .frase-inline {
   font-family: var(--serif-body);
   font-style: italic;
@@ -306,7 +296,6 @@ h1#nombre-hero {
   text-shadow: 0 0 12px rgba(201, 162, 77, 0.3);
 }
 
-/* ---- Navegación inferior ---- */
 #nav {
   width: 100%;
   max-width: 480px;
@@ -347,9 +336,7 @@ h1#nombre-hero {
   color: #d4af37;
 }
 
-/* ============================================================
-   CONTADOR
-   ============================================================ */
+/* CONTADOR */
 .clock {
   display: flex;
   flex-wrap: nowrap;
@@ -395,9 +382,7 @@ h1#nombre-hero {
   opacity: 0.6;
 }
 
-/* ============================================================
-   MODALES
-   ============================================================ */
+/* MODALES */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -687,9 +672,7 @@ h1#nombre-hero {
   padding-top: 0.3rem;
 }
 
-/* ============================================================
-   JUEGO
-   ============================================================ */
+/* JUEGO */
 #game-overlay {
   position: fixed;
   inset: 0;
@@ -721,7 +704,7 @@ h1#nombre-hero {
   opacity: 1;
 }
 
-/* ---- HEADER DEL JUEGO (BOTONES PEGADOS) ---- */
+/* HEADER CON BOTONES PEGADOS */
 #game-header {
   display: flex;
   align-items: center;
@@ -730,8 +713,8 @@ h1#nombre-hero {
   font-family: var(--serif-display);
   text-transform: uppercase;
   font-size: clamp(0.7rem, 2vw, 0.9rem);
-  padding: 0 0.2rem;
-  gap: 0.15rem; /* MUY PEGADO */
+  padding: 0 0.1rem;
+  gap: 0.05rem;
 }
 #game-header span { white-space: nowrap; }
 #game-score {
@@ -747,7 +730,7 @@ h1#nombre-hero {
   color: var(--gold-light);
   font-size: 1.4rem;
   cursor: pointer;
-  padding: 0.1rem 0.15rem; /* más apretado */
+  padding: 0.05rem 0.1rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -835,6 +818,95 @@ h1#nombre-hero {
   font-size: clamp(1rem, 3vw, 1.3rem);
   white-space: pre-line;
 }
+
+/* MENÚ DEL JUEGO */
+#game-menu {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.88);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  border-radius: 12px;
+  padding: 1rem;
+}
+#game-menu.visible {
+  display: flex;
+}
+#game-menu h2 {
+  color: var(--gold-light);
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(1rem, 3vw, 1.4rem);
+  text-align: center;
+  margin: 0;
+}
+#menu-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  align-items: center;
+}
+#menu-scores-list {
+  display: none;
+  color: white;
+  font-family: 'Press Start 2P', monospace;
+  text-align: center;
+  width: 100%;
+  max-width: 300px;
+}
+#menu-scores-list.visible {
+  display: block;
+}
+#menu-scores-list h3 {
+  color: var(--gold-light);
+  font-size: clamp(0.8rem, 2vw, 1rem);
+}
+#scores-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+}
+#scores-list li {
+  padding: 0.3rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  font-size: clamp(0.6rem, 1.5vw, 0.8rem);
+}
+#menu-gameover {
+  display: none;
+  color: var(--gold-light);
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(0.8rem, 2vw, 1rem);
+  text-align: center;
+}
+#menu-gameover.visible {
+  display: block;
+}
+#gameover-input {
+  display: none;
+  margin-top: 0.5rem;
+}
+#gameover-input.visible {
+  display: block;
+}
+#player-name-input {
+  padding: 0.3rem;
+  border-radius: 4px;
+  border: none;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.7rem;
+  text-align: center;
+  background: #222;
+  color: white;
+  width: 80%;
+  max-width: 200px;
+}
+#player-name-input:focus {
+  outline: 2px solid var(--gold-light);
+}
+
 .game-btn {
   font-family: var(--serif-display);
   font-size: clamp(0.8rem, 2vw, 1rem);
@@ -846,7 +918,16 @@ h1#nombre-hero {
   padding: 0.5rem 1.2rem;
   border-radius: 22px;
   cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
 }
+.game-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 15px rgba(212,175,55,0.3);
+}
+.game-btn:active {
+  transform: scale(0.95);
+}
+
 #game-close {
   background: none;
   border: 1px solid var(--glass-border);
@@ -870,7 +951,6 @@ h1#nombre-hero {
   text-shadow: 0 0 10px rgba(201, 162, 77, 0.2);
 }
 
-/* ---- Animación de desaparición de corazones ---- */
 .heart-fade {
   animation: heartFade 0.6s ease forwards;
 }
@@ -884,8 +964,6 @@ h1#nombre-hero {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
 }
-
-/* ---- Mensajes flotantes ---- */
 @keyframes floatMsg {
   0% { opacity: 0; transform: translate(-50%, 30%) scale(0.5); }
   20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
@@ -893,9 +971,6 @@ h1#nombre-hero {
   100% { opacity: 0; transform: translate(-50%, -80%) scale(0.8); }
 }
 
-/* ============================================================
-   RESPONSIVE EXTRA
-   ============================================================ */
 @media (max-width: 400px) {
   #app { padding: 0.6rem 0.8rem; }
   #app-top .eyebrow { font-size: 0.8rem; }
@@ -922,5 +997,3 @@ h1#nombre-hero {
 
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 3px; }
-
-
