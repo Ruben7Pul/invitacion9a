@@ -1,7 +1,7 @@
 // ============================================================
 // juego.js – VERSIÓN DEFINITIVA CON CONTROL DE POWER-UPS
 // ============================================================
-console.log('📦 juego.js (definitiva)');
+console.log('📦 juego 1a.js (definitiva)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
