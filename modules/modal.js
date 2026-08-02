@@ -1,4 +1,4 @@
-console.log('📦 1 módulo modal.js cargado');
+console.log('📦 módulo modal.js cargado');
 
 import { soundOpen, soundClose, soundTap } from './sonidos.js';
 import { burst } from './particulas.js';
@@ -17,8 +17,16 @@ export function initModal() {
     });
   });
 
-  // Solo se cierra con el botón [data-close], no con clic en overlay
   document.querySelectorAll('.modal-overlay').forEach(ov => {
+    // El modal de pausa NO se cierra con clic fuera
+    if (ov.id === 'modal-pausa') return;
+
+    ov.addEventListener('click', (e) => {
+      if (e.target === ov) {
+        closeModal(ov);
+      }
+    });
+
     const closeBtn = ov.querySelector('[data-close]');
     if (closeBtn) {
       closeBtn.addEventListener('click', (e) => {
