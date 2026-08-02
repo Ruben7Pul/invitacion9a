@@ -18,7 +18,6 @@ export function initModal() {
   });
 
   document.querySelectorAll('.modal-overlay').forEach(ov => {
-    // El modal de pausa NO se cierra con clic fuera
     if (ov.id === 'modal-pausa') return;
 
     ov.addEventListener('click', (e) => {
