@@ -1,4 +1,4 @@
-console.log('📦 módulo modal.js cargado');
+console.log('📦 módulo modal b2.js cargado');
 
 import { soundOpen, soundClose, soundTap } from './sonidos.js';
 import { burst } from './particulas.js';
