@@ -1468,3 +1468,6 @@ export function initJuego(config) {
   // No se abre automáticamente
   console.log('✅ Juego inicializado con nuevas funciones');
 }
+
+
+
