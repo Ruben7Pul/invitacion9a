@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – DEFINITIVO CON MENÚ Y PUNTUACIONES
+// juego.js – DEFINITIVO CON MENÚ Y PUNTUACIONES (CORREGIDO)
 // ============================================================
-console.log('📦 juego.js (definitivo con pausa de juego sin pétalos)');
+console.log('📦 juego b1.js (definitivo con menuContent definido)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
@@ -111,6 +111,7 @@ export function initJuego(config) {
   const closeBtn = document.getElementById('game-close');
 
   const menuEl = document.getElementById('game-menu');
+  const menuContent = document.getElementById('menu-content');
   const menuPlay = document.getElementById('menu-play');
   const menuScores = document.getElementById('menu-scores');
   const menuScoresList = document.getElementById('menu-scores-list');
@@ -214,6 +215,7 @@ export function initJuego(config) {
   let pendingHighScore = false;
 
   function showMenu(showGameOver = false, score = 0) {
+    if (!menuEl) return;
     menuEl.classList.add('visible');
     if (showGameOver) {
       menuGameover.classList.add('visible');
@@ -234,14 +236,15 @@ export function initJuego(config) {
     }
     menuScoresList.classList.remove('visible');
     menuScoresList.style.display = 'none';
-    menuContent.style.display = 'flex';
+    if (menuContent) menuContent.style.display = 'flex';
   }
 
   function hideMenu() {
+    if (!menuEl) return;
     menuEl.classList.remove('visible');
     menuScoresList.classList.remove('visible');
     menuScoresList.style.display = 'none';
-    menuContent.style.display = 'flex';
+    if (menuContent) menuContent.style.display = 'flex';
     menuGameover.classList.remove('visible');
     gameoverInput.classList.remove('visible');
   }
@@ -272,7 +275,7 @@ export function initJuego(config) {
   menuScores.addEventListener('click', () => {
     soundTap();
     updateScoresList();
-    menuContent.style.display = 'none';
+    if (menuContent) menuContent.style.display = 'none';
     menuScoresList.style.display = 'block';
     menuScoresList.classList.add('visible');
   });
@@ -281,7 +284,7 @@ export function initJuego(config) {
     soundTap();
     menuScoresList.classList.remove('visible');
     menuScoresList.style.display = 'none';
-    menuContent.style.display = 'flex';
+    if (menuContent) menuContent.style.display = 'flex';
   });
 
   gameoverSave.addEventListener('click', () => {
@@ -297,7 +300,7 @@ export function initJuego(config) {
     if (e.key === 'Enter') gameoverSave.click();
   });
 
-  // ---- PAUSA DEL JUEGO (SOLO JUEGO, NO AFECTA A PÉTALOS) ----
+  // ---- PAUSA DEL JUEGO (SOLO JUEGO) ----
   function togglePause() {
     if (!running || gameOver) return;
     const now = performance.now();
@@ -1208,9 +1211,7 @@ export function initJuego(config) {
     msgEl.classList.remove('show');
     draw();
 
-    // Pausar pétalos al abrir el juego
-    pauseParticulas();
-
+    pauseParticulas(); // Pausar pétalos al abrir el juego
     showMenu(false);
     layoutStage();
     updateUI();
@@ -1233,9 +1234,7 @@ export function initJuego(config) {
     inner.querySelectorAll('[style*="floatMsg"]').forEach(el => el.remove());
     resetGameState();
 
-    // Reanudar pétalos al cerrar el juego
-    resumeParticulas();
-
+    resumeParticulas(); // Reanudar pétalos al cerrar el juego
     soundClose();
     console.log('🧹 Juego cerrado y limpiado');
   }
