@@ -1,4 +1,4 @@
-console.log('🚀 script 1a.js');
+console.log('🚀 script 1b.js');
 
 async function cargarConfig() {
   try {
