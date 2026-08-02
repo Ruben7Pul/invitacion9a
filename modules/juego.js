@@ -1,7 +1,7 @@
 // ============================================================
 // juego.js – CORREGIDO (bug pelota y resumeParticulas)
 // ============================================================
-console.log('📦 juego23.js (corregido: bug pelota y resumeParticulas)');
+console.log('📦 juego.js (corregido: bug pelota y resumeParticulas)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
@@ -1478,5 +1478,3 @@ export function initJuego(config) {
   layoutStage();
   console.log('✅ Juego inicializado con correcciones');
 }
-
-
