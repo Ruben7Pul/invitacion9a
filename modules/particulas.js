@@ -1,4 +1,4 @@
-console.log('📦 partículas (con contador de pausas)');
+console.log('📦 partículas b1 (con contador de pausas)');
 
 let petals = [];
 let animationId = null;
