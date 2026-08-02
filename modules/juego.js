@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – CORREGIDO v2: bug de grietas en ladrillos MADERA e HIERRO
+// juego.js – CORREGIDO: bug pelota y resumeParticulas
 // ============================================================
-console.log('📦 juego3.js (corregido v2 - sin bug grietas)');
+console.log('📦 juego.js (corregido)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose, soundClay, soundWood, soundIron } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
@@ -86,7 +86,7 @@ function getRandomName() {
 }
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego (corregido v2)');
+  console.log('🎮 Iniciando juego (corregido)');
 
   if (!document.querySelector('#pixel-font')) {
     const link = document.createElement('link');
@@ -451,16 +451,10 @@ export function initJuego(config) {
     return BRICK_TYPES.IRON;
   }
 
-  // ⚠️ FUNCIÓN CORREGIDA: updateBrickVisual
-  // Bug: el.textContent = '' destruía los elementos hijos que acababan de crearse
-  // Solución: Solo actualizar clases, NO destruir contenido
   function updateBrickVisual(brick) {
     const el = brick.el;
     const type = brick.type;
-    
-    // Resetear clases: mantener 'brick' pero quitar las antiguas grietas
     el.className = 'brick';
-    
     if (type === BRICK_TYPES.CLAY) {
       el.classList.add('brick-clay');
     } else if (type === BRICK_TYPES.WOOD) {
@@ -468,7 +462,6 @@ export function initJuego(config) {
       if (brick.hits === 1) {
         el.classList.add('cracked-1');
       }
-      // NO hay que crear elementos hijos: el CSS usa ::before y ::after
     } else if (type === BRICK_TYPES.IRON) {
       el.classList.add('brick-iron');
       if (brick.hits === 2) {
@@ -476,11 +469,7 @@ export function initJuego(config) {
       } else if (brick.hits === 1) {
         el.classList.add('cracked-2');
       }
-      // NO hay que crear elementos hijos: el CSS usa ::before y ::after
     }
-    
-    // ✅ NO borrar textContent: los pseudo-elementos ::before y ::after no son hijos del DOM
-    // Simplemente dejar el elemento limpio pero sin destruir nada
   }
 
   function upgradeBrickType(brick) {
@@ -1476,5 +1465,5 @@ export function initJuego(config) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego inicializado (corregido v2 - SIN BUG DE GRIETAS)');
+  console.log('✅ Juego inicializado (corregido)');
 }
