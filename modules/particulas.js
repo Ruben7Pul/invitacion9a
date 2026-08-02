@@ -1,9 +1,9 @@
-console.log('📦 partículas (con pausa)');
+console.log('📦 partículas (con contador de pausas)');
 
 let petals = [];
 let animationId = null;
 let lastTime = 0;
-let paused = false;
+let pauseCounter = 0;
 
 export function initParticulas() {
   const layer = document.getElementById('petals-layer');
@@ -39,7 +39,7 @@ export function initParticulas() {
   }
 
   function updatePetals(timestamp) {
-    if (paused) {
+    if (pauseCounter > 0) {
       animationId = requestAnimationFrame(updatePetals);
       return;
     }
@@ -69,18 +69,26 @@ export function initParticulas() {
   if (animationId) cancelAnimationFrame(animationId);
   lastTime = 0;
   updatePetals(0);
-  console.log('✅ 12 pétalos rojos con pausa');
+  console.log('✅ Pétalos iniciados con contador de pausas');
 }
 
 export function pauseParticulas() {
-  paused = true;
-  console.log('⏸️ Pétalos pausados');
+  pauseCounter++;
+  console.log(`⏸️ Pétalos pausados (contador: ${pauseCounter})`);
 }
 
 export function resumeParticulas() {
-  paused = false;
-  lastTime = 0;
-  console.log('▶️ Pétalos reanudados');
+  if (pauseCounter > 0) {
+    pauseCounter--;
+    if (pauseCounter === 0) {
+      lastTime = 0;
+      console.log('▶️ Pétalos reanudados');
+    } else {
+      console.log(`⏸️ Pétalos aún pausados (contador: ${pauseCounter})`);
+    }
+  } else {
+    console.warn('⚠️ resumeParticulas llamado sin pausa activa');
+  }
 }
 
 export function burst() { /* compatibilidad */ }
