@@ -1517,3 +1517,6 @@ export function initJuego(config) {
   layoutStage();
   console.log('✅ Juego inicializado (niebla actualizada)');
 }
+
+
+
