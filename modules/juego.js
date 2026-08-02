@@ -73,7 +73,7 @@ export function initJuego(config) {
   const resumeBtn = document.getElementById('resume-btn');
   const closePausa = document.getElementById('close-pausa');
 
-  // Pala neón (sin líneas)
+  // Pala neón
   paddleEl.style.cssText += `
     background: linear-gradient(90deg, #ff00cc, #3333ff, #00ffcc, #ffcc00, #ff00cc);
     background-size: 300% 100%;
@@ -165,18 +165,14 @@ export function initJuego(config) {
 
   window.closeGame = closeGame;
 
-  // Funciones auxiliares para cerrar modales
-  function closeAllModals() {
-    document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
-  }
-
   // Función para alternar pausa
   function togglePause() {
     if (!running) return;
     paused = !paused;
     if (paused) {
       pauseBtn.textContent = '▶️';
-      closeAllModals();
+      // Cerrar otros modales
+      document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
       modalPausa.classList.add('open');
     } else {
       pauseBtn.textContent = '⏸️';
