@@ -1,7 +1,7 @@
 // ============================================================
 // juego.js – CORREGIDO (bug pelota y resumeParticulas)
 // ============================================================
-console.log('📦 juego10.js (corregido: bug pelota y resumeParticulas)');
+console.log('📦 juego.js (corregido: bug pelota y resumeParticulas)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
@@ -34,14 +34,14 @@ const BRICK_TYPES = {
 };
 
 const FRACTURE_SYMBOLS = {
-  1: '|',
-  2: '||',
-  3: '|||'
+  1: '',
+  2: '|',
+  3: '||'
 };
 
 const POWERUP_PROBS = {
-  CLAY: 0.06,
-  WOOD: 0.12,
+  CLAY: 0.08,
+  WOOD: 0.16,
   IRON: 0.24
 };
 
@@ -202,9 +202,13 @@ export function initJuego(config) {
     pointer-events: none;
     background: linear-gradient(to bottom, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.96) 78%, rgba(255,255,255,0) 100%);
     transition: height 0.6s ease, opacity 0.6s ease;
-    opacity: 0; border-radius: 12px 12px 0 0; z-index: 20;
+    opacity: 0; z-index: 20;
   `;
-  stage.appendChild(nieblaEl);
+  // Se agrega a "inner" (no a "stage"): así comparte el mismo sistema de
+  // coordenadas lógico (300x420) que ladrillos/pelota/power-ups, y el mismo
+  // contexto de apilamiento, para que el z-index de la pelota y la bola azul
+  // realmente la deje por encima de la niebla.
+  inner.appendChild(nieblaEl);
 
   let scale = 1;
   let bricks = [];
@@ -1517,5 +1521,3 @@ export function initJuego(config) {
   layoutStage();
   console.log('✅ Juego inicializado con correcciones');
 }
-
-
