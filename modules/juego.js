@@ -1478,3 +1478,5 @@ export function initJuego(config) {
   layoutStage();
   console.log('✅ Juego inicializado con correcciones');
 }
+
+
