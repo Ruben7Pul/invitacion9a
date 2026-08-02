@@ -1,7 +1,7 @@
 // ============================================================
 // juego.js – CORREGIDO (bug pelota y resumeParticulas)
 // ============================================================
-console.log('📦 juego9.js (corregido: bug pelota y resumeParticulas)');
+console.log('📦 juego.js (corregido: bug pelota y resumeParticulas)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
@@ -19,9 +19,10 @@ const REGEN_THRESHOLD = 9;
 const BALL_LOW_Y = STAGE_H - 60;
 const MAX_NIEBLA = 3;
 // Altura (en px, sobre STAGE_H=420) hasta donde llega la niebla en cada nivel.
-// Nivel 1: solo la zona de ladrillos. Nivel 2: un poco antes de la mitad.
-// Nivel 3: casi todo el área de juego, dejando ~15% libre junto a la paleta.
-const NIEBLA_HEIGHTS = [0, 145, 190, Math.round(STAGE_H * 0.85)];
+// Nivel 1: cubre por completo la zona de ladrillos (con margen).
+// Nivel 2: llega justo a la mitad del área de juego.
+// Nivel 3: un poco más abajo que la mitad.
+const NIEBLA_HEIGHTS = [0, 170, Math.round(STAGE_H * 0.5), Math.round(STAGE_H * 0.62)];
 const MAX_LIVES = 3;
 const SCORE_PER_LIFE = 8500;
 const TOP_SCORES_COUNT = 5;
@@ -50,7 +51,7 @@ const GREEN_PROB_TABLE = [
 ];
 
 const GREEN_WEIGHTS = { MULTIBOLA: 15, PALA_GRANDE: 35, DUREZA: 50 };
-const RED_WEIGHTS   = { BOLA_NIEBLA: 98, PALA_MINI: 1, FLAQUESA: 1 };
+const RED_WEIGHTS   = { BOLA_NIEBLA: 10, PALA_MINI: 35, FLAQUESA: 55 };
 
 const SCORE_MESSAGES = [
   "¡Ánimo! Cada punto cuenta.",
@@ -199,7 +200,7 @@ export function initJuego(config) {
   nieblaEl.style.cssText = `
     position: absolute; left: 0; top: 0; width: 100%; height: 0px;
     pointer-events: none;
-    background: linear-gradient(to bottom, rgba(15,20,35,0.96) 0%, rgba(15,20,35,0.96) 78%, rgba(15,20,35,0) 100%);
+    background: linear-gradient(to bottom, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.96) 78%, rgba(255,255,255,0) 100%);
     transition: height 0.6s ease, opacity 0.6s ease;
     opacity: 0; border-radius: 12px 12px 0 0; z-index: 20;
   `;
@@ -1516,5 +1517,3 @@ export function initJuego(config) {
   layoutStage();
   console.log('✅ Juego inicializado con correcciones');
 }
-
-
