@@ -28,17 +28,176 @@
     <div class="portal-inner">
       <span class="eyebrow gold-text">Una invitación encantada</span>
       <div class="gate-wrapper" id="gate-wrapper" role="button" tabindex="0" aria-label="Abrir la reja">
-        <!-- (SVG de la reja - omitido por brevedad, pero debe estar igual que antes) -->
+        <!-- Hoja izquierda -->
         <div class="gate-leaf gate-left" aria-hidden="true">
-          <!-- SVG completo -->
           <svg viewBox="0 0 150 200" width="100%" height="100%">
-            <!-- (mismo SVG que en versiones anteriores) -->
+            <defs>
+              <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f5e6b8"/>
+                <stop offset="50%" stop-color="#d4af37"/>
+                <stop offset="100%" stop-color="#8a6d1b"/>
+              </linearGradient>
+              <radialGradient id="rubyGrad" cx="35%" cy="30%" r="70%">
+                <stop offset="0%" stop-color="#ff9aa8"/>
+                <stop offset="55%" stop-color="#e63946"/>
+                <stop offset="100%" stop-color="#6e1320"/>
+              </radialGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="2" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <g id="rosette">
+                <circle cx="0" cy="-6" r="4.4" fill="url(#goldGrad)"/>
+                <circle cx="6" cy="0" r="4.4" fill="url(#goldGrad)"/>
+                <circle cx="0" cy="6" r="4.4" fill="url(#goldGrad)"/>
+                <circle cx="-6" cy="0" r="4.4" fill="url(#goldGrad)"/>
+                <circle cx="0" cy="0" r="3.2" fill="#241a0d" stroke="url(#goldGrad)" stroke-width="1"/>
+              </g>
+              <g id="finial">
+                <path d="M0,-16 C-4.5,-9 -4.5,-2 0,1 C4.5,-2 4.5,-9 0,-16 Z" fill="url(#goldGrad)"/>
+                <circle cx="0" cy="1" r="2.4" fill="url(#goldGrad)"/>
+              </g>
+              <g id="scroll">
+                <path d="M0,0 C9,-2 9,-13 0,-13 C-7,-13 -8,-4 -1,-2" fill="none" stroke="url(#goldGrad)" stroke-width="3" stroke-linecap="round"/>
+                <circle cx="0" cy="-13" r="2.3" fill="url(#goldGrad)"/>
+              </g>
+              <g id="scrollR">
+                <path d="M0,0 C-9,-2 -9,-13 0,-13 C7,-13 8,-4 1,-2" fill="none" stroke="url(#goldGrad)" stroke-width="3" stroke-linecap="round"/>
+                <circle cx="0" cy="-13" r="2.3" fill="url(#goldGrad)"/>
+              </g>
+            </defs>
+            <rect x="5" y="5" width="140" height="190" rx="8" fill="none" stroke="url(#goldGrad)" stroke-width="6" filter="url(#glow)"/>
+            <rect x="12" y="12" width="126" height="176" rx="5" fill="none" stroke="rgba(255,215,0,0.2)" stroke-width="2"/>
+            <path d="M22 20 Q75 -20 128 20" fill="none" stroke="url(#goldGrad)" stroke-width="6" filter="url(#glow)"/>
+            <path d="M32 20 Q75 -6 118 20" fill="none" stroke="url(#goldGrad)" stroke-width="2.2" opacity="0.6"/>
+            <use href="#finial" x="75" y="-20"/>
+            <use href="#rosette" x="75" y="4"/>
+            <rect x="22" y="20" width="6" height="160" rx="3" fill="url(#goldGrad)"/>
+            <rect x="48" y="20" width="6" height="160" rx="3" fill="url(#goldGrad)"/>
+            <rect x="74" y="20" width="6" height="160" rx="3" fill="url(#goldGrad)"/>
+            <rect x="100" y="20" width="6" height="160" rx="3" fill="url(#goldGrad)"/>
+            <rect x="126" y="20" width="6" height="160" rx="3" fill="url(#goldGrad)"/>
+            <use href="#finial" x="25" y="20"/>
+            <use href="#finial" x="51" y="20"/>
+            <use href="#finial" x="77" y="20"/>
+            <use href="#finial" x="103" y="20"/>
+            <use href="#finial" x="129" y="20"/>
+            <circle cx="25" cy="178" r="3.4" fill="url(#goldGrad)"/>
+            <circle cx="51" cy="178" r="3.4" fill="url(#goldGrad)"/>
+            <circle cx="77" cy="178" r="3.4" fill="url(#goldGrad)"/>
+            <circle cx="103" cy="178" r="3.4" fill="url(#goldGrad)"/>
+            <circle cx="129" cy="178" r="3.4" fill="url(#goldGrad)"/>
+            <rect x="15" y="40" width="120" height="6" rx="3" fill="url(#goldGrad)"/>
+            <rect x="15" y="80" width="120" height="6" rx="3" fill="url(#goldGrad)"/>
+            <rect x="15" y="120" width="120" height="6" rx="3" fill="url(#goldGrad)"/>
+            <rect x="15" y="160" width="120" height="6" rx="3" fill="url(#goldGrad)"/>
+            <use href="#rosette" x="25" y="43"/>
+            <use href="#rosette" x="51" y="43"/>
+            <use href="#rosette" x="103" y="43"/>
+            <use href="#rosette" x="129" y="43"/>
+            <use href="#rosette" x="25" y="83"/>
+            <use href="#rosette" x="51" y="83"/>
+            <use href="#rosette" x="103" y="83"/>
+            <use href="#rosette" x="129" y="83"/>
+            <use href="#rosette" x="25" y="123"/>
+            <use href="#rosette" x="51" y="123"/>
+            <use href="#rosette" x="103" y="123"/>
+            <use href="#rosette" x="129" y="123"/>
+            <use href="#rosette" x="25" y="163"/>
+            <use href="#rosette" x="51" y="163"/>
+            <use href="#rosette" x="103" y="163"/>
+            <use href="#rosette" x="129" y="163"/>
+            <path d="M77 74 C86 74 92 80 92 90 C92 100 86 106 77 106 C68 106 62 100 62 90 C62 80 68 74 77 74 Z" fill="none" stroke="url(#goldGrad)" stroke-width="2.4" opacity="0.85"/>
+            <circle cx="77" cy="90" r="10" fill="none" stroke="url(#goldGrad)" stroke-width="3"/>
+            <circle cx="77" cy="90" r="5" fill="url(#rubyGrad)"/>
+            <use href="#scroll" x="25" y="176"/>
+            <use href="#scrollR" x="129" y="176"/>
           </svg>
         </div>
+        <!-- Hoja derecha -->
         <div class="gate-leaf gate-right" aria-hidden="true">
-          <!-- SVG completo -->
           <svg viewBox="0 0 150 200" width="100%" height="100%">
-            <!-- (mismo SVG) -->
+            <defs>
+              <linearGradient id="goldGrad2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f5e6b8"/>
+                <stop offset="50%" stop-color="#d4af37"/>
+                <stop offset="100%" stop-color="#8a6d1b"/>
+              </linearGradient>
+              <radialGradient id="rubyGrad2" cx="35%" cy="30%" r="70%">
+                <stop offset="0%" stop-color="#ff9aa8"/>
+                <stop offset="55%" stop-color="#e63946"/>
+                <stop offset="100%" stop-color="#6e1320"/>
+              </radialGradient>
+              <filter id="glow2">
+                <feGaussianBlur stdDeviation="2" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <g id="rosette2">
+                <circle cx="0" cy="-6" r="4.4" fill="url(#goldGrad2)"/>
+                <circle cx="6" cy="0" r="4.4" fill="url(#goldGrad2)"/>
+                <circle cx="0" cy="6" r="4.4" fill="url(#goldGrad2)"/>
+                <circle cx="-6" cy="0" r="4.4" fill="url(#goldGrad2)"/>
+                <circle cx="0" cy="0" r="3.2" fill="#241a0d" stroke="url(#goldGrad2)" stroke-width="1"/>
+              </g>
+              <g id="finial2">
+                <path d="M0,-16 C-4.5,-9 -4.5,-2 0,1 C4.5,-2 4.5,-9 0,-16 Z" fill="url(#goldGrad2)"/>
+                <circle cx="0" cy="1" r="2.4" fill="url(#goldGrad2)"/>
+              </g>
+              <g id="scroll2">
+                <path d="M0,0 C9,-2 9,-13 0,-13 C-7,-13 -8,-4 -1,-2" fill="none" stroke="url(#goldGrad2)" stroke-width="3" stroke-linecap="round"/>
+                <circle cx="0" cy="-13" r="2.3" fill="url(#goldGrad2)"/>
+              </g>
+              <g id="scrollR2">
+                <path d="M0,0 C-9,-2 -9,-13 0,-13 C7,-13 8,-4 1,-2" fill="none" stroke="url(#goldGrad2)" stroke-width="3" stroke-linecap="round"/>
+                <circle cx="0" cy="-13" r="2.3" fill="url(#goldGrad2)"/>
+              </g>
+            </defs>
+            <rect x="5" y="5" width="140" height="190" rx="8" fill="none" stroke="url(#goldGrad2)" stroke-width="6" filter="url(#glow2)"/>
+            <rect x="12" y="12" width="126" height="176" rx="5" fill="none" stroke="rgba(255,215,0,0.2)" stroke-width="2"/>
+            <path d="M22 20 Q75 -20 128 20" fill="none" stroke="url(#goldGrad2)" stroke-width="6" filter="url(#glow2)"/>
+            <path d="M32 20 Q75 -6 118 20" fill="none" stroke="url(#goldGrad2)" stroke-width="2.2" opacity="0.6"/>
+            <use href="#finial2" x="75" y="-20"/>
+            <use href="#rosette2" x="75" y="4"/>
+            <rect x="22" y="20" width="6" height="160" rx="3" fill="url(#goldGrad2)"/>
+            <rect x="48" y="20" width="6" height="160" rx="3" fill="url(#goldGrad2)"/>
+            <rect x="74" y="20" width="6" height="160" rx="3" fill="url(#goldGrad2)"/>
+            <rect x="100" y="20" width="6" height="160" rx="3" fill="url(#goldGrad2)"/>
+            <rect x="126" y="20" width="6" height="160" rx="3" fill="url(#goldGrad2)"/>
+            <use href="#finial2" x="25" y="20"/>
+            <use href="#finial2" x="51" y="20"/>
+            <use href="#finial2" x="77" y="20"/>
+            <use href="#finial2" x="103" y="20"/>
+            <use href="#finial2" x="129" y="20"/>
+            <circle cx="25" cy="178" r="3.4" fill="url(#goldGrad2)"/>
+            <circle cx="51" cy="178" r="3.4" fill="url(#goldGrad2)"/>
+            <circle cx="77" cy="178" r="3.4" fill="url(#goldGrad2)"/>
+            <circle cx="103" cy="178" r="3.4" fill="url(#goldGrad2)"/>
+            <circle cx="129" cy="178" r="3.4" fill="url(#goldGrad2)"/>
+            <rect x="15" y="40" width="120" height="6" rx="3" fill="url(#goldGrad2)"/>
+            <rect x="15" y="80" width="120" height="6" rx="3" fill="url(#goldGrad2)"/>
+            <rect x="15" y="120" width="120" height="6" rx="3" fill="url(#goldGrad2)"/>
+            <rect x="15" y="160" width="120" height="6" rx="3" fill="url(#goldGrad2)"/>
+            <use href="#rosette2" x="25" y="43"/>
+            <use href="#rosette2" x="51" y="43"/>
+            <use href="#rosette2" x="103" y="43"/>
+            <use href="#rosette2" x="129" y="43"/>
+            <use href="#rosette2" x="25" y="83"/>
+            <use href="#rosette2" x="51" y="83"/>
+            <use href="#rosette2" x="103" y="83"/>
+            <use href="#rosette2" x="129" y="83"/>
+            <use href="#rosette2" x="25" y="123"/>
+            <use href="#rosette2" x="51" y="123"/>
+            <use href="#rosette2" x="103" y="123"/>
+            <use href="#rosette2" x="129" y="123"/>
+            <use href="#rosette2" x="25" y="163"/>
+            <use href="#rosette2" x="51" y="163"/>
+            <use href="#rosette2" x="103" y="163"/>
+            <use href="#rosette2" x="129" y="163"/>
+            <path d="M77 74 C86 74 92 80 92 90 C92 100 86 106 77 106 C68 106 62 100 62 90 C62 80 68 74 77 74 Z" fill="none" stroke="url(#goldGrad2)" stroke-width="2.4" opacity="0.85"/>
+            <circle cx="77" cy="90" r="10" fill="none" stroke="url(#goldGrad2)" stroke-width="3"/>
+            <circle cx="77" cy="90" r="5" fill="url(#rubyGrad2)"/>
+            <use href="#scroll2" x="25" y="176"/>
+            <use href="#scrollR2" x="129" y="176"/>
           </svg>
         </div>
       </div>
@@ -181,7 +340,6 @@
         <span id="game-score" class="gold-text" style="display:none;">0</span>
         <button id="pause-btn" class="top-btn" style="display:none;" aria-label="Pausar o reanudar juego">⏸️</button>
         <button id="menu-btn" class="top-btn" style="display:none;" aria-label="Volver al menú principal">📋</button>
-        <!-- Botón X eliminado -->
       </div>
       <div id="game-stage">
         <div id="game-inner">
@@ -197,7 +355,6 @@
             <button id="menu-scores" class="game-btn gold-text">🏆 Mejores puntuaciones</button>
             <button id="menu-rules" class="game-btn gold-text">📖 Reglas</button>
             <button id="menu-exit" class="game-btn gold-text">🚪 Salir</button>
-            <!-- Botón temporal para reiniciar tops -->
             <button id="menu-reset-tops" class="game-btn gold-text" style="font-size:0.7rem; opacity:0.6;">🔄 Reiniciar tops</button>
           </div>
           <div id="menu-scores-list" style="display:none; color:white; font-family:'Press Start 2P', monospace; text-align:center; width:100%; max-width:300px;">
@@ -227,15 +384,15 @@
     </div>
   </div>
 
-  <!-- Modal de reglas -->
-  <div class="modal-overlay" id="modal-rules" role="dialog" aria-modal="true" aria-labelledby="modal-rules-title">
-    <div class="modal-card">
+  <!-- MODAL DE REGLAS (con z-index alto para que esté encima) -->
+  <div class="modal-overlay" id="modal-rules" role="dialog" aria-modal="true" aria-labelledby="modal-rules-title" style="z-index:100;">
+    <div class="modal-card" style="max-width:500px;">
       <button class="modal-close" id="rules-close" aria-label="Cerrar reglas">&times;</button>
-      <h2 id="modal-rules-title" class="gold-text">📖 Reglas del juego</h2>
-      <div style="color:#e0d0b0; font-family:var(--serif-body); font-size:1rem; text-align:left; padding:0.5rem 0; line-height:1.6;">
-        <p><strong>🎯 Objetivo:</strong> Rompe todos los ladrillos para ganar puntos.</p>
-        <p><strong>🖱️ Controles:</strong> Mueve la pala con el ratón, el dedo (en móvil) o las teclas A/D y flechas izquierda/derecha.</p>
-        <p><strong>💥 Poderes:</strong> Al romper un ladrillo, puede caer un poder (verde = bueno, rojo = malo).</p>
+      <h2 id="modal-rules-title" class="gold-text" style="font-family:'Cinzel',serif; text-shadow:0 0 15px #d4af37;">📖 Reglas del juego</h2>
+      <div style="color:#f0e0c0; font-family:'Cinzel',serif; font-size:0.9rem; text-align:left; padding:0.5rem 0; line-height:1.6;">
+        <p><strong style="color:#fae3a0;">🎯 Objetivo:</strong> Rompe todos los ladrillos para ganar puntos.</p>
+        <p><strong style="color:#fae3a0;">🖱️ Controles:</strong> Mueve la pala con el ratón, el dedo (en móvil) o las teclas A/D y flechas izquierda/derecha.</p>
+        <p><strong style="color:#fae3a0;">💥 Poderes:</strong> Al romper un ladrillo, puede caer un poder (verde = bueno, rojo = malo).</p>
         <ul style="list-style:none; padding-left:0.5rem;">
           <li>🌀 <span style="color:#2ecc71;">Multibola</span> – multiplica las bolas (máx 9).</li>
           <li>📏 <span style="color:#2ecc71;">Pala Grande</span> – aumenta el tamaño de la pala.</li>
@@ -244,9 +401,10 @@
           <li>📐 <span style="color:#e74c3c;">Pala Mini</span> – reduce la pala.</li>
           <li>⬇️ <span style="color:#e74c3c;">Flaquesa</span> – baja un nivel de dureza.</li>
         </ul>
-        <p><strong>❤️ Vidas:</strong> Tienes 3 vidas. Al perder una, la pelota vuelve a la pala.</p>
-        <p><strong>⭐ Bola Azul:</strong> Cada 8500 puntos, si tienes 3 vidas, aparece una bola azul que da +2000 pts y un poder positivo aleatorio.</p>
-        <p><strong>🏆 Puntuaciones:</strong> Las mejores 5 puntuaciones se guardan localmente.</p>
+        <p><strong style="color:#fae3a0;">❤️ Vidas:</strong> Tienes 3 vidas. Al perder una, la pelota vuelve a la pala.</p>
+        <p><strong style="color:#fae3a0;">⭐ Bola Azul:</strong> Cada 8500 puntos, si tienes 3 vidas, aparece una bola azul que da +2000 pts y un poder positivo aleatorio.</p>
+        <p><strong style="color:#fae3a0;">🏆 Puntuaciones:</strong> Las mejores 5 puntuaciones se guardan localmente.</p>
+        <p style="margin-top:0.5rem; text-align:center; font-family:'Pinyon Script',cursive; font-size:1.4rem; color:#d4af37;">— La magia te espera —</p>
       </div>
     </div>
   </div>
