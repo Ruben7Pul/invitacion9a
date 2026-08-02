@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – CORREGIDO: bug pelota y resumeParticulas
+// juego.js – CORREGIDO v2: bug de grietas en ladrillos MADERA e HIERRO
 // ============================================================
-console.log('📦 juego c3.js (corregido)');
+console.log('📦 juego3.js (corregido v2 - sin bug grietas)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose, soundClay, soundWood, soundIron } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
@@ -86,7 +86,7 @@ function getRandomName() {
 }
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego (corregido)');
+  console.log('🎮 Iniciando juego (corregido v2)');
 
   if (!document.querySelector('#pixel-font')) {
     const link = document.createElement('link');
@@ -451,10 +451,16 @@ export function initJuego(config) {
     return BRICK_TYPES.IRON;
   }
 
+  // ⚠️ FUNCIÓN CORREGIDA: updateBrickVisual
+  // Bug: el.textContent = '' destruía los elementos hijos que acababan de crearse
+  // Solución: Solo actualizar clases, NO destruir contenido
   function updateBrickVisual(brick) {
     const el = brick.el;
     const type = brick.type;
+    
+    // Resetear clases: mantener 'brick' pero quitar las antiguas grietas
     el.className = 'brick';
+    
     if (type === BRICK_TYPES.CLAY) {
       el.classList.add('brick-clay');
     } else if (type === BRICK_TYPES.WOOD) {
@@ -462,20 +468,19 @@ export function initJuego(config) {
       if (brick.hits === 1) {
         el.classList.add('cracked-1');
       }
+      // NO hay que crear elementos hijos: el CSS usa ::before y ::after
     } else if (type === BRICK_TYPES.IRON) {
       el.classList.add('brick-iron');
       if (brick.hits === 2) {
         el.classList.add('cracked-1');
       } else if (brick.hits === 1) {
         el.classList.add('cracked-2');
-        if (!el.querySelector('.crack-extra')) {
-          const extra = document.createElement('div');
-          extra.className = 'crack-extra';
-          el.appendChild(extra);
-        }
       }
+      // NO hay que crear elementos hijos: el CSS usa ::before y ::after
     }
-    el.textContent = '';
+    
+    // ✅ NO borrar textContent: los pseudo-elementos ::before y ::after no son hijos del DOM
+    // Simplemente dejar el elemento limpio pero sin destruir nada
   }
 
   function upgradeBrickType(brick) {
@@ -1251,17 +1256,6 @@ export function initJuego(config) {
             updateUI();
             spawnPowerup(br);
             if (gamePoints <= REGEN_THRESHOLD) requestRegeneration();
-            // Quitar el ladrillo del DOM y del arreglo una vez termina su
-            // animación de desaparición (misma animación que usa arcilla),
-            // para que no quede un "fantasma" invisible ocupando esa celda
-            // ni se acumulen ladrillos muertos que luego se vean duplicados
-            // cuando el juego reutilice esa celda para un ladrillo nuevo.
-            const deadEl = br.el;
-            setTimeout(() => {
-              deadEl.remove();
-              const idx = bricks.indexOf(br);
-              if (idx !== -1) bricks.splice(idx, 1);
-            }, 250);
           } else {
             updateBrickVisual(br);
           }
@@ -1482,5 +1476,5 @@ export function initJuego(config) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego inicializado (corregido)');
+  console.log('✅ Juego inicializado (corregido v2 - SIN BUG DE GRIETAS)');
 }
