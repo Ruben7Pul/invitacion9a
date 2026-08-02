@@ -1,4 +1,4 @@
-console.log('📦 partículas (con delta time, transform y pausa)');
+console.log('📦 partículas (con pausa)');
 
 let petals = [];
 let animationId = null;
@@ -69,21 +69,18 @@ export function initParticulas() {
   if (animationId) cancelAnimationFrame(animationId);
   lastTime = 0;
   updatePetals(0);
-  console.log('✅ 12 pétalos rojos con delta time y transform');
+  console.log('✅ 12 pétalos rojos con pausa');
 }
 
-// Funciones para pausar/reanudar
-export function pausePetals() {
+export function pauseParticulas() {
   paused = true;
   console.log('⏸️ Pétalos pausados');
 }
 
-export function resumePetals() {
-  if (paused) {
-    paused = false;
-    lastTime = 0; // reiniciar delta para evitar saltos
-    console.log('▶️ Pétalos reanudados');
-  }
+export function resumeParticulas() {
+  paused = false;
+  lastTime = 0;
+  console.log('▶️ Pétalos reanudados');
 }
 
 export function burst() { /* compatibilidad */ }
