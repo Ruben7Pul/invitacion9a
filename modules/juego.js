@@ -1,12 +1,11 @@
 // ============================================================
-// juego.js – VERSIÓN FINAL CON MENÚ PRINCIPAL Y TOP 5
+// juego.js – DEFINITIVO CON TOP 5, ESTADÍSTICAS Y MENÚ
 // ============================================================
-console.log('📦 juego.js (menú principal, top 5, limpieza total)');
+console.log('📦 juego.js (top 5, estadísticas, menú)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
 
-// Constantes
 const PADDLE_W_BASE = 72;
 const PADDLE_H = 10;
 const BALL_R = 6;
@@ -88,15 +87,15 @@ function isHighScore(score) {
   return score > scores[scores.length - 1].score;
 }
 
+// ---- NOMBRE ALEATORIO ----
 function getRandomName() {
-  const names = ['Jugador', 'Gamer', 'Pro', 'Leyenda', 'Campeón', 'Destructor', 'Aventurero', 'Estrella'];
+  const names = ['Jugador', 'Campeón', 'Leyenda', 'Guerrero', 'Mago', 'Ninja', 'Samurai', 'Vikingo', 'Fénix', 'Titan'];
   return names[Math.floor(Math.random() * names.length)];
 }
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego con menú principal y top 5');
+  console.log('🎮 Iniciando juego definitivo');
 
-  // Cargar fuente pixelada
   if (!document.querySelector('#pixel-font')) {
     const link = document.createElement('link');
     link.id = 'pixel-font';
@@ -105,7 +104,6 @@ export function initJuego(config) {
     document.head.appendChild(link);
   }
 
-  // Elementos del DOM
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => { soundTap(); openGame(); });
 
@@ -131,18 +129,16 @@ export function initJuego(config) {
   const menuGameover = document.getElementById('menu-gameover');
   const gameoverScore = document.getElementById('gameover-score');
   const gameoverStats = document.getElementById('gameover-stats');
+  const statClay = document.getElementById('stat-clay');
+  const statWood = document.getElementById('stat-wood');
+  const statIron = document.getElementById('stat-iron');
+  const statTotal = document.getElementById('stat-total');
   const gameoverInput = document.getElementById('gameover-input');
   const playerNameInput = document.getElementById('player-name-input');
   const gameoverSave = document.getElementById('gameover-save');
-  const gameoverBack = document.getElementById('gameover-back');
+  const gameoverMenuBtn = document.getElementById('gameover-menu-btn');
 
-  // Ocultar elementos de juego hasta que se inicie la partida
-  livesEl.style.display = 'none';
-  scoreEl.style.display = 'none';
-  pauseBtn.style.display = 'none';
-  closeBtn.style.display = 'none';
-
-  // Estilo de la pala
+  // Estilos de la pala
   paddleEl.style.cssText += `
     background: linear-gradient(90deg, #ff00cc, #3333ff, #00ffcc, #ffcc00, #ff00cc);
     background-size: 300% 100%;
@@ -163,10 +159,11 @@ export function initJuego(config) {
     document.head.appendChild(style);
   }
 
-  // Estilos de lives y score (solo se muestran durante la partida)
+  // Estilos de vidas y puntuación (ocultos inicialmente)
   livesEl.style.fontFamily = "'Press Start 2P', monospace";
   livesEl.style.fontSize = '1.2rem';
   livesEl.style.letterSpacing = '0.1em';
+  livesEl.style.display = 'none';
   scoreEl.style.fontFamily = "'Press Start 2P', monospace";
   scoreEl.style.fontSize = '0.9rem';
   scoreEl.style.background = 'linear-gradient(90deg, #ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #8800ff)';
@@ -175,6 +172,9 @@ export function initJuego(config) {
   scoreEl.style.webkitBackgroundClip = 'text';
   scoreEl.style.backgroundClip = 'text';
   scoreEl.style.color = 'transparent';
+  scoreEl.style.display = 'none';
+  pauseBtn.style.display = 'none';
+
   if (!document.querySelector('#rainbow-score')) {
     const style2 = document.createElement('style');
     style2.id = 'rainbow-score';
@@ -187,7 +187,6 @@ export function initJuego(config) {
     document.head.appendChild(style2);
   }
 
-  // Niebla
   const nieblaEl = document.createElement('div');
   nieblaEl.id = 'niebla-overlay';
   nieblaEl.style.cssText = `
@@ -197,7 +196,7 @@ export function initJuego(config) {
   `;
   stage.appendChild(nieblaEl);
 
-  // Variables de estado del juego
+  // Variables de estado
   let scale = 1;
   let bricks = [];
   let balls = [];
@@ -213,11 +212,13 @@ export function initJuego(config) {
   let gamePoints = 0;
   let pendingRegeneration = false;
   let ladrillosRotos = 0;
-  let ladrillosRotosClay = 0;
-  let ladrillosRotosWood = 0;
-  let ladrillosRotosIron = 0;
   let lastScoreMilestone = 0;
   let blueBallActive = false;
+
+  // Estadísticas de ladrillos
+  let statClayCount = 0;
+  let statWoodCount = 0;
+  let statIronCount = 0;
 
   let ballDurability = 1;
   let paddleSizeMultiplier = 1;
@@ -240,111 +241,45 @@ export function initJuego(config) {
   let gameOver = false;
   let pendingHighScore = false;
 
-  // ---- FUNCIONES DE MENÚ Y LIMPIEZA ----
-  function clearGameArea() {
-    // Eliminar todos los elementos visuales del juego
-    inner.querySelectorAll('.brick').forEach(b => b.remove());
-    powerups.forEach(p => p.el.remove());
-    powerups = [];
-    inner.querySelectorAll('.ball-dynamic').forEach(el => el.remove());
-    inner.querySelectorAll('[style*="floatMsg"]').forEach(el => el.remove());
-    // Resetear variables
-    bricks = [];
-    balls = [];
-    activePowerupTypes.clear();
-    powerupsInAir = 0;
-    playerScore = 0;
-    gamePoints = 0;
-    lives = 3;
-    launched = false;
-    running = false;
-    gameOver = false;
-    paused = false;
-    pauseBtn.textContent = '⏸️';
-    paddleSizeMultiplier = 1;
-    paddleWidth = PADDLE_W_BASE;
-    paddle.x = (STAGE_W - PADDLE_W_BASE) / 2;
-    ballDurability = 1;
-    nieblaLevel = 0;
-    updateNiebla();
-    ladrillosRotos = 0;
-    ladrillosRotosClay = 0;
-    ladrillosRotosWood = 0;
-    ladrillosRotosIron = 0;
-    lastScoreMilestone = 0;
-    blueBallActive = false;
-    gameTimeActive = false;
-    gameStartTime = 0;
-    pausedTime = 0;
-    pauseStartTime = 0;
-    lastTime = 0;
-    // Ocultar elementos de la partida
-    livesEl.style.display = 'none';
-    scoreEl.style.display = 'none';
-    pauseBtn.style.display = 'none';
-    closeBtn.style.display = 'none';
-    // Limpiar mensaje de Game Over
-    msgEl.classList.remove('show');
-    // Redibujar
-    draw();
-  }
+  // ---- FUNCIONES DEL MENÚ ----
+  function showMenu(showGameOver = false, score = 0) {
+    if (!menuEl) return;
+    menuEl.style.display = 'flex';
+    if (showGameOver) {
+      menuGameover.style.display = 'block';
+      gameoverScore.textContent = `Puntuación: ${score}`;
+      // Mostrar estadísticas
+      gameoverStats.style.display = 'block';
+      statClay.textContent = statClayCount;
+      statWood.textContent = statWoodCount;
+      statIron.textContent = statIronCount;
+      statTotal.textContent = statClayCount + statWoodCount + statIronCount;
 
-  function showMainMenu() {
-    // Limpiar área de juego
-    clearGameArea();
-    // Mostrar menú principal
-    menuEl.classList.add('visible');
-    menuContent.style.display = 'flex';
-    menuScoresList.classList.remove('visible');
-    menuScoresList.style.display = 'none';
-    menuGameover.classList.remove('visible');
-    gameoverInput.classList.remove('visible');
-    gameoverBack.style.display = 'none';
-    // Pausar pétalos
-    pauseParticulas();
-  }
-
-  function showGameOver(score) {
-    // Limpiar área de juego (pero mantener el score para mostrarlo)
-    clearGameArea();
-    // Mostrar menú de Game Over
-    menuEl.classList.add('visible');
-    menuContent.style.display = 'none';
-    menuScoresList.classList.remove('visible');
-    menuScoresList.style.display = 'none';
-    menuGameover.classList.add('visible');
-    gameoverScore.textContent = `Puntuación: ${score}`;
-    // Estadísticas de ladrillos
-    const total = ladrillosRotosClay + ladrillosRotosWood + ladrillosRotosIron;
-    gameoverStats.textContent = `Ladrillos: ${total} total | Arcilla: ${ladrillosRotosClay} | Madera: ${ladrillosRotosWood} | Hierro: ${ladrillosRotosIron}`;
-    // Comprobar si es high score (top 5)
-    if (isHighScore(score) && score > 0) {
-      pendingHighScore = true;
-      gameoverInput.classList.add('visible');
-      playerNameInput.value = '';
-      playerNameInput.focus();
-      gameoverBack.style.display = 'none';
+      if (isHighScore(score) && score > 0) {
+        pendingHighScore = true;
+        gameoverInput.style.display = 'block';
+        playerNameInput.value = '';
+        playerNameInput.focus();
+      } else {
+        pendingHighScore = false;
+        gameoverInput.style.display = 'none';
+      }
     } else {
+      menuGameover.style.display = 'none';
+      gameoverInput.style.display = 'none';
       pendingHighScore = false;
-      gameoverInput.classList.remove('visible');
-      gameoverBack.style.display = 'inline-block';
     }
-    // Mostrar botón Volver al menú
-    gameoverBack.style.display = 'inline-block';
-    // Pausar pétalos
-    pauseParticulas();
+    menuScoresList.style.display = 'none';
+    menuContent.style.display = 'flex';
   }
 
   function hideMenu() {
-    menuEl.classList.remove('visible');
-    menuScoresList.classList.remove('visible');
+    if (!menuEl) return;
+    menuEl.style.display = 'none';
     menuScoresList.style.display = 'none';
     menuContent.style.display = 'flex';
-    menuGameover.classList.remove('visible');
-    gameoverInput.classList.remove('visible');
-    gameoverBack.style.display = 'none';
-    // Reanudar pétalos solo si no hay otros modales abiertos
-    resumeParticulas();
+    menuGameover.style.display = 'none';
+    gameoverInput.style.display = 'none';
   }
 
   function updateScoresList() {
@@ -364,11 +299,14 @@ export function initJuego(config) {
     }
   }
 
-  // ---- EVENTOS DEL MENÚ ----
+  // Eventos del menú
   menuPlay.addEventListener('click', () => {
     soundTap();
     hideMenu();
-    // Iniciar partida
+    // Ocultar elementos de juego si estaban visibles
+    livesEl.style.display = 'none';
+    scoreEl.style.display = 'none';
+    pauseBtn.style.display = 'none';
     startGame();
   });
 
@@ -377,12 +315,10 @@ export function initJuego(config) {
     updateScoresList();
     menuContent.style.display = 'none';
     menuScoresList.style.display = 'block';
-    menuScoresList.classList.add('visible');
   });
 
   menuScoresBack.addEventListener('click', () => {
     soundTap();
-    menuScoresList.classList.remove('visible');
     menuScoresList.style.display = 'none';
     menuContent.style.display = 'flex';
   });
@@ -391,22 +327,33 @@ export function initJuego(config) {
     const name = playerNameInput.value.trim() || getRandomName();
     addHighScore(name, playerScore);
     pendingHighScore = false;
-    gameoverInput.classList.remove('visible');
-    // Volver al menú principal
-    showMainMenu();
+    gameoverInput.style.display = 'none';
+    // Mostrar botón volver al menú
+    showMenu(true, playerScore);
     soundTap();
-  });
-
-  gameoverBack.addEventListener('click', () => {
-    soundTap();
-    showMainMenu();
   });
 
   playerNameInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') gameoverSave.click();
   });
 
-  // ---- PAUSA DEL JUEGO ----
+  gameoverMenuBtn.addEventListener('click', () => {
+    soundTap();
+    // Limpiar todo y volver al menú principal
+    cleanGameState();
+    hideMenu();
+    showMenu(false);
+    // Ocultar elementos de juego
+    livesEl.style.display = 'none';
+    scoreEl.style.display = 'none';
+    pauseBtn.style.display = 'none';
+    // Asegurar que no hay partida corriendo
+    running = false;
+    gameOver = false;
+    if (animFrameId) cancelAnimationFrame(animFrameId);
+  });
+
+  // ---- PAUSA DEL JUEGO (SOLO JUEGO) ----
   function togglePause() {
     if (!running || gameOver) return;
     const now = performance.now();
@@ -501,6 +448,17 @@ export function initJuego(config) {
     brick.playerPoints = brick.type.playerPoints;
     updateBrickVisual(brick);
     return true;
+  }
+
+  function resetBricksToOriginal() {
+    for (const b of bricks) {
+      b.type = b.originalType;
+      b.hits = b.originalHits;
+      b.maxHits = b.originalHits;
+      b.value = b.type.value;
+      b.playerPoints = b.type.playerPoints;
+      updateBrickVisual(b);
+    }
   }
 
   function generateBrickValues() {
@@ -867,8 +825,54 @@ export function initJuego(config) {
     }
   }
 
+  function cleanGameState() {
+    // Limpiar todos los elementos visuales
+    inner.querySelectorAll('.brick').forEach(b => b.remove());
+    powerups.forEach(p => p.el.remove());
+    powerups = [];
+    activePowerupTypes.clear();
+    powerupsInAir = 0;
+    inner.querySelectorAll('[style*="floatMsg"]').forEach(el => el.remove());
+    // Resetear variables
+    bricks = [];
+    balls = [];
+    paddle.x = (STAGE_W - PADDLE_W_BASE) / 2;
+    paddleSizeMultiplier = 1;
+    paddleWidth = PADDLE_W_BASE;
+    ballDurability = 1;
+    nieblaLevel = 0;
+    updateNiebla();
+    lives = 3;
+    playerScore = 0;
+    gamePoints = 0;
+    pendingRegeneration = false;
+    ladrillosRotos = 0;
+    lastScoreMilestone = 0;
+    blueBallActive = false;
+    statClayCount = 0;
+    statWoodCount = 0;
+    statIronCount = 0;
+    gameTimeActive = false;
+    launched = false;
+    running = false;
+    gameOver = false;
+    paused = false;
+    pauseBtn.textContent = '⏸️';
+    // Ocultar elementos de juego
+    livesEl.style.display = 'none';
+    scoreEl.style.display = 'none';
+    pauseBtn.style.display = 'none';
+    // Limpiar mensajes
+    msgEl.classList.remove('show');
+    // Actualizar UI
+    updateUI();
+    draw();
+  }
+
   function resetGameState() {
     if (animFrameId) cancelAnimationFrame(animFrameId);
+    // No llamamos a cleanGameState aquí porque queremos mantener estadísticas para Game Over
+    // Pero reiniciamos lo necesario para una nueva partida
     running = false;
     launched = false;
     paused = false;
@@ -892,11 +896,9 @@ export function initJuego(config) {
     gamePoints = 0;
     pendingRegeneration = false;
     ladrillosRotos = 0;
-    ladrillosRotosClay = 0;
-    ladrillosRotosWood = 0;
-    ladrillosRotosIron = 0;
     lastScoreMilestone = 0;
     blueBallActive = false;
+    // No reiniciamos estadísticas para mantenerlas hasta Game Over
     keys.left = keys.right = false;
     touchActive = false;
     touchX = 0;
@@ -909,7 +911,6 @@ export function initJuego(config) {
     inner.querySelectorAll('.brick').forEach(b => b.remove());
     powerups.forEach(p => p.el.remove());
     powerups = [];
-    inner.querySelectorAll('.ball-dynamic').forEach(el => el.remove());
     inner.querySelectorAll('[style*="floatMsg"]').forEach(el => el.remove());
 
     const initialX = paddle.x + paddleWidth / 2;
@@ -974,24 +975,22 @@ export function initJuego(config) {
     gameOver = true;
     gameTimeActive = false;
     if (animFrameId) cancelAnimationFrame(animFrameId);
-    // Ocultar elementos de juego
+    // Mostrar Game Over con estadísticas
+    showMenu(true, playerScore);
+    // Ocultar elementos de juego (ya no se necesitan)
     livesEl.style.display = 'none';
     scoreEl.style.display = 'none';
     pauseBtn.style.display = 'none';
-    closeBtn.style.display = 'none';
-    // Mostrar menú de Game Over
-    showGameOver(playerScore);
     soundLose();
   }
 
   function startGame() {
-    // Limpiar todo y mostrar elementos de juego
-    clearGameArea();
-    livesEl.style.display = 'block';
-    scoreEl.style.display = 'block';
-    pauseBtn.style.display = 'flex';
-    closeBtn.style.display = 'flex';
-
+    // Limpiar partida anterior (sin perder estadísticas)
+    resetGameState();
+    // Restablecer estadísticas para la nueva partida
+    statClayCount = 0;
+    statWoodCount = 0;
+    statIronCount = 0;
     // Crear ladrillos iniciales
     const clayValues = new Array(36).fill(1);
     inner.querySelectorAll('.brick').forEach(b => b.remove());
@@ -1012,14 +1011,16 @@ export function initJuego(config) {
     pauseStartTime = 0;
     gameTimeActive = false;
     layoutStage();
+    // Mostrar elementos de juego
+    livesEl.style.display = 'block';
+    scoreEl.style.display = 'block';
+    pauseBtn.style.display = 'block';
     updateUI();
     updateDurabilityVisual();
     draw();
     lastTime = 0;
     if (animFrameId) cancelAnimationFrame(animFrameId);
     animFrameId = requestAnimationFrame(gameLoop);
-    // Pausar pétalos durante la partida (ya se pausan al abrir el juego, pero por si acaso)
-    pauseParticulas();
   }
 
   function updateUI() {
@@ -1082,7 +1083,6 @@ export function initJuego(config) {
     paddleEl.style.width = paddleWidth + 'px';
     paddleEl.style.transform = 'translateX(' + paddle.x + 'px)';
 
-    // Dibujar bolas (dinámicas)
     let ballElements = inner.querySelectorAll('.ball-dynamic');
     while (ballElements.length < balls.length) {
       const el = document.createElement('div');
@@ -1199,10 +1199,10 @@ export function initJuego(config) {
             playerScore += br.playerPoints;
             gamePoints -= br.value;
             ladrillosRotos++;
-            // Contar por tipo
-            if (br.type === BRICK_TYPES.CLAY) ladrillosRotosClay++;
-            else if (br.type === BRICK_TYPES.WOOD) ladrillosRotosWood++;
-            else if (br.type === BRICK_TYPES.IRON) ladrillosRotosIron++;
+            // Actualizar estadísticas
+            if (br.type === BRICK_TYPES.CLAY) statClayCount++;
+            else if (br.type === BRICK_TYPES.WOOD) statWoodCount++;
+            else if (br.type === BRICK_TYPES.IRON) statIronCount++;
             updateUI();
             spawnPowerup(br);
             if (gamePoints <= REGEN_THRESHOLD) requestRegeneration();
@@ -1319,21 +1319,43 @@ export function initJuego(config) {
 
   // ---- ABRIR Y CERRAR JUEGO ----
   function openGame() {
+    // Limpiar todo antes de mostrar el menú
+    cleanGameState();
     overlay.classList.add('open');
-    // Mostrar menú principal (limpia todo)
-    showMainMenu();
+    pauseParticulas(); // Pausar pétalos
+    // Mostrar menú principal (sin partida precargada)
+    showMenu(false);
     layoutStage();
-    // Pausar pétalos
-    pauseParticulas();
-    console.log('🎮 Juego abierto (menú principal)');
+    updateUI();
+    updateDurabilityVisual();
+    // Ocultar elementos de juego
+    livesEl.style.display = 'none';
+    scoreEl.style.display = 'none';
+    pauseBtn.style.display = 'none';
+    // Asegurar que no hay partida
+    running = false;
+    gameOver = false;
+    if (animFrameId) cancelAnimationFrame(animFrameId);
+    // Limpiar el área de juego
+    inner.querySelectorAll('.brick').forEach(b => b.remove());
+    powerups.forEach(p => p.el.remove());
+    powerups = [];
+    activePowerupTypes.clear();
+    powerupsInAir = 0;
+    inner.querySelectorAll('[style*="floatMsg"]').forEach(el => el.remove());
+    draw();
   }
 
   function closeGame() {
     if (animFrameId) cancelAnimationFrame(animFrameId);
+    running = false;
+    paused = false;
+    gameOver = false;
+    gameTimeActive = false;
+    pauseBtn.textContent = '⏸️';
     overlay.classList.remove('open');
     // Limpiar todo
-    clearGameArea();
-    // Reanudar pétalos
+    cleanGameState();
     resumeParticulas();
     soundClose();
     console.log('🧹 Juego cerrado y limpiado');
@@ -1351,7 +1373,6 @@ export function initJuego(config) {
     inner.style.transformOrigin = 'top left';
   }
 
-  // ---- EVENTOS DE RATÓN Y TECLADO ----
   closeBtn.addEventListener('click', closeGame);
 
   stage.addEventListener('mousedown', (e) => {
@@ -1411,7 +1432,7 @@ export function initJuego(config) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  // Inicializar con menú principal
-  showMainMenu();
-  console.log('✅ Juego listo con menú principal y top 5');
+  // Inicializar en menú, sin partida
+  openGame();
+  console.log('✅ Juego definitivo listo (top 5, estadísticas, menú)');
 }
