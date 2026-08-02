@@ -1,12 +1,10 @@
 // ============================================================
-// juego.js – VERSIÓN DEFINITIVA CON CONTROL DE POWER-UPS
+// juego.js – DEFINITIVO CON MENÚ Y PUNTUACIONES
 // ============================================================
-console.log('📦 juego 1a.js (definitiva)');
+console.log('📦 juego.js (definitivo)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
-
-// Importamos las funciones de partículas para pausarlas
-import { pausePetals, resumePetals } from './particulas.js';
+import { pauseParticulas, resumeParticulas } from './particulas.js';
 
 const PADDLE_W_BASE = 72;
 const PADDLE_H = 10;
@@ -21,7 +19,7 @@ const REGEN_THRESHOLD = 9;
 const BALL_LOW_Y = STAGE_H - 60;
 const MAX_NIEBLA = 3;
 const MAX_LIVES = 3;
-const SCORE_PER_LIFE = 8000; // Ahora 8.000
+const SCORE_PER_LIFE = 8000;
 
 const BRICK_TYPES = {
   CLAY:   { value: 1, playerPoints: 100, hits: 1, color: '#d9534f', label: 'CLAY' },
@@ -35,7 +33,6 @@ const FRACTURE_SYMBOLS = {
   3: '|||'
 };
 
-// PROBABILIDADES CORRECTAS
 const POWERUP_PROBS = {
   CLAY: 0.06,
   WOOD: 0.12,
@@ -63,6 +60,31 @@ const SCORE_MESSAGES = [
   "¡Dios del juego! Eres el mejor."
 ];
 
+function getHighScores() {
+  try {
+    const data = localStorage.getItem('highscores');
+    return data ? JSON.parse(data) : [];
+  } catch { return []; }
+}
+
+function saveHighScores(scores) {
+  localStorage.setItem('highscores', JSON.stringify(scores));
+}
+
+function addHighScore(name, score) {
+  let scores = getHighScores();
+  scores.push({ name: name || 'Jugador', score });
+  scores.sort((a, b) => b.score - a.score);
+  if (scores.length > 3) scores = scores.slice(0, 3);
+  saveHighScores(scores);
+}
+
+function isHighScore(score) {
+  const scores = getHighScores();
+  if (scores.length < 3) return true;
+  return score > scores[scores.length - 1].score;
+}
+
 export function initJuego(config) {
   console.log('🎮 Iniciando juego definitivo');
 
@@ -85,11 +107,20 @@ export function initJuego(config) {
   const msgText = document.getElementById('game-msg-text');
   const livesEl = document.getElementById('lives');
   const scoreEl = document.getElementById('game-score');
-  const restartBtn = document.getElementById('game-restart');
   const pauseBtn = document.getElementById('pause-btn');
-  const modalPausa = document.getElementById('modal-pausa');
-  const resumeBtn = document.getElementById('resume-btn');
-  const closePausa = document.getElementById('close-pausa');
+  const closeBtn = document.getElementById('game-close');
+
+  const menuEl = document.getElementById('game-menu');
+  const menuPlay = document.getElementById('menu-play');
+  const menuScores = document.getElementById('menu-scores');
+  const menuScoresList = document.getElementById('menu-scores-list');
+  const scoresList = document.getElementById('scores-list');
+  const menuScoresBack = document.getElementById('menu-scores-back');
+  const menuGameover = document.getElementById('menu-gameover');
+  const gameoverScore = document.getElementById('gameover-score');
+  const gameoverInput = document.getElementById('gameover-input');
+  const playerNameInput = document.getElementById('player-name-input');
+  const gameoverSave = document.getElementById('gameover-save');
 
   paddleEl.style.cssText += `
     background: linear-gradient(90deg, #ff00cc, #3333ff, #00ffcc, #ffcc00, #ff00cc);
@@ -143,18 +174,12 @@ export function initJuego(config) {
   `;
   stage.appendChild(nieblaEl);
 
-  const timeEl = document.getElementById('game-time');
-  if (timeEl) timeEl.style.display = 'none';
-
-  restartBtn.style.display = 'none';
-
-  // Variables de estado
   let scale = 1;
   let bricks = [];
   let balls = [];
   let powerups = [];
   let activePowerupTypes = new Set();
-  let powerupsInAir = 0; // Controla que solo haya máximo 2 y de tipos diferentes
+  let powerupsInAir = 0;
   let paddle = { x: (STAGE_W - PADDLE_W_BASE) / 2 };
   let lives = 3;
   let running = false;
@@ -172,7 +197,6 @@ export function initJuego(config) {
   let paddleWidth = PADDLE_W_BASE;
   let nieblaLevel = 0;
 
-  // Control del contador de minutos
   let gameStartTime = 0;
   let pausedTime = 0;
   let pauseStartTime = 0;
@@ -186,63 +210,128 @@ export function initJuego(config) {
   let touchX = 0;
 
   let paused = false;
+  let gameOver = false;
+  let pendingHighScore = false;
 
-  window.closeGame = closeGame;
+  function showMenu(showGameOver = false, score = 0) {
+    menuEl.classList.add('visible');
+    if (showGameOver) {
+      menuGameover.classList.add('visible');
+      gameoverScore.textContent = `Puntuación: ${score}`;
+      if (isHighScore(score) && score > 0) {
+        pendingHighScore = true;
+        gameoverInput.classList.add('visible');
+        playerNameInput.value = '';
+        playerNameInput.focus();
+      } else {
+        pendingHighScore = false;
+        gameoverInput.classList.remove('visible');
+      }
+    } else {
+      menuGameover.classList.remove('visible');
+      gameoverInput.classList.remove('visible');
+      pendingHighScore = false;
+    }
+    menuScoresList.classList.remove('visible');
+    menuScoresList.style.display = 'none';
+    menuContent.style.display = 'flex';
+  }
 
-  // ---- PAUSA ----
+  function hideMenu() {
+    menuEl.classList.remove('visible');
+    menuScoresList.classList.remove('visible');
+    menuScoresList.style.display = 'none';
+    menuContent.style.display = 'flex';
+    menuGameover.classList.remove('visible');
+    gameoverInput.classList.remove('visible');
+  }
+
+  function updateScoresList() {
+    const scores = getHighScores();
+    scoresList.innerHTML = '';
+    if (scores.length === 0) {
+      const li = document.createElement('li');
+      li.textContent = 'No hay puntuaciones aún';
+      li.style.color = '#888';
+      scoresList.appendChild(li);
+    } else {
+      scores.forEach((s, i) => {
+        const li = document.createElement('li');
+        li.textContent = `#${i+1} ${s.name} — ${s.score}`;
+        scoresList.appendChild(li);
+      });
+    }
+  }
+
+  menuPlay.addEventListener('click', () => {
+    soundTap();
+    hideMenu();
+    startGame();
+  });
+
+  menuScores.addEventListener('click', () => {
+    soundTap();
+    updateScoresList();
+    menuContent.style.display = 'none';
+    menuScoresList.style.display = 'block';
+    menuScoresList.classList.add('visible');
+  });
+
+  menuScoresBack.addEventListener('click', () => {
+    soundTap();
+    menuScoresList.classList.remove('visible');
+    menuScoresList.style.display = 'none';
+    menuContent.style.display = 'flex';
+  });
+
+  gameoverSave.addEventListener('click', () => {
+    const name = playerNameInput.value.trim() || 'Jugador';
+    addHighScore(name, playerScore);
+    pendingHighScore = false;
+    gameoverInput.classList.remove('visible');
+    showMenu(true, playerScore);
+    soundTap();
+  });
+
+  playerNameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') gameoverSave.click();
+  });
+
   function togglePause() {
-    if (!running) return;
+    if (!running || gameOver) return;
     const now = performance.now();
     if (!paused) {
       paused = true;
       pauseBtn.textContent = '▶️';
       pauseStartTime = now;
       if (gameTimeActive) gameTimeActive = false;
-      document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
-      modalPausa.classList.add('open');
-      // Pausar partículas
-      pausePetals();
     } else {
       paused = false;
       pauseBtn.textContent = '⏸️';
-      modalPausa.classList.remove('open');
       pausedTime += (now - pauseStartTime);
       if (launched) gameTimeActive = true;
       lastTime = 0;
-      // Reanudar partículas
-      resumePetals();
     }
   }
 
   function handleSpace() {
-    if (!running) return;
-    if (paused) {
-      togglePause();
-      return;
-    }
-    if (!launched) {
-      launchBall();
-    } else {
-      togglePause();
-    }
+    if (!running || gameOver) return;
+    if (paused) { togglePause(); return; }
+    if (!launched) launchBall();
+    else togglePause();
   }
 
   pauseBtn.addEventListener('click', togglePause);
-  resumeBtn.addEventListener('click', togglePause);
-  closePausa.addEventListener('click', togglePause);
-
   document.addEventListener('keydown', (e) => {
     if (e.key === ' ' || e.key === 'Space') {
       e.preventDefault();
       handleSpace();
     }
   });
-
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden && running && !paused) togglePause();
+    if (document.hidden && running && !paused && !gameOver) togglePause();
   });
 
-  // ---- LADRILLOS ----
   function getBrickTypeFromValue(val) {
     if (val === 1) return BRICK_TYPES.CLAY;
     if (val === 2) return BRICK_TYPES.WOOD;
@@ -280,9 +369,7 @@ export function initJuego(config) {
       brick.type = BRICK_TYPES.WOOD;
     } else if (brick.type === BRICK_TYPES.WOOD) {
       brick.type = BRICK_TYPES.IRON;
-    } else {
-      return false;
-    }
+    } else return false;
     brick.hits = brick.type.hits;
     brick.maxHits = brick.type.hits;
     brick.value = brick.type.value;
@@ -296,9 +383,7 @@ export function initJuego(config) {
       brick.type = BRICK_TYPES.WOOD;
     } else if (brick.type === BRICK_TYPES.WOOD) {
       brick.type = BRICK_TYPES.CLAY;
-    } else {
-      return false;
-    }
+    } else return false;
     brick.hits = brick.type.hits;
     brick.maxHits = brick.type.hits;
     brick.value = brick.type.value;
@@ -318,7 +403,6 @@ export function initJuego(config) {
     }
   }
 
-  // ---- GENERACIÓN ----
   function generateBrickValues() {
     const total = TARGET_GAME_POINTS;
     const values = [];
@@ -456,7 +540,6 @@ export function initJuego(config) {
     }
   }
 
-  // ---- POWER-UPS ----
   function getGreenProbability(minutes) {
     if (minutes < 0) return GREEN_PROB_TABLE[0];
     if (minutes >= GREEN_PROB_TABLE.length - 1) return GREEN_PROB_TABLE[GREEN_PROB_TABLE.length - 1];
@@ -490,7 +573,6 @@ export function initJuego(config) {
 
   function getAvailableTypes(color) {
     const types = color === 'verde' ? Object.keys(GREEN_WEIGHTS) : Object.keys(RED_WEIGHTS);
-    // Filtrar también los que ya están en el aire
     return types.filter(t => !isSaturated(t) && !activePowerupTypes.has(t));
   }
 
@@ -503,7 +585,6 @@ export function initJuego(config) {
 
   function spawnPowerup(brick) {
     if (ladrillosRotos <= 36) return;
-    // Máximo 2 en el aire y de tipos diferentes (ya controlado por activePowerupTypes)
     if (powerupsInAir >= 2) return;
 
     let prob = 0;
@@ -565,19 +646,12 @@ export function initJuego(config) {
     inner.appendChild(el);
 
     powerups.push({
-      x: cx,
-      y: cy,
-      vx: 0,
-      vy: speed,
-      size: size,
-      color: color,
-      type: typeKey,
-      el: el,
-      alive: true
+      x: cx, y: cy, vx: 0, vy: speed,
+      size: size, color: color, type: typeKey,
+      el: el, alive: true
     });
   }
 
-  // ---- BOLA AZUL ----
   function spawnBlueBall() {
     if (blueBallActive) return;
     blueBallActive = true;
@@ -604,17 +678,10 @@ export function initJuego(config) {
     inner.appendChild(el);
 
     powerups.push({
-      x: x,
-      y: y,
-      vy: speed,
-      size: size,
-      type: 'BOLA_AZUL',
-      el: el,
-      alive: true,
-      isBlue: true
+      x: x, y: y, vy: speed, size: size,
+      type: 'BOLA_AZUL', el: el, alive: true, isBlue: true
     });
-    powerupsInAir++; // También cuenta como power‑up en el aire
-    activePowerupTypes.add('BOLA_AZUL'); // Para controlar duplicados
+    powerupsInAir++;
 
     showFloatingMessage('⭐ ¡Bola Azul! ⭐', '#00ccff');
   }
@@ -641,12 +708,7 @@ export function initJuego(config) {
               const speed = Math.sqrt(src.vx * src.vx + src.vy * src.vy) || BALL_SPEED;
               const vx = Math.sin(angle) * speed;
               const vy = -Math.cos(angle) * speed;
-              balls.push({
-                x: src.x + (Math.random() - 0.5) * 10,
-                y: src.y + (Math.random() - 0.5) * 10,
-                vx: vx,
-                vy: vy
-              });
+              balls.push({ x: src.x + (Math.random() - 0.5) * 10, y: src.y + (Math.random() - 0.5) * 10, vx: vx, vy: vy });
             }
           }
           break;
@@ -664,11 +726,8 @@ export function initJuego(config) {
     updateUI();
     showFloatingMessage('✨ +2000 pts y poder extra ✨', '#ffcc00');
     blueBallActive = false;
-    // Quitar del conjunto de activos
-    activePowerupTypes.delete('BOLA_AZUL');
   }
 
-  // ---- MENSAJES ----
   function showFloatingMessage(text, color = '#fff') {
     const el = document.createElement('div');
     el.style.cssText = `
@@ -691,7 +750,6 @@ export function initJuego(config) {
     setTimeout(() => el.remove(), 2500);
   }
 
-  // ---- JUEGO ----
   function launchBall() {
     if (launched) return;
     for (const b of balls) {
@@ -707,8 +765,6 @@ export function initJuego(config) {
       gameTimeActive = true;
       if (paused) gameTimeActive = false;
     }
-    // Reanudar partículas si estaban pausadas
-    resumePetals();
   }
 
   function resetGameState() {
@@ -716,9 +772,8 @@ export function initJuego(config) {
     running = false;
     launched = false;
     paused = false;
+    gameOver = false;
     pauseBtn.textContent = '⏸️';
-    modalPausa.classList.remove('open');
-    gameTimeActive = false;
     pausedTime = 0;
     pauseStartTime = 0;
     bricks = [];
@@ -746,6 +801,7 @@ export function initJuego(config) {
     mouseX = 0;
     gameStartTime = 0;
     lastTime = 0;
+    gameTimeActive = false;
 
     inner.querySelectorAll('.brick').forEach(b => b.remove());
     powerups.forEach(p => p.el.remove());
@@ -757,12 +813,9 @@ export function initJuego(config) {
     balls.push({ x: initialX, y: initialY, vx: 0, vy: 0 });
 
     msgEl.classList.remove('show');
-    restartBtn.style.display = 'none';
     updateUI();
     updateDurabilityVisual();
     draw();
-    // Reanudar partículas al resetear (por si acaso)
-    resumePetals();
   }
 
   function updateLivesUI() {
@@ -809,20 +862,16 @@ export function initJuego(config) {
       updateDurabilityVisual();
       updateUI();
       draw();
-      // Las partículas se reanudan al lanzar la bola de nuevo
     }, 300);
   }
 
   function endGame() {
     running = false;
+    gameOver = true;
     gameTimeActive = false;
     if (animFrameId) cancelAnimationFrame(animFrameId);
-    restartBtn.style.display = 'inline-block';
-    msgText.textContent = `Game Over\n${playerScore}`;
-    msgEl.classList.add('show');
+    showMenu(true, playerScore);
     soundLose();
-    // Pausar partículas al terminar el juego
-    pausePetals();
   }
 
   function startGame() {
@@ -840,6 +889,7 @@ export function initJuego(config) {
     balls = [{ x: newX, y: newY, vx: 0, vy: 0 }];
     msgEl.classList.remove('show');
     running = true;
+    gameOver = false;
     gameStartTime = performance.now();
     pausedTime = 0;
     pauseStartTime = 0;
@@ -851,33 +901,25 @@ export function initJuego(config) {
     lastTime = 0;
     if (animFrameId) cancelAnimationFrame(animFrameId);
     animFrameId = requestAnimationFrame(gameLoop);
-    // Pausar partículas al iniciar el juego (se reanudan al lanzar la bola)
-    pausePetals();
   }
 
   function updateUI() {
     updateLivesUI();
     scoreEl.textContent = `${playerScore}`;
 
-    // Hitos cada 8.000 puntos
     const milestone = Math.floor(playerScore / SCORE_PER_LIFE);
     if (milestone > lastScoreMilestone && milestone > 0) {
       lastScoreMilestone = milestone;
-      // Mostrar mensaje
       const msgIndex = Math.min(milestone - 1, SCORE_MESSAGES.length - 1);
       const msg = SCORE_MESSAGES[msgIndex];
       showFloatingMessage(msg, '#ffcc00');
 
-      // Recompensa: vida o bola azul
       if (lives < MAX_LIVES) {
         lives++;
         updateLivesUI();
         showFloatingMessage('❤️ +1 Vida', '#ff4444');
       } else {
-        // Si ya tiene 3 vidas, dar bola azul
-        if (!blueBallActive) {
-          spawnBlueBall();
-        }
+        if (!blueBallActive) spawnBlueBall();
       }
     }
   }
@@ -951,7 +993,6 @@ export function initJuego(config) {
     }
   }
 
-  // ---- BUCLE PRINCIPAL ----
   function gameLoop(timestamp) {
     if (!running) {
       animFrameId = requestAnimationFrame(gameLoop);
@@ -1070,7 +1111,6 @@ export function initJuego(config) {
       }
     }
 
-    // Movimiento de powerups (incluye bola azul)
     for (let i = powerups.length - 1; i >= 0; i--) {
       const pu = powerups[i];
       pu.y += pu.vy * delta;
@@ -1086,7 +1126,6 @@ export function initJuego(config) {
         pu.el.remove();
         powerups.splice(i, 1);
         powerupsInAir--;
-        if (!pu.isBlue) activePowerupTypes.delete(pu.type);
         soundTap();
         updateDurabilityVisual();
         continue;
@@ -1096,12 +1135,8 @@ export function initJuego(config) {
         pu.el.remove();
         powerups.splice(i, 1);
         powerupsInAir--;
-        if (pu.isBlue) {
-          blueBallActive = false;
-          activePowerupTypes.delete('BOLA_AZUL');
-        } else {
-          activePowerupTypes.delete(pu.type);
-        }
+        if (pu.isBlue) blueBallActive = false;
+        else activePowerupTypes.delete(pu.type);
         continue;
       }
 
@@ -1137,39 +1172,27 @@ export function initJuego(config) {
             const speed = Math.sqrt(src.vx * src.vx + src.vy * src.vy) || BALL_SPEED;
             const vx = Math.sin(angle) * speed;
             const vy = -Math.cos(angle) * speed;
-            balls.push({
-              x: src.x + (Math.random() - 0.5) * 10,
-              y: src.y + (Math.random() - 0.5) * 10,
-              vx: vx,
-              vy: vy
-            });
+            balls.push({ x: src.x + (Math.random() - 0.5) * 10, y: src.y + (Math.random() - 0.5) * 10, vx: vx, vy: vy });
           }
         }
         break;
       }
       case 'DUREZA':
-        if (ballDurability < 3) {
-          ballDurability++;
-          updateDurabilityVisual();
-        }
+        if (ballDurability < 3) ballDurability++;
+        updateDurabilityVisual();
         break;
       case 'FLAQUESA':
-        if (ballDurability > 1) {
-          ballDurability--;
-          updateDurabilityVisual();
-        }
+        if (ballDurability > 1) ballDurability--;
+        updateDurabilityVisual();
         break;
       case 'BOLA_NIEBLA':
-        if (nieblaLevel < MAX_NIEBLA) {
-          nieblaLevel++;
-          updateNiebla();
-        }
+        if (nieblaLevel < MAX_NIEBLA) nieblaLevel++;
+        updateNiebla();
         break;
     }
-    // Ya se eliminó del conjunto al ser recogido
+    activePowerupTypes.delete(type);
   }
 
-  // ---- ABRIR / CERRAR ----
   function openGame() {
     resetGameState();
     overlay.classList.add('open');
@@ -1180,20 +1203,22 @@ export function initJuego(config) {
     activePowerupTypes.clear();
     powerupsInAir = 0;
     msgEl.classList.remove('show');
-    restartBtn.style.display = 'none';
     draw();
-    startGame();
-    // Pausar partículas al abrir el juego
-    pausePetals();
+
+    pauseParticulas();
+    showMenu(false);
+    layoutStage();
+    updateUI();
+    updateDurabilityVisual();
   }
 
   function closeGame() {
     if (animFrameId) cancelAnimationFrame(animFrameId);
     running = false;
     paused = false;
+    gameOver = false;
     gameTimeActive = false;
     pauseBtn.textContent = '⏸️';
-    modalPausa.classList.remove('open');
     overlay.classList.remove('open');
     inner.querySelectorAll('.brick').forEach(b => b.remove());
     powerups.forEach(p => p.el.remove());
@@ -1202,10 +1227,9 @@ export function initJuego(config) {
     powerupsInAir = 0;
     inner.querySelectorAll('[style*="floatMsg"]').forEach(el => el.remove());
     resetGameState();
+    resumeParticulas();
     soundClose();
-    // Reanudar partículas al cerrar el juego
-    resumePetals();
-    console.log('🧹 Juego cerrado y limpiado completamente');
+    console.log('🧹 Juego cerrado y limpiado');
   }
 
   function layoutStage() {
@@ -1220,16 +1244,10 @@ export function initJuego(config) {
     inner.style.transformOrigin = 'top left';
   }
 
-  // ---- EVENTOS ----
-  document.getElementById('game-close').addEventListener('click', closeGame);
-  restartBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    soundTap();
-    startGame();
-  });
+  closeBtn.addEventListener('click', closeGame);
 
   stage.addEventListener('mousedown', (e) => {
-    if (!running || paused) return;
+    if (!running || paused || gameOver) return;
     const rect = stage.getBoundingClientRect();
     const localX = (e.clientX - rect.left) / scale;
     mouseX = Math.min(Math.max(localX - paddleWidth / 2, 0), STAGE_W - paddleWidth);
@@ -1237,7 +1255,7 @@ export function initJuego(config) {
     if (!launched) launchBall();
   });
   document.addEventListener('mousemove', (e) => {
-    if (!running || !mouseActive || paused) return;
+    if (!running || !mouseActive || paused || gameOver) return;
     const rect = stage.getBoundingClientRect();
     const localX = (e.clientX - rect.left) / scale;
     mouseX = Math.min(Math.max(localX - paddleWidth / 2, 0), STAGE_W - paddleWidth);
@@ -1245,11 +1263,11 @@ export function initJuego(config) {
   document.addEventListener('mouseup', () => { mouseActive = false; });
 
   stage.addEventListener('click', (e) => {
-    if (running && !launched && !paused) launchBall();
+    if (running && !launched && !paused && !gameOver) launchBall();
   });
 
   document.addEventListener('keydown', (e) => {
-    if (!running || paused) return;
+    if (!running || paused || gameOver) return;
     if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') { keys.left = true; e.preventDefault(); }
     else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') { keys.right = true; e.preventDefault(); }
   });
@@ -1259,7 +1277,7 @@ export function initJuego(config) {
   });
 
   stage.addEventListener('touchstart', (e) => {
-    if (!running || paused) return;
+    if (!running || paused || gameOver) return;
     const touch = e.touches[0];
     if (touch) {
       const rect = stage.getBoundingClientRect();
@@ -1270,7 +1288,7 @@ export function initJuego(config) {
     }
   }, { passive: true });
   stage.addEventListener('touchmove', (e) => {
-    if (!running || paused) return;
+    if (!running || paused || gameOver) return;
     e.preventDefault();
     const touch = e.touches[0];
     if (touch) {
