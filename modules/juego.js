@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – CORREGIDO: bug pelota y resumeParticulas
+// juego.js – VERSIÓN COMPLETA CON LADRILLOS REALISTAS Y SONIDOS
 // ============================================================
-console.log('📦 juego.js (corregido)');
+console.log('📦 juego.js (completo con ladrillos realistas)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose, soundClay, soundWood, soundIron } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
@@ -27,6 +27,9 @@ const BRICK_TYPES = {
   WOOD:   { value: 2, playerPoints: 200, hits: 2, color: '#8b5a2b', label: 'WOOD' },
   IRON:   { value: 3, playerPoints: 300, hits: 3, color: '#7a8a9a', label: 'IRON' }
 };
+
+// Ya no usamos FRACTURE_SYMBOLS porque usamos clases CSS
+// const FRACTURE_SYMBOLS = { ... }
 
 const POWERUP_PROBS = {
   CLAY: 0.06,
@@ -86,7 +89,7 @@ function getRandomName() {
 }
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego (corregido)');
+  console.log('🎮 Iniciando juego (completo)');
 
   if (!document.querySelector('#pixel-font')) {
     const link = document.createElement('link');
@@ -232,7 +235,6 @@ export function initJuego(config) {
   let paused = false;
   let gameOver = false;
   let pendingHighScore = false;
-  let gameIsOpen = false; // control para resumeParticulas
 
   // ---- FUNCIONES DEL MENÚ ----
   function showMenu(showGameOver = false, score = 0) {
@@ -454,9 +456,12 @@ export function initJuego(config) {
   function updateBrickVisual(brick) {
     const el = brick.el;
     const type = brick.type;
+    // Limpiar clases
     el.className = 'brick';
+    // Asignar clase base
     if (type === BRICK_TYPES.CLAY) {
       el.classList.add('brick-clay');
+      // Arcilla no tiene grietas
     } else if (type === BRICK_TYPES.WOOD) {
       el.classList.add('brick-wood');
       if (brick.hits === 1) {
@@ -468,6 +473,7 @@ export function initJuego(config) {
         el.classList.add('cracked-1');
       } else if (brick.hits === 1) {
         el.classList.add('cracked-2');
+        // Añadir grieta extra si no existe
         if (!el.querySelector('.crack-extra')) {
           const extra = document.createElement('div');
           extra.className = 'crack-extra';
@@ -475,6 +481,7 @@ export function initJuego(config) {
         }
       }
     }
+    // Quitar texto numérico
     el.textContent = '';
   }
 
@@ -799,6 +806,7 @@ export function initJuego(config) {
       type: 'BOLA_AZUL', el: el, alive: true, isBlue: true
     });
     powerupsInAir++;
+    // No mostrar mensaje
   }
 
   function applyBlueBall() {
@@ -840,6 +848,7 @@ export function initJuego(config) {
     }
     updateUI();
     blueBallActive = false;
+    // No mostrar mensaje
   }
 
   function showFloatingMessage(text, color = '#fff') {
@@ -989,12 +998,7 @@ export function initJuego(config) {
     }
   }
 
-  // ---- FUNCIÓN loseLife CORREGIDA ----
   function loseLife() {
-    // Detener inmediatamente la pelota
-    launched = false;
-    // Vaciar bolas para que no sigan moviéndose
-    balls = [];
     lives--;
     animateHeartLoss();
     gameTimeActive = false;
@@ -1075,15 +1079,19 @@ export function initJuego(config) {
     const milestone = Math.floor(playerScore / SCORE_PER_LIFE);
     if (milestone > lastScoreMilestone && milestone > 0) {
       lastScoreMilestone = milestone;
+      // Mensaje de ánimo
       const msgIndex = Math.min(milestone - 1, SCORE_MESSAGES.length - 1);
       const msg = SCORE_MESSAGES[msgIndex];
       showFloatingMessage(msg, '#ffcc00');
 
+      // Recompensa exacta cada 8500 puntos
       if (lives < MAX_LIVES) {
         lives++;
         updateLivesUI();
+        // No mostrar mensaje de vida extra
       } else {
         if (!blueBallActive) spawnBlueBall();
+        // No mostrar mensaje de bola azul
       }
     }
   }
@@ -1157,7 +1165,6 @@ export function initJuego(config) {
     }
   }
 
-  // ---- BUCLE PRINCIPAL ----
   function gameLoop(timestamp) {
     if (!running) {
       animFrameId = requestAnimationFrame(gameLoop);
@@ -1252,6 +1259,7 @@ export function initJuego(config) {
             spawnPowerup(br);
             if (gamePoints <= REGEN_THRESHOLD) requestRegeneration();
           } else {
+            // Actualizar visual con nuevas grietas
             updateBrickVisual(br);
           }
           break;
@@ -1268,8 +1276,9 @@ export function initJuego(config) {
             animFrameId = requestAnimationFrame(gameLoop);
             return;
           }
-          // No recrear aquí, loseLife ya se encarga después de 300ms
-          // Solo aseguramos que launched sea false y esperamos
+          const newX = paddle.x + paddleWidth / 2;
+          const newY = STAGE_H - 14 - BALL_R;
+          balls = [{ x: newX, y: newY, vx: 0, vy: 0 }];
           launched = false;
           updateUI();
           draw();
@@ -1366,7 +1375,6 @@ export function initJuego(config) {
     cleanGameState();
     overlay.classList.add('open');
     pauseParticulas();
-    gameIsOpen = true;
     showMenu(false);
     layoutStage();
     updateUI();
@@ -1390,10 +1398,7 @@ export function initJuego(config) {
     pauseBtn.textContent = '⏸️';
     overlay.classList.remove('open');
     cleanGameState();
-    if (gameIsOpen) {
-      resumeParticulas();
-      gameIsOpen = false;
-    }
+    resumeParticulas();
     soundClose();
     console.log('🧹 Juego cerrado y limpiado');
   }
@@ -1471,5 +1476,6 @@ export function initJuego(config) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego inicializado (corregido)');
+  // No se abre automáticamente
+  console.log('✅ Juego inicializado (completo con ladrillos realistas)');
 }
