@@ -1,7 +1,7 @@
 // ============================================================
 // juego.js – CORREGIDO: bug pelota y resumeParticulas
 // ============================================================
-console.log('📦 juego.js (corregido)');
+console.log('📦 juego b1.js (corregido)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose, soundClay, soundWood, soundIron } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
