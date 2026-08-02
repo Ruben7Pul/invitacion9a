@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – CON BOTÓN DE MENÚ, REGLAS Y SALIDA
+// juego.js – CORREGIDO (bug pelota y resumeParticulas)
 // ============================================================
-console.log('📦 juego9.js (con botón de menú y reglas)');
+console.log('📦 juego23.js (corregido: bug pelota y resumeParticulas)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
@@ -19,7 +19,7 @@ const REGEN_THRESHOLD = 9;
 const BALL_LOW_Y = STAGE_H - 60;
 const MAX_NIEBLA = 3;
 const MAX_LIVES = 3;
-const SCORE_PER_LIFE = 8500; // Ahora 8500 puntos exactos
+const SCORE_PER_LIFE = 8500;
 const TOP_SCORES_COUNT = 5;
 
 const BRICK_TYPES = {
@@ -92,7 +92,7 @@ function getRandomName() {
 }
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego (con botón de menú y reglas)');
+  console.log('🎮 Iniciando juego (corregido)');
 
   if (!document.querySelector('#pixel-font')) {
     const link = document.createElement('link');
@@ -117,7 +117,7 @@ export function initJuego(config) {
   const livesEl = document.getElementById('lives');
   const scoreEl = document.getElementById('game-score');
   const pauseBtn = document.getElementById('pause-btn');
-  const menuBtn = document.getElementById('menu-btn'); // nuevo botón volver al menú
+  const menuBtn = document.getElementById('menu-btn');
 
   const menuEl = document.getElementById('game-menu');
   const menuContent = document.getElementById('menu-content');
@@ -139,7 +139,6 @@ export function initJuego(config) {
   const modalRules = document.getElementById('modal-rules');
   const rulesClose = document.getElementById('rules-close');
 
-  // Ocultar título "MENÚ"
   const menuTitle = menuEl?.querySelector('h2');
   if (menuTitle) menuTitle.style.display = 'none';
 
@@ -238,6 +237,7 @@ export function initJuego(config) {
   let paused = false;
   let gameOver = false;
   let pendingHighScore = false;
+  let gameIsOpen = false; // control para resumeParticulas
 
   // ---- FUNCIONES DEL MENÚ ----
   function showMenu(showGameOver = false, score = 0) {
@@ -301,7 +301,6 @@ export function initJuego(config) {
     }
   }
 
-  // ---- Eventos del menú ----
   menuPlay.addEventListener('click', (e) => {
     e.stopPropagation();
     soundTap();
@@ -327,7 +326,7 @@ export function initJuego(config) {
   menuExit.addEventListener('click', (e) => {
     e.stopPropagation();
     soundTap();
-    closeGame(); // Cierra el juego y vuelve a la invitación
+    closeGame();
   });
 
   menuRules.addEventListener('click', (e) => {
@@ -397,7 +396,6 @@ export function initJuego(config) {
     if (animFrameId) cancelAnimationFrame(animFrameId);
   });
 
-  // ---- Botón "Volver al menú" en la partida ----
   menuBtn.addEventListener('click', () => {
     if (!running && !gameOver) return;
     soundTap();
@@ -413,7 +411,7 @@ export function initJuego(config) {
     if (animFrameId) cancelAnimationFrame(animFrameId);
   });
 
-  // ---- PAUSA DEL JUEGO ----
+  // ---- PAUSA ----
   function togglePause() {
     if (!running || gameOver) return;
     const now = performance.now();
@@ -449,7 +447,7 @@ export function initJuego(config) {
     if (document.hidden && running && !paused && !gameOver) togglePause();
   });
 
-  // ---- FUNCIONES DEL JUEGO (sin cambios relevantes) ----
+  // ---- FUNCIONES DEL JUEGO ----
   function getBrickTypeFromValue(val) {
     if (val === 1) return BRICK_TYPES.CLAY;
     if (val === 2) return BRICK_TYPES.WOOD;
@@ -800,7 +798,6 @@ export function initJuego(config) {
       type: 'BOLA_AZUL', el: el, alive: true, isBlue: true
     });
     powerupsInAir++;
-    // No mostrar mensaje flotante
   }
 
   function applyBlueBall() {
@@ -842,7 +839,6 @@ export function initJuego(config) {
     }
     updateUI();
     blueBallActive = false;
-    // No mostrar mensaje flotante
   }
 
   function showFloatingMessage(text, color = '#fff') {
@@ -992,29 +988,47 @@ export function initJuego(config) {
     }
   }
 
+  // CORRECCIÓN: perder vida sin bug de teletransporte
   function loseLife() {
     lives--;
     animateHeartLoss();
     gameTimeActive = false;
+
+    // Detener la pelota inmediatamente
+    launched = false;
+    // Vaciar las bolas actuales para evitar colisiones durante el setTimeout
+    balls = [];
+    // Limpiar powerups en caída
+    powerups.forEach(p => p.el.remove());
+    powerups = [];
+    activePowerupTypes.clear();
+    powerupsInAir = 0;
+    // Reiniciar efectos
+    paddleSizeMultiplier = 1;
+    paddleWidth = PADDLE_W_BASE;
+    ballDurability = 1;
+    nieblaLevel = 0;
+    updateNiebla();
+    updateDurabilityVisual();
+    updateUI();
+    draw();
+
     if (lives <= 0) {
       setTimeout(() => endGame(), 300);
       return;
     }
+
+    // Después de 300ms, colocar nueva bola pegada a la pala
     setTimeout(() => {
-      paddleSizeMultiplier = 1;
-      paddleWidth = PADDLE_W_BASE;
-      ballDurability = 1;
-      nieblaLevel = 0;
-      updateNiebla();
-      powerups.forEach(p => p.el.remove());
-      powerups = [];
-      activePowerupTypes.clear();
-      powerupsInAir = 0;
       const newX = paddle.x + paddleWidth / 2;
       const newY = STAGE_H - 14 - BALL_R;
       balls = [{ x: newX, y: newY, vx: 0, vy: 0 }];
       launched = false;
-      updateDurabilityVisual();
+      // Asegurarse de que no haya powerups residuales
+      powerups.forEach(p => p.el.remove());
+      powerups = [];
+      activePowerupTypes.clear();
+      powerupsInAir = 0;
       updateUI();
       draw();
     }, 300);
@@ -1057,7 +1071,7 @@ export function initJuego(config) {
     livesEl.style.display = 'block';
     scoreEl.style.display = 'block';
     pauseBtn.style.display = 'block';
-    menuBtn.style.display = 'block'; // Mostrar botón de volver al menú
+    menuBtn.style.display = 'block';
     updateUI();
     updateDurabilityVisual();
     draw();
@@ -1073,19 +1087,15 @@ export function initJuego(config) {
     const milestone = Math.floor(playerScore / SCORE_PER_LIFE);
     if (milestone > lastScoreMilestone && milestone > 0) {
       lastScoreMilestone = milestone;
-      // Mostrar mensaje de ánimo (opcional)
       const msgIndex = Math.min(milestone - 1, SCORE_MESSAGES.length - 1);
       const msg = SCORE_MESSAGES[msgIndex];
       showFloatingMessage(msg, '#ffcc00');
 
-      // Recompensa exacta cada 8500 puntos: vida o bola azul
       if (lives < MAX_LIVES) {
         lives++;
         updateLivesUI();
-        // No mostrar mensaje de vida extra
       } else {
         if (!blueBallActive) spawnBlueBall();
-        // No mostrar mensaje de bola azul
       }
     }
   }
@@ -1265,14 +1275,8 @@ export function initJuego(config) {
             animFrameId = requestAnimationFrame(gameLoop);
             return;
           }
-          const newX = paddle.x + paddleWidth / 2;
-          const newY = STAGE_H - 14 - BALL_R;
-          balls = [{ x: newX, y: newY, vx: 0, vy: 0 }];
-          launched = false;
-          updateUI();
-          draw();
-          animFrameId = requestAnimationFrame(gameLoop);
-          return;
+          // Si después de perder vida no hay bolas, se maneja en loseLife
+          // No hacer nada aquí porque loseLife ya se encarga
         }
       }
     }
@@ -1364,6 +1368,7 @@ export function initJuego(config) {
     cleanGameState();
     overlay.classList.add('open');
     pauseParticulas();
+    gameIsOpen = true;
     showMenu(false);
     layoutStage();
     updateUI();
@@ -1387,7 +1392,13 @@ export function initJuego(config) {
     pauseBtn.textContent = '⏸️';
     overlay.classList.remove('open');
     cleanGameState();
-    resumeParticulas();
+
+    // Solo reanudar pétalos si el juego estaba abierto
+    if (gameIsOpen) {
+      resumeParticulas();
+      gameIsOpen = false;
+    }
+
     soundClose();
     console.log('🧹 Juego cerrado y limpiado');
   }
@@ -1465,6 +1476,5 @@ export function initJuego(config) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  // No se abre automáticamente
-  console.log('✅ Juego inicializado con nuevas funciones');
+  console.log('✅ Juego inicializado con correcciones');
 }
