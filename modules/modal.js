@@ -1,4 +1,4 @@
-console.log('📦 módulo modal.js cargado');
+console.log('📦 1 módulo modal.js cargado');
 
 import { soundOpen, soundClose, soundTap } from './sonidos.js';
 import { burst } from './particulas.js';
@@ -49,6 +49,3 @@ function closeModal(el) {
   el.classList.remove('open');
   soundClose();
 }
-
-
-
