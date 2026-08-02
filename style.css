@@ -721,7 +721,7 @@ h1#nombre-hero {
   opacity: 1;
 }
 
-/* ---- HEADER DEL JUEGO (FIJADO) ---- */
+/* ---- HEADER DEL JUEGO (BOTONES PEGADOS) ---- */
 #game-header {
   display: flex;
   align-items: center;
@@ -731,7 +731,7 @@ h1#nombre-hero {
   text-transform: uppercase;
   font-size: clamp(0.7rem, 2vw, 0.9rem);
   padding: 0 0.2rem;
-  gap: 0.3rem;
+  gap: 0.15rem; /* MUY PEGADO */
 }
 #game-header span { white-space: nowrap; }
 #game-score {
@@ -747,7 +747,7 @@ h1#nombre-hero {
   color: var(--gold-light);
   font-size: 1.4rem;
   cursor: pointer;
-  padding: 0.2rem 0.3rem;
+  padding: 0.1rem 0.15rem; /* más apretado */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -885,7 +885,7 @@ h1#nombre-hero {
   50% { transform: translateY(-8px); }
 }
 
-/* ---- Mensajes flotantes (añadir al juego) ---- */
+/* ---- Mensajes flotantes ---- */
 @keyframes floatMsg {
   0% { opacity: 0; transform: translate(-50%, 30%) scale(0.5); }
   20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
