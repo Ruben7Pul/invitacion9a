@@ -1,7 +1,7 @@
 // ============================================================
 // juego.js – CORREGIDO (bug pelota y resumeParticulas)
 // ============================================================
-console.log('📦 juego z1.js (corregido: bug pelota y resumeParticulas)');
+console.log('📦 juego.js (corregido: bug pelota y resumeParticulas)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
@@ -20,9 +20,9 @@ const BALL_LOW_Y = STAGE_H - 60;
 const MAX_NIEBLA = 3;
 // Altura (en px, sobre STAGE_H=420) hasta donde llega la niebla en cada nivel.
 // Nivel 1: cubre la zona de ladrillos (170px) + 15% más.
-// Nivel 2: cubre el 55% del tablero.
-// Nivel 3: cubre el 95% del tablero (deja solo un 5% visible junto a la paleta).
-const NIEBLA_HEIGHTS = [0, Math.round(170 * 1.15), Math.round(STAGE_H * 0.55), Math.round(STAGE_H * 0.95)];
+// Nivel 2: cubre el 60% del tablero.
+// Nivel 3: cubre el 90% del tablero (deja un 10% visible junto a la paleta).
+const NIEBLA_HEIGHTS = [0, Math.round(170 * 1.15), Math.round(STAGE_H * 0.60), Math.round(STAGE_H * 0.90)];
 const MAX_LIVES = 3;
 const SCORE_PER_LIFE = 8500;
 const TOP_SCORES_COUNT = 5;
@@ -200,7 +200,7 @@ export function initJuego(config) {
   nieblaEl.style.cssText = `
     position: absolute; left: 0; top: 0; width: 100%; height: 0px;
     pointer-events: none;
-    background: linear-gradient(to bottom, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.96) 78%, rgba(255,255,255,0) 100%);
+    background: #ffffff;
     transition: height 0.6s ease, opacity 0.6s ease;
     opacity: 0; z-index: 20;
   `;
@@ -208,6 +208,12 @@ export function initJuego(config) {
   // coordenadas lógico (300x420) que ladrillos/pelota/power-ups, y el mismo
   // contexto de apilamiento, para que el z-index de la pelota y la bola azul
   // realmente la deje por encima de la niebla.
+  //
+  // La niebla es una capa sólida y opaca que se dibuja ENCIMA del tablero,
+  // como una cortina: no oculta ladrillos ni power-ups individualmente
+  // (siguen 100% visibles en el DOM y su colisión funciona igual), solo los
+  // tapa visualmente mientras están debajo de ella. Al no tener degradado ni
+  // transparencia no hay forma de "ver a través" de la niebla lo que hay atrás.
   inner.appendChild(nieblaEl);
 
   let scale = 1;
@@ -643,7 +649,6 @@ export function initJuego(config) {
       bricks.push(brick);
       gamePoints += type.value;
       updateBrickVisual(brick);
-      el.style.visibility = isDentroDeNiebla(y) ? 'hidden' : 'visible';
     }
   }
 
@@ -1143,32 +1148,12 @@ export function initJuego(config) {
     return NIEBLA_HEIGHTS[nieblaLevel] || 0;
   }
 
-  // Un ladrillo/powerup está "dentro" de la niebla si su posición cae
-  // por encima del límite actual (la niebla siempre nace arriba y crece
-  // hacia abajo, dejando libre la franja de la paleta).
-  function isDentroDeNiebla(y) {
-    const boundary = getNieblaBoundary();
-    return boundary > 0 && y < boundary;
-  }
-
   function updateNiebla() {
     const boundary = getNieblaBoundary();
     nieblaEl.style.height = boundary + 'px';
     nieblaEl.style.opacity = boundary > 0 ? 1 : 0;
-
-    // Ladrillos: invisibles dentro de la niebla, pero se siguen pudiendo
-    // romper con normalidad (la colisión usa las coordenadas, no el CSS).
-    for (const b of bricks) {
-      if (!b.alive) continue;
-      b.el.style.visibility = isDentroDeNiebla(b.y) ? 'hidden' : 'visible';
-    }
-
-    // Power-ups: invisibles dentro de la niebla, pero siguen cayendo y
-    // se pueden recoger igual. La bola azul nunca se oculta.
-    for (const pu of powerups) {
-      if (pu.isBlue) continue;
-      pu.el.style.visibility = isDentroDeNiebla(pu.y) ? 'hidden' : 'visible';
-    }
+    // Ladrillos y power-ups siempre quedan visibles en el DOM: la niebla
+    // solo los tapa visualmente al dibujarse encima de ellos.
   }
 
   function draw() {
@@ -1350,9 +1335,6 @@ export function initJuego(config) {
 
       pu.el.style.left = pu.x + 'px';
       pu.el.style.top = pu.y + 'px';
-      if (!pu.isBlue) {
-        pu.el.style.visibility = isDentroDeNiebla(pu.y) ? 'hidden' : 'visible';
-      }
     }
 
     if (pendingRegeneration) checkAndRegenerate();
