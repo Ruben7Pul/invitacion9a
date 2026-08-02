@@ -276,6 +276,11 @@
         <div class="unit"><span class="num" id="m">00</span><span class="lbl gold-text">Min</span></div>
         <div class="unit"><span class="num" id="s">00</span><span class="lbl gold-text">Seg</span></div>
       </div>
+      <div class="modal-seal">
+        <span class="gold-text">✦</span>
+        <span class="gold-text" style="font-family: var(--script); font-size: 1.2rem;">La rosa encantada</span>
+        <span class="gold-text">✦</span>
+      </div>
     </div>
   </div>
 
@@ -283,7 +288,7 @@
   <div class="modal-overlay" id="modal-detalles" role="dialog" aria-modal="true" aria-labelledby="modal-detalles-title">
     <div class="modal-card">
       <button class="modal-close" data-close aria-label="Cerrar">&times;</button>
-      <h2 id="modal-detalles-title" class="gold-text">🏰 Lugares 🏰</h2>
+      <h2 id="modal-detalles-title" class="gold-text">🏰 Donde 🏰 o</h2>
       <div class="detalle-card">
         <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2 L12 8 M8 6 L16 6 M6 22 L18 22 L18 12 L6 12 Z M9 22 L9 16 L15 16 L15 22"/></svg>
         <h3 class="gold-text">Misa</h3>
@@ -346,7 +351,7 @@
       <div id="game-header">
         <span id="lives" class="gold-text">♥ ♥ ♥</span>
         <span id="game-score" class="gold-text">Puntos: 0</span>
-        <!-- El tiempo fue eliminado -->
+        <button id="pause-btn" class="top-btn" aria-label="Pausar o reanudar juego">⏸️</button>
         <button id="game-close" aria-label="Cerrar juego">&times;</button>
       </div>
       <div id="game-stage">
@@ -360,6 +365,16 @@
         </div>
       </div>
       <p class="game-help gold-text">Mueve con dedo, A/D o flechas del teclado</p>
+    </div>
+  </div>
+
+  <!-- MODAL DE PAUSA (fuera del área de juego) -->
+  <div class="modal-overlay" id="modal-pausa" role="dialog" aria-modal="true" aria-labelledby="modal-pausa-title">
+    <div class="modal-card">
+      <button class="modal-close" id="close-pausa" aria-label="Cerrar pausa">&times;</button>
+      <h2 id="modal-pausa-title" class="gold-text">⏸️ Juego en pausa</h2>
+      <p class="modal-subtitle gold-text">Toca el botón de play para continuar</p>
+      <button id="resume-btn" class="game-btn gold-text">▶️ Reanudar</button>
     </div>
   </div>
 
