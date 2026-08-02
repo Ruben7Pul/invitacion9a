@@ -144,7 +144,6 @@ export function initJuego(config) {
     border: 2px solid #fff;
     box-shadow: 0 0 20px rgba(255,255,255,0.6);
     border-radius: 6px;
-    z-index: 25;
   `;
   if (!document.querySelector('#neon-style')) {
     const style = document.createElement('style');
@@ -189,14 +188,11 @@ export function initJuego(config) {
   const nieblaEl = document.createElement('div');
   nieblaEl.id = 'niebla-overlay';
   nieblaEl.style.cssText = `
-    position: absolute; top: 0; left: 0; width: 100%; height: 0px;
-    pointer-events: none;
-    background: linear-gradient(to bottom, rgba(214,224,245,0.95) 0%, rgba(214,224,245,0.92) 68%, rgba(214,224,245,0) 100%);
-    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-    transition: height 0.7s ease, opacity 0.5s ease;
-    opacity: 0; z-index: 12;
+    position: absolute; inset: 0; pointer-events: none;
+    background: rgba(20, 30, 50, 0.4); transition: opacity 0.5s;
+    opacity: 0; border-radius: 12px; z-index: 20;
   `;
-  inner.appendChild(nieblaEl);
+  stage.appendChild(nieblaEl);
 
   let scale = 1;
   let bricks = [];
@@ -635,7 +631,6 @@ export function initJuego(config) {
       gamePoints += type.value;
       updateBrickVisual(brick);
     }
-    applyNieblaVisibility();
   }
 
   function requestRegeneration() {
@@ -771,7 +766,6 @@ export function initJuego(config) {
       size: size, color: color, type: typeKey,
       el: el, alive: true
     });
-    applyNieblaVisibility();
   }
 
   // ---- BOLA AZUL ----
@@ -1123,36 +1117,9 @@ export function initJuego(config) {
     el.style.boxShadow = shadow;
   }
 
-  // Nivel 1: solo la zona de ladrillos. Nivel 2: un poco antes de la mitad.
-  // Nivel 3: casi todo el juego, dejando libre un 15% junto a la pala.
-  const NIEBLA_BOUNDARIES = [0, 150, STAGE_H * 0.45, STAGE_H * 0.85];
-
-  function getNieblaBoundaryY() {
-    return NIEBLA_BOUNDARIES[nieblaLevel] || 0;
-  }
-
   function updateNiebla() {
-    const boundaryY = getNieblaBoundaryY();
-    nieblaEl.style.height = boundaryY + 'px';
-    nieblaEl.style.opacity = nieblaLevel > 0 ? '1' : '0';
-    applyNieblaVisibility();
-  }
-
-  // Oculta (opacity 0) ladrillos y power-ups cuya posición cae dentro de la
-  // zona de niebla. Siguen existiendo con su física normal: se pueden romper,
-  // los power-ups siguen cayendo y se pueden recoger, solo que no se ven.
-  // La pelota y la bola azul nunca se ocultan.
-  function applyNieblaVisibility() {
-    const boundaryY = getNieblaBoundaryY();
-    for (const br of bricks) {
-      if (!br.alive || !br.el) continue;
-      const centerY = br.y + br.h / 2;
-      br.el.style.opacity = (nieblaLevel > 0 && centerY < boundaryY) ? '0' : '1';
-    }
-    for (const pu of powerups) {
-      if (pu.isBlue) continue; // la bola azul siempre visible
-      pu.el.style.opacity = (nieblaLevel > 0 && pu.y < boundaryY) ? '0' : '1';
-    }
+    const opacity = nieblaLevel / MAX_NIEBLA * 0.5;
+    nieblaEl.style.opacity = opacity;
   }
 
   function draw() {
@@ -1169,7 +1136,6 @@ export function initJuego(config) {
         border-radius: 50%;
         pointer-events: none;
         transform: translate(-50%, -50%);
-        z-index: 25;
       `;
       updateBallStyle(el);
       inner.appendChild(el);
@@ -1347,7 +1313,6 @@ export function initJuego(config) {
     }
 
     if (pendingRegeneration) checkAndRegenerate();
-    if (nieblaLevel > 0) applyNieblaVisibility();
 
     draw();
     animFrameId = requestAnimationFrame(gameLoop);
