@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – VERSIÓN FINAL CON TODAS LAS CORRECCIONES
+// juego.js – CONTADOR DE MINUTOS CON PAUSA POR VIDA Y LANZAMIENTO
 // ============================================================
-console.log('📦 juego.js (versión final con bola azul y mensajes)');
+console.log('📦 juego.js (contador con pausa por vida)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
@@ -32,7 +32,6 @@ const FRACTURE_SYMBOLS = {
   3: '|||'
 };
 
-// Probabilidades reducidas: arcilla 10%, madera 20%, hierro 30%
 const POWERUP_PROBS = {
   CLAY: 0.10,
   WOOD: 0.20,
@@ -47,7 +46,6 @@ const GREEN_PROB_TABLE = [
 const GREEN_WEIGHTS = { MULTIBOLA: 15, PALA_GRANDE: 35, DUREZA: 50 };
 const RED_WEIGHTS   = { BOLA_NIEBLA: 10, PALA_MINI: 35, FLAQUESA: 55 };
 
-// Mensajes por cada 15,000 puntos (10 mensajes)
 const SCORE_MESSAGES = [
   "¡Ánimo! Cada punto cuenta.",
   "¡Vas bien! Sigue así.",
@@ -62,7 +60,7 @@ const SCORE_MESSAGES = [
 ];
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego (versión final)');
+  console.log('🎮 Iniciando juego (contador con pausa por vida)');
 
   if (!document.querySelector('#pixel-font')) {
     const link = document.createElement('link');
@@ -89,7 +87,6 @@ export function initJuego(config) {
   const resumeBtn = document.getElementById('resume-btn');
   const closePausa = document.getElementById('close-pausa');
 
-  // Pala neón
   paddleEl.style.cssText += `
     background: linear-gradient(90deg, #ff00cc, #3333ff, #00ffcc, #ffcc00, #ff00cc);
     background-size: 300% 100%;
@@ -110,7 +107,6 @@ export function initJuego(config) {
     document.head.appendChild(style);
   }
 
-  // Estilo arcade (solo número)
   livesEl.style.fontFamily = "'Press Start 2P', monospace";
   livesEl.style.fontSize = '1.2rem';
   livesEl.style.letterSpacing = '0.1em';
@@ -134,7 +130,6 @@ export function initJuego(config) {
     document.head.appendChild(style2);
   }
 
-  // Niebla
   const nieblaEl = document.createElement('div');
   nieblaEl.id = 'niebla-overlay';
   nieblaEl.style.cssText = `
@@ -163,15 +158,21 @@ export function initJuego(config) {
   let playerScore = 0;
   let gamePoints = 0;
   let pendingRegeneration = false;
-  let ladrillosRotos = 0;           // contador de ladrillos rotos
-  let lastScoreMilestone = 0;       // último múltiplo de 15000 alcanzado
-  let blueBallActive = false;       // para evitar múltiples bolas azules
+  let ladrillosRotos = 0;
+  let lastScoreMilestone = 0;
+  let blueBallActive = false;
 
   let ballDurability = 1;
   let paddleSizeMultiplier = 1;
   let paddleWidth = PADDLE_W_BASE;
   let nieblaLevel = 0;
-  let gameStartTime = 0;
+
+  // ---- CONTROL DEL CONTADOR DE MINUTOS ----
+  let gameStartTime = 0;          // momento de inicio de la partida
+  let pausedTime = 0;            // tiempo acumulado en pausa (ms)
+  let pauseStartTime = 0;        // momento en que empezó la pausa actual
+  let gameTimeActive = false;    // si el contador de minutos debe avanzar (bola lanzada y no pausa)
+  let lastTime = 0;
 
   let mouseActive = false;
   let mouseX = 0;
@@ -180,21 +181,32 @@ export function initJuego(config) {
   let touchX = 0;
 
   let paused = false;
-  let lastTime = 0;
 
   window.closeGame = closeGame;
 
   // ---- FUNCIONES DE PAUSA Y TECLA ESPACIO ----
   function togglePause() {
     if (!running) return;
-    paused = !paused;
-    if (paused) {
+    const now = performance.now();
+    if (!paused) {
+      paused = true;
       pauseBtn.textContent = '▶️';
+      pauseStartTime = now;
+      // Si el contador estaba activo, desactivarlo (se pausa el juego)
+      if (gameTimeActive) {
+        gameTimeActive = false;
+      }
       document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
       modalPausa.classList.add('open');
     } else {
+      paused = false;
       pauseBtn.textContent = '⏸️';
       modalPausa.classList.remove('open');
+      pausedTime += (now - pauseStartTime);
+      // Si la bola está lanzada, reactivar el contador
+      if (launched) {
+        gameTimeActive = true;
+      }
       lastTime = 0;
     }
   }
@@ -229,7 +241,7 @@ export function initJuego(config) {
     }
   });
 
-  // ---- LÓGICA DE LADRILLOS ----
+  // ---- FUNCIONES DE LADRILLOS ----
   function getBrickTypeFromValue(val) {
     if (val === 1) return BRICK_TYPES.CLAY;
     if (val === 2) return BRICK_TYPES.WOOD;
@@ -445,7 +457,7 @@ export function initJuego(config) {
     }
   }
 
-  // ---- POWER-UPS CON PROBABILIDADES REDUCIDAS Y CONTADOR DE LADRILLOS ----
+  // ---- POWER-UPS ----
   function getGreenProbability(minutes) {
     if (minutes < 0) return GREEN_PROB_TABLE[0];
     if (minutes >= GREEN_PROB_TABLE.length - 1) return GREEN_PROB_TABLE[GREEN_PROB_TABLE.length - 1];
@@ -490,7 +502,6 @@ export function initJuego(config) {
   }
 
   function spawnPowerup(brick) {
-    // Solo si se han roto más de 36 ladrillos
     if (ladrillosRotos <= 36) return;
 
     let prob = 0;
@@ -500,7 +511,12 @@ export function initJuego(config) {
     if (Math.random() >= prob) return;
 
     const now = performance.now();
-    const minutes = (now - gameStartTime) / 60000;
+    // Calcular minutos reales restando el tiempo en pausa y solo si gameTimeActive
+    let elapsed = 0;
+    if (gameTimeActive && gameStartTime > 0) {
+      elapsed = (now - gameStartTime - pausedTime) / 60000;
+    }
+    const minutes = Math.max(0, elapsed);
     const greenProb = getGreenProbability(minutes);
     const color = Math.random() * 100 < greenProb ? 'verde' : 'rojo';
     let typeKey = selectPowerupByColor(color);
@@ -559,7 +575,7 @@ export function initJuego(config) {
     });
   }
 
-  // ---- BOLA AZUL (evento especial) ----
+  // ---- BOLA AZUL ----
   function spawnBlueBall() {
     if (blueBallActive) return;
     blueBallActive = true;
@@ -585,17 +601,6 @@ export function initJuego(config) {
     el.textContent = '★';
     inner.appendChild(el);
 
-    const blueBall = {
-      x: x,
-      y: y,
-      vy: speed,
-      size: size,
-      el: el,
-      alive: true
-    };
-
-    // Añadir a un array específico para bolas azules o manejarlo en el bucle
-    // Lo añadimos a powerups pero con un tipo especial
     powerups.push({
       x: x,
       y: y,
@@ -607,24 +612,19 @@ export function initJuego(config) {
       isBlue: true
     });
 
-    // Mostrar mensaje de que ha llegado la bola azul
     showFloatingMessage('⭐ ¡Bola Azul! ⭐', '#00ccff');
   }
 
   function applyBlueBall() {
-    // +2000 puntos
     playerScore += 2000;
-    // Eliminar poderes negativos: niebla, mini pala, flaqueza
     nieblaLevel = 0;
     updateNiebla();
     if (paddleSizeMultiplier < 1) paddleSizeMultiplier = 1;
     if (ballDurability < 1) ballDurability = 1;
-    // Dar un poder positivo aleatorio (que no tenga)
     const positiveTypes = ['MULTIBOLA', 'PALA_GRANDE', 'DUREZA'];
     const available = positiveTypes.filter(t => !isSaturated(t));
     if (available.length > 0) {
       const selected = available[Math.floor(Math.random() * available.length)];
-      // Aplicar el poder
       switch (selected) {
         case 'MULTIBOLA': {
           const count = balls.length;
@@ -685,21 +685,6 @@ export function initJuego(config) {
     setTimeout(() => el.remove(), 2500);
   }
 
-  // Añadir keyframes para el mensaje flotante si no existen
-  if (!document.querySelector('#float-msg-style')) {
-    const style = document.createElement('style');
-    style.id = 'float-msg-style';
-    style.textContent = `
-      @keyframes floatMsg {
-        0% { opacity: 0; transform: translate(-50%, 30%) scale(0.5); }
-        20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-        80% { opacity: 1; transform: translate(-50%, -60%) scale(1); }
-        100% { opacity: 0; transform: translate(-50%, -80%) scale(0.8); }
-      }
-    `;
-    document.head.appendChild(style);
-  }
-
   // ---- FUNCIONES DE JUEGO ----
   function launchBall() {
     if (launched) return;
@@ -712,6 +697,15 @@ export function initJuego(config) {
       }
     }
     launched = true;
+    // Activar contador de minutos al lanzar la bola por primera vez
+    if (!gameTimeActive && gameStartTime > 0) {
+      gameTimeActive = true;
+      // Si había pausa acumulada, se ajusta
+      if (paused) {
+        // Si está en pausa, no activar hasta reanudar
+        gameTimeActive = false;
+      }
+    }
   }
 
   function resetGameState() {
@@ -721,6 +715,9 @@ export function initJuego(config) {
     paused = false;
     pauseBtn.textContent = '⏸️';
     modalPausa.classList.remove('open');
+    gameTimeActive = false;
+    pausedTime = 0;
+    pauseStartTime = 0;
     bricks = [];
     powerups = [];
     activePowerupTypes.clear();
@@ -746,11 +743,9 @@ export function initJuego(config) {
     gameStartTime = 0;
     lastTime = 0;
 
-    // Limpiar todo el DOM interno
     inner.querySelectorAll('.brick').forEach(b => b.remove());
     powerups.forEach(p => p.el.remove());
     powerups = [];
-    // También eliminar posibles mensajes flotantes
     inner.querySelectorAll('[style*="floatMsg"]').forEach(el => el.remove());
 
     const initialX = paddle.x + paddleWidth / 2;
@@ -788,6 +783,8 @@ export function initJuego(config) {
   function loseLife() {
     lives--;
     animateHeartLoss();
+    // Detener el contador de minutos
+    gameTimeActive = false;
     if (lives <= 0) {
       setTimeout(() => {
         endGame();
@@ -810,11 +807,13 @@ export function initJuego(config) {
       updateDurabilityVisual();
       updateUI();
       draw();
+      // El contador se reactivará al lanzar la bola de nuevo (en launchBall)
     }, 300);
   }
 
   function endGame() {
     running = false;
+    gameTimeActive = false;
     if (animFrameId) cancelAnimationFrame(animFrameId);
     restartBtn.style.display = 'inline-block';
     msgText.textContent = `Game Over\n${playerScore}`;
@@ -838,6 +837,9 @@ export function initJuego(config) {
     msgEl.classList.remove('show');
     running = true;
     gameStartTime = performance.now();
+    pausedTime = 0;
+    pauseStartTime = 0;
+    gameTimeActive = false; // no avanza hasta que se lance la bola
     layoutStage();
     updateUI();
     updateDurabilityVisual();
@@ -850,18 +852,52 @@ export function initJuego(config) {
   function updateUI() {
     updateLivesUI();
     scoreEl.textContent = `${playerScore}`;
-    // Verificar hitos de puntuación (cada 15000)
     const milestone = Math.floor(playerScore / SCORE_PER_LIFE);
     if (milestone > lastScoreMilestone && milestone > 0) {
       lastScoreMilestone = milestone;
       const msgIndex = Math.min(milestone - 1, SCORE_MESSAGES.length - 1);
       const msg = SCORE_MESSAGES[msgIndex];
       showFloatingMessage(msg, '#ffcc00');
-      // Si se tienen 3 vidas, generar bola azul
       if (lives === 3 && !blueBallActive) {
         spawnBlueBall();
       }
     }
+  }
+
+  function updateDurabilityVisual() {
+    const ballElements = inner.querySelectorAll('.ball-dynamic');
+    for (const el of ballElements) {
+      updateBallStyle(el);
+    }
+  }
+
+  function updateBallStyle(el) {
+    let bg, border, shadow;
+    switch (ballDurability) {
+      case 1:
+        bg = 'radial-gradient(circle at 35% 30%, #b0b0b0, #606060 60%, #303030)';
+        border = '2px solid #888';
+        shadow = '0 0 10px rgba(100,100,100,0.5)';
+        break;
+      case 2:
+        bg = 'radial-gradient(circle at 35% 30%, #ffaa00, #ff3300 60%, #990000)';
+        border = '2px solid #ff6600';
+        shadow = '0 0 20px rgba(255,100,0,0.8)';
+        break;
+      case 3:
+        bg = 'radial-gradient(circle at 35% 30%, #88ddff, #0066ff 60%, #0000aa)';
+        border = '2px solid #00ccff';
+        shadow = '0 0 25px rgba(0,150,255,0.9)';
+        break;
+    }
+    el.style.background = bg;
+    el.style.border = border;
+    el.style.boxShadow = shadow;
+  }
+
+  function updateNiebla() {
+    const opacity = nieblaLevel / MAX_NIEBLA * 0.5;
+    nieblaEl.style.opacity = opacity;
   }
 
   function draw() {
@@ -911,6 +947,9 @@ export function initJuego(config) {
       animFrameId = requestAnimationFrame(gameLoop);
       return;
     }
+
+    // Si el contador está activo, no hacemos nada especial, solo avanzamos el tiempo
+    // El tiempo real se calcula en spawnPowerup usando gameStartTime, pausedTime y gameTimeActive
 
     const delta = lastTime ? Math.min((timestamp - lastTime) / 1000, 0.05) : 0.016;
     lastTime = timestamp;
@@ -986,7 +1025,7 @@ export function initJuego(config) {
             br.el.classList.add('gone');
             playerScore += br.playerPoints;
             gamePoints -= br.value;
-            ladrillosRotos++;  // incrementar contador
+            ladrillosRotos++;
             updateUI();
             spawnPowerup(br);
             if (gamePoints <= REGEN_THRESHOLD) requestRegeneration();
@@ -1019,7 +1058,6 @@ export function initJuego(config) {
       }
     }
 
-    // Movimiento de powerups (incluye bola azul)
     for (let i = powerups.length - 1; i >= 0; i--) {
       const pu = powerups[i];
       pu.y += pu.vy * delta;
@@ -1030,7 +1068,6 @@ export function initJuego(config) {
           pu.y - pu.size / 2 < py2 + PADDLE_H / 2 &&
           pu.x + pu.size / 2 > px &&
           pu.x - pu.size / 2 < px + paddleWidth) {
-        // Atrapado
         if (pu.isBlue) {
           applyBlueBall();
         } else {
@@ -1064,6 +1101,60 @@ export function initJuego(config) {
     animFrameId = requestAnimationFrame(gameLoop);
   }
 
+  function applyPowerup(pu) {
+    const type = pu.type;
+    switch (type) {
+      case 'PALA_GRANDE':
+        if (paddleSizeMultiplier < 1) paddleSizeMultiplier = 1;
+        paddleSizeMultiplier = 1.3;
+        break;
+      case 'PALA_MINI':
+        if (paddleSizeMultiplier > 1) paddleSizeMultiplier = 1;
+        paddleSizeMultiplier = 0.85;
+        break;
+      case 'MULTIBOLA': {
+        const count = balls.length;
+        if (count >= 1 && count <= 3) {
+          const newCount = Math.min(9, count * 3);
+          const extra = newCount - count;
+          for (let i = 0; i < extra; i++) {
+            const src = balls[Math.floor(Math.random() * balls.length)];
+            const angle = (Math.random() - 0.5) * 1.2;
+            const speed = Math.sqrt(src.vx * src.vx + src.vy * src.vy) || BALL_SPEED;
+            const vx = Math.sin(angle) * speed;
+            const vy = -Math.cos(angle) * speed;
+            balls.push({
+              x: src.x + (Math.random() - 0.5) * 10,
+              y: src.y + (Math.random() - 0.5) * 10,
+              vx: vx,
+              vy: vy
+            });
+          }
+        }
+        break;
+      }
+      case 'DUREZA':
+        if (ballDurability < 3) {
+          ballDurability++;
+          updateDurabilityVisual();
+        }
+        break;
+      case 'FLAQUESA':
+        if (ballDurability > 1) {
+          ballDurability--;
+          updateDurabilityVisual();
+        }
+        break;
+      case 'BOLA_NIEBLA':
+        if (nieblaLevel < MAX_NIEBLA) {
+          nieblaLevel++;
+          updateNiebla();
+        }
+        break;
+    }
+    activePowerupTypes.delete(type);
+  }
+
   // ---- ABRIR / CERRAR JUEGO ----
   function openGame() {
     resetGameState();
@@ -1081,21 +1172,18 @@ export function initJuego(config) {
   }
 
   function closeGame() {
-    // Limpieza total
     if (animFrameId) cancelAnimationFrame(animFrameId);
     running = false;
     paused = false;
+    gameTimeActive = false;
     pauseBtn.textContent = '⏸️';
     modalPausa.classList.remove('open');
     overlay.classList.remove('open');
-    // Eliminar todos los elementos visuales
     inner.querySelectorAll('.brick').forEach(b => b.remove());
     powerups.forEach(p => p.el.remove());
     powerups = [];
     activePowerupTypes.clear();
-    // Eliminar mensajes flotantes
     inner.querySelectorAll('[style*="floatMsg"]').forEach(el => el.remove());
-    // Resetear estado
     resetGameState();
     soundClose();
     console.log('🧹 Juego cerrado y limpiado completamente');
@@ -1179,5 +1267,5 @@ export function initJuego(config) {
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
   resetGameState();
-  console.log('✅ Juego listo (versión final con todas las correcciones)');
+  console.log('✅ Juego listo (contador con pausa por vida)');
 }
