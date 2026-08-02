@@ -17,13 +17,16 @@ export function initModal() {
     });
   });
 
+  // Solo se cierra con el botón [data-close], no con clic en overlay
   document.querySelectorAll('.modal-overlay').forEach(ov => {
-    ov.addEventListener('click', e => { if (e.target === ov) closeModal(ov); });
-    ov.querySelector('[data-close]').addEventListener('click', (e) => {
-      const r = e.currentTarget.getBoundingClientRect();
-      burst(r.left + r.width / 2, r.top + r.height / 2, 10);
-      closeModal(ov);
-    });
+    const closeBtn = ov.querySelector('[data-close]');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', (e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        burst(r.left + r.width / 2, r.top + r.height / 2, 10);
+        closeModal(ov);
+      });
+    }
   });
 
   document.addEventListener('keydown', e => {
