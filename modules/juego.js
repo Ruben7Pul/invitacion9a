@@ -1,9 +1,12 @@
 // ============================================================
-// juego.js – PROBABILIDADES AJUSTADAS Y BOTÓN DE PAUSA PEGADO
+// juego.js – VERSIÓN DEFINITIVA CON CONTROL DE POWER-UPS
 // ============================================================
-console.log('📦 juego.js (probabilidades 6/12/24, pausa pegada)');
+console.log('📦 juego.js (definitiva)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
+
+// Importamos las funciones de partículas para pausarlas
+import { pausePetals, resumePetals } from './particulas.js';
 
 const PADDLE_W_BASE = 72;
 const PADDLE_H = 10;
@@ -18,7 +21,7 @@ const REGEN_THRESHOLD = 9;
 const BALL_LOW_Y = STAGE_H - 60;
 const MAX_NIEBLA = 3;
 const MAX_LIVES = 3;
-const SCORE_PER_LIFE = 15000;
+const SCORE_PER_LIFE = 8000; // Ahora 8.000
 
 const BRICK_TYPES = {
   CLAY:   { value: 1, playerPoints: 100, hits: 1, color: '#d9534f', label: 'CLAY' },
@@ -32,7 +35,7 @@ const FRACTURE_SYMBOLS = {
   3: '|||'
 };
 
-// PROBABILIDADES CORREGIDAS: 6%, 12%, 24%
+// PROBABILIDADES CORRECTAS
 const POWERUP_PROBS = {
   CLAY: 0.06,
   WOOD: 0.12,
@@ -61,7 +64,7 @@ const SCORE_MESSAGES = [
 ];
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego (prob 6/12/24, pausa pegada)');
+  console.log('🎮 Iniciando juego definitivo');
 
   if (!document.querySelector('#pixel-font')) {
     const link = document.createElement('link');
@@ -151,6 +154,7 @@ export function initJuego(config) {
   let balls = [];
   let powerups = [];
   let activePowerupTypes = new Set();
+  let powerupsInAir = 0; // Controla que solo haya máximo 2 y de tipos diferentes
   let paddle = { x: (STAGE_W - PADDLE_W_BASE) / 2 };
   let lives = 3;
   let running = false;
@@ -196,6 +200,8 @@ export function initJuego(config) {
       if (gameTimeActive) gameTimeActive = false;
       document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
       modalPausa.classList.add('open');
+      // Pausar partículas
+      pausePetals();
     } else {
       paused = false;
       pauseBtn.textContent = '⏸️';
@@ -203,6 +209,8 @@ export function initJuego(config) {
       pausedTime += (now - pauseStartTime);
       if (launched) gameTimeActive = true;
       lastTime = 0;
+      // Reanudar partículas
+      resumePetals();
     }
   }
 
@@ -482,6 +490,7 @@ export function initJuego(config) {
 
   function getAvailableTypes(color) {
     const types = color === 'verde' ? Object.keys(GREEN_WEIGHTS) : Object.keys(RED_WEIGHTS);
+    // Filtrar también los que ya están en el aire
     return types.filter(t => !isSaturated(t) && !activePowerupTypes.has(t));
   }
 
@@ -493,8 +502,9 @@ export function initJuego(config) {
   }
 
   function spawnPowerup(brick) {
-    // No soltar power-ups hasta romper 36 ladrillos
     if (ladrillosRotos <= 36) return;
+    // Máximo 2 en el aire y de tipos diferentes (ya controlado por activePowerupTypes)
+    if (powerupsInAir >= 2) return;
 
     let prob = 0;
     if (brick.type === BRICK_TYPES.CLAY) prob = POWERUP_PROBS.CLAY;
@@ -502,7 +512,6 @@ export function initJuego(config) {
     else if (brick.type === BRICK_TYPES.IRON) prob = POWERUP_PROBS.IRON;
     if (Math.random() >= prob) return;
 
-    // Calcular minutos reales
     const now = performance.now();
     let elapsed = 0;
     if (gameTimeActive && gameStartTime > 0) {
@@ -518,6 +527,7 @@ export function initJuego(config) {
     typeKey = alternative;
 
     activePowerupTypes.add(typeKey);
+    powerupsInAir++;
 
     const isGreen = color === 'verde';
     console.log(`⚡ Powerup generado: ${typeKey} (${color})`);
@@ -603,6 +613,8 @@ export function initJuego(config) {
       alive: true,
       isBlue: true
     });
+    powerupsInAir++; // También cuenta como power‑up en el aire
+    activePowerupTypes.add('BOLA_AZUL'); // Para controlar duplicados
 
     showFloatingMessage('⭐ ¡Bola Azul! ⭐', '#00ccff');
   }
@@ -652,6 +664,8 @@ export function initJuego(config) {
     updateUI();
     showFloatingMessage('✨ +2000 pts y poder extra ✨', '#ffcc00');
     blueBallActive = false;
+    // Quitar del conjunto de activos
+    activePowerupTypes.delete('BOLA_AZUL');
   }
 
   // ---- MENSAJES ----
@@ -693,6 +707,8 @@ export function initJuego(config) {
       gameTimeActive = true;
       if (paused) gameTimeActive = false;
     }
+    // Reanudar partículas si estaban pausadas
+    resumePetals();
   }
 
   function resetGameState() {
@@ -708,6 +724,7 @@ export function initJuego(config) {
     bricks = [];
     powerups = [];
     activePowerupTypes.clear();
+    powerupsInAir = 0;
     balls = [];
     paddle.x = (STAGE_W - PADDLE_W_BASE) / 2;
     paddleSizeMultiplier = 1;
@@ -744,6 +761,8 @@ export function initJuego(config) {
     updateUI();
     updateDurabilityVisual();
     draw();
+    // Reanudar partículas al resetear (por si acaso)
+    resumePetals();
   }
 
   function updateLivesUI() {
@@ -782,6 +801,7 @@ export function initJuego(config) {
       powerups.forEach(p => p.el.remove());
       powerups = [];
       activePowerupTypes.clear();
+      powerupsInAir = 0;
       const newX = paddle.x + paddleWidth / 2;
       const newY = STAGE_H - 14 - BALL_R;
       balls = [{ x: newX, y: newY, vx: 0, vy: 0 }];
@@ -789,6 +809,7 @@ export function initJuego(config) {
       updateDurabilityVisual();
       updateUI();
       draw();
+      // Las partículas se reanudan al lanzar la bola de nuevo
     }, 300);
   }
 
@@ -800,6 +821,8 @@ export function initJuego(config) {
     msgText.textContent = `Game Over\n${playerScore}`;
     msgEl.classList.add('show');
     soundLose();
+    // Pausar partículas al terminar el juego
+    pausePetals();
   }
 
   function startGame() {
@@ -828,18 +851,34 @@ export function initJuego(config) {
     lastTime = 0;
     if (animFrameId) cancelAnimationFrame(animFrameId);
     animFrameId = requestAnimationFrame(gameLoop);
+    // Pausar partículas al iniciar el juego (se reanudan al lanzar la bola)
+    pausePetals();
   }
 
   function updateUI() {
     updateLivesUI();
     scoreEl.textContent = `${playerScore}`;
+
+    // Hitos cada 8.000 puntos
     const milestone = Math.floor(playerScore / SCORE_PER_LIFE);
     if (milestone > lastScoreMilestone && milestone > 0) {
       lastScoreMilestone = milestone;
+      // Mostrar mensaje
       const msgIndex = Math.min(milestone - 1, SCORE_MESSAGES.length - 1);
       const msg = SCORE_MESSAGES[msgIndex];
       showFloatingMessage(msg, '#ffcc00');
-      if (lives === 3 && !blueBallActive) spawnBlueBall();
+
+      // Recompensa: vida o bola azul
+      if (lives < MAX_LIVES) {
+        lives++;
+        updateLivesUI();
+        showFloatingMessage('❤️ +1 Vida', '#ff4444');
+      } else {
+        // Si ya tiene 3 vidas, dar bola azul
+        if (!blueBallActive) {
+          spawnBlueBall();
+        }
+      }
     }
   }
 
@@ -1031,6 +1070,7 @@ export function initJuego(config) {
       }
     }
 
+    // Movimiento de powerups (incluye bola azul)
     for (let i = powerups.length - 1; i >= 0; i--) {
       const pu = powerups[i];
       pu.y += pu.vy * delta;
@@ -1045,6 +1085,8 @@ export function initJuego(config) {
         else applyPowerup(pu);
         pu.el.remove();
         powerups.splice(i, 1);
+        powerupsInAir--;
+        if (!pu.isBlue) activePowerupTypes.delete(pu.type);
         soundTap();
         updateDurabilityVisual();
         continue;
@@ -1053,8 +1095,13 @@ export function initJuego(config) {
       if (pu.y - pu.size / 2 > STAGE_H) {
         pu.el.remove();
         powerups.splice(i, 1);
-        if (pu.isBlue) blueBallActive = false;
-        else activePowerupTypes.delete(pu.type);
+        powerupsInAir--;
+        if (pu.isBlue) {
+          blueBallActive = false;
+          activePowerupTypes.delete('BOLA_AZUL');
+        } else {
+          activePowerupTypes.delete(pu.type);
+        }
         continue;
       }
 
@@ -1119,7 +1166,7 @@ export function initJuego(config) {
         }
         break;
     }
-    activePowerupTypes.delete(type);
+    // Ya se eliminó del conjunto al ser recogido
   }
 
   // ---- ABRIR / CERRAR ----
@@ -1131,10 +1178,13 @@ export function initJuego(config) {
     powerups.forEach(p => p.el.remove());
     powerups = [];
     activePowerupTypes.clear();
+    powerupsInAir = 0;
     msgEl.classList.remove('show');
     restartBtn.style.display = 'none';
     draw();
     startGame();
+    // Pausar partículas al abrir el juego
+    pausePetals();
   }
 
   function closeGame() {
@@ -1149,9 +1199,12 @@ export function initJuego(config) {
     powerups.forEach(p => p.el.remove());
     powerups = [];
     activePowerupTypes.clear();
+    powerupsInAir = 0;
     inner.querySelectorAll('[style*="floatMsg"]').forEach(el => el.remove());
     resetGameState();
     soundClose();
+    // Reanudar partículas al cerrar el juego
+    resumePetals();
     console.log('🧹 Juego cerrado y limpiado completamente');
   }
 
@@ -1233,5 +1286,5 @@ export function initJuego(config) {
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
   resetGameState();
-  console.log('✅ Juego listo (probabilidades 6/12/24, pausa pegada)');
+  console.log('✅ Juego definitivo listo');
 }
