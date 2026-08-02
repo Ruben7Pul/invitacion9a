@@ -51,7 +51,7 @@ const GREEN_PROB_TABLE = [
 ];
 
 const GREEN_WEIGHTS = { MULTIBOLA: 15, PALA_GRANDE: 35, DUREZA: 50 };
-const RED_WEIGHTS   = { BOLA_NIEBLA: 10, PALA_MINI: 35, FLAQUESA: 55 };
+const RED_WEIGHTS   = { BOLA_NIEBLA: 98, PALA_MINI: 1, FLAQUESA: 1 };
 
 const SCORE_MESSAGES = [
   "¡Ánimo! Cada punto cuenta.",
