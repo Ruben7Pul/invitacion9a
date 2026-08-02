@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – CONTADOR DE MINUTOS CON PAUSA POR VIDA Y LANZAMIENTO
+// juego.js – PROBABILIDADES AJUSTADAS Y BOTÓN DE PAUSA PEGADO
 // ============================================================
-console.log('📦 juego.js (contador con pausa por vida)');
+console.log('📦 juego.js (probabilidades 6/12/24, pausa pegada)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
@@ -32,10 +32,11 @@ const FRACTURE_SYMBOLS = {
   3: '|||'
 };
 
+// PROBABILIDADES CORREGIDAS: 6%, 12%, 24%
 const POWERUP_PROBS = {
-  CLAY: 0.10,
-  WOOD: 0.20,
-  IRON: 0.30
+  CLAY: 0.06,
+  WOOD: 0.12,
+  IRON: 0.24
 };
 
 const GREEN_PROB_TABLE = [
@@ -60,7 +61,7 @@ const SCORE_MESSAGES = [
 ];
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego (contador con pausa por vida)');
+  console.log('🎮 Iniciando juego (prob 6/12/24, pausa pegada)');
 
   if (!document.querySelector('#pixel-font')) {
     const link = document.createElement('link');
@@ -167,11 +168,11 @@ export function initJuego(config) {
   let paddleWidth = PADDLE_W_BASE;
   let nieblaLevel = 0;
 
-  // ---- CONTROL DEL CONTADOR DE MINUTOS ----
-  let gameStartTime = 0;          // momento de inicio de la partida
-  let pausedTime = 0;            // tiempo acumulado en pausa (ms)
-  let pauseStartTime = 0;        // momento en que empezó la pausa actual
-  let gameTimeActive = false;    // si el contador de minutos debe avanzar (bola lanzada y no pausa)
+  // Control del contador de minutos
+  let gameStartTime = 0;
+  let pausedTime = 0;
+  let pauseStartTime = 0;
+  let gameTimeActive = false;
   let lastTime = 0;
 
   let mouseActive = false;
@@ -184,7 +185,7 @@ export function initJuego(config) {
 
   window.closeGame = closeGame;
 
-  // ---- FUNCIONES DE PAUSA Y TECLA ESPACIO ----
+  // ---- PAUSA ----
   function togglePause() {
     if (!running) return;
     const now = performance.now();
@@ -192,10 +193,7 @@ export function initJuego(config) {
       paused = true;
       pauseBtn.textContent = '▶️';
       pauseStartTime = now;
-      // Si el contador estaba activo, desactivarlo (se pausa el juego)
-      if (gameTimeActive) {
-        gameTimeActive = false;
-      }
+      if (gameTimeActive) gameTimeActive = false;
       document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
       modalPausa.classList.add('open');
     } else {
@@ -203,10 +201,7 @@ export function initJuego(config) {
       pauseBtn.textContent = '⏸️';
       modalPausa.classList.remove('open');
       pausedTime += (now - pauseStartTime);
-      // Si la bola está lanzada, reactivar el contador
-      if (launched) {
-        gameTimeActive = true;
-      }
+      if (launched) gameTimeActive = true;
       lastTime = 0;
     }
   }
@@ -236,12 +231,10 @@ export function initJuego(config) {
   });
 
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden && running && !paused) {
-      togglePause();
-    }
+    if (document.hidden && running && !paused) togglePause();
   });
 
-  // ---- FUNCIONES DE LADRILLOS ----
+  // ---- LADRILLOS ----
   function getBrickTypeFromValue(val) {
     if (val === 1) return BRICK_TYPES.CLAY;
     if (val === 2) return BRICK_TYPES.WOOD;
@@ -317,7 +310,7 @@ export function initJuego(config) {
     }
   }
 
-  // ---- GENERACIÓN DE LADRILLOS ----
+  // ---- GENERACIÓN ----
   function generateBrickValues() {
     const total = TARGET_GAME_POINTS;
     const values = [];
@@ -441,7 +434,6 @@ export function initJuego(config) {
 
   function checkAndRegenerate() {
     if (!pendingRegeneration || !running) return;
-
     if (balls.length > 1) {
       const exclude = getCellsWithBalls();
       const values = generateBrickValues();
@@ -449,7 +441,6 @@ export function initJuego(config) {
       pendingRegeneration = false;
       return;
     }
-
     if (launched && balls.some(b => b.y < BALL_LOW_Y)) {
       const values = generateBrickValues();
       placeBricks(values);
@@ -502,6 +493,7 @@ export function initJuego(config) {
   }
 
   function spawnPowerup(brick) {
+    // No soltar power-ups hasta romper 36 ladrillos
     if (ladrillosRotos <= 36) return;
 
     let prob = 0;
@@ -510,8 +502,8 @@ export function initJuego(config) {
     else if (brick.type === BRICK_TYPES.IRON) prob = POWERUP_PROBS.IRON;
     if (Math.random() >= prob) return;
 
+    // Calcular minutos reales
     const now = performance.now();
-    // Calcular minutos reales restando el tiempo en pausa y solo si gameTimeActive
     let elapsed = 0;
     if (gameTimeActive && gameStartTime > 0) {
       elapsed = (now - gameStartTime - pausedTime) / 60000;
@@ -662,7 +654,7 @@ export function initJuego(config) {
     blueBallActive = false;
   }
 
-  // ---- MENSAJES FLOTANTES ----
+  // ---- MENSAJES ----
   function showFloatingMessage(text, color = '#fff') {
     const el = document.createElement('div');
     el.style.cssText = `
@@ -685,7 +677,7 @@ export function initJuego(config) {
     setTimeout(() => el.remove(), 2500);
   }
 
-  // ---- FUNCIONES DE JUEGO ----
+  // ---- JUEGO ----
   function launchBall() {
     if (launched) return;
     for (const b of balls) {
@@ -697,14 +689,9 @@ export function initJuego(config) {
       }
     }
     launched = true;
-    // Activar contador de minutos al lanzar la bola por primera vez
     if (!gameTimeActive && gameStartTime > 0) {
       gameTimeActive = true;
-      // Si había pausa acumulada, se ajusta
-      if (paused) {
-        // Si está en pausa, no activar hasta reanudar
-        gameTimeActive = false;
-      }
+      if (paused) gameTimeActive = false;
     }
   }
 
@@ -772,9 +759,7 @@ export function initJuego(config) {
     if (hearts.length > 0) {
       const lastHeart = hearts[hearts.length - 1];
       lastHeart.classList.add('heart-fade');
-      setTimeout(() => {
-        updateLivesUI();
-      }, 600);
+      setTimeout(() => updateLivesUI(), 600);
     } else {
       updateLivesUI();
     }
@@ -783,12 +768,9 @@ export function initJuego(config) {
   function loseLife() {
     lives--;
     animateHeartLoss();
-    // Detener el contador de minutos
     gameTimeActive = false;
     if (lives <= 0) {
-      setTimeout(() => {
-        endGame();
-      }, 300);
+      setTimeout(() => endGame(), 300);
       return;
     }
     setTimeout(() => {
@@ -807,7 +789,6 @@ export function initJuego(config) {
       updateDurabilityVisual();
       updateUI();
       draw();
-      // El contador se reactivará al lanzar la bola de nuevo (en launchBall)
     }, 300);
   }
 
@@ -839,7 +820,7 @@ export function initJuego(config) {
     gameStartTime = performance.now();
     pausedTime = 0;
     pauseStartTime = 0;
-    gameTimeActive = false; // no avanza hasta que se lance la bola
+    gameTimeActive = false;
     layoutStage();
     updateUI();
     updateDurabilityVisual();
@@ -858,17 +839,13 @@ export function initJuego(config) {
       const msgIndex = Math.min(milestone - 1, SCORE_MESSAGES.length - 1);
       const msg = SCORE_MESSAGES[msgIndex];
       showFloatingMessage(msg, '#ffcc00');
-      if (lives === 3 && !blueBallActive) {
-        spawnBlueBall();
-      }
+      if (lives === 3 && !blueBallActive) spawnBlueBall();
     }
   }
 
   function updateDurabilityVisual() {
     const ballElements = inner.querySelectorAll('.ball-dynamic');
-    for (const el of ballElements) {
-      updateBallStyle(el);
-    }
+    for (const el of ballElements) updateBallStyle(el);
   }
 
   function updateBallStyle(el) {
@@ -941,15 +918,11 @@ export function initJuego(config) {
       animFrameId = requestAnimationFrame(gameLoop);
       return;
     }
-
     if (paused) {
       draw();
       animFrameId = requestAnimationFrame(gameLoop);
       return;
     }
-
-    // Si el contador está activo, no hacemos nada especial, solo avanzamos el tiempo
-    // El tiempo real se calcula en spawnPowerup usando gameStartTime, pausedTime y gameTimeActive
 
     const delta = lastTime ? Math.min((timestamp - lastTime) / 1000, 0.05) : 0.016;
     lastTime = timestamp;
@@ -1068,11 +1041,8 @@ export function initJuego(config) {
           pu.y - pu.size / 2 < py2 + PADDLE_H / 2 &&
           pu.x + pu.size / 2 > px &&
           pu.x - pu.size / 2 < px + paddleWidth) {
-        if (pu.isBlue) {
-          applyBlueBall();
-        } else {
-          applyPowerup(pu);
-        }
+        if (pu.isBlue) applyBlueBall();
+        else applyPowerup(pu);
         pu.el.remove();
         powerups.splice(i, 1);
         soundTap();
@@ -1083,11 +1053,8 @@ export function initJuego(config) {
       if (pu.y - pu.size / 2 > STAGE_H) {
         pu.el.remove();
         powerups.splice(i, 1);
-        if (pu.isBlue) {
-          blueBallActive = false;
-        } else {
-          activePowerupTypes.delete(pu.type);
-        }
+        if (pu.isBlue) blueBallActive = false;
+        else activePowerupTypes.delete(pu.type);
         continue;
       }
 
@@ -1155,7 +1122,7 @@ export function initJuego(config) {
     activePowerupTypes.delete(type);
   }
 
-  // ---- ABRIR / CERRAR JUEGO ----
+  // ---- ABRIR / CERRAR ----
   function openGame() {
     resetGameState();
     overlay.classList.add('open');
@@ -1167,7 +1134,6 @@ export function initJuego(config) {
     msgEl.classList.remove('show');
     restartBtn.style.display = 'none';
     draw();
-
     startGame();
   }
 
@@ -1267,5 +1233,5 @@ export function initJuego(config) {
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
   resetGameState();
-  console.log('✅ Juego listo (contador con pausa por vida)');
+  console.log('✅ Juego listo (probabilidades 6/12/24, pausa pegada)');
 }
