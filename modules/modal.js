@@ -2,6 +2,7 @@ console.log('📦 módulo modal.js cargado');
 
 import { soundOpen, soundClose, soundTap } from './sonidos.js';
 import { burst } from './particulas.js';
+import { pauseParticulas, resumeParticulas } from './particulas.js';
 
 export function initModal() {
   console.log('📋 Iniciando modales...');
@@ -18,8 +19,6 @@ export function initModal() {
   });
 
   document.querySelectorAll('.modal-overlay').forEach(ov => {
-    if (ov.id === 'modal-pausa') return;
-
     ov.addEventListener('click', (e) => {
       if (e.target === ov) {
         closeModal(ov);
@@ -49,10 +48,12 @@ function openModal(id) {
   if (!modal) return;
   modal.classList.add('open');
   soundOpen();
+  pauseParticulas(); // Pausar pétalos al abrir cualquier modal
 }
 
 function closeModal(el) {
   if (!el) return;
   el.classList.remove('open');
   soundClose();
+  resumeParticulas(); // Reanudar pétalos al cerrar el modal (solo si es el último abierto)
 }
