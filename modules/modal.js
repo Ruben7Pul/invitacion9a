@@ -49,3 +49,6 @@ function closeModal(el) {
   el.classList.remove('open');
   soundClose();
 }
+
+
+
