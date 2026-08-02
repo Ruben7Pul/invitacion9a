@@ -1,7 +1,7 @@
 // ============================================================
 // juego.js – CORREGIDO (bug pelota y resumeParticulas)
 // ============================================================
-console.log('📦 juego.js (corregido: bug pelota y resumeParticulas)');
+console.log('📦 juego z1.js (corregido: bug pelota y resumeParticulas)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
@@ -19,10 +19,10 @@ const REGEN_THRESHOLD = 9;
 const BALL_LOW_Y = STAGE_H - 60;
 const MAX_NIEBLA = 3;
 // Altura (en px, sobre STAGE_H=420) hasta donde llega la niebla en cada nivel.
-// Nivel 1: cubre por completo la zona de ladrillos (con margen).
-// Nivel 2: llega justo a la mitad del área de juego.
-// Nivel 3: un poco más abajo que la mitad.
-const NIEBLA_HEIGHTS = [0, 170, Math.round(STAGE_H * 0.5), Math.round(STAGE_H * 0.62)];
+// Nivel 1: cubre la zona de ladrillos (170px) + 15% más.
+// Nivel 2: cubre el 55% del tablero.
+// Nivel 3: cubre el 95% del tablero (deja solo un 5% visible junto a la paleta).
+const NIEBLA_HEIGHTS = [0, Math.round(170 * 1.15), Math.round(STAGE_H * 0.55), Math.round(STAGE_H * 0.95)];
 const MAX_LIVES = 3;
 const SCORE_PER_LIFE = 8500;
 const TOP_SCORES_COUNT = 5;
@@ -40,8 +40,8 @@ const FRACTURE_SYMBOLS = {
 };
 
 const POWERUP_PROBS = {
-  CLAY: 0.08,
-  WOOD: 0.16,
+  CLAY: 0.06,
+  WOOD: 0.12,
   IRON: 0.24
 };
 
@@ -473,7 +473,7 @@ export function initJuego(config) {
     `;
     el.style.backgroundSize = '200% 200%';
     el.style.boxShadow = 'inset 0 -3px 0 rgba(0,0,0,0.3), inset 0 3px 0 rgba(255,255,255,0.2)';
-    el.textContent = FRACTURE_SYMBOLS[brick.hits] || '|';
+    el.textContent = FRACTURE_SYMBOLS[brick.hits] ?? '';
   }
 
   function adjustColor(hex, percent) {
@@ -622,6 +622,7 @@ export function initJuego(config) {
       el.style.justifyContent = 'center';
       el.style.color = '#fff';
       el.style.fontWeight = 'bold';
+      el.style.fontSize = '11px';
       el.style.textShadow = '0 1px 2px rgba(0,0,0,0.5)';
 
       inner.appendChild(el);
@@ -1099,9 +1100,6 @@ export function initJuego(config) {
     const milestone = Math.floor(playerScore / SCORE_PER_LIFE);
     if (milestone > lastScoreMilestone && milestone > 0) {
       lastScoreMilestone = milestone;
-      const msgIndex = Math.min(milestone - 1, SCORE_MESSAGES.length - 1);
-      const msg = SCORE_MESSAGES[msgIndex];
-      showFloatingMessage(msg, '#ffcc00');
 
       if (lives < MAX_LIVES) {
         lives++;
@@ -1299,7 +1297,7 @@ export function initJuego(config) {
             spawnPowerup(br);
             if (gamePoints <= REGEN_THRESHOLD) requestRegeneration();
           } else {
-            br.el.textContent = FRACTURE_SYMBOLS[br.hits] || '|';
+            br.el.textContent = FRACTURE_SYMBOLS[br.hits] ?? '';
           }
           break;
         }
