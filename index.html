@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Invitación XV</title>
 
-  <!-- Meta Open Graph -->
   <meta property="og:title" content="Invitación a mis XV años" />
   <meta property="og:description" content="Te invitamos a celebrar mis 15 años. ¡No faltes!" />
   <meta property="og:image" content="https://tudominio.com/archivos/og-image.jpg" />
@@ -16,7 +15,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
   
-  <!-- CSS CON TIMESTAMP PARA FORZAR RECARGA -->
   <link rel="stylesheet" href="style.css?v=20260801b">
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌹</text></svg>">
@@ -30,7 +28,6 @@
     <div class="portal-inner">
       <span class="eyebrow gold-text">Una invitación encantada</span>
       <div class="gate-wrapper" id="gate-wrapper" role="button" tabindex="0" aria-label="Abrir la reja">
-        <!-- Hoja izquierda -->
         <div class="gate-leaf gate-left" aria-hidden="true">
           <svg viewBox="0 0 150 200" width="100%" height="100%">
             <defs>
@@ -116,7 +113,6 @@
             <use href="#scrollR" x="129" y="176"/>
           </svg>
         </div>
-        <!-- Hoja derecha -->
         <div class="gate-leaf gate-right" aria-hidden="true">
           <svg viewBox="0 0 150 200" width="100%" height="100%">
             <defs>
@@ -222,7 +218,6 @@
     </div>
 
     <div id="app-mid">
-      <!-- Óvalo dorado -->
       <div id="oval-wrap">
         <div class="oval-frame">
           <div class="oval-mask">
@@ -231,22 +226,15 @@
         </div>
       </div>
 
-      <!-- Nombre -->
       <div class="name-wrap">
         <h1 id="nombre-hero">X</h1>
       </div>
 
-      <!-- Frase -->
       <p class="frase-inline gold-text" id="frase-texto">Cargando...</p>
-
-      <!-- Fecha -->
       <p class="fecha-fija gold-text" id="fecha-fija">Cargando...</p>
-
-      <!-- Mensaje -->
       <p class="hint gold-text" id="hint-juego">👆 Toca el nombre para jugar</p>
     </div>
 
-    <!-- Botones de navegación -->
     <nav id="nav" aria-label="Navegación principal">
       <button class="nav-btn" data-modal="modal-contador" aria-label="Cuenta regresiva">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="13" r="8"/><path d="M12 9 L12 13 L15 15 M9 2 L15 2"/></svg>
@@ -263,8 +251,7 @@
     </nav>
   </div>
 
-  <!-- MODALES -->
-  <!-- 1. CONTADOR -->
+  <!-- MODALES (contador, lugares, familia) -->
   <div class="modal-overlay" id="modal-contador" role="dialog" aria-modal="true" aria-labelledby="modal-contador-title">
     <div class="modal-card">
       <button class="modal-close" data-close aria-label="Cerrar">&times;</button>
@@ -284,7 +271,6 @@
     </div>
   </div>
 
-  <!-- 2. LUGARES -->
   <div class="modal-overlay" id="modal-detalles" role="dialog" aria-modal="true" aria-labelledby="modal-detalles-title">
     <div class="modal-card">
       <button class="modal-close" data-close aria-label="Cerrar">&times;</button>
@@ -311,7 +297,6 @@
     </div>
   </div>
 
-  <!-- 3. FAMILIA -->
   <div class="modal-overlay" id="modal-familia" role="dialog" aria-modal="true" aria-labelledby="modal-familia-title">
     <div class="modal-card">
       <button class="modal-close" data-close aria-label="Cerrar">&times;</button>
@@ -345,12 +330,12 @@
     </div>
   </div>
 
-  <!-- JUEGO -->
+  <!-- JUEGO (SIN MODAL DE PAUSA) -->
   <div id="game-overlay" role="dialog" aria-modal="true" aria-label="Juego de romper el hechizo">
     <div id="game-panel">
       <div id="game-header">
         <span id="lives" class="gold-text">♥ ♥ ♥</span>
-        <span id="game-score" class="gold-text">Puntos: 0</span>
+        <span id="game-score" class="gold-text">0</span>
         <button id="pause-btn" class="top-btn" aria-label="Pausar o reanudar juego">⏸️</button>
         <button id="game-close" aria-label="Cerrar juego">&times;</button>
       </div>
@@ -359,22 +344,32 @@
           <div id="paddle"></div>
           <div id="ball"></div>
         </div>
-        <div id="game-msg">
+        <!-- MENÚ DEL JUEGO -->
+        <div id="game-menu" style="display:none; position:absolute; inset:0; z-index:50; background:rgba(0,0,0,0.85); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.8rem; border-radius:12px; padding:1rem;">
+          <h2 style="color:var(--gold-light); font-family:'Press Start 2P', monospace; font-size:clamp(1rem,3vw,1.4rem); text-align:center; margin:0;">MENÚ</h2>
+          <div id="menu-content" style="display:flex; flex-direction:column; gap:0.8rem; align-items:center;">
+            <button id="menu-play" class="game-btn gold-text">▶ Jugar de nuevo</button>
+            <button id="menu-scores" class="game-btn gold-text">🏆 Mejores puntuaciones</button>
+          </div>
+          <div id="menu-scores-list" style="display:none; color:white; font-family:'Press Start 2P', monospace; text-align:center; width:100%; max-width:300px;">
+            <h3 style="color:var(--gold-light); font-size:clamp(0.8rem,2vw,1rem);">Mejores puntuaciones</h3>
+            <ul id="scores-list" style="list-style:none; padding:0; margin:0.5rem 0;"></ul>
+            <button id="menu-scores-back" class="game-btn gold-text" style="font-size:0.7rem;">Volver</button>
+          </div>
+          <div id="menu-gameover" style="display:none; color:var(--gold-light); font-family:'Press Start 2P', monospace; font-size:clamp(0.8rem,2vw,1rem); text-align:center;">
+            <p id="gameover-score">Puntuación: 0</p>
+            <div id="gameover-input" style="display:none; margin-top:0.5rem;">
+              <p>¡Nueva mejor puntuación!</p>
+              <input type="text" id="player-name-input" maxlength="12" placeholder="Tu nombre" style="padding:0.3rem; border-radius:4px; border:none; font-family:'Press Start 2P', monospace; font-size:0.7rem; text-align:center; background:#222; color:white;">
+              <button id="gameover-save" class="game-btn gold-text" style="font-size:0.7rem; margin-top:0.3rem;">Guardar</button>
+            </div>
+          </div>
+        </div>
+        <div id="game-msg" style="display:none;">
           <p id="game-msg-text" class="gold-text">¡Game Over!</p>
-          <button class="game-btn gold-text" id="game-restart">Jugar de nuevo</button>
         </div>
       </div>
       <p class="game-help gold-text">Mueve con dedo, A/D o flechas del teclado</p>
-    </div>
-  </div>
-
-  <!-- MODAL DE PAUSA (fuera del área de juego) -->
-  <div class="modal-overlay" id="modal-pausa" role="dialog" aria-modal="true" aria-labelledby="modal-pausa-title">
-    <div class="modal-card">
-      <button class="modal-close" id="close-pausa" aria-label="Cerrar pausa">&times;</button>
-      <h2 id="modal-pausa-title" class="gold-text">⏸️ Juego en pausa</h2>
-      <p class="modal-subtitle gold-text">Toca el botón de play para continuar</p>
-      <button id="resume-btn" class="game-btn gold-text">▶️ Reanudar</button>
     </div>
   </div>
 
