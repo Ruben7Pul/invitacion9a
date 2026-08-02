@@ -1,7 +1,7 @@
 // ============================================================
 // juego.js – DEFINITIVO CON MENÚ Y PUNTUACIONES
 // ============================================================
-console.log('📦 juego.js (definitivo)');
+console.log('📦 juego.js (definitivo con pausa de juego sin pétalos)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
@@ -297,6 +297,7 @@ export function initJuego(config) {
     if (e.key === 'Enter') gameoverSave.click();
   });
 
+  // ---- PAUSA DEL JUEGO (SOLO JUEGO, NO AFECTA A PÉTALOS) ----
   function togglePause() {
     if (!running || gameOver) return;
     const now = performance.now();
@@ -332,6 +333,7 @@ export function initJuego(config) {
     if (document.hidden && running && !paused && !gameOver) togglePause();
   });
 
+  // ---- RESTO DE FUNCIONES DEL JUEGO (SIN CAMBIOS) ----
   function getBrickTypeFromValue(val) {
     if (val === 1) return BRICK_TYPES.CLAY;
     if (val === 2) return BRICK_TYPES.WOOD;
@@ -1193,6 +1195,7 @@ export function initJuego(config) {
     activePowerupTypes.delete(type);
   }
 
+  // ---- ABRIR Y CERRAR JUEGO (CON PAUSA DE PÉTALOS) ----
   function openGame() {
     resetGameState();
     overlay.classList.add('open');
@@ -1205,7 +1208,9 @@ export function initJuego(config) {
     msgEl.classList.remove('show');
     draw();
 
+    // Pausar pétalos al abrir el juego
     pauseParticulas();
+
     showMenu(false);
     layoutStage();
     updateUI();
@@ -1227,7 +1232,10 @@ export function initJuego(config) {
     powerupsInAir = 0;
     inner.querySelectorAll('[style*="floatMsg"]').forEach(el => el.remove());
     resetGameState();
+
+    // Reanudar pétalos al cerrar el juego
     resumeParticulas();
+
     soundClose();
     console.log('🧹 Juego cerrado y limpiado');
   }
