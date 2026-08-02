@@ -1,50 +1,10 @@
 // ============================================================
-// juego.js – CON SONIDOS POR TIPO DE LADRILLO Y FRACTURA VISUAL
+// juego.js – CON SONIDOS, FRACTURA VISUAL Y ESTILO ARCADE-PRINCESA
 // ============================================================
-console.log('📦 juego.js (con sonidos y fractura elegante)');
+console.log('📦 juego.js (con sonidos y fractura visual)');
 
-import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
+import { soundTap, soundBrick, soundWin, soundLose, soundClose, soundClay, soundWood, soundIron } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
-
-// Sonidos personalizados para cada tipo de ladrillo
-function playBrickSound(type) {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    
-    let freq = 800;
-    let duration = 0.15;
-    let volume = 0.3;
-    
-    if (type === 'CLAY') {
-      freq = 600;
-      duration = 0.1;
-      volume = 0.2;
-      osc.type = 'sine';
-    } else if (type === 'WOOD') {
-      freq = 900;
-      duration = 0.15;
-      volume = 0.35;
-      osc.type = 'sawtooth';
-    } else if (type === 'IRON') {
-      freq = 1500;
-      duration = 0.2;
-      volume = 0.4;
-      osc.type = 'square';
-    } else {
-      osc.type = 'sine';
-    }
-    
-    osc.frequency.setValueAtTime(freq, ctx.currentTime);
-    gain.gain.setValueAtTime(volume, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + duration);
-  } catch(e) { /* silencioso */ }
-}
 
 const PADDLE_W_BASE = 72;
 const PADDLE_H = 10;
@@ -132,7 +92,7 @@ function getRandomName() {
 }
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego (con sonidos y fractura)');
+  console.log('🎮 Iniciando juego (con sonidos y fractura visual)');
 
   if (!document.querySelector('#pixel-font')) {
     const link = document.createElement('link');
@@ -179,6 +139,7 @@ export function initJuego(config) {
   const modalRules = document.getElementById('modal-rules');
   const rulesClose = document.getElementById('rules-close');
 
+  // Ocultar título "MENÚ"
   const menuTitle = menuEl?.querySelector('h2');
   if (menuTitle) menuTitle.style.display = 'none';
 
@@ -340,6 +301,7 @@ export function initJuego(config) {
     }
   }
 
+  // ---- Eventos del menú ----
   menuPlay.addEventListener('click', (e) => {
     e.stopPropagation();
     soundTap();
@@ -435,6 +397,7 @@ export function initJuego(config) {
     if (animFrameId) cancelAnimationFrame(animFrameId);
   });
 
+  // ---- Botón "Volver al menú" en la partida ----
   menuBtn.addEventListener('click', () => {
     if (!running && !gameOver) return;
     soundTap();
@@ -450,7 +413,7 @@ export function initJuego(config) {
     if (animFrameId) cancelAnimationFrame(animFrameId);
   });
 
-  // ---- PAUSA ----
+  // ---- PAUSA DEL JUEGO ----
   function togglePause() {
     if (!running || gameOver) return;
     const now = performance.now();
@@ -493,59 +456,46 @@ export function initJuego(config) {
     return BRICK_TYPES.IRON;
   }
 
+  // ---- NUEVA FUNCIÓN para actualizar visual del ladrillo con fractura ----
   function updateBrickVisual(brick) {
     const el = brick.el;
     const type = brick.type;
-    const hits = brick.hits;
+    const hitsLeft = brick.hits;
     const maxHits = brick.maxHits;
-    
-    let color = type.color;
-    let brightness = 1;
-    let symbol = '';
-    
+
+    // Limpiar clases anteriores
+    el.className = 'brick';
+    el.innerHTML = ''; // limpiar contenido
+
+    // Asignar clase según tipo y daño
+    let damageClass = '';
     if (type === BRICK_TYPES.CLAY) {
-      symbol = '';
-      brightness = 1;
+      el.classList.add('brick-clay');
     } else if (type === BRICK_TYPES.WOOD) {
-      if (hits === 1) {
-        symbol = '▌';
-        brightness = 0.7;
-      } else {
-        symbol = '';
-        brightness = 1;
+      el.classList.add('brick-wood');
+      if (hitsLeft === 1) {
+        damageClass = 'brick-damage-1';
       }
     } else if (type === BRICK_TYPES.IRON) {
-      if (hits === 2) {
-        symbol = '▐';
-        brightness = 0.8;
-      } else if (hits === 1) {
-        symbol = '▓';
-        brightness = 0.6;
-      } else {
-        symbol = '';
-        brightness = 1;
+      el.classList.add('brick-iron');
+      if (hitsLeft === 2) {
+        damageClass = 'brick-damage-1';
+      } else if (hitsLeft === 1) {
+        damageClass = 'brick-damage-2';
       }
     }
-    
-    el.style.background = `
-      linear-gradient(135deg, ${adjustColor(color, -20 * (1 - brightness))} 0%, ${adjustColor(color, 20 * (1 - brightness))} 100%)
-    `;
-    el.style.backgroundSize = '200% 200%';
-    el.style.boxShadow = `inset 0 -3px 0 rgba(0,0,0,0.3), inset 0 3px 0 rgba(255,255,255,${0.2 * brightness})`;
-    el.style.color = '#fff';
-    el.style.fontWeight = 'bold';
-    el.style.textShadow = '0 1px 2px rgba(0,0,0,0.5)';
-    el.style.fontSize = '1.2rem';
-    el.style.display = 'flex';
-    el.style.alignItems = 'center';
-    el.style.justifyContent = 'center';
-    el.textContent = symbol;
-    
-    if (brightness < 1) {
-      el.classList.add('damaged');
-    } else {
-      el.classList.remove('damaged');
+    if (damageClass) el.classList.add(damageClass);
+
+    // Si no está dañado, mostrar símbolo de dureza (solo para madera/hierro sin daño)
+    if (!damageClass && type !== BRICK_TYPES.CLAY) {
+      const span = document.createElement('span');
+      span.className = 'brick-text';
+      span.textContent = FRACTURE_SYMBOLS[hitsLeft] || '|';
+      span.style.fontSize = '0.7rem';
+      span.style.opacity = '0.7';
+      el.appendChild(span);
     }
+    // Para arcilla no mostramos nada
   }
 
   function adjustColor(hex, percent) {
@@ -1313,9 +1263,11 @@ export function initJuego(config) {
 
           const damage = ballDurability;
           br.hits -= damage;
-          // Reproducir sonido según el tipo de ladrillo
-          playBrickSound(br.type.label);
-          soundBrick(); // sonido genérico opcional
+          // NUEVO: sonido según tipo
+          if (br.type === BRICK_TYPES.CLAY) soundClay();
+          else if (br.type === BRICK_TYPES.WOOD) soundWood();
+          else if (br.type === BRICK_TYPES.IRON) soundIron();
+
           if (br.hits <= 0) {
             br.alive = false;
             br.el.classList.add('gone');
@@ -1326,6 +1278,7 @@ export function initJuego(config) {
             spawnPowerup(br);
             if (gamePoints <= REGEN_THRESHOLD) requestRegeneration();
           } else {
+            // Actualizar visual del ladrillo dañado
             updateBrickVisual(br);
           }
           break;
@@ -1436,6 +1389,7 @@ export function initJuego(config) {
     activePowerupTypes.delete(type);
   }
 
+  // ---- ABRIR Y CERRAR JUEGO ----
   function openGame() {
     cleanGameState();
     overlay.classList.add('open');
@@ -1541,5 +1495,5 @@ export function initJuego(config) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego inicializado con sonidos y fractura');
+  console.log('✅ Juego inicializado (con sonidos y fractura visual)');
 }
