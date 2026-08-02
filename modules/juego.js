@@ -1,7 +1,7 @@
 // ============================================================
 // juego.js – CORREGIDO (bug pelota y resumeParticulas)
 // ============================================================
-console.log('📦 juego.js (corregido: bug pelota y resumeParticulas)');
+console.log('📦 juego hj.js (corregido: bug pelota y resumeParticulas)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
@@ -23,6 +23,10 @@ const MAX_NIEBLA = 3;
 // Nivel 2: cubre el 60% del tablero.
 // Nivel 3: cubre el 90% del tablero (deja un 10% visible junto a la paleta).
 const NIEBLA_HEIGHTS = [0, Math.round(170 * 1.15), Math.round(STAGE_H * 0.60), Math.round(STAGE_H * 0.90)];
+// Margen extra (px) donde la niebla se desvanece suavemente. Este margen
+// queda SIEMPRE por debajo del límite real de cada nivel, así el degradado
+// nunca resta opacidad dentro de la zona que debe quedar tapada.
+const NIEBLA_FEATHER = 26;
 const MAX_LIVES = 3;
 const SCORE_PER_LIFE = 8500;
 const TOP_SCORES_COUNT = 5;
@@ -200,7 +204,12 @@ export function initJuego(config) {
   nieblaEl.style.cssText = `
     position: absolute; left: 0; top: 0; width: 100%; height: 0px;
     pointer-events: none;
-    background: #ffffff;
+    background: linear-gradient(to bottom,
+      #ffffff 0,
+      #ffffff calc(100% - ${NIEBLA_FEATHER}px),
+      rgba(255,255,255,0.55) calc(100% - ${Math.round(NIEBLA_FEATHER * 0.4)}px),
+      rgba(255,255,255,0) 100%);
+    filter: blur(2px);
     transition: height 0.6s ease, opacity 0.6s ease;
     opacity: 0; z-index: 20;
   `;
@@ -1150,7 +1159,13 @@ export function initJuego(config) {
 
   function updateNiebla() {
     const boundary = getNieblaBoundary();
-    nieblaEl.style.height = boundary + 'px';
+    // El alto real incluye el margen de desvanecido (NIEBLA_FEATHER), que
+    // siempre queda MÁS ABAJO del límite lógico "boundary". Así, todo lo que
+    // hay entre 0 y "boundary" queda 100% opaco (nada se ve debajo), y el
+    // degradado suave solo ocurre en la franja extra, donde no hay nada que
+    // deba seguir oculto.
+    const totalHeight = boundary > 0 ? boundary + NIEBLA_FEATHER : 0;
+    nieblaEl.style.height = totalHeight + 'px';
     nieblaEl.style.opacity = boundary > 0 ? 1 : 0;
     // Ladrillos y power-ups siempre quedan visibles en el DOM: la niebla
     // solo los tapa visualmente al dibujarse encima de ellos.
