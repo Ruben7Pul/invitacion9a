@@ -1,11 +1,16 @@
 // ============================================================
-// juego.js – con pausa, limpieza total y detección de cambio de pestaña
+// juego.js – CORRECCIONES FINALES
+// - Tecla espacio: pausa/reanuda y lanza la bola (si no lanzada)
+// - Sin contador inicial (empieza directamente)
+// - Sin palabra "Puntos" (solo número)
+// - Corazones rojos con animación al morir
+// - No se repiten power‑ups en caída (control por tipo activo)
+// - Botón de pausa fijo junto al cerrar
 // ============================================================
-console.log('📦 juego.js (arcade, pausa, limpieza)');
+console.log('📦 juego.js (versión final)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 
-// Constantes
 const PADDLE_W_BASE = 72;
 const PADDLE_H = 10;
 const BALL_R = 6;
@@ -21,7 +26,6 @@ const MAX_NIEBLA = 3;
 const MAX_LIVES = 3;
 const SCORE_PER_LIFE = 15000;
 
-// Tipos de ladrillos
 const BRICK_TYPES = {
   CLAY:   { value: 1, playerPoints: 100, hits: 1, color: '#d9534f', label: 'CLAY' },
   WOOD:   { value: 2, playerPoints: 200, hits: 2, color: '#8b5a2b', label: 'WOOD' },
@@ -34,7 +38,6 @@ const FRACTURE_SYMBOLS = {
   3: '|||'
 };
 
-// Probabilidades
 const GREEN_PROB_TABLE = [
   50.000, 46.875, 43.750, 40.625, 37.500, 34.375, 31.250, 28.125,
   25.000, 21.875, 18.750, 15.625, 12.500, 9.375, 6.250, 3.125, 0.000
@@ -46,7 +49,6 @@ const RED_WEIGHTS   = { BOLA_NIEBLA: 10, PALA_MINI: 35, FLAQUESA: 55 };
 export function initJuego(config) {
   console.log('🎮 Iniciando juego arcade');
 
-  // Cargar fuente pixelada
   if (!document.querySelector('#pixel-font')) {
     const link = document.createElement('link');
     link.id = 'pixel-font';
@@ -62,7 +64,6 @@ export function initJuego(config) {
   const stage = document.getElementById('game-stage');
   const inner = document.getElementById('game-inner');
   const paddleEl = document.getElementById('paddle');
-  const ballEl = document.getElementById('ball');
   const msgEl = document.getElementById('game-msg');
   const msgText = document.getElementById('game-msg-text');
   const livesEl = document.getElementById('lives');
@@ -94,7 +95,7 @@ export function initJuego(config) {
     document.head.appendChild(style);
   }
 
-  // Estilo arcade para vidas y puntuación
+  // Estilo arcade (sin la palabra "Puntos")
   livesEl.style.fontFamily = "'Press Start 2P', monospace";
   livesEl.style.fontSize = '1.2rem';
   livesEl.style.letterSpacing = '0.1em';
@@ -118,7 +119,7 @@ export function initJuego(config) {
     document.head.appendChild(style2);
   }
 
-  // Elemento para la niebla
+  // Niebla
   const nieblaEl = document.createElement('div');
   nieblaEl.id = 'niebla-overlay';
   nieblaEl.style.cssText = `
@@ -138,12 +139,12 @@ export function initJuego(config) {
   let bricks = [];
   let balls = [];
   let powerups = [];
+  let activePowerupTypes = new Set(); // para evitar duplicados en caída
   let paddle = { x: (STAGE_W - PADDLE_W_BASE) / 2 };
   let lives = 3;
   let running = false;
   let launched = false;
   let animFrameId = null;
-  let countdownInterval = null;
   let playerScore = 0;
   let gamePoints = 0;
   let pendingRegeneration = false;
@@ -160,18 +161,17 @@ export function initJuego(config) {
   let touchActive = false;
   let touchX = 0;
 
-  // ---- PAUSA ----
   let paused = false;
+  let lastTime = 0;
 
   window.closeGame = closeGame;
 
-  // Función para alternar pausa
+  // ---- FUNCIONES DE PAUSA Y TECLA ESPACIO ----
   function togglePause() {
     if (!running) return;
     paused = !paused;
     if (paused) {
       pauseBtn.textContent = '▶️';
-      // Cerrar otros modales
       document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
       modalPausa.classList.add('open');
     } else {
@@ -181,20 +181,39 @@ export function initJuego(config) {
     }
   }
 
+  function handleSpace() {
+    if (!running) return;
+    if (paused) {
+      togglePause();
+      return;
+    }
+    // Si no está lanzado, lanzar la bola
+    if (!launched) {
+      launchBall();
+    } else {
+      // Si ya está lanzado, pausar
+      togglePause();
+    }
+  }
+
   pauseBtn.addEventListener('click', togglePause);
   resumeBtn.addEventListener('click', togglePause);
   closePausa.addEventListener('click', togglePause);
 
-  // Pausa automática al cambiar de pestaña
+  document.addEventListener('keydown', (e) => {
+    if (e.key === ' ' || e.key === 'Space') {
+      e.preventDefault();
+      handleSpace();
+    }
+  });
+
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && running && !paused) {
       togglePause();
     }
   });
 
-  // ------------------------------------------------------------
-  // Funciones de ladrillos con textura
-  // ------------------------------------------------------------
+  // ---- LÓGICA DE LADRILLOS ----
   function getBrickTypeFromValue(val) {
     if (val === 1) return BRICK_TYPES.CLAY;
     if (val === 2) return BRICK_TYPES.WOOD;
@@ -270,9 +289,7 @@ export function initJuego(config) {
     }
   }
 
-  // ------------------------------------------------------------
-  // Generación de ladrillos
-  // ------------------------------------------------------------
+  // ---- GENERACIÓN DE LADRILLOS ----
   function generateBrickValues() {
     const total = TARGET_GAME_POINTS;
     const values = [];
@@ -412,9 +429,7 @@ export function initJuego(config) {
     }
   }
 
-  // ------------------------------------------------------------
-  // Power‑ups con lógica inteligente
-  // ------------------------------------------------------------
+  // ---- POWER-UPS CON CONTROL DE DUPLICADOS ----
   function getGreenProbability(minutes) {
     if (minutes < 0) return GREEN_PROB_TABLE[0];
     if (minutes >= GREEN_PROB_TABLE.length - 1) return GREEN_PROB_TABLE[GREEN_PROB_TABLE.length - 1];
@@ -448,12 +463,12 @@ export function initJuego(config) {
 
   function getAvailableTypes(color) {
     const types = color === 'verde' ? Object.keys(GREEN_WEIGHTS) : Object.keys(RED_WEIGHTS);
-    return types.filter(t => !isSaturated(t));
+    return types.filter(t => !isSaturated(t) && !activePowerupTypes.has(t));
   }
 
   function getAlternativeType(color, currentType) {
     const available = getAvailableTypes(color);
-    if (!isSaturated(currentType)) return currentType;
+    if (!isSaturated(currentType) && !activePowerupTypes.has(currentType)) return currentType;
     if (available.length === 0) return null;
     return available[Math.floor(Math.random() * available.length)];
   }
@@ -474,6 +489,9 @@ export function initJuego(config) {
     const alternative = getAlternativeType(color, typeKey);
     if (alternative === null) return;
     typeKey = alternative;
+
+    // Marcar como activo en caída
+    activePowerupTypes.add(typeKey);
 
     const isGreen = color === 'verde';
     console.log(`⚡ Powerup generado: ${typeKey} (${color})`);
@@ -523,9 +541,6 @@ export function initJuego(config) {
     });
   }
 
-  // ------------------------------------------------------------
-  // Aplicar power‑up
-  // ------------------------------------------------------------
   function applyPowerup(pu) {
     const type = pu.type;
     switch (type) {
@@ -577,11 +592,11 @@ export function initJuego(config) {
         }
         break;
     }
+    // Quitar del conjunto de activos al ser recogido
+    activePowerupTypes.delete(type);
   }
 
-  // ------------------------------------------------------------
-  // Visuales
-  // ------------------------------------------------------------
+  // ---- VISUALES ----
   function updateDurabilityVisual() {
     const ballElements = inner.querySelectorAll('.ball-dynamic');
     for (const el of ballElements) {
@@ -618,9 +633,7 @@ export function initJuego(config) {
     nieblaEl.style.opacity = opacity;
   }
 
-  // ------------------------------------------------------------
-  // Funciones de bola y juego
-  // ------------------------------------------------------------
+  // ---- FUNCIONES DE JUEGO ----
   function launchBall() {
     if (launched) return;
     for (const b of balls) {
@@ -636,7 +649,6 @@ export function initJuego(config) {
 
   function resetGameState() {
     if (animFrameId) cancelAnimationFrame(animFrameId);
-    if (countdownInterval) clearInterval(countdownInterval);
     running = false;
     launched = false;
     paused = false;
@@ -644,6 +656,7 @@ export function initJuego(config) {
     modalPausa.classList.remove('open');
     bricks = [];
     powerups = [];
+    activePowerupTypes.clear();
     balls = [];
     paddle.x = (STAGE_W - PADDLE_W_BASE) / 2;
     paddleSizeMultiplier = 1;
@@ -678,33 +691,61 @@ export function initJuego(config) {
     draw();
   }
 
+  function updateLivesUI() {
+    // Corazones rojos con animación al perder vida
+    let heartsHtml = '';
+    for (let i = 0; i < lives; i++) {
+      heartsHtml += `<span class="heart-icon" style="color:#ff0000; text-shadow:0 0 10px #ff0000;">♥</span>`;
+    }
+    livesEl.innerHTML = heartsHtml || '—';
+  }
+
+  function animateHeartLoss() {
+    const hearts = livesEl.querySelectorAll('.heart-icon');
+    if (hearts.length > 0) {
+      const lastHeart = hearts[hearts.length - 1];
+      lastHeart.classList.add('heart-fade');
+      setTimeout(() => {
+        updateLivesUI();
+      }, 600);
+    } else {
+      updateLivesUI();
+    }
+  }
+
   function loseLife() {
     lives--;
+    animateHeartLoss();
     if (lives <= 0) {
-      endGame();
+      setTimeout(() => {
+        endGame();
+      }, 300);
       return;
     }
-    paddleSizeMultiplier = 1;
-    paddleWidth = PADDLE_W_BASE;
-    ballDurability = 1;
-    nieblaLevel = 0;
-    updateNiebla();
-    powerups.forEach(p => p.el.remove());
-    powerups = [];
-    const newX = paddle.x + paddleWidth / 2;
-    const newY = STAGE_H - 14 - BALL_R;
-    balls = [{ x: newX, y: newY, vx: 0, vy: 0 }];
-    launched = false;
-    updateDurabilityVisual();
-    updateUI();
-    draw();
+    setTimeout(() => {
+      paddleSizeMultiplier = 1;
+      paddleWidth = PADDLE_W_BASE;
+      ballDurability = 1;
+      nieblaLevel = 0;
+      updateNiebla();
+      powerups.forEach(p => p.el.remove());
+      powerups = [];
+      activePowerupTypes.clear();
+      const newX = paddle.x + paddleWidth / 2;
+      const newY = STAGE_H - 14 - BALL_R;
+      balls = [{ x: newX, y: newY, vx: 0, vy: 0 }];
+      launched = false;
+      updateDurabilityVisual();
+      updateUI();
+      draw();
+    }, 300);
   }
 
   function endGame() {
     running = false;
     if (animFrameId) cancelAnimationFrame(animFrameId);
     restartBtn.style.display = 'inline-block';
-    msgText.textContent = `Game Over\nPuntaje final: ${playerScore}`;
+    msgText.textContent = `Game Over\n${playerScore}`;
     msgEl.classList.add('show');
     soundLose();
   }
@@ -735,14 +776,9 @@ export function initJuego(config) {
   }
 
   function updateUI() {
-    let hearts = '';
-    for (let i = 0; i < lives; i++) {
-      const colors = ['#ff0000', '#ffcc00', '#ff00ff', '#00ffcc'];
-      const col = colors[i % colors.length];
-      hearts += `<span style="color:${col}; text-shadow:0 0 8px ${col};">♥</span>`;
-    }
-    livesEl.innerHTML = hearts || '—';
-    scoreEl.textContent = `Puntos: ${playerScore}`;
+    updateLivesUI();
+    // Solo el número de puntos (sin "Puntos:")
+    scoreEl.textContent = `${playerScore}`;
   }
 
   function draw() {
@@ -780,11 +816,7 @@ export function initJuego(config) {
     }
   }
 
-  // ------------------------------------------------------------
-  // Bucle principal
-  // ------------------------------------------------------------
-  let lastTime = 0;
-
+  // ---- BUCLE PRINCIPAL ----
   function gameLoop(timestamp) {
     if (!running) {
       animFrameId = requestAnimationFrame(gameLoop);
@@ -903,6 +935,7 @@ export function initJuego(config) {
       }
     }
 
+    // Movimiento de powerups
     for (let i = powerups.length - 1; i >= 0; i--) {
       const pu = powerups[i];
       pu.y += pu.vy * delta;
@@ -924,6 +957,8 @@ export function initJuego(config) {
       if (pu.y - pu.size / 2 > STAGE_H) {
         pu.el.remove();
         powerups.splice(i, 1);
+        // Eliminar del conjunto de activos si se perdió
+        activePowerupTypes.delete(pu.type);
         continue;
       }
 
@@ -937,9 +972,7 @@ export function initJuego(config) {
     animFrameId = requestAnimationFrame(gameLoop);
   }
 
-  // ------------------------------------------------------------
-  // Abrir / cerrar juego
-  // ------------------------------------------------------------
+  // ---- ABRIR / CERRAR JUEGO ----
   function openGame() {
     resetGameState();
     overlay.classList.add('open');
@@ -947,40 +980,26 @@ export function initJuego(config) {
     bricks = [];
     powerups.forEach(p => p.el.remove());
     powerups = [];
+    activePowerupTypes.clear();
     msgEl.classList.remove('show');
     restartBtn.style.display = 'none';
     draw();
 
-    let countdown = 3;
-    msgText.textContent = countdown;
-    msgEl.classList.add('show');
-    countdownInterval = setInterval(() => {
-      countdown--;
-      if (countdown > 0) {
-        msgText.textContent = countdown;
-      } else {
-        clearInterval(countdownInterval);
-        countdownInterval = null;
-        msgEl.classList.remove('show');
-        startGame();
-      }
-    }, 1000);
+    // Iniciar directamente sin contador
+    startGame();
   }
 
   function closeGame() {
-    // Limpiar todo
     if (animFrameId) cancelAnimationFrame(animFrameId);
-    if (countdownInterval) clearInterval(countdownInterval);
     running = false;
     paused = false;
     pauseBtn.textContent = '⏸️';
     modalPausa.classList.remove('open');
     overlay.classList.remove('open');
-    // Eliminar elementos visuales
     inner.querySelectorAll('.brick').forEach(b => b.remove());
     powerups.forEach(p => p.el.remove());
     powerups = [];
-    // Resetear estado completo
+    activePowerupTypes.clear();
     resetGameState();
     soundClose();
     console.log('🧹 Juego cerrado y limpiado');
@@ -998,9 +1017,7 @@ export function initJuego(config) {
     inner.style.transformOrigin = 'top left';
   }
 
-  // ------------------------------------------------------------
-  // Eventos
-  // ------------------------------------------------------------
+  // ---- EVENTOS ----
   document.getElementById('game-close').addEventListener('click', closeGame);
   restartBtn.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -1028,6 +1045,7 @@ export function initJuego(config) {
     if (running && !launched && !paused) launchBall();
   });
 
+  // Teclas A/D y flechas (la espacio ya está arriba)
   document.addEventListener('keydown', (e) => {
     if (!running || paused) return;
     if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') { keys.left = true; e.preventDefault(); }
@@ -1066,5 +1084,5 @@ export function initJuego(config) {
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
   resetGameState();
-  console.log('✅ Juego arcade listo con pausa y limpieza total');
+  console.log('✅ Juego listo (versión final)');
 }
