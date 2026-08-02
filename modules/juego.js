@@ -1,9 +1,9 @@
 // ============================================================
-// juego.js – CORREGIDO: solo he cambiado la niebla
+// juego.js – CORREGIDO (bug pelota y resumeParticulas)
 // ============================================================
-console.log('📦 juego.js (niebla actualizada)');
+console.log('📦 juego9.js (corregido: bug pelota y resumeParticulas)');
 
-import { soundTap, soundBrick, soundWin, soundLose, soundClose, soundClay, soundWood, soundIron } from './sonidos.js';
+import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
 
 const PADDLE_W_BASE = 72;
@@ -18,6 +18,10 @@ const TARGET_GAME_POINTS = 18;
 const REGEN_THRESHOLD = 9;
 const BALL_LOW_Y = STAGE_H - 60;
 const MAX_NIEBLA = 3;
+// Altura (en px, sobre STAGE_H=420) hasta donde llega la niebla en cada nivel.
+// Nivel 1: solo la zona de ladrillos. Nivel 2: un poco antes de la mitad.
+// Nivel 3: casi todo el área de juego, dejando ~15% libre junto a la paleta.
+const NIEBLA_HEIGHTS = [0, 145, 190, Math.round(STAGE_H * 0.85)];
 const MAX_LIVES = 3;
 const SCORE_PER_LIFE = 8500;
 const TOP_SCORES_COUNT = 5;
@@ -26,6 +30,12 @@ const BRICK_TYPES = {
   CLAY:   { value: 1, playerPoints: 100, hits: 1, color: '#d9534f', label: 'CLAY' },
   WOOD:   { value: 2, playerPoints: 200, hits: 2, color: '#8b5a2b', label: 'WOOD' },
   IRON:   { value: 3, playerPoints: 300, hits: 3, color: '#7a8a9a', label: 'IRON' }
+};
+
+const FRACTURE_SYMBOLS = {
+  1: '|',
+  2: '||',
+  3: '|||'
 };
 
 const POWERUP_PROBS = {
@@ -86,7 +96,7 @@ function getRandomName() {
 }
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego (niebla actualizada)');
+  console.log('🎮 Iniciando juego (corregido)');
 
   if (!document.querySelector('#pixel-font')) {
     const link = document.createElement('link');
@@ -133,7 +143,6 @@ export function initJuego(config) {
   const modalRules = document.getElementById('modal-rules');
   const rulesClose = document.getElementById('rules-close');
 
-  // Ocultar título "MENÚ"
   const menuTitle = menuEl?.querySelector('h2');
   if (menuTitle) menuTitle.style.display = 'none';
 
@@ -144,7 +153,6 @@ export function initJuego(config) {
     border: 2px solid #fff;
     box-shadow: 0 0 20px rgba(255,255,255,0.6);
     border-radius: 6px;
-    z-index: 25;
   `;
   if (!document.querySelector('#neon-style')) {
     const style = document.createElement('style');
@@ -186,51 +194,16 @@ export function initJuego(config) {
     document.head.appendChild(style2);
   }
 
-  // ---- NIEBLA (versión de tu código) ----
   const nieblaEl = document.createElement('div');
   nieblaEl.id = 'niebla-overlay';
   nieblaEl.style.cssText = `
-    position: absolute; top: 0; left: 0; width: 100%; height: 0px;
+    position: absolute; left: 0; top: 0; width: 100%; height: 0px;
     pointer-events: none;
-    background: linear-gradient(to bottom, rgba(214,224,245,0.95) 0%, rgba(214,224,245,0.92) 68%, rgba(214,224,245,0) 100%);
-    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-    transition: height 0.7s ease, opacity 0.5s ease;
-    opacity: 0; z-index: 12;
+    background: linear-gradient(to bottom, rgba(15,20,35,0.96) 0%, rgba(15,20,35,0.96) 78%, rgba(15,20,35,0) 100%);
+    transition: height 0.6s ease, opacity 0.6s ease;
+    opacity: 0; border-radius: 12px 12px 0 0; z-index: 20;
   `;
-  inner.appendChild(nieblaEl);
-
-  // Límites de altura para cada nivel de niebla
-  const NIEBLA_BOUNDARIES = [0, 150, STAGE_H * 0.45, STAGE_H * 0.85];
-
-  function getNieblaBoundaryY() {
-    return NIEBLA_BOUNDARIES[nieblaLevel] || 0;
-  }
-
-  function applyNieblaVisibility() {
-    const boundaryY = getNieblaBoundaryY();
-    for (const br of bricks) {
-      if (!br.alive || !br.el) continue;
-      const centerY = br.y + br.h / 2;
-      br.el.style.opacity = (nieblaLevel > 0 && centerY < boundaryY) ? '0' : '1';
-    }
-    for (const pu of powerups) {
-      if (pu.isBlue) continue; // la bola azul siempre visible
-      pu.el.style.opacity = (nieblaLevel > 0 && pu.y < boundaryY) ? '0' : '1';
-    }
-  }
-
-  function updateNiebla() {
-    const boundaryY = getNieblaBoundaryY();
-    nieblaEl.style.height = boundaryY + 'px';
-    nieblaEl.style.opacity = nieblaLevel > 0 ? '1' : '0';
-    applyNieblaVisibility();
-  }
-
-  // Llamar a updateNiebla() después de crear o destruir ladrillos/powerups
-  const originalPlaceBricks = placeBricks;
-  const originalSpawnPowerup = spawnPowerup;
-
-  // ---- FIN NIEBLA ----
+  stage.appendChild(nieblaEl);
 
   let scale = 1;
   let bricks = [];
@@ -270,9 +243,9 @@ export function initJuego(config) {
   let paused = false;
   let gameOver = false;
   let pendingHighScore = false;
-  let gameIsOpen = false;
+  let gameIsOpen = false; // control para resumeParticulas
 
-  // ---- FUNCIONES DEL MENÚ (sin cambios) ----
+  // ---- FUNCIONES DEL MENÚ ----
   function showMenu(showGameOver = false, score = 0) {
     if (!menuEl) return;
     menuEl.style.display = 'flex';
@@ -334,7 +307,6 @@ export function initJuego(config) {
     }
   }
 
-  // ---- Eventos del menú ----
   menuPlay.addEventListener('click', (e) => {
     e.stopPropagation();
     soundTap();
@@ -430,7 +402,6 @@ export function initJuego(config) {
     if (animFrameId) cancelAnimationFrame(animFrameId);
   });
 
-  // ---- Botón "Volver al menú" en partida ----
   menuBtn.addEventListener('click', () => {
     if (!running && !gameOver) return;
     soundTap();
@@ -482,7 +453,7 @@ export function initJuego(config) {
     if (document.hidden && running && !paused && !gameOver) togglePause();
   });
 
-  // ---- FUNCIONES DE LADRILLOS ----
+  // ---- FUNCIONES DEL JUEGO ----
   function getBrickTypeFromValue(val) {
     if (val === 1) return BRICK_TYPES.CLAY;
     if (val === 2) return BRICK_TYPES.WOOD;
@@ -492,28 +463,27 @@ export function initJuego(config) {
   function updateBrickVisual(brick) {
     const el = brick.el;
     const type = brick.type;
-    el.className = 'brick';
-    if (type === BRICK_TYPES.CLAY) {
-      el.classList.add('brick-clay');
-    } else if (type === BRICK_TYPES.WOOD) {
-      el.classList.add('brick-wood');
-      if (brick.hits === 1) {
-        el.classList.add('cracked-1');
-      }
-    } else if (type === BRICK_TYPES.IRON) {
-      el.classList.add('brick-iron');
-      if (brick.hits === 2) {
-        el.classList.add('cracked-1');
-      } else if (brick.hits === 1) {
-        el.classList.add('cracked-2');
-        if (!el.querySelector('.crack-extra')) {
-          const extra = document.createElement('div');
-          extra.className = 'crack-extra';
-          el.appendChild(extra);
-        }
-      }
+    el.style.background = `
+      linear-gradient(135deg, ${type.color} 0%, ${adjustColor(type.color, -20)} 50%, ${type.color} 100%)
+    `;
+    el.style.backgroundSize = '200% 200%';
+    el.style.boxShadow = 'inset 0 -3px 0 rgba(0,0,0,0.3), inset 0 3px 0 rgba(255,255,255,0.2)';
+    el.textContent = FRACTURE_SYMBOLS[brick.hits] || '|';
+  }
+
+  function adjustColor(hex, percent) {
+    let r = parseInt(hex.slice(1,2), 16) * 17;
+    let g = parseInt(hex.slice(2,3), 16) * 17;
+    let b = parseInt(hex.slice(3,4), 16) * 17;
+    if (hex.length === 7) {
+      r = parseInt(hex.slice(1,3), 16);
+      g = parseInt(hex.slice(3,5), 16);
+      b = parseInt(hex.slice(5,7), 16);
     }
-    el.textContent = '';
+    r = Math.min(255, Math.max(0, r + percent));
+    g = Math.min(255, Math.max(0, g + percent));
+    b = Math.min(255, Math.max(0, b + percent));
+    return `rgb(${r},${g},${b})`;
   }
 
   function upgradeBrickType(brick) {
@@ -555,7 +525,6 @@ export function initJuego(config) {
     }
   }
 
-  // ---- GENERACIÓN DE LADRILLOS ----
   function generateBrickValues() {
     const total = TARGET_GAME_POINTS;
     const values = [];
@@ -668,8 +637,8 @@ export function initJuego(config) {
       bricks.push(brick);
       gamePoints += type.value;
       updateBrickVisual(brick);
+      el.style.visibility = isDentroDeNiebla(y) ? 'hidden' : 'visible';
     }
-    applyNieblaVisibility(); // ocultar los que estén en zona de niebla
   }
 
   function requestRegeneration() {
@@ -694,7 +663,6 @@ export function initJuego(config) {
     }
   }
 
-  // ---- POWER-UPS ----
   function getGreenProbability(minutes) {
     if (minutes < 0) return GREEN_PROB_TABLE[0];
     if (minutes >= GREEN_PROB_TABLE.length - 1) return GREEN_PROB_TABLE[GREEN_PROB_TABLE.length - 1];
@@ -805,10 +773,8 @@ export function initJuego(config) {
       size: size, color: color, type: typeKey,
       el: el, alive: true
     });
-    applyNieblaVisibility(); // ocultar si está en zona de niebla
   }
 
-  // ---- BOLA AZUL ----
   function spawnBlueBall() {
     if (blueBallActive) return;
     blueBallActive = true;
@@ -827,7 +793,7 @@ export function initJuego(config) {
       box-shadow: 0 0 30px rgba(0,150,255,0.9);
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-weight: bold; font-size: 14px;
-      pointer-events: none; z-index: 16;
+      pointer-events: none; z-index: 26;
       transform: translate(-50%, -50%);
       text-shadow: 0 0 6px rgba(0,0,0,0.8);
     `;
@@ -1029,34 +995,47 @@ export function initJuego(config) {
     }
   }
 
-  // ---- FUNCIÓN loseLife CORREGIDA ----
+  // CORRECCIÓN: perder vida sin bug de teletransporte
   function loseLife() {
-    // Detener inmediatamente la pelota
-    launched = false;
-    // Vaciar bolas para que no sigan moviéndose
-    balls = [];
     lives--;
     animateHeartLoss();
     gameTimeActive = false;
+
+    // Detener la pelota inmediatamente
+    launched = false;
+    // Vaciar las bolas actuales para evitar colisiones durante el setTimeout
+    balls = [];
+    // Limpiar powerups en caída
+    powerups.forEach(p => p.el.remove());
+    powerups = [];
+    activePowerupTypes.clear();
+    powerupsInAir = 0;
+    // Reiniciar efectos
+    paddleSizeMultiplier = 1;
+    paddleWidth = PADDLE_W_BASE;
+    ballDurability = 1;
+    nieblaLevel = 0;
+    updateNiebla();
+    updateDurabilityVisual();
+    updateUI();
+    draw();
+
     if (lives <= 0) {
       setTimeout(() => endGame(), 300);
       return;
     }
+
+    // Después de 300ms, colocar nueva bola pegada a la pala
     setTimeout(() => {
-      paddleSizeMultiplier = 1;
-      paddleWidth = PADDLE_W_BASE;
-      ballDurability = 1;
-      nieblaLevel = 0;
-      updateNiebla();
-      powerups.forEach(p => p.el.remove());
-      powerups = [];
-      activePowerupTypes.clear();
-      powerupsInAir = 0;
       const newX = paddle.x + paddleWidth / 2;
       const newY = STAGE_H - 14 - BALL_R;
       balls = [{ x: newX, y: newY, vx: 0, vy: 0 }];
       launched = false;
-      updateDurabilityVisual();
+      // Asegurarse de que no haya powerups residuales
+      powerups.forEach(p => p.el.remove());
+      powerups = [];
+      activePowerupTypes.clear();
+      powerupsInAir = 0;
       updateUI();
       draw();
     }, 300);
@@ -1157,6 +1136,38 @@ export function initJuego(config) {
     el.style.boxShadow = shadow;
   }
 
+  function getNieblaBoundary() {
+    return NIEBLA_HEIGHTS[nieblaLevel] || 0;
+  }
+
+  // Un ladrillo/powerup está "dentro" de la niebla si su posición cae
+  // por encima del límite actual (la niebla siempre nace arriba y crece
+  // hacia abajo, dejando libre la franja de la paleta).
+  function isDentroDeNiebla(y) {
+    const boundary = getNieblaBoundary();
+    return boundary > 0 && y < boundary;
+  }
+
+  function updateNiebla() {
+    const boundary = getNieblaBoundary();
+    nieblaEl.style.height = boundary + 'px';
+    nieblaEl.style.opacity = boundary > 0 ? 1 : 0;
+
+    // Ladrillos: invisibles dentro de la niebla, pero se siguen pudiendo
+    // romper con normalidad (la colisión usa las coordenadas, no el CSS).
+    for (const b of bricks) {
+      if (!b.alive) continue;
+      b.el.style.visibility = isDentroDeNiebla(b.y) ? 'hidden' : 'visible';
+    }
+
+    // Power-ups: invisibles dentro de la niebla, pero siguen cayendo y
+    // se pueden recoger igual. La bola azul nunca se oculta.
+    for (const pu of powerups) {
+      if (pu.isBlue) continue;
+      pu.el.style.visibility = isDentroDeNiebla(pu.y) ? 'hidden' : 'visible';
+    }
+  }
+
   function draw() {
     paddleWidth = PADDLE_W_BASE * paddleSizeMultiplier;
     paddleEl.style.width = paddleWidth + 'px';
@@ -1191,11 +1202,8 @@ export function initJuego(config) {
       pu.el.style.left = pu.x + 'px';
       pu.el.style.top = pu.y + 'px';
     }
-
-    applyNieblaVisibility(); // actualizar visibilidad de ladrillos y powerups
   }
 
-  // ---- BUCLE PRINCIPAL ----
   function gameLoop(timestamp) {
     if (!running) {
       animFrameId = requestAnimationFrame(gameLoop);
@@ -1275,10 +1283,7 @@ export function initJuego(config) {
 
           const damage = ballDurability;
           br.hits -= damage;
-          if (br.type === BRICK_TYPES.CLAY) soundClay();
-          else if (br.type === BRICK_TYPES.WOOD) soundWood();
-          else if (br.type === BRICK_TYPES.IRON) soundIron();
-
+          soundBrick();
           if (br.hits <= 0) {
             br.alive = false;
             br.el.classList.add('gone');
@@ -1288,14 +1293,8 @@ export function initJuego(config) {
             updateUI();
             spawnPowerup(br);
             if (gamePoints <= REGEN_THRESHOLD) requestRegeneration();
-            const deadEl = br.el;
-            setTimeout(() => {
-              deadEl.remove();
-              const idx = bricks.indexOf(br);
-              if (idx !== -1) bricks.splice(idx, 1);
-            }, 250);
           } else {
-            updateBrickVisual(br);
+            br.el.textContent = FRACTURE_SYMBOLS[br.hits] || '|';
           }
           break;
         }
@@ -1311,11 +1310,8 @@ export function initJuego(config) {
             animFrameId = requestAnimationFrame(gameLoop);
             return;
           }
-          launched = false;
-          updateUI();
-          draw();
-          animFrameId = requestAnimationFrame(gameLoop);
-          return;
+          // Si después de perder vida no hay bolas, se maneja en loseLife
+          // No hacer nada aquí porque loseLife ya se encarga
         }
       }
     }
@@ -1351,10 +1347,12 @@ export function initJuego(config) {
 
       pu.el.style.left = pu.x + 'px';
       pu.el.style.top = pu.y + 'px';
+      if (!pu.isBlue) {
+        pu.el.style.visibility = isDentroDeNiebla(pu.y) ? 'hidden' : 'visible';
+      }
     }
 
     if (pendingRegeneration) checkAndRegenerate();
-    if (nieblaLevel > 0) applyNieblaVisibility();
 
     draw();
     animFrameId = requestAnimationFrame(gameLoop);
@@ -1396,10 +1394,8 @@ export function initJuego(config) {
         updateDurabilityVisual();
         break;
       case 'BOLA_NIEBLA':
-        if (nieblaLevel < MAX_NIEBLA) {
-          nieblaLevel++;
-          updateNiebla();
-        }
+        if (nieblaLevel < MAX_NIEBLA) nieblaLevel++;
+        updateNiebla();
         break;
     }
     activePowerupTypes.delete(type);
@@ -1434,10 +1430,13 @@ export function initJuego(config) {
     pauseBtn.textContent = '⏸️';
     overlay.classList.remove('open');
     cleanGameState();
+
+    // Solo reanudar pétalos si el juego estaba abierto
     if (gameIsOpen) {
       resumeParticulas();
       gameIsOpen = false;
     }
+
     soundClose();
     console.log('🧹 Juego cerrado y limpiado');
   }
@@ -1515,8 +1514,7 @@ export function initJuego(config) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego inicializado (niebla actualizada)');
+  console.log('✅ Juego inicializado con correcciones');
 }
-
 
 
