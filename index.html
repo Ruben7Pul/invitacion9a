@@ -339,7 +339,7 @@
         <span id="lives" class="gold-text" style="display:none;">♥ ♥ ♥</span>
         <span id="game-score" class="gold-text" style="display:none;">0</span>
         <button id="pause-btn" class="top-btn" style="display:none;" aria-label="Pausar o reanudar juego">⏸️</button>
-        <button id="menu-btn" class="top-btn" style="display:none;" aria-label="Volver al menú principal">📋</button>
+        <button id="game-close" aria-label="Cerrar juego">&times;</button>
       </div>
       <div id="game-stage">
         <div id="game-inner">
@@ -349,12 +349,11 @@
 
         <!-- MENÚ PRINCIPAL -->
         <div id="game-menu" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.8rem; border-radius:12px; padding:1rem; position:absolute; inset:0; z-index:50; background:rgba(0,0,0,0.85);">
-          <h2 style="color:var(--gold-light); font-family:'Press Start 2P', monospace; font-size:clamp(1rem,3vw,1.4rem); text-align:center; margin:0; display:none;">MENÚ</h2>
+          <h2 style="color:var(--gold-light); font-family:'Press Start 2P', monospace; font-size:clamp(1rem,3vw,1.4rem); text-align:center; margin:0;">MENÚ</h2>
           <div id="menu-content" style="display:flex; flex-direction:column; gap:0.8rem; align-items:center;">
             <button id="menu-play" class="game-btn gold-text">▶ Jugar de nuevo</button>
             <button id="menu-scores" class="game-btn gold-text">🏆 Mejores puntuaciones</button>
-            <button id="menu-rules" class="game-btn gold-text">📖 Reglas</button>
-            <button id="menu-exit" class="game-btn gold-text">🚪 Salir</button>
+            <!-- Botón temporal para reiniciar tops -->
             <button id="menu-reset-tops" class="game-btn gold-text" style="font-size:0.7rem; opacity:0.6;">🔄 Reiniciar tops</button>
           </div>
           <div id="menu-scores-list" style="display:none; color:white; font-family:'Press Start 2P', monospace; text-align:center; width:100%; max-width:300px;">
@@ -381,30 +380,6 @@
         </div>
       </div>
       <p class="game-help gold-text">Mueve con dedo, A/D o flechas del teclado</p>
-    </div>
-  </div>
-
-  <!-- Modal de reglas -->
-  <div class="modal-overlay" id="modal-rules" role="dialog" aria-modal="true" aria-labelledby="modal-rules-title">
-    <div class="modal-card">
-      <button class="modal-close" id="rules-close" aria-label="Cerrar reglas">&times;</button>
-      <h2 id="modal-rules-title" class="gold-text">📖 Reglas del juego</h2>
-      <div style="color:#e0d0b0; font-family:var(--serif-body); font-size:1rem; text-align:left; padding:0.5rem 0; line-height:1.6;">
-        <p><strong>🎯 Objetivo:</strong> Rompe todos los ladrillos para ganar puntos.</p>
-        <p><strong>🖱️ Controles:</strong> Mueve la pala con el ratón, el dedo (en móvil) o las teclas A/D y flechas izquierda/derecha.</p>
-        <p><strong>💥 Poderes:</strong> Al romper un ladrillo, puede caer un poder (verde = bueno, rojo = malo).</p>
-        <ul style="list-style:none; padding-left:0.5rem;">
-          <li>🌀 <span style="color:#2ecc71;">Multibola</span> – multiplica las bolas (máx 9).</li>
-          <li>📏 <span style="color:#2ecc71;">Pala Grande</span> – aumenta el tamaño de la pala.</li>
-          <li>⚡ <span style="color:#2ecc71;">Dureza</span> – sube un nivel de dureza de la pelota.</li>
-          <li>🌫️ <span style="color:#e74c3c;">Bola de Niebla</span> – oscurece la pantalla.</li>
-          <li>📐 <span style="color:#e74c3c;">Pala Mini</span> – reduce la pala.</li>
-          <li>⬇️ <span style="color:#e74c3c;">Flaquesa</span> – baja un nivel de dureza.</li>
-        </ul>
-        <p><strong>❤️ Vidas:</strong> Tienes 3 vidas. Al perder una, la pelota vuelve a la pala.</p>
-        <p><strong>⭐ Bola Azul:</strong> Cada 8500 puntos, si tienes 3 vidas, aparece una bola azul que da +2000 pts y un poder positivo aleatorio.</p>
-        <p><strong>🏆 Puntuaciones:</strong> Las mejores 5 puntuaciones se guardan localmente.</p>
-      </div>
     </div>
   </div>
 
