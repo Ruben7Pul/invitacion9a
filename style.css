@@ -885,6 +885,14 @@ h1#nombre-hero {
   50% { transform: translateY(-8px); }
 }
 
+/* ---- Mensajes flotantes (añadir al juego) ---- */
+@keyframes floatMsg {
+  0% { opacity: 0; transform: translate(-50%, 30%) scale(0.5); }
+  20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+  80% { opacity: 1; transform: translate(-50%, -60%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -80%) scale(0.8); }
+}
+
 /* ============================================================
    RESPONSIVE EXTRA
    ============================================================ */
