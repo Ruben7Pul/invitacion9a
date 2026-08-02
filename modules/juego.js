@@ -1,9 +1,9 @@
 // ============================================================
-// juego.js – CORREGIDO (bug pelota y resumeParticulas)
+// juego.js – CORREGIDO: bug pelota y resumeParticulas
 // ============================================================
-console.log('📦 juego.js (corregido: bug pelota y resumeParticulas)');
+console.log('📦 juego.js (corregido)');
 
-import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
+import { soundTap, soundBrick, soundWin, soundLose, soundClose, soundClay, soundWood, soundIron } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
 
 const PADDLE_W_BASE = 72;
@@ -26,12 +26,6 @@ const BRICK_TYPES = {
   CLAY:   { value: 1, playerPoints: 100, hits: 1, color: '#d9534f', label: 'CLAY' },
   WOOD:   { value: 2, playerPoints: 200, hits: 2, color: '#8b5a2b', label: 'WOOD' },
   IRON:   { value: 3, playerPoints: 300, hits: 3, color: '#7a8a9a', label: 'IRON' }
-};
-
-const FRACTURE_SYMBOLS = {
-  1: '|',
-  2: '||',
-  3: '|||'
 };
 
 const POWERUP_PROBS = {
@@ -139,6 +133,7 @@ export function initJuego(config) {
   const modalRules = document.getElementById('modal-rules');
   const rulesClose = document.getElementById('rules-close');
 
+  // Ocultar título "MENÚ"
   const menuTitle = menuEl?.querySelector('h2');
   if (menuTitle) menuTitle.style.display = 'none';
 
@@ -149,6 +144,7 @@ export function initJuego(config) {
     border: 2px solid #fff;
     box-shadow: 0 0 20px rgba(255,255,255,0.6);
     border-radius: 6px;
+    z-index: 25;
   `;
   if (!document.querySelector('#neon-style')) {
     const style = document.createElement('style');
@@ -193,11 +189,14 @@ export function initJuego(config) {
   const nieblaEl = document.createElement('div');
   nieblaEl.id = 'niebla-overlay';
   nieblaEl.style.cssText = `
-    position: absolute; inset: 0; pointer-events: none;
-    background: rgba(20, 30, 50, 0.4); transition: opacity 0.5s;
-    opacity: 0; border-radius: 12px; z-index: 20;
+    position: absolute; top: 0; left: 0; width: 100%; height: 0px;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgba(214,224,245,0.95) 0%, rgba(214,224,245,0.92) 68%, rgba(214,224,245,0) 100%);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    transition: height 0.7s ease, opacity 0.5s ease;
+    opacity: 0; z-index: 12;
   `;
-  stage.appendChild(nieblaEl);
+  inner.appendChild(nieblaEl);
 
   let scale = 1;
   let bricks = [];
@@ -301,6 +300,7 @@ export function initJuego(config) {
     }
   }
 
+  // ---- Eventos del menú ----
   menuPlay.addEventListener('click', (e) => {
     e.stopPropagation();
     soundTap();
@@ -396,6 +396,7 @@ export function initJuego(config) {
     if (animFrameId) cancelAnimationFrame(animFrameId);
   });
 
+  // ---- Botón "Volver al menú" en partida ----
   menuBtn.addEventListener('click', () => {
     if (!running && !gameOver) return;
     soundTap();
@@ -447,7 +448,7 @@ export function initJuego(config) {
     if (document.hidden && running && !paused && !gameOver) togglePause();
   });
 
-  // ---- FUNCIONES DEL JUEGO ----
+  // ---- FUNCIONES DE LADRILLOS ----
   function getBrickTypeFromValue(val) {
     if (val === 1) return BRICK_TYPES.CLAY;
     if (val === 2) return BRICK_TYPES.WOOD;
@@ -457,27 +458,28 @@ export function initJuego(config) {
   function updateBrickVisual(brick) {
     const el = brick.el;
     const type = brick.type;
-    el.style.background = `
-      linear-gradient(135deg, ${type.color} 0%, ${adjustColor(type.color, -20)} 50%, ${type.color} 100%)
-    `;
-    el.style.backgroundSize = '200% 200%';
-    el.style.boxShadow = 'inset 0 -3px 0 rgba(0,0,0,0.3), inset 0 3px 0 rgba(255,255,255,0.2)';
-    el.textContent = FRACTURE_SYMBOLS[brick.hits] || '|';
-  }
-
-  function adjustColor(hex, percent) {
-    let r = parseInt(hex.slice(1,2), 16) * 17;
-    let g = parseInt(hex.slice(2,3), 16) * 17;
-    let b = parseInt(hex.slice(3,4), 16) * 17;
-    if (hex.length === 7) {
-      r = parseInt(hex.slice(1,3), 16);
-      g = parseInt(hex.slice(3,5), 16);
-      b = parseInt(hex.slice(5,7), 16);
+    el.className = 'brick';
+    if (type === BRICK_TYPES.CLAY) {
+      el.classList.add('brick-clay');
+    } else if (type === BRICK_TYPES.WOOD) {
+      el.classList.add('brick-wood');
+      if (brick.hits === 1) {
+        el.classList.add('cracked-1');
+      }
+    } else if (type === BRICK_TYPES.IRON) {
+      el.classList.add('brick-iron');
+      if (brick.hits === 2) {
+        el.classList.add('cracked-1');
+      } else if (brick.hits === 1) {
+        el.classList.add('cracked-2');
+        if (!el.querySelector('.crack-extra')) {
+          const extra = document.createElement('div');
+          extra.className = 'crack-extra';
+          el.appendChild(extra);
+        }
+      }
     }
-    r = Math.min(255, Math.max(0, r + percent));
-    g = Math.min(255, Math.max(0, g + percent));
-    b = Math.min(255, Math.max(0, b + percent));
-    return `rgb(${r},${g},${b})`;
+    el.textContent = '';
   }
 
   function upgradeBrickType(brick) {
@@ -519,6 +521,7 @@ export function initJuego(config) {
     }
   }
 
+  // ---- GENERACIÓN DE LADRILLOS ----
   function generateBrickValues() {
     const total = TARGET_GAME_POINTS;
     const values = [];
@@ -632,6 +635,7 @@ export function initJuego(config) {
       gamePoints += type.value;
       updateBrickVisual(brick);
     }
+    applyNieblaVisibility();
   }
 
   function requestRegeneration() {
@@ -656,6 +660,7 @@ export function initJuego(config) {
     }
   }
 
+  // ---- POWER-UPS ----
   function getGreenProbability(minutes) {
     if (minutes < 0) return GREEN_PROB_TABLE[0];
     if (minutes >= GREEN_PROB_TABLE.length - 1) return GREEN_PROB_TABLE[GREEN_PROB_TABLE.length - 1];
@@ -766,8 +771,10 @@ export function initJuego(config) {
       size: size, color: color, type: typeKey,
       el: el, alive: true
     });
+    applyNieblaVisibility();
   }
 
+  // ---- BOLA AZUL ----
   function spawnBlueBall() {
     if (blueBallActive) return;
     blueBallActive = true;
@@ -988,47 +995,34 @@ export function initJuego(config) {
     }
   }
 
-  // CORRECCIÓN: perder vida sin bug de teletransporte
+  // ---- FUNCIÓN loseLife CORREGIDA ----
   function loseLife() {
+    // Detener inmediatamente la pelota
+    launched = false;
+    // Vaciar bolas para que no sigan moviéndose
+    balls = [];
     lives--;
     animateHeartLoss();
     gameTimeActive = false;
-
-    // Detener la pelota inmediatamente
-    launched = false;
-    // Vaciar las bolas actuales para evitar colisiones durante el setTimeout
-    balls = [];
-    // Limpiar powerups en caída
-    powerups.forEach(p => p.el.remove());
-    powerups = [];
-    activePowerupTypes.clear();
-    powerupsInAir = 0;
-    // Reiniciar efectos
-    paddleSizeMultiplier = 1;
-    paddleWidth = PADDLE_W_BASE;
-    ballDurability = 1;
-    nieblaLevel = 0;
-    updateNiebla();
-    updateDurabilityVisual();
-    updateUI();
-    draw();
-
     if (lives <= 0) {
       setTimeout(() => endGame(), 300);
       return;
     }
-
-    // Después de 300ms, colocar nueva bola pegada a la pala
     setTimeout(() => {
-      const newX = paddle.x + paddleWidth / 2;
-      const newY = STAGE_H - 14 - BALL_R;
-      balls = [{ x: newX, y: newY, vx: 0, vy: 0 }];
-      launched = false;
-      // Asegurarse de que no haya powerups residuales
+      paddleSizeMultiplier = 1;
+      paddleWidth = PADDLE_W_BASE;
+      ballDurability = 1;
+      nieblaLevel = 0;
+      updateNiebla();
       powerups.forEach(p => p.el.remove());
       powerups = [];
       activePowerupTypes.clear();
       powerupsInAir = 0;
+      const newX = paddle.x + paddleWidth / 2;
+      const newY = STAGE_H - 14 - BALL_R;
+      balls = [{ x: newX, y: newY, vx: 0, vy: 0 }];
+      launched = false;
+      updateDurabilityVisual();
       updateUI();
       draw();
     }, 300);
@@ -1129,9 +1123,36 @@ export function initJuego(config) {
     el.style.boxShadow = shadow;
   }
 
+  // Nivel 1: solo la zona de ladrillos. Nivel 2: un poco antes de la mitad.
+  // Nivel 3: casi todo el juego, dejando libre un 15% junto a la pala.
+  const NIEBLA_BOUNDARIES = [0, 150, STAGE_H * 0.45, STAGE_H * 0.85];
+
+  function getNieblaBoundaryY() {
+    return NIEBLA_BOUNDARIES[nieblaLevel] || 0;
+  }
+
   function updateNiebla() {
-    const opacity = nieblaLevel / MAX_NIEBLA * 0.5;
-    nieblaEl.style.opacity = opacity;
+    const boundaryY = getNieblaBoundaryY();
+    nieblaEl.style.height = boundaryY + 'px';
+    nieblaEl.style.opacity = nieblaLevel > 0 ? '1' : '0';
+    applyNieblaVisibility();
+  }
+
+  // Oculta (opacity 0) ladrillos y power-ups cuya posición cae dentro de la
+  // zona de niebla. Siguen existiendo con su física normal: se pueden romper,
+  // los power-ups siguen cayendo y se pueden recoger, solo que no se ven.
+  // La pelota y la bola azul nunca se ocultan.
+  function applyNieblaVisibility() {
+    const boundaryY = getNieblaBoundaryY();
+    for (const br of bricks) {
+      if (!br.alive || !br.el) continue;
+      const centerY = br.y + br.h / 2;
+      br.el.style.opacity = (nieblaLevel > 0 && centerY < boundaryY) ? '0' : '1';
+    }
+    for (const pu of powerups) {
+      if (pu.isBlue) continue; // la bola azul siempre visible
+      pu.el.style.opacity = (nieblaLevel > 0 && pu.y < boundaryY) ? '0' : '1';
+    }
   }
 
   function draw() {
@@ -1148,6 +1169,7 @@ export function initJuego(config) {
         border-radius: 50%;
         pointer-events: none;
         transform: translate(-50%, -50%);
+        z-index: 25;
       `;
       updateBallStyle(el);
       inner.appendChild(el);
@@ -1169,6 +1191,7 @@ export function initJuego(config) {
     }
   }
 
+  // ---- BUCLE PRINCIPAL ----
   function gameLoop(timestamp) {
     if (!running) {
       animFrameId = requestAnimationFrame(gameLoop);
@@ -1248,7 +1271,11 @@ export function initJuego(config) {
 
           const damage = ballDurability;
           br.hits -= damage;
-          soundBrick();
+          // Sonido según material
+          if (br.type === BRICK_TYPES.CLAY) soundClay();
+          else if (br.type === BRICK_TYPES.WOOD) soundWood();
+          else if (br.type === BRICK_TYPES.IRON) soundIron();
+
           if (br.hits <= 0) {
             br.alive = false;
             br.el.classList.add('gone');
@@ -1258,8 +1285,17 @@ export function initJuego(config) {
             updateUI();
             spawnPowerup(br);
             if (gamePoints <= REGEN_THRESHOLD) requestRegeneration();
+            // Quitar el ladrillo del DOM y del arreglo una vez termina su
+            // animación de desaparición, para que no quede un "fantasma"
+            // invisible ocupando esa celda ni se acumulen ladrillos muertos.
+            const deadEl = br.el;
+            setTimeout(() => {
+              deadEl.remove();
+              const idx = bricks.indexOf(br);
+              if (idx !== -1) bricks.splice(idx, 1);
+            }, 250);
           } else {
-            br.el.textContent = FRACTURE_SYMBOLS[br.hits] || '|';
+            updateBrickVisual(br);
           }
           break;
         }
@@ -1275,8 +1311,13 @@ export function initJuego(config) {
             animFrameId = requestAnimationFrame(gameLoop);
             return;
           }
-          // Si después de perder vida no hay bolas, se maneja en loseLife
-          // No hacer nada aquí porque loseLife ya se encarga
+          // No recrear aquí, loseLife ya se encarga después de 300ms
+          // Solo aseguramos que launched sea false y esperamos
+          launched = false;
+          updateUI();
+          draw();
+          animFrameId = requestAnimationFrame(gameLoop);
+          return;
         }
       }
     }
@@ -1315,6 +1356,7 @@ export function initJuego(config) {
     }
 
     if (pendingRegeneration) checkAndRegenerate();
+    if (nieblaLevel > 0) applyNieblaVisibility();
 
     draw();
     animFrameId = requestAnimationFrame(gameLoop);
@@ -1392,13 +1434,10 @@ export function initJuego(config) {
     pauseBtn.textContent = '⏸️';
     overlay.classList.remove('open');
     cleanGameState();
-
-    // Solo reanudar pétalos si el juego estaba abierto
     if (gameIsOpen) {
       resumeParticulas();
       gameIsOpen = false;
     }
-
     soundClose();
     console.log('🧹 Juego cerrado y limpiado');
   }
@@ -1476,7 +1515,5 @@ export function initJuego(config) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego inicializado con correcciones');
+  console.log('✅ Juego inicializado (corregido)');
 }
-
-
