@@ -1,7 +1,7 @@
 // ============================================================
 // juego.js – CORREGIDO (bug pelota y resumeParticulas)
 // ============================================================
-console.log('📦 juego z.js (corregido: bug pelota y resumeParticulas)');
+console.log('📦 juego w.js (corregido: bug pelota y resumeParticulas)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
@@ -37,11 +37,20 @@ const BRICK_TYPES = {
   IRON:   { value: 3, playerPoints: 300, hits: 3, color: '#7a8a9a', label: 'IRON' }
 };
 
-const FRACTURE_SYMBOLS = {
-  1: '',
-  2: '|',
-  3: '||'
-};
+// Grietas visuales según el tipo de ladrillo y golpes restantes:
+// - Arcilla (1 golpe): se rompe de una, nunca muestra grieta.
+// - Madera (2 golpes): tras el primer golpe muestra griet2.
+// - Hierro (3 golpes): tras el primer golpe muestra griet1, tras el
+//   segundo muestra griet2 (más dañado), antes de romperse del todo.
+function getCrackImageSrc(brick) {
+  if (brick.hits >= brick.maxHits) return null;
+  if (brick.maxHits === 2) return 'archivos/griet2.png';
+  if (brick.maxHits === 3) {
+    if (brick.hits === 2) return 'archivos/griet1.png';
+    if (brick.hits === 1) return 'archivos/griet2.png';
+  }
+  return null;
+}
 
 const POWERUP_PROBS = {
   CLAY: 0.06,
@@ -78,14 +87,16 @@ function buildPatternCells(predicate) {
   return cells;
 }
 
-// Ladrillo dorado: ocasional, mismo comportamiento pero da 50% más de puntos.
+// Ladrillo dorado: ocasional, mismo comportamiento pero da el triple de
+// puntos. Solo puede haber uno activo a la vez, y dura 5s: si no se rompe
+// a tiempo, vuelve a ser un ladrillo normal de su mismo tipo.
 const GOLDEN_BRICK_CHANCE = 0.08;
+const GOLDEN_BRICK_DURATION_MS = 5000;
 
 // Racha/combo: cada ladrillo seguido sin perder una vida suma bonus de
 // puntos, con un techo para que no se desbalancee (máx. +50%).
 const COMBO_BONUS_PER_HIT = 0.02;
 const COMBO_BONUS_CAP = 0.5;
-const COMBO_MIN_TO_SHOW = 3;
 
 const GREEN_PROB_TABLE = [
   75.000, 70.3125, 65.625, 60.9375, 56.250, 51.5625, 46.875, 42.1875,
@@ -225,20 +236,6 @@ export function initJuego(config) {
   pauseBtn.style.display = 'none';
   menuBtn.style.display = 'none';
 
-  // Indicador de racha/combo: chico, discreto, junto al puntaje.
-  const comboEl = document.createElement('span');
-  comboEl.id = 'combo-indicator';
-  comboEl.style.cssText = `
-    font-family: 'Press Start 2P', monospace;
-    font-size: 0.65rem;
-    color: #ffd700;
-    text-shadow: 0 0 8px rgba(255,215,0,0.8);
-    margin-left: 6px;
-    display: none;
-    vertical-align: middle;
-  `;
-  if (scoreEl.parentNode) scoreEl.parentNode.insertBefore(comboEl, scoreEl.nextSibling);
-
   if (!document.querySelector('#rainbow-score')) {
     const style2 = document.createElement('style');
     style2.id = 'rainbow-score';
@@ -257,18 +254,43 @@ export function initJuego(config) {
     position: absolute; left: 0; top: 0; width: 100%; height: 0px;
     pointer-events: none;
     background:
-      radial-gradient(ellipse 42px 24px at 8% 100%, rgba(255,255,255,0.95) 40%, rgba(255,255,255,0) 100%),
-      radial-gradient(ellipse 50px 28px at 30% 100%, rgba(255,255,255,0.95) 40%, rgba(255,255,255,0) 100%),
-      radial-gradient(ellipse 46px 26px at 52% 100%, rgba(255,255,255,0.95) 40%, rgba(255,255,255,0) 100%),
-      radial-gradient(ellipse 52px 28px at 74% 100%, rgba(255,255,255,0.95) 40%, rgba(255,255,255,0) 100%),
-      radial-gradient(ellipse 44px 24px at 94% 100%, rgba(255,255,255,0.95) 40%, rgba(255,255,255,0) 100%),
-      linear-gradient(to bottom,
-        #ffffff 0,
-        #ffffff calc(100% - ${NIEBLA_FEATHER}px),
-        rgba(255,255,255,0) 100%);
+      radial-gradient(circle at 12% 20%, #ffffff 0%, #e9edf5 65%),
+      radial-gradient(circle at 60% 10%, #ffffff 0%, #eef1f8 60%),
+      radial-gradient(circle at 85% 35%, #ffffff 0%, #e9edf5 65%),
+      radial-gradient(circle at 25% 55%, #ffffff 0%, #eef1f8 60%),
+      radial-gradient(circle at 70% 60%, #ffffff 0%, #e9edf5 65%),
+      radial-gradient(circle at 40% 85%, #ffffff 0%, #eef1f8 60%),
+      linear-gradient(180deg, #ffffff 0%, #eef1f8 100%);
+    background-size: 140% 140%, 130% 130%, 150% 150%, 130% 130%, 140% 140%, 130% 130%, 100% 100%;
+    -webkit-mask-image:
+      radial-gradient(ellipse 44px 30px at 8% 100%, #000 55%, transparent 100%),
+      radial-gradient(ellipse 52px 34px at 28% 100%, #000 55%, transparent 100%),
+      radial-gradient(ellipse 48px 32px at 48% 100%, #000 55%, transparent 100%),
+      radial-gradient(ellipse 54px 34px at 68% 100%, #000 55%, transparent 100%),
+      radial-gradient(ellipse 50px 30px at 88% 100%, #000 55%, transparent 100%),
+      linear-gradient(to bottom, #000 0, #000 calc(100% - ${NIEBLA_FEATHER}px), transparent 100%);
+    mask-image:
+      radial-gradient(ellipse 44px 30px at 8% 100%, #000 55%, transparent 100%),
+      radial-gradient(ellipse 52px 34px at 28% 100%, #000 55%, transparent 100%),
+      radial-gradient(ellipse 48px 32px at 48% 100%, #000 55%, transparent 100%),
+      radial-gradient(ellipse 54px 34px at 68% 100%, #000 55%, transparent 100%),
+      radial-gradient(ellipse 50px 30px at 88% 100%, #000 55%, transparent 100%),
+      linear-gradient(to bottom, #000 0, #000 calc(100% - ${NIEBLA_FEATHER}px), transparent 100%);
     transition: height 0.6s ease, opacity 0.6s ease;
     opacity: 0; z-index: 20;
   `;
+  // La niebla ya no es "un rectángulo blanco con degradado": el fondo es una
+  // mezcla de manchas radiales (blanco / gris muy claro) que le dan textura
+  // de nube, y el borde inferior ondulado lo define un mask-image (no el
+  // fondo). Toda la parte del fondo es SIEMPRE 100% opaca (colores sólidos,
+  // sin alpha) — lo único que puede ocultar algo es el mask, y el mask
+  // garantiza opacidad total desde 0 hasta "boundary" (límite real del
+  // nivel); el desvanecido ondulado ocurre solo en el margen extra
+  // (NIEBLA_FEATHER), que siempre queda MÁS ABAJO del límite real. Si el
+  // navegador no soporta mask-image, simplemente no se aplica ningún
+  // recorte y se ve el rectángulo completo opaco: nunca revela nada, en el
+  // peor caso tapa un poco más de lo necesario.
+  //
   // Se agrega a "inner" (no a "stage"): así comparte el mismo sistema de
   // coordenadas lógico (300x420) que ladrillos/pelota/power-ups, y el mismo
   // contexto de apilamiento, para que el z-index de la pelota y la bola azul
@@ -299,6 +321,7 @@ export function initJuego(config) {
   let lastPowerupTime = 0;
   let pendingBlueBall = false;
   let comboCount = 0;
+  let goldenBrickRef = null;
   let lastScoreMilestone = 0;
   let blueBallActive = false;
 
@@ -454,7 +477,6 @@ export function initJuego(config) {
     showMenu(false);
     livesEl.style.display = 'none';
     scoreEl.style.display = 'none';
-    comboEl.style.display = 'none';
     pauseBtn.style.display = 'none';
     menuBtn.style.display = 'none';
     running = false;
@@ -475,7 +497,6 @@ export function initJuego(config) {
     showMenu(false);
     livesEl.style.display = 'none';
     scoreEl.style.display = 'none';
-    comboEl.style.display = 'none';
     pauseBtn.style.display = 'none';
     menuBtn.style.display = 'none';
     running = false;
@@ -491,7 +512,6 @@ export function initJuego(config) {
     showMenu(false);
     livesEl.style.display = 'none';
     scoreEl.style.display = 'none';
-    comboEl.style.display = 'none';
     pauseBtn.style.display = 'none';
     menuBtn.style.display = 'none';
     running = false;
@@ -556,7 +576,17 @@ export function initJuego(config) {
       el.style.boxShadow = 'inset 0 -3px 0 rgba(0,0,0,0.3), inset 0 3px 0 rgba(255,255,255,0.2)';
       el.style.border = '1px solid rgba(0,0,0,0.3)';
     }
-    el.textContent = FRACTURE_SYMBOLS[brick.hits] ?? '';
+    updateBrickCrack(brick);
+  }
+
+  function updateBrickCrack(brick) {
+    const src = getCrackImageSrc(brick);
+    if (src) {
+      if (brick.crackImg.getAttribute('src') !== src) brick.crackImg.setAttribute('src', src);
+      brick.crackImg.style.display = 'block';
+    } else {
+      brick.crackImg.style.display = 'none';
+    }
   }
 
   function adjustColor(hex, percent) {
@@ -716,6 +746,16 @@ export function initJuego(config) {
       el.style.fontSize = '11px';
       el.style.textShadow = '0 1px 2px rgba(0,0,0,0.5)';
 
+      const crackImg = document.createElement('img');
+      crackImg.style.cssText = `
+        max-width: 78%; max-height: 62%;
+        width: auto; height: auto;
+        object-fit: contain;
+        pointer-events: none;
+        display: none;
+      `;
+      el.appendChild(crackImg);
+
       inner.appendChild(el);
 
       const brick = {
@@ -730,7 +770,9 @@ export function initJuego(config) {
         type: type,
         originalType: type,
         originalHits: type.hits,
-        isGolden: false
+        isGolden: false,
+        goldenExpiresAt: 0,
+        crackImg
       };
       bricks.push(brick);
       gamePoints += type.value;
@@ -745,12 +787,27 @@ export function initJuego(config) {
   }
 
   function maybeMakeGolden(fromIndex) {
+    if (goldenBrickRef && goldenBrickRef.alive) return; // ya hay uno activo
     if (Math.random() >= GOLDEN_BRICK_CHANCE) return;
     const recent = bricks.slice(fromIndex);
     if (recent.length === 0) return;
     const chosen = recent[Math.floor(Math.random() * recent.length)];
     chosen.isGolden = true;
+    chosen.goldenExpiresAt = performance.now() + GOLDEN_BRICK_DURATION_MS;
+    goldenBrickRef = chosen;
     updateBrickVisual(chosen);
+  }
+
+  // Revisa si el ladrillo dorado activo se venció sin ser destruido; si es
+  // así, vuelve a ser un ladrillo normal de su mismo tipo.
+  function checkGoldenExpiry() {
+    if (!goldenBrickRef) return;
+    if (!goldenBrickRef.alive) { goldenBrickRef = null; return; }
+    if (performance.now() >= goldenBrickRef.goldenExpiresAt) {
+      goldenBrickRef.isGolden = false;
+      updateBrickVisual(goldenBrickRef);
+      goldenBrickRef = null;
+    }
   }
 
   function checkAndRegenerate() {
@@ -1063,6 +1120,7 @@ export function initJuego(config) {
     lastPowerupTime = 0;
     pendingBlueBall = false;
     comboCount = 0;
+    goldenBrickRef = null;
     lastScoreMilestone = 0;
     blueBallActive = false;
     gameTimeActive = false;
@@ -1073,7 +1131,6 @@ export function initJuego(config) {
     pauseBtn.textContent = '⏸️';
     livesEl.style.display = 'none';
     scoreEl.style.display = 'none';
-    comboEl.style.display = 'none';
     pauseBtn.style.display = 'none';
     menuBtn.style.display = 'none';
     msgEl.classList.remove('show');
@@ -1109,6 +1166,7 @@ export function initJuego(config) {
     lastPowerupTime = 0;
     pendingBlueBall = false;
     comboCount = 0;
+    goldenBrickRef = null;
     lastScoreMilestone = 0;
     blueBallActive = false;
     keys.left = keys.right = false;
@@ -1210,7 +1268,6 @@ export function initJuego(config) {
     showMenu(true, playerScore);
     livesEl.style.display = 'none';
     scoreEl.style.display = 'none';
-    comboEl.style.display = 'none';
     pauseBtn.style.display = 'none';
     menuBtn.style.display = 'none';
     soundLose();
@@ -1239,7 +1296,6 @@ export function initJuego(config) {
     layoutStage();
     livesEl.style.display = 'block';
     scoreEl.style.display = 'block';
-    comboEl.style.display = 'none';
     pauseBtn.style.display = 'block';
     menuBtn.style.display = 'block';
     updateUI();
@@ -1253,13 +1309,6 @@ export function initJuego(config) {
   function updateUI() {
     updateLivesUI();
     scoreEl.textContent = `${playerScore}`;
-
-    if (comboCount >= COMBO_MIN_TO_SHOW) {
-      comboEl.textContent = `x${comboCount}`;
-      comboEl.style.display = 'inline';
-    } else {
-      comboEl.style.display = 'none';
-    }
 
     const milestone = Math.floor(playerScore / SCORE_PER_LIFE);
     if (milestone > lastScoreMilestone && milestone > 0) {
@@ -1423,6 +1472,9 @@ export function initJuego(config) {
         const speed = getCurrentBallSpeed();
         b.vx = Math.sin(angle) * speed;
         b.vy = -Math.cos(angle) * speed;
+        // El combo se mide entre un toque de paleta y el siguiente: cada
+        // vez que la pelota vuelve a la paleta, arranca una racha nueva.
+        comboCount = 0;
       }
 
       for (const br of bricks) {
@@ -1448,9 +1500,10 @@ export function initJuego(config) {
           if (br.hits <= 0) {
             br.alive = false;
             br.el.classList.add('gone');
+            if (br.isGolden && goldenBrickRef === br) goldenBrickRef = null;
             comboCount++;
             const comboMult = 1 + Math.min(comboCount * COMBO_BONUS_PER_HIT, COMBO_BONUS_CAP);
-            const basePoints = br.isGolden ? Math.round(br.playerPoints * 1.5) : br.playerPoints;
+            const basePoints = br.isGolden ? br.playerPoints * 3 : br.playerPoints;
             playerScore += Math.round(basePoints * comboMult);
             gamePoints -= br.value;
             ladrillosRotos++;
@@ -1458,7 +1511,7 @@ export function initJuego(config) {
             spawnPowerup(br);
             if (gamePoints <= REGEN_THRESHOLD) requestRegeneration();
           } else {
-            br.el.textContent = FRACTURE_SYMBOLS[br.hits] ?? '';
+            updateBrickCrack(br);
           }
           break;
         }
@@ -1513,6 +1566,7 @@ export function initJuego(config) {
       pu.el.style.top = pu.y + 'px';
     }
 
+    checkGoldenExpiry();
     if (pendingRegeneration) checkAndRegenerate();
 
     draw();
@@ -1574,7 +1628,6 @@ export function initJuego(config) {
     updateDurabilityVisual();
     livesEl.style.display = 'none';
     scoreEl.style.display = 'none';
-    comboEl.style.display = 'none';
     pauseBtn.style.display = 'none';
     menuBtn.style.display = 'none';
     running = false;
@@ -1678,4 +1731,5 @@ export function initJuego(config) {
   layoutStage();
   console.log('✅ Juego inicializado con correcciones');
 }
+
 
