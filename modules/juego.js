@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – CORREGIDO: bug pelota y resumeParticulas
+// juego.js – CON NIEBLA POR NIVELES Y VISIBILIDAD CONTROLADA
 // ============================================================
-console.log('📦 juego.js (corregido)');
+console.log('📦 juego.js (niebla por niveles)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose, soundClay, soundWood, soundIron } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
@@ -86,7 +86,7 @@ function getRandomName() {
 }
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego (corregido)');
+  console.log('🎮 Iniciando juego (niebla por niveles)');
 
   if (!document.querySelector('#pixel-font')) {
     const link = document.createElement('link');
@@ -185,12 +185,22 @@ export function initJuego(config) {
     document.head.appendChild(style2);
   }
 
+  // ---- NIEBLA (nuevo comportamiento) ----
   const nieblaEl = document.createElement('div');
   nieblaEl.id = 'niebla-overlay';
   nieblaEl.style.cssText = `
-    position: absolute; inset: 0; pointer-events: none;
-    background: rgba(20, 30, 50, 0.4); transition: opacity 0.5s;
-    opacity: 0; border-radius: 12px; z-index: 20;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 0%;
+    pointer-events: none;
+    background: rgba(10, 15, 30, 0.7);
+    transition: height 0.6s ease, opacity 0.6s ease;
+    border-radius: 12px;
+    z-index: 25;
+    overflow: hidden;
+    opacity: 0;
   `;
   stage.appendChild(nieblaEl);
 
@@ -232,7 +242,7 @@ export function initJuego(config) {
   let paused = false;
   let gameOver = false;
   let pendingHighScore = false;
-  let gameIsOpen = false; // control para resumeParticulas
+  let gameIsOpen = false;
 
   // ---- FUNCIONES DEL MENÚ ----
   function showMenu(showGameOver = false, score = 0) {
@@ -745,7 +755,8 @@ export function initJuego(config) {
       box-shadow: 0 0 20px rgba(0,0,0,0.5);
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-weight: bold; font-size: ${size * 0.5}px;
-      pointer-events: none; z-index: 15;
+      pointer-events: none;
+      z-index: 15;
       transform: translate(-50%, -50%);
       text-shadow: 0 0 6px rgba(0,0,0,0.8);
     `;
@@ -787,7 +798,8 @@ export function initJuego(config) {
       box-shadow: 0 0 30px rgba(0,150,255,0.9);
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-weight: bold; font-size: 14px;
-      pointer-events: none; z-index: 16;
+      pointer-events: none;
+      z-index: 30;
       transform: translate(-50%, -50%);
       text-shadow: 0 0 6px rgba(0,0,0,0.8);
     `;
@@ -803,6 +815,7 @@ export function initJuego(config) {
 
   function applyBlueBall() {
     playerScore += 2000;
+    // Quitar niebla
     nieblaLevel = 0;
     updateNiebla();
     if (paddleSizeMultiplier < 1) paddleSizeMultiplier = 1;
@@ -854,7 +867,7 @@ export function initJuego(config) {
       color: ${color};
       text-shadow: 0 0 20px rgba(0,0,0,0.8);
       pointer-events: none;
-      z-index: 30;
+      z-index: 35;
       animation: floatMsg 2s ease forwards;
       text-align: center;
       white-space: nowrap;
@@ -989,11 +1002,31 @@ export function initJuego(config) {
     }
   }
 
-  // ---- FUNCIÓN loseLife CORREGIDA ----
+  // ---- NUEVA FUNCIÓN DE NIEBLA ----
+  function updateNiebla() {
+    const level = nieblaLevel;
+    let heightPercent = 0;
+    let opacity = 0;
+    if (level === 1) {
+      heightPercent = 38;  // cubre los ladrillos (aprox. hasta fila 6)
+      opacity = 0.65;
+    } else if (level === 2) {
+      heightPercent = 58;  // mitad superior
+      opacity = 0.75;
+    } else if (level === 3) {
+      heightPercent = 85;  // casi todo, dejando la pala visible
+      opacity = 0.85;
+    }
+    nieblaEl.style.height = heightPercent + '%';
+    nieblaEl.style.opacity = level > 0 ? opacity : 0;
+  }
+
   function loseLife() {
-    // Detener inmediatamente la pelota
+    // Quitar niebla al morir
+    nieblaLevel = 0;
+    updateNiebla();
+    // Detener pelota
     launched = false;
-    // Vaciar bolas para que no sigan moviéndose
     balls = [];
     lives--;
     animateHeartLoss();
@@ -1006,8 +1039,6 @@ export function initJuego(config) {
       paddleSizeMultiplier = 1;
       paddleWidth = PADDLE_W_BASE;
       ballDurability = 1;
-      nieblaLevel = 0;
-      updateNiebla();
       powerups.forEach(p => p.el.remove());
       powerups = [];
       activePowerupTypes.clear();
@@ -1117,16 +1148,12 @@ export function initJuego(config) {
     el.style.boxShadow = shadow;
   }
 
-  function updateNiebla() {
-    const opacity = nieblaLevel / MAX_NIEBLA * 0.5;
-    nieblaEl.style.opacity = opacity;
-  }
-
   function draw() {
     paddleWidth = PADDLE_W_BASE * paddleSizeMultiplier;
     paddleEl.style.width = paddleWidth + 'px';
     paddleEl.style.transform = 'translateX(' + paddle.x + 'px)';
 
+    // Actualizar bolas (con z-index alto para que se vean sobre la niebla)
     let ballElements = inner.querySelectorAll('.ball-dynamic');
     while (ballElements.length < balls.length) {
       const el = document.createElement('div');
@@ -1136,6 +1163,7 @@ export function initJuego(config) {
         border-radius: 50%;
         pointer-events: none;
         transform: translate(-50%, -50%);
+        z-index: 30;
       `;
       updateBallStyle(el);
       inner.appendChild(el);
@@ -1151,6 +1179,7 @@ export function initJuego(config) {
       el.style.top = balls[i].y + 'px';
     }
 
+    // Power-ups (se mantienen con z-index 15, por debajo de la niebla que es 25)
     for (const pu of powerups) {
       pu.el.style.left = pu.x + 'px';
       pu.el.style.top = pu.y + 'px';
@@ -1237,7 +1266,6 @@ export function initJuego(config) {
 
           const damage = ballDurability;
           br.hits -= damage;
-          // Sonido según material
           if (br.type === BRICK_TYPES.CLAY) soundClay();
           else if (br.type === BRICK_TYPES.WOOD) soundWood();
           else if (br.type === BRICK_TYPES.IRON) soundIron();
@@ -1268,8 +1296,6 @@ export function initJuego(config) {
             animFrameId = requestAnimationFrame(gameLoop);
             return;
           }
-          // No recrear aquí, loseLife ya se encarga después de 300ms
-          // Solo aseguramos que launched sea false y esperamos
           launched = false;
           updateUI();
           draw();
@@ -1354,8 +1380,10 @@ export function initJuego(config) {
         updateDurabilityVisual();
         break;
       case 'BOLA_NIEBLA':
-        if (nieblaLevel < MAX_NIEBLA) nieblaLevel++;
-        updateNiebla();
+        if (nieblaLevel < MAX_NIEBLA) {
+          nieblaLevel++;
+          updateNiebla();
+        }
         break;
     }
     activePowerupTypes.delete(type);
@@ -1471,5 +1499,5 @@ export function initJuego(config) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego inicializado (corregido)');
+  console.log('✅ Juego inicializado (niebla por niveles)');
 }
