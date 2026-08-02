@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – CORRECCIÓN FINAL (no se abre automáticamente)
+// juego.js – CORRECCIÓN FINAL: 8500 pts, sin mensajes, botón salida, reglas
 // ============================================================
-console.log('📦 juego.js (no abre automáticamente)');
+console.log('📦 juego.js (8500 pts, sin mensajes, salida y reglas)');
 
 import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
@@ -19,7 +19,7 @@ const REGEN_THRESHOLD = 9;
 const BALL_LOW_Y = STAGE_H - 60;
 const MAX_NIEBLA = 3;
 const MAX_LIVES = 3;
-const SCORE_PER_LIFE = 8000;
+const SCORE_PER_LIFE = 8500; // AHORA 8500
 const TOP_SCORES_COUNT = 5;
 
 const BRICK_TYPES = {
@@ -92,7 +92,7 @@ function getRandomName() {
 }
 
 export function initJuego(config) {
-  console.log('🎮 Iniciando juego (no abre automáticamente)');
+  console.log('🎮 Iniciando juego (8500 pts, sin mensajes)');
 
   if (!document.querySelector('#pixel-font')) {
     const link = document.createElement('link');
@@ -105,7 +105,7 @@ export function initJuego(config) {
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => {
     soundTap();
-    openGame(); // Solo se abre al hacer clic en el nombre
+    openGame();
   });
 
   const overlay = document.getElementById('game-overlay');
@@ -117,8 +117,8 @@ export function initJuego(config) {
   const livesEl = document.getElementById('lives');
   const scoreEl = document.getElementById('game-score');
   const pauseBtn = document.getElementById('pause-btn');
-  const closeBtn = document.getElementById('game-close');
 
+  // Elementos del menú
   const menuEl = document.getElementById('game-menu');
   const menuContent = document.getElementById('menu-content');
   const menuPlay = document.getElementById('menu-play');
@@ -134,6 +134,10 @@ export function initJuego(config) {
   const gameoverMenuBtn = document.getElementById('gameover-menu-btn');
   const nameError = document.getElementById('name-error');
   const menuResetTops = document.getElementById('menu-reset-tops');
+  const menuRulesBtn = document.getElementById('menu-rules-btn');
+  const menuRules = document.getElementById('menu-rules');
+  const menuRulesBack = document.getElementById('menu-rules-back');
+  const menuExit = document.getElementById('menu-exit');
 
   // Ocultar título "MENÚ"
   const menuTitle = menuEl?.querySelector('h2');
@@ -267,6 +271,7 @@ export function initJuego(config) {
       pendingHighScore = false;
     }
     menuScoresList.style.display = 'none';
+    menuRules.style.display = 'none';
   }
 
   function hideMenu() {
@@ -277,6 +282,7 @@ export function initJuego(config) {
     menuGameover.style.display = 'none';
     gameoverInputContainer.style.display = 'none';
     gameoverMenuBtn.style.display = 'none';
+    menuRules.style.display = 'none';
   }
 
   function updateScoresList() {
@@ -317,6 +323,26 @@ export function initJuego(config) {
     soundTap();
     menuScoresList.style.display = 'none';
     menuContent.style.display = 'flex';
+  });
+
+  menuRulesBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    soundTap();
+    menuContent.style.display = 'none';
+    menuRules.style.display = 'block';
+  });
+
+  menuRulesBack.addEventListener('click', (e) => {
+    e.stopPropagation();
+    soundTap();
+    menuRules.style.display = 'none';
+    menuContent.style.display = 'flex';
+  });
+
+  menuExit.addEventListener('click', (e) => {
+    e.stopPropagation();
+    soundTap();
+    closeGame();
   });
 
   if (menuResetTops) {
@@ -762,7 +788,7 @@ export function initJuego(config) {
     });
     powerupsInAir++;
 
-    showFloatingMessage('⭐ ¡Bola Azul! ⭐', '#00ccff');
+    // SIN MENSAJE DE BOLA AZUL
   }
 
   function applyBlueBall() {
@@ -803,11 +829,13 @@ export function initJuego(config) {
       }
     }
     updateUI();
-    showFloatingMessage('✨ +2000 pts y poder extra ✨', '#ffcc00');
+    // SIN MENSAJE DE +2000
     blueBallActive = false;
   }
 
   function showFloatingMessage(text, color = '#fff') {
+    // Esta función ya no se usa para vida extra ni bola azul, pero se mantiene por si acaso
+    // (se usa para mensajes de puntuación y de ánimo)
     const el = document.createElement('div');
     el.style.cssText = `
       position: absolute;
@@ -1032,16 +1060,20 @@ export function initJuego(config) {
     const milestone = Math.floor(playerScore / SCORE_PER_LIFE);
     if (milestone > lastScoreMilestone && milestone > 0) {
       lastScoreMilestone = milestone;
+      // Mostrar mensaje de ánimo (pero no de vida extra ni bola azul)
       const msgIndex = Math.min(milestone - 1, SCORE_MESSAGES.length - 1);
       const msg = SCORE_MESSAGES[msgIndex];
       showFloatingMessage(msg, '#ffcc00');
 
+      // Recompensa: vida extra o bola azul (sin mensaje)
       if (lives < MAX_LIVES) {
         lives++;
         updateLivesUI();
-        showFloatingMessage('❤️ +1 Vida', '#ff4444');
+        // SIN MENSAJE DE VIDA EXTRA
       } else {
-        if (!blueBallActive) spawnBlueBall();
+        if (!blueBallActive) {
+          spawnBlueBall(); // sin mensaje
+        }
       }
     }
   }
@@ -1359,8 +1391,6 @@ export function initJuego(config) {
     inner.style.transformOrigin = 'top left';
   }
 
-  closeBtn.addEventListener('click', closeGame);
-
   stage.addEventListener('mousedown', (e) => {
     if (e.target.closest('#game-menu')) return;
     if (!running || paused || gameOver) return;
@@ -1422,6 +1452,6 @@ export function initJuego(config) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  // NO llamamos a openGame() aquí. Solo se abre cuando el usuario hace clic en #nombre-hero.
-  console.log('✅ Juego inicializado (no se abre automáticamente)');
+  // NO se abre automáticamente
+  console.log('✅ Juego inicializado (8500 pts, sin mensajes, salida y reglas)');
 }
