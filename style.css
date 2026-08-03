@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS ARCADE-PRINCESAS (con vídeos)
+   🌹 INVITACIÓN XV – ESTILOS (sin brillo reja, sin mariposas)
    ============================================================ */
 
 :root {
@@ -58,10 +58,10 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  z-index: 1;                    /* sobre #bg, debajo de pétalos y app */
+  z-index: 1;
   pointer-events: none;
-  opacity: 0.7;                  /* ajusta la intensidad */
-  mix-blend-mode: screen;        /* fondo negro → transparente */
+  opacity: 0.7;
+  mix-blend-mode: screen;
 }
 
 /* ---- VÍDEO DE FONDO PARA EL PORTAL (mar2.mp4) ---- */
@@ -72,7 +72,7 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  z-index: 0;                    /* debajo del contenido del portal */
+  z-index: 0;
   pointer-events: none;
   opacity: 0.6;
   mix-blend-mode: screen;
@@ -108,7 +108,7 @@ body {
 }
 
 /* ============================================================
-   PORTAL / REJA
+   PORTAL / REJA (sin glowPulse)
    ============================================================ */
 #portal {
   position: fixed;
@@ -135,7 +135,7 @@ body {
   align-items: center;
   justify-content: center;
   position: relative;
-  z-index: 1;                    /* encima del vídeo */
+  z-index: 1;
 }
 .portal-inner .eyebrow {
   display: block;
@@ -155,14 +155,10 @@ body {
   perspective: 1000px;
   cursor: pointer;
   pointer-events: none;
-  animation: glowPulse 3s ease-in-out infinite;
+  /* sin animación de brillo */
 }
 .gate-wrapper.active {
   pointer-events: auto;
-}
-@keyframes glowPulse {
-  0%, 100% { filter: drop-shadow(0 0 8px rgba(201,162,77,0.2)); }
-  50% { filter: drop-shadow(0 0 25px rgba(201,162,77,0.6)); }
 }
 .gate-leaf {
   position: absolute;
@@ -466,7 +462,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   MODALES – SEMITRANSPARENTES CON ANIMACIÓN
+   MODALES – TRANSICIÓN SIMPLE Y RÁPIDA (sin rotación ni rebote)
    ============================================================ */
 .modal-overlay {
   position: fixed;
@@ -481,7 +477,7 @@ h1#nombre-hero {
   padding: 1rem;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.4s ease, visibility 0.4s ease;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 .modal-overlay.open {
   opacity: 1;
@@ -497,32 +493,32 @@ h1#nombre-hero {
   border-radius: 24px;
   padding: 1.8rem 1.2rem;
   position: relative;
-  transform: scale(0.92) translateY(20px) rotateX(-5deg);
+  transform: scale(0.9);
   opacity: 0;
-  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
+  transition: transform 0.3s ease, opacity 0.3s ease;
   box-shadow: 0 0 60px rgba(212, 175, 55, 0.15), inset 0 0 80px rgba(25, 60, 120, 0.4);
   z-index: 1;
   -webkit-overflow-scrolling: touch;
 }
 .modal-overlay.open .modal-card {
-  transform: scale(1) translateY(0) rotateX(0);
+  transform: scale(1);
   opacity: 1;
 }
 .modal-card > * {
   opacity: 0;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.25s ease;
 }
 .modal-overlay.open .modal-card > * {
   opacity: 1;
 }
-.modal-overlay.open .modal-card h2 { transition-delay: 0.05s; }
-.modal-overlay.open .modal-card .modal-subtitle { transition-delay: 0.10s; }
+.modal-overlay.open .modal-card h2 { transition-delay: 0.04s; }
+.modal-overlay.open .modal-card .modal-subtitle { transition-delay: 0.07s; }
 .modal-overlay.open .modal-card .clock,
 .modal-overlay.open .modal-card .detalle-card,
-.modal-overlay.open .modal-card .familia-grupo { transition-delay: 0.15s; }
+.modal-overlay.open .modal-card .familia-grupo { transition-delay: 0.10s; }
 .modal-overlay.open .modal-card .modal-seal,
 .modal-overlay.open .modal-card .btn-mapa,
-.modal-overlay.open .modal-card .divider-thin { transition-delay: 0.20s; }
+.modal-overlay.open .modal-card .divider-thin { transition-delay: 0.13s; }
 
 .modal-card::before {
   content: '';
@@ -1239,16 +1235,3 @@ h1#nombre-hero {
 }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 3px; }
-
-/* ---- MARIPOSAS ---- */
-.mariposa {
-  position: fixed;
-  pointer-events: none;
-  z-index: 2;
-  will-change: transform;
-  font-size: clamp(24px, 4vw, 42px);
-  opacity: 0.8;
-  filter: drop-shadow(0 0 8px rgba(255,215,0,0.25));
-  transition: none;
-  text-shadow: 0 0 12px rgba(255,200,100,0.1);
-}
