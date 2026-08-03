@@ -1,4 +1,4 @@
-console.log('📦 módulo modal b2.js cargado (transición simple)');
+console.log('📦 módulo modal zzz.js cargado (transición simple)');
 
 import { soundOpen, soundClose, soundTap } from './sonidos.js';
 import { burst } from './particulas.js';
@@ -57,3 +57,5 @@ function closeModal(el) {
   soundClose();
   resumeParticulas();
 }
+
+
