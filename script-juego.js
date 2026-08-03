@@ -1,10 +1,21 @@
-console.log('🎮 script-juego.js (independiente)');
+// ============================================================
+// script-juego.js – SCRIPT PRINCIPAL DEL JUEGO
+// ============================================================
+console.log('🎮 script-juego.js cargado');
 
-// Cargar configuración desde archivo
-const config = await fetch('config.json')
-  .then(r => r.json())
-  .catch(() => {
-    console.warn('⚠️ Usando configuración por defecto');
+// Detectar móvil
+const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+// Cargar configuración
+async function cargarConfig() {
+  try {
+    const res = await fetch('config.json');
+    if (!res.ok) throw new Error('HTTP error ' + res.status);
+    const data = await res.json();
+    if (!data.nombre) throw new Error('Falta "nombre"');
+    return data;
+  } catch (e) {
+    console.warn('⚠️ Error cargando config.json:', e);
     return {
       nombre: 'Dania',
       fechaTexto: '24 de octubre de 2026',
@@ -22,9 +33,26 @@ const config = await fetch('config.json')
       madrina: 'Madrina',
       audioFile: 'archivos/cancion.mp3'
     };
-  });
+  }
+}
 
-// Importar e iniciar el juego
-const { initJuego } = await import('./modules/juego.js');
-const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-initJuego(config, isMobile);
+// Iniciar juego
+(async function init() {
+  const config = await cargarConfig();
+  try {
+    const { initJuego } = await import('./modules/juego.js');
+    initJuego(config, isMobile);
+    console.log('✅ Juego iniciado correctamente');
+  } catch (e) {
+    console.error('❌ Error al iniciar el juego:', e);
+    document.body.innerHTML = `
+      <div style="display:flex; align-items:center; justify-content:center; height:100vh; background:#0e0a18; color:#ff6b6b; font-family:'Cinzel',serif; text-align:center; padding:2rem;">
+        <div>
+          <h2 style="color:#d4af37;">❌ Error al cargar el juego</h2>
+          <p style="color:#fae3a0; margin-top:1rem;">Revisa la consola para más detalles.</p>
+          <p style="color:#888; font-size:0.8rem; margin-top:0.5rem;">${e.message}</p>
+        </div>
+      </div>
+    `;
+  }
+})();
