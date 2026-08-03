@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS ARCADE-PRINCESAS (optimizado estable)
+   🌹 INVITACIÓN XV – ESTILOS ARCADE-PRINCESAS (con vídeos)
    ============================================================ */
 
 :root {
@@ -32,7 +32,7 @@ body {
   font-size: clamp(16px, 2.2vw, 20px);
 }
 
-/* ---- FONDO IMAGEN ---- */
+/* ---- Fondo imagen (bella.jpg) ---- */
 #bg {
   position: fixed;
   inset: 0;
@@ -50,26 +50,39 @@ body {
   background: rgba(0, 0, 0, 0.35);
 }
 
-/* ---- VIDEO DE FONDO (sobre bella.jpg, debajo de todo lo demás) ---- */
-#video-fondo {
+/* ---- VÍDEO DE FONDO PARA LA APP (mar1.mp4) ---- */
+#video-app {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  z-index: 1; /* Encima de #bg (z-index:0), debajo de pétalos y app */
-  pointer-events: none; /* Para que no interfiera con clics */
-  mix-blend-mode: screen; /* El fondo negro se vuelve transparente */
-  opacity: 0.6; /* Ajusta la intensidad (puedes cambiarlo) */
+  z-index: 1;                    /* sobre #bg, debajo de pétalos y app */
+  pointer-events: none;
+  opacity: 0.7;                  /* ajusta la intensidad */
+  mix-blend-mode: screen;        /* fondo negro → transparente */
 }
 
-/* ---- PÉTALOS ---- */
+/* ---- VÍDEO DE FONDO PARA EL PORTAL (mar2.mp4) ---- */
+#video-portal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;                    /* debajo del contenido del portal */
+  pointer-events: none;
+  opacity: 0.6;
+  mix-blend-mode: screen;
+}
+
 #petals-layer {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 3; /* Encima del video */
+  z-index: 3;
   overflow: hidden;
 }
 .petal {
@@ -78,19 +91,6 @@ body {
   opacity: 0.6;
   will-change: transform;
   transform-origin: 0 0;
-}
-
-/* ---- MARIPOSAS (z-index:2, entre video y pétalos) ---- */
-.mariposa {
-  position: fixed;
-  pointer-events: none;
-  z-index: 2;
-  will-change: transform;
-  font-size: clamp(24px, 4vw, 42px);
-  opacity: 0.8;
-  filter: drop-shadow(0 0 8px rgba(255,215,0,0.25));
-  transition: none;
-  text-shadow: 0 0 12px rgba(255,200,100,0.1);
 }
 
 /* ---- Utilidades ---- */
@@ -134,6 +134,8 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  position: relative;
+  z-index: 1;                    /* encima del vídeo */
 }
 .portal-inner .eyebrow {
   display: block;
@@ -213,7 +215,7 @@ body {
 #app {
   position: fixed;
   inset: 0;
-  z-index: 5; /* Encima de video y pétalos */
+  z-index: 5;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1238,3 +1240,15 @@ h1#nombre-hero {
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 3px; }
 
+/* ---- MARIPOSAS ---- */
+.mariposa {
+  position: fixed;
+  pointer-events: none;
+  z-index: 2;
+  will-change: transform;
+  font-size: clamp(24px, 4vw, 42px);
+  opacity: 0.8;
+  filter: drop-shadow(0 0 8px rgba(255,215,0,0.25));
+  transition: none;
+  text-shadow: 0 0 12px rgba(255,200,100,0.1);
+}
