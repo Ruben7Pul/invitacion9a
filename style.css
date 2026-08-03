@@ -308,12 +308,12 @@ h1#nombre-hero {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0.4rem;
-  background: rgba(10, 26, 47, 0.8);
-  border: 1px solid #b8860b;
+  background: transparent;
+  border: 1.5px solid #b8860b;
   border-radius: 20px;
   padding: 0.5rem;
   margin-top: 0.2rem;
-  box-shadow: 0 0 30px rgba(212, 175, 55, 0.1);
+  box-shadow: none;
 }
 .nav-btn {
   background: rgba(201, 162, 77, 0.12);
@@ -635,22 +635,25 @@ h1#nombre-hero {
   font-size: clamp(0.7rem, 2vw, 0.9rem);
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #0a1a2f;
-  background: linear-gradient(180deg, #fae3a0, #d4af37, #b8860b);
+  color: #f0d9a3;
+  background: rgba(201, 162, 77, 0.15);
   padding: 0.5rem 1.6rem;
   border-radius: 30px;
   text-decoration: none;
-  border: 1px solid #fae3a0;
-  box-shadow: 0 4px 0 #6b4c1a, 0 2px 10px rgba(0,0,0,0.3);
-  transition: transform 0.15s, box-shadow 0.15s;
+  border: 1.5px solid rgba(201, 162, 77, 0.4);
+  box-shadow: 0 0 15px rgba(212,175,55,0.15);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
 }
 .btn-mapa:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 0 #6b4c1a, 0 4px 20px rgba(212, 175, 55, 0.3);
+  background: rgba(201, 162, 77, 0.25);
+  border-color: rgba(201, 162, 77, 0.6);
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.35);
 }
 .btn-mapa:active {
-  transform: translateY(2px);
-  box-shadow: 0 2px 0 #6b4c1a;
+  transform: translateY(0px);
+  background: rgba(201, 162, 77, 0.2);
 }
 .divider-thin {
   height: 2px;
