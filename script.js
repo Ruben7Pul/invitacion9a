@@ -70,64 +70,57 @@ function rellenarDatos(config) {
   if (ogDesc) ogDesc.content = `Te invitamos a celebrar los 15 años de ${config.nombre}. ¡No faltes!`;
 }
 
-// ---- MARIPOSAS CON MOVIMIENTO REALISTA (JS) ----
+// ---- MARIPOSAS CON MOVIMIENTO REALISTA (JS) — versión corregida ----
 function iniciarMariposas() {
   const emojis = ['🦋', '🦋', '🦋', '🦋'];
   const container = document.body;
   const mariposas = [];
 
-  emojis.forEach((emoji, i) => {
+  emojis.forEach((emoji) => {
     const el = document.createElement('div');
     el.className = 'mariposa';
     el.textContent = emoji;
-    // Posición inicial aleatoria
-    const x = Math.random() * 80 + 10; // 10-90vw
-    const y = Math.random() * 80 + 10;
-    el.style.left = x + 'vw';
-    el.style.top = y + 'vh';
-    el.style.transform = 'rotate(0deg) scale(1, 1)';
-    container.appendChild(el);
+    // Importante: NO usar left/top, toda la posición vive en el transform.
+    el.style.left = '0';
+    el.style.top = '0';
 
-    // Estado de la mariposa
+    const x = 10 + Math.random() * 80; // 10-90 vw
+    const y = 10 + Math.random() * 80; // 10-90 vh
+
     const mariposa = {
-      el: el,
-      x: x,
-      y: y,
-      // Dirección actual en radianes
-      angle: Math.random() * 2 * Math.PI,
-      // Velocidad (módulo)
+      el,
+      x, y,
+      angle: 0,
       speed: 0.4 + Math.random() * 0.6,
-      // Objetivo (punto al que se dirige)
       targetX: x,
       targetY: y,
-      // Tiempo hasta próximo cambio de objetivo
       changeTimer: 0,
-      // Suavizado de rotación (lerp)
-      currentAngle: Math.random() * 2 * Math.PI,
-      // Aleteo
-      wingPhase: Math.random() * 2 * Math.PI,
+      currentAngle: 0,
+      facing: 1,               // 1 = mira a la derecha, -1 = mira a la izquierda
+      wingPhase: Math.random() * Math.PI * 2,
       wingSpeed: 2 + Math.random() * 2,
     };
 
+    // Colocamos el transform inicial ANTES de insertarla, así no hay salto/flash.
+    el.style.transform = `translate(${x}vw, ${y}vh)`;
+    container.appendChild(el);
     mariposas.push(mariposa);
   });
 
-  // Función para generar un nuevo objetivo dentro de los límites
-  function nuevoObjetivo(mariposa) {
+  function nuevoObjetivo(m) {
     const margin = 10;
-    mariposa.targetX = margin + Math.random() * (100 - 2 * margin);
-    mariposa.targetY = margin + Math.random() * (100 - 2 * margin);
-    mariposa.changeTimer = 3 + Math.random() * 5; // segundos hasta próximo cambio
+    m.targetX = margin + Math.random() * (100 - 2 * margin);
+    m.targetY = margin + Math.random() * (100 - 2 * margin);
+    m.changeTimer = 3 + Math.random() * 5;
   }
 
-  // Inicializar objetivos
   mariposas.forEach(m => {
     nuevoObjetivo(m);
-    // Además, establecer una dirección inicial hacia el objetivo
     const dx = m.targetX - m.x;
     const dy = m.targetY - m.y;
     m.angle = Math.atan2(dy, dx);
     m.currentAngle = m.angle;
+    m.facing = Math.cos(m.angle) >= 0 ? 1 : -1;
   });
 
   let lastTimestamp = 0;
@@ -137,63 +130,49 @@ function iniciarMariposas() {
     lastTimestamp = timestamp;
 
     for (const m of mariposas) {
-      // Reducir temporizador para cambio de objetivo
       m.changeTimer -= delta;
-      if (m.changeTimer <= 0) {
-        nuevoObjetivo(m);
-      }
+      if (m.changeTimer <= 0) nuevoObjetivo(m);
 
-      // Calcular dirección hacia el objetivo
       const dx = m.targetX - m.x;
       const dy = m.targetY - m.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
 
       if (dist > 0.5) {
-        // Ángulo deseado
         const targetAngle = Math.atan2(dy, dx);
-        // Interpolar suavemente el ángulo actual hacia el deseado (lerp)
         let diff = targetAngle - m.currentAngle;
-        // Normalizar a [-PI, PI]
         diff = ((diff % (2 * Math.PI)) + 3 * Math.PI) % (2 * Math.PI) - Math.PI;
-        m.currentAngle += diff * Math.min(1, 4 * delta); // velocidad de giro
+        m.currentAngle += diff * Math.min(1, 4 * delta); // giro suave
 
-        // Mover hacia el objetivo con aceleración suave
-        const speedFactor = Math.min(1, dist / 5); // más lento cerca del objetivo
+        const speedFactor = Math.min(1, dist / 5); // frena cerca del objetivo
         const moveSpeed = m.speed * speedFactor * delta * 60;
         m.x += Math.cos(m.currentAngle) * moveSpeed;
         m.y += Math.sin(m.currentAngle) * moveSpeed;
-
-        // Actualizar el ángulo visual (para la rotación del elemento)
         m.angle = m.currentAngle;
+
+        // Solo cambia de "cara" cuando el rumbo es claramente horizontal,
+        // para que no se voltee constantemente con giros pequeños.
+        if (Math.cos(m.angle) > 0.15) m.facing = 1;
+        else if (Math.cos(m.angle) < -0.15) m.facing = -1;
       }
 
-      // Aleteo: oscilación en escala Y y rotación en X
+      // Aleteo suave e independiente del rumbo (rango sutil, ya no agresivo)
       m.wingPhase += delta * m.wingSpeed;
-      const wingFlap = Math.sin(m.wingPhase);
-      // Escala en Y: 0.7 a 1.3, y un pequeño giro en X para dar profundidad
-      const scaleY = 0.75 + 0.25 * Math.sin(m.wingPhase);
-      const rotateX = 5 * Math.sin(m.wingPhase * 0.8); // grados
+      const wingScale = 0.88 + 0.12 * Math.sin(m.wingPhase);
 
-      // Aplicar transformación: traslación + rotación (hacia donde mira) + aleteo
-      const angleDeg = (m.angle * 180 / Math.PI);
-      // Invertir el escalado en Y según la dirección para que el aleteo sea asimétrico
-      const flip = Math.cos(m.angle) > 0 ? 1 : -1; // para que mire hacia la derecha
-      // La mariposa siempre mira hacia la derecha por defecto, pero la rotación la orienta
-      // Usamos scaleY y rotateX para el aleteo
+      // Inclinación limitada según si sube o baja — nada de rotación completa
+      const tiltDeg = Math.max(-14, Math.min(14, Math.sin(m.angle) * 14));
+
       m.el.style.transform = `
         translate(${m.x}vw, ${m.y}vh)
-        rotate(${angleDeg}deg)
-        scale(1, ${scaleY})
-        rotateX(${rotateX}deg)
+        rotate(${tiltDeg}deg)
+        scale(${m.facing}, ${wingScale})
       `;
-      // Ajuste de opacidad para dar sensación de profundidad
-      m.el.style.opacity = 0.6 + 0.3 * (0.5 + 0.5 * Math.sin(m.wingPhase * 0.5));
+      m.el.style.opacity = 0.65 + 0.25 * (0.5 + 0.5 * Math.sin(m.wingPhase * 0.5));
     }
 
     requestAnimationFrame(animarMariposas);
   }
 
-  // Iniciar animación
   requestAnimationFrame(animarMariposas);
 }
 
@@ -313,3 +292,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 });
+
