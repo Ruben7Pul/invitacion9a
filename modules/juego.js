@@ -1,13 +1,15 @@
 // ============================================================
-// juego.js – COMPLETO, PALETA DINÁMICA, REDIRECCIÓN AL SALIR
+// juego.js – COMPLETO Y CORREGIDO (verifica elementos, redirige al salir)
 // ============================================================
-console.log('📦 juego.js (completo, redirección al salir)');
+console.log('📦 juego.js (completo y corregido)');
 
 import { soundTap, soundBrick, soundLose, soundClose } from './sonidos.js';
 
+// ========== DETECCIÓN DE MÓVIL ==========
 const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 console.log('📱 isMobile:', isMobile);
 
+// ========== CONSTANTES ==========
 const MAX_DELTA = 0.03;
 const PADDLE_W_BASE = isMobile ? 64 : 72;
 const PADDLE_H = 12;
@@ -29,6 +31,7 @@ const MAX_LIVES = 3;
 const SCORE_PER_LIFE = 8500;
 const TOP_SCORES_COUNT = 5;
 
+// ========== TIPOS DE LADRILLOS ==========
 const BRICK_TYPES = {
   CLAY:   { value: 1, playerPoints: 100, hits: 1, color: '#d9534f', label: 'CLAY' },
   WOOD:   { value: 2, playerPoints: 200, hits: 2, color: '#8b5a2b', label: 'WOOD' },
@@ -45,6 +48,7 @@ function getCrackImageSrc(brick) {
   return null;
 }
 
+// ========== POWER-UPS ==========
 const POWERUP_PROBS = {
   CLAY: 0.06,
   WOOD: 0.12,
@@ -53,6 +57,7 @@ const POWERUP_PROBS = {
 const POWERUP_MIN_GAP_MS = isMobile ? 5000 : 3500;
 const POWERUP_PITY_GAP_MS = isMobile ? 14000 : 11000;
 
+// ========== PATRONES DE LADRILLOS ==========
 const BRICK_PATTERNS = [
   (r, c) => Math.abs(r - 2.5) + Math.abs(c - 2.5) <= 2.5,
   (r, c) => (r === 2 || r === 3) || (c === 2 || c === 3),
@@ -72,11 +77,13 @@ function buildPatternCells(predicate) {
   return cells;
 }
 
+// ========== LADRILLO DORADO Y COMBO ==========
 const GOLDEN_BRICK_CHANCE = 0.08;
 const GOLDEN_BRICK_DURATION_MS = 5000;
 const COMBO_BONUS_PER_HIT = 0.02;
 const COMBO_BONUS_CAP = 0.5;
 
+// ========== PROBABILIDAD DE POWER-UP VERDE ==========
 const GREEN_PROB_TABLE = [
   75.000, 70.3125, 65.625, 60.9375, 56.250, 51.5625, 46.875, 42.1875,
   37.500, 32.8125, 28.125, 23.4375, 18.750, 14.0625, 9.375, 4.6875, 0.000
@@ -85,6 +92,7 @@ const GREEN_PROB_TABLE = [
 const GREEN_WEIGHTS = { MULTIBOLA: 15, PALA_GRANDE: 35, DUREZA: 50 };
 const RED_WEIGHTS   = { BOLA_NIEBLA: 10, PALA_MINI: 35, FLAQUESA: 55 };
 
+// ========== PUNTUACIONES (localStorage) ==========
 function getHighScores() {
   try {
     const data = localStorage.getItem('highscores');
@@ -107,9 +115,11 @@ function isHighScore(score) {
   return score > scores[scores.length - 1].score;
 }
 
+// ========== FUNCIÓN PRINCIPAL ==========
 export function initJuego(config, mobile = false) {
-  console.log('🎮 Iniciando juego (paleta dinámica, redirección al salir)');
+  console.log('🎮 Iniciando juego (completo y corregido)');
 
+  // Fuente pixel para el marcador
   if (!document.querySelector('#pixel-font')) {
     const link = document.createElement('link');
     link.id = 'pixel-font';
@@ -118,12 +128,8 @@ export function initJuego(config, mobile = false) {
     document.head.appendChild(link);
   }
 
+  // ========== OBTENER ELEMENTOS (con verificación) ==========
   const nombreEl = document.getElementById('nombre-hero');
-  nombreEl.addEventListener('click', () => {
-    soundTap();
-    openGame();
-  });
-
   const overlay = document.getElementById('game-overlay');
   const stage = document.getElementById('game-stage');
   const inner = document.getElementById('game-inner');
@@ -155,13 +161,37 @@ export function initJuego(config, mobile = false) {
   const modalRules = document.getElementById('modal-rules');
   const rulesClose = document.getElementById('rules-close');
 
+  // ========== SI NO HAY nombreEl (página del juego) ==========
+  if (nombreEl) {
+    nombreEl.addEventListener('click', () => {
+      soundTap();
+      openGame();
+    });
+  } else {
+    // En la página del juego, abrir el menú automáticamente
+    setTimeout(() => openGame(), 100);
+  }
+
+  // Ocultar título del menú (ya hay un H2)
   const menuTitle = menuEl?.querySelector('h2');
   if (menuTitle) menuTitle.style.display = 'none';
 
+  // Estilos de la paleta (se aplicarán en draw())
+  paddleEl.style.background = '#111';
+  paddleEl.style.border = '2px solid #d4af37';
+  paddleEl.style.boxShadow = '0 0 25px rgba(212,175,55,0.3)';
+  paddleEl.style.borderRadius = '8px';
+  paddleEl.style.height = PADDLE_H + 'px';
+  paddleEl.style.willChange = 'transform';
+  paddleEl.style.zIndex = '100';
+  paddleEl.style.pointerEvents = 'none';
+
+  // Estilos de vidas y puntuación
   livesEl.style.fontFamily = "'Press Start 2P', monospace";
   livesEl.style.fontSize = '1.2rem';
   livesEl.style.letterSpacing = '0.1em';
   livesEl.style.display = 'none';
+
   scoreEl.style.fontFamily = "'Press Start 2P', monospace";
   scoreEl.style.fontSize = '0.9rem';
   scoreEl.style.background = 'linear-gradient(90deg, #ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #8800ff)';
@@ -171,9 +201,11 @@ export function initJuego(config, mobile = false) {
   scoreEl.style.backgroundClip = 'text';
   scoreEl.style.color = 'transparent';
   scoreEl.style.display = 'none';
+
   pauseBtn.style.display = 'none';
   menuBtn.style.display = 'none';
 
+  // Asegurar animación de rainbowScore
   if (!document.querySelector('#rainbow-score')) {
     const style2 = document.createElement('style');
     style2.id = 'rainbow-score';
@@ -186,6 +218,7 @@ export function initJuego(config, mobile = false) {
     document.head.appendChild(style2);
   }
 
+  // ========== NIEBLA (overlay) ==========
   const nieblaEl = document.createElement('div');
   nieblaEl.id = 'niebla-overlay';
   nieblaEl.style.cssText = `
@@ -331,12 +364,14 @@ export function initJuego(config, mobile = false) {
     }
   }
 
+  // ========== EVENTOS DEL MENÚ ==========
   menuPlay.addEventListener('click', (e) => {
     e.stopPropagation();
     soundTap();
     hideMenu();
     startGame();
   });
+
   menuScores.addEventListener('click', (e) => {
     e.stopPropagation();
     soundTap();
@@ -344,6 +379,7 @@ export function initJuego(config, mobile = false) {
     menuContent.style.display = 'none';
     menuScoresList.style.display = 'block';
   });
+
   menuScoresBack.addEventListener('click', (e) => {
     e.stopPropagation();
     soundTap();
@@ -355,7 +391,6 @@ export function initJuego(config, mobile = false) {
   menuExit.addEventListener('click', (e) => {
     e.stopPropagation();
     soundTap();
-    // Redirigir a la página principal
     window.location.href = 'index.html';
   });
 
@@ -364,9 +399,11 @@ export function initJuego(config, mobile = false) {
     soundTap();
     if (modalRules) modalRules.classList.add('open');
   });
+
   rulesClose.addEventListener('click', () => {
     if (modalRules) modalRules.classList.remove('open');
   });
+
   if (menuResetTops) {
     menuResetTops.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -939,7 +976,7 @@ export function initJuego(config, mobile = false) {
         }
         case 'PALA_GRANDE':
           if (paddleSizeMultiplier < 1) paddleSizeMultiplier = 1;
-          paddleSizeMultiplier = 1.3;
+          paddleSizeMultiplier = 1.35;
           break;
         case 'DUREZA':
           if (ballDurability < 3) ballDurability++;
@@ -1620,5 +1657,5 @@ export function initJuego(config, mobile = false) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego inicializado (paleta dinámica, redirección al salir)');
+  console.log('✅ Juego inicializado (completo y corregido)');
 }
