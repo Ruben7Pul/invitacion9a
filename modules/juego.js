@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – OPTIMIZADO, SIN PARTÍCULAS, PALETA NEGRA
+// juego.js – COMPLETO, PALETA NEGRA, SIN PARTÍCULAS
 // ============================================================
-console.log('📦 juego.js (sin partículas, paleta negra)');
+console.log('📦 juego.js (paleta negra visible)');
 
 import { soundTap, soundBrick, soundLose, soundClose } from './sonidos.js';
 
@@ -112,7 +112,7 @@ function isHighScore(score) {
 
 // ========== EXPORT PRINCIPAL ==========
 export function initJuego(config, mobile = false) {
-  console.log('🎮 Iniciando juego (sin partículas, paleta negra)');
+  console.log('🎮 Iniciando juego (paleta negra visible)');
 
   if (!document.querySelector('#pixel-font')) {
     const link = document.createElement('link');
@@ -162,21 +162,22 @@ export function initJuego(config, mobile = false) {
   const menuTitle = menuEl?.querySelector('h2');
   if (menuTitle) menuTitle.style.display = 'none';
 
-  // ========== PALETA NEGRA (sin animación, visible) ==========
-  paddleEl.style.cssText = `
-    background: #111;
-    border: 2px solid #fff;
-    border-radius: 6px;
-    box-shadow: 0 0 12px rgba(255,255,255,0.2);
-    height: ${PADDLE_H}px;
-    width: ${PADDLE_W_BASE}px;
-    position: absolute;
-    top: ${STAGE_H - 14}px;
-    left: 0;
-    will-change: transform;
-  `;
-  // Eliminamos cualquier estilo previo que pudiera tener
+  // ========== PALETA NEGRA (NO SOBREESCRIBIR estilo.css) ==========
+  // Configuramos solo las propiedades que faltan, sin usar .cssText
+  paddleEl.style.background = '#111';
+  paddleEl.style.border = '2px solid #fff';
+  paddleEl.style.boxShadow = '0 0 15px rgba(255,255,255,0.3)';
+  paddleEl.style.borderRadius = '6px';
+  paddleEl.style.height = PADDLE_H + 'px';
+  paddleEl.style.width = PADDLE_W_BASE + 'px';
+  paddleEl.style.position = 'absolute';
+  paddleEl.style.top = (STAGE_H - 14) + 'px';
+  paddleEl.style.left = '0';
+  paddleEl.style.willChange = 'transform';
+  paddleEl.style.zIndex = '10';
+  // No tocamos display, ni otras propiedades que ya vienen del CSS
 
+  // Estilos de lives y score
   livesEl.style.fontFamily = "'Press Start 2P', monospace";
   livesEl.style.fontSize = '1.2rem';
   livesEl.style.letterSpacing = '0.1em';
@@ -1514,7 +1515,6 @@ export function initJuego(config, mobile = false) {
   function openGame() {
     cleanGameState();
     overlay.classList.add('open');
-    // No hay partículas que pausar
     gameIsOpen = true;
     showMenu(false);
     layoutStage();
@@ -1540,9 +1540,7 @@ export function initJuego(config, mobile = false) {
     overlay.classList.remove('open');
     cleanGameState();
 
-    // No hay partículas que reanudar
     gameIsOpen = false;
-
     soundClose();
     console.log('🧹 Juego cerrado y limpiado');
   }
@@ -1621,5 +1619,5 @@ export function initJuego(config, mobile = false) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego inicializado (sin partículas, paleta negra)');
+  console.log('✅ Juego inicializado (paleta negra visible)');
 }
