@@ -70,9 +70,30 @@ function rellenarDatos(config) {
   if (ogDesc) ogDesc.content = `Te invitamos a celebrar los 15 años de ${config.nombre}. ¡No faltes!`;
 }
 
+// ---- MARIPOSAS ----
+function iniciarMariposas() {
+  const mariposas = ['🦋', '🦋', '🦋', '🦋', '🦋', '🦋'];
+  const container = document.body;
+  mariposas.forEach((emoji, i) => {
+    const el = document.createElement('div');
+    el.className = 'mariposa';
+    el.textContent = emoji;
+    const x = Math.random() * 90;
+    const y = Math.random() * 90;
+    el.style.left = x + 'vw';
+    el.style.top = y + 'vh';
+    el.style.animationDelay = (i * 1.2) + 's';
+    el.style.animationDuration = (10 + Math.random() * 8) + 's';
+    container.appendChild(el);
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const config = await cargarConfig();
   rellenarDatos(config);
+
+  // Mariposas
+  iniciarMariposas();
 
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
@@ -124,6 +145,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   const gateWrapper = document.getElementById('gate-wrapper');
   const app = document.getElementById('app');
   const backBtn = document.getElementById('back-link');
+  const caption = document.querySelector('.portal-caption');
+
+  // Inicialmente: reja bloqueada y caption oculto
+  gateWrapper.classList.remove('active');
+  caption.classList.remove('show');
+
+  // Tras 2 segundos: mostrar mensaje y activar reja
+  setTimeout(() => {
+    caption.classList.add('show');
+    gateWrapper.classList.add('active');
+  }, 2000);
 
   function abrirReja() {
     console.log('🔄 Abriendo la reja');
@@ -144,6 +176,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     setTimeout(() => {
       portal.classList.remove('closing');
     }, 700);
+    // Al volver, ocultar caption y desactivar reja, luego esperar 2s
+    caption.classList.remove('show');
+    gateWrapper.classList.remove('active');
+    setTimeout(() => {
+      caption.classList.add('show');
+      gateWrapper.classList.add('active');
+    }, 2000);
   }
 
   if (gateWrapper) {
