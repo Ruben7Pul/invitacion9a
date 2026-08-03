@@ -1,6 +1,4 @@
-console.log('🚀 script-principal.js (carga perezosa del juego en iframe)');
-
-const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
+console.log('🚀 script-principal.js');
 
 async function cargarConfig() {
   try {
@@ -87,12 +85,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.resetMusic = resetMusic;
   } catch (e) { console.error('❌ Música:', e); }
 
-  // Cargar pétalos (optimizados)
-  try {
-    const { initParticulas } = await import('./modules/particulas.js');
-    initParticulas(isMobile);
-  } catch (e) { console.error('❌ Partículas:', e); }
-
   let appIniciada = false;
   async function iniciarApp() {
     if (appIniciada) return;
@@ -117,31 +109,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // ========== CARGA PEREZOSA DEL JUEGO EN IFRAME ==========
-  let juegoCargado = false;
+  // ========== IR AL JUEGO (navegación real, cambia la URL) ==========
   const nombreEl = document.getElementById('nombre-hero');
-  nombreEl.addEventListener('click', async () => {
-    if (juegoCargado) return;
-    juegoCargado = true;
-    
-    // Crear y mostrar iframe con el juego
-    let gameIframe = document.getElementById('game-iframe');
-    if (!gameIframe) {
-      gameIframe = document.createElement('iframe');
-      gameIframe.id = 'game-iframe';
-      gameIframe.src = 'juegos1.html';
-      gameIframe.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 1000;
-        border: none;
-        background: #0a0a0a;
-      `;
-      document.body.appendChild(gameIframe);
-    }
+  nombreEl.addEventListener('click', () => {
+    window.location.href = 'juegos1.html';
   });
 
   // ========== REJA ==========
