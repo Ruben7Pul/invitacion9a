@@ -1,15 +1,13 @@
 // ============================================================
-// juego.js – COMPLETO, PALETA NEGRA VISIBLE, SIN PARTÍCULAS
+// juego.js – COMPLETO, CORREGIDO (paleta, tamaño, límites)
 // ============================================================
-console.log('📦 juego.js (completo, paleta negra)');
+console.log('📦 juego.js (paleta corregida, tamaño dinámico)');
 
 import { soundTap, soundBrick, soundLose, soundClose } from './sonidos.js';
 
-// ========== DETECCIÓN DE MÓVIL ==========
 const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 console.log('📱 isMobile:', isMobile);
 
-// ========== CONSTANTES ==========
 const MAX_DELTA = 0.03;
 const PADDLE_W_BASE = isMobile ? 64 : 72;
 const PADDLE_H = 12;
@@ -87,7 +85,6 @@ const GREEN_PROB_TABLE = [
 const GREEN_WEIGHTS = { MULTIBOLA: 15, PALA_GRANDE: 35, DUREZA: 50 };
 const RED_WEIGHTS   = { BOLA_NIEBLA: 10, PALA_MINI: 35, FLAQUESA: 55 };
 
-// ========== PUNTUACIONES ==========
 function getHighScores() {
   try {
     const data = localStorage.getItem('highscores');
@@ -110,9 +107,8 @@ function isHighScore(score) {
   return score > scores[scores.length - 1].score;
 }
 
-// ========== EXPORT PRINCIPAL ==========
 export function initJuego(config, mobile = false) {
-  console.log('🎮 Iniciando juego (paleta negra visible)');
+  console.log('🎮 Iniciando juego (paleta corregida)');
 
   if (!document.querySelector('#pixel-font')) {
     const link = document.createElement('link');
@@ -162,23 +158,21 @@ export function initJuego(config, mobile = false) {
   const menuTitle = menuEl?.querySelector('h2');
   if (menuTitle) menuTitle.style.display = 'none';
 
-  // ========== FORZAR PALETA NEGRA DESDE EL PRINCIPIO ==========
+  // Estilos básicos para la paleta (se sobrescribirán en draw)
   paddleEl.style.background = '#111';
   paddleEl.style.border = '3px solid #fff';
   paddleEl.style.boxShadow = '0 0 25px rgba(255,255,255,0.6)';
   paddleEl.style.borderRadius = '8px';
   paddleEl.style.height = PADDLE_H + 'px';
-  paddleEl.style.width = PADDLE_W_BASE + 'px';
   paddleEl.style.position = 'absolute';
   paddleEl.style.top = (STAGE_H - 14) + 'px';
   paddleEl.style.left = '0';
   paddleEl.style.willChange = 'transform';
-  paddleEl.style.zIndex = '100';
+  paddleEl.style.zIndex = '10';
   paddleEl.style.display = 'block';
   paddleEl.style.visibility = 'visible';
   paddleEl.style.opacity = '1';
 
-  // ========== ESTILOS DE UI ==========
   livesEl.style.fontFamily = "'Press Start 2P', monospace";
   livesEl.style.fontSize = '1.2rem';
   livesEl.style.letterSpacing = '0.1em';
@@ -288,7 +282,6 @@ export function initJuego(config, mobile = false) {
 
   // ========== FUNCIONES DEL MENÚ ==========
   function showMenu(showGameOver = false, score = 0) {
-    // Oculta visualmente, pero no con display: none
     paddleEl.style.visibility = 'hidden';
     document.querySelectorAll('.ball-dynamic').forEach(el => el.style.visibility = 'hidden');
     document.getElementById('ball').style.visibility = 'hidden';
@@ -353,11 +346,14 @@ export function initJuego(config, mobile = false) {
     }
   }
 
-  // Eventos del menú
   menuPlay.addEventListener('click', (e) => {
     e.stopPropagation();
     soundTap();
     hideMenu();
+    // Mostrar paleta y bolas
+    paddleEl.style.visibility = 'visible';
+    document.querySelectorAll('.ball-dynamic').forEach(el => el.style.visibility = 'visible');
+    document.getElementById('ball').style.visibility = 'visible';
     startGame();
   });
   menuScores.addEventListener('click', (e) => {
@@ -1204,9 +1200,6 @@ export function initJuego(config, mobile = false) {
     scoreEl.style.display = 'block';
     pauseBtn.style.display = 'block';
     menuBtn.style.display = 'block';
-    // Forzar paleta visible
-    paddleEl.style.visibility = 'visible';
-    paddleEl.style.display = 'block';
     updateUI();
     updateDurabilityVisual();
     draw();
@@ -1278,12 +1271,15 @@ export function initJuego(config, mobile = false) {
     nieblaEl.style.opacity = boundary > 0 ? 1 : 0;
   }
 
-  // ========== DRAW – PALETA FORZADA ==========
+  // ========== FUNCIÓN DRAW CORREGIDA ==========
   function draw() {
-    paddleWidth = PADDLE_W_BASE * paddleSizeMultiplier;
-    // Forzar visibilidad y estilo de la paleta
-    paddleEl.style.visibility = 'visible';
+    // Calcular el ancho actual de la paleta
+    const currentWidth = PADDLE_W_BASE * paddleSizeMultiplier;
+    paddleWidth = currentWidth;
+
+    // Aplicar estilos y posición
     paddleEl.style.display = 'block';
+    paddleEl.style.visibility = 'visible';
     paddleEl.style.opacity = '1';
     paddleEl.style.width = paddleWidth + 'px';
     paddleEl.style.transform = 'translateX(' + paddle.x + 'px)';
@@ -1293,6 +1289,7 @@ export function initJuego(config, mobile = false) {
     paddleEl.style.border = '3px solid #fff';
     paddleEl.style.boxShadow = '0 0 25px rgba(255,255,255,0.6)';
 
+    // Actualizar bolas
     let ballElements = inner.querySelectorAll('.ball-dynamic');
     while (ballElements.length < balls.length) {
       const el = document.createElement('div');
@@ -1318,13 +1315,14 @@ export function initJuego(config, mobile = false) {
       el.style.top = balls[i].y + 'px';
     }
 
+    // Actualizar power-ups
     for (const pu of powerups) {
       pu.el.style.left = pu.x + 'px';
       pu.el.style.top = pu.y + 'px';
     }
   }
 
-  // ========== GAME LOOP ==========
+  // ========== BUCLE PRINCIPAL ==========
   function gameLoop(timestamp) {
     if (!running) {
       animFrameId = requestAnimationFrame(gameLoop);
@@ -1345,12 +1343,22 @@ export function initJuego(config, mobile = false) {
     }
 
     let paddleMoved = false;
-    if (keys.left) { paddle.x = Math.max(0, paddle.x - PADDLE_SPEED * delta); paddleMoved = true; }
-    if (keys.right) { paddle.x = Math.min(STAGE_W - paddleWidth, paddle.x + PADDLE_SPEED * delta); paddleMoved = true; }
+    // Movimiento con teclado
+    if (keys.left) {
+      paddle.x = Math.max(0, paddle.x - PADDLE_SPEED * delta);
+      paddleMoved = true;
+    }
+    if (keys.right) {
+      paddle.x = Math.min(STAGE_W - paddleWidth, paddle.x + PADDLE_SPEED * delta);
+      paddleMoved = true;
+    }
+    // Movimiento táctil
     if (touchActive) {
+      // touchX ya es la posición izquierda de la paleta (se calcula restando paddleWidth/2)
       paddle.x = Math.max(0, Math.min(STAGE_W - paddleWidth, touchX));
       paddleMoved = true;
     }
+    // Movimiento con ratón
     if (mouseActive) {
       paddle.x = Math.max(0, Math.min(STAGE_W - paddleWidth, mouseX));
       paddleMoved = true;
@@ -1368,15 +1376,18 @@ export function initJuego(config, mobile = false) {
       return;
     }
 
+    // Actualizar bolas
     for (let i = balls.length - 1; i >= 0; i--) {
       const b = balls[i];
       b.x += b.vx * delta;
       b.y += b.vy * delta;
 
+      // Rebotes en paredes
       if (b.x - BALL_R < 0) { b.x = BALL_R; b.vx = Math.abs(b.vx); }
       if (b.x + BALL_R > STAGE_W) { b.x = STAGE_W - BALL_R; b.vx = -Math.abs(b.vx); }
       if (b.y - BALL_R < 0) { b.y = BALL_R; b.vy = Math.abs(b.vy); }
 
+      // Colisión con paleta
       const py = STAGE_H - 14;
       if (b.vy > 0 && b.y + BALL_R >= py && b.y + BALL_R <= py + 10 &&
           b.x >= paddle.x - BALL_R && b.x <= paddle.x + paddleWidth + BALL_R) {
@@ -1390,11 +1401,11 @@ export function initJuego(config, mobile = false) {
         comboCount = 0;
       }
 
+      // Colisión con ladrillos
       for (const br of bricks) {
         if (!br.alive) continue;
         if (b.x + BALL_R > br.x && b.x - BALL_R < br.x + br.w &&
             b.y + BALL_R > br.y && b.y - BALL_R < br.y + br.h) {
-
           const overlapX = Math.min(b.x + BALL_R - br.x, br.x + br.w - (b.x - BALL_R));
           const overlapY = Math.min(b.y + BALL_R - br.y, br.y + br.h - (b.y - BALL_R));
           if (overlapX < overlapY) {
@@ -1406,7 +1417,6 @@ export function initJuego(config, mobile = false) {
             else b.y = br.y + br.h + BALL_R;
             b.vy = -b.vy;
           }
-
           const damage = ballDurability;
           br.hits -= damage;
           soundBrick();
@@ -1444,6 +1454,7 @@ export function initJuego(config, mobile = false) {
       }
     }
 
+    // Actualizar power-ups
     for (let i = powerups.length - 1; i >= 0; i--) {
       const pu = powerups[i];
       pu.y += pu.vy * delta;
@@ -1554,7 +1565,6 @@ export function initJuego(config, mobile = false) {
     pauseBtn.textContent = '⏸️';
     overlay.classList.remove('open');
     cleanGameState();
-
     gameIsOpen = false;
     soundClose();
     console.log('🧹 Juego cerrado y limpiado');
@@ -1578,6 +1588,7 @@ export function initJuego(config, mobile = false) {
     if (!running || paused || gameOver) return;
     const rect = stage.getBoundingClientRect();
     const localX = (e.clientX - rect.left) / scale;
+    // Restamos paddleWidth/2 para que el ratón controle el centro de la paleta
     mouseX = Math.min(Math.max(localX - paddleWidth / 2, 0), STAGE_W - paddleWidth);
     mouseActive = true;
     if (!launched) launchBall();
@@ -1613,6 +1624,7 @@ export function initJuego(config, mobile = false) {
     if (touch) {
       const rect = stage.getBoundingClientRect();
       const localX = (touch.clientX - rect.left) / scale;
+      // Restamos paddleWidth/2 para que el dedo controle el centro
       touchX = Math.min(Math.max(localX - paddleWidth / 2, 0), STAGE_W - paddleWidth);
       touchActive = true;
       if (!launched) launchBall();
@@ -1634,5 +1646,5 @@ export function initJuego(config, mobile = false) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego inicializado (paleta negra visible)');
+  console.log('✅ Juego inicializado (paleta corregida, tamaño dinámico)');
 }
