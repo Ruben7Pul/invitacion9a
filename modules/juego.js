@@ -161,7 +161,7 @@ export function initJuego(config) {
   }
 
   const nombreEl = document.getElementById('nombre-hero');
-  nombreEl?.addEventListener('click', () => {
+  nombreEl.addEventListener('click', () => {
     soundTap();
     openGame();
   });
