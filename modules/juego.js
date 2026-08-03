@@ -1626,3 +1626,5 @@ export function initJuego(config, mobile = false) {
   console.log('✅ Juego inicializado (paleta 35%, borde dorado)');
 }
 
+
+
