@@ -1,4 +1,4 @@
-console.log('🚀 script 1b.js (sin mariposas)');
+console.log('🚀 script hol.js (sin mariposas)');
 
 async function cargarConfig() {
   try {
@@ -185,3 +185,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 });
+
