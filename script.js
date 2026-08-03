@@ -1,6 +1,8 @@
-console.log('🚀 script.js (con stopPropagation en reja)');
+console.log('🚀 script.js (invitación sin juego)');
 
-const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
+const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+let configGlobal = null;
 
 async function cargarConfig() {
   try {
@@ -68,53 +70,67 @@ function rellenarDatos(config) {
   if (ogDesc) ogDesc.content = `Te invitamos a celebrar los 15 años de ${config.nombre}. ¡No faltes!`;
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  const config = await cargarConfig();
-  rellenarDatos(config);
+// ========== CARGA PEREZOSA DE MÓDULOS ==========
+let sonidosCargados = false;
+let musicaCargada = false;
+let contadorCargado = false;
+let modalCargado = false;
 
-  // Sonidos
+async function cargarSonidos() {
+  if (sonidosCargados) return;
+  sonidosCargados = true;
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
     initSonidos();
+    console.log('🔊 Sonidos cargados');
   } catch (e) { console.error('❌ Sonidos:', e); }
+}
 
-  // Música
+async function cargarMusica() {
+  if (musicaCargada) return;
+  musicaCargada = true;
   try {
     const { initMusica, playMusic, toggleMusic, resetMusic } = await import('./modules/musica.js');
-    initMusica(config);
+    initMusica(configGlobal);
     window.playMusic = playMusic;
     window.toggleMusic = toggleMusic;
     window.resetMusic = resetMusic;
-  } catch (e) { console.error('❌ Música:', e); }
-
-  let appIniciada = false;
-  async function iniciarApp() {
-    if (appIniciada) return;
-    appIniciada = true;
-
-    try {
-      const { initContador } = await import('./modules/contador.js');
-      initContador(config);
-    } catch (e) { console.error('❌ Contador:', e); }
-
-    try {
-      const { initModal } = await import('./modules/modal.js');
-      initModal();
-    } catch (e) { console.error('❌ Modal:', e); }
-
-    try {
-      const { initJuego } = await import('./modules/juego.js');
-      initJuego(config, isMobile);
-    } catch (e) { console.error('❌ Juego:', e); }
-
+    console.log('🎵 Música cargada');
     const muteBtn = document.getElementById('music-toggle');
     if (muteBtn) {
       muteBtn.addEventListener('click', () => {
         if (window.toggleMusic) window.toggleMusic();
       });
     }
-  }
+  } catch (e) { console.error('❌ Música:', e); }
+}
 
+async function cargarContador() {
+  if (contadorCargado) return;
+  contadorCargado = true;
+  try {
+    const { initContador } = await import('./modules/contador.js');
+    initContador(configGlobal);
+    console.log('⏳ Contador cargado');
+  } catch (e) { console.error('❌ Contador:', e); }
+}
+
+async function cargarModal() {
+  if (modalCargado) return;
+  modalCargado = true;
+  try {
+    const { initModal } = await import('./modules/modal.js');
+    initModal();
+    console.log('📋 Modales cargados');
+  } catch (e) { console.error('❌ Modal:', e); }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const config = await cargarConfig();
+  configGlobal = config;
+  rellenarDatos(config);
+
+  // REJA
   const portal = document.getElementById('portal');
   const gateWrapper = document.getElementById('gate-wrapper');
   const app = document.getElementById('app');
@@ -130,11 +146,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   }, 2000);
 
   function abrirReja(e) {
-    if (e) e.stopPropagation(); // Evita propagación accidental
+    if (e) e.stopPropagation();
     gateWrapper.classList.add('open');
     portal.classList.add('hide');
     app.classList.add('show');
-    iniciarApp();
+    cargarMusica();
+    cargarSonidos();
     if (window.playMusic) window.playMusic();
   }
 
@@ -161,4 +178,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirReja(e); }
   });
   backBtn.addEventListener('click', cerrarReja);
+
+  // Carga perezosa de contador y modales
+  document.querySelector('[data-modal="modal-contador"]')?.addEventListener('click', () => {
+    cargarContador();
+    cargarModal();
+  });
+  document.querySelector('[data-modal="modal-detalles"]')?.addEventListener('click', cargarModal);
+  document.querySelector('[data-modal="modal-familia"]')?.addEventListener('click', cargarModal);
+
+  // ABRIR JUEGO EN NUEVA PESTAÑA
+  const nombreEl = document.getElementById('nombre-hero');
+  nombreEl.addEventListener('click', () => {
+    const win = window.open('juegos1.html', '_blank', 'width=500,height=700,menubar=no,toolbar=no,location=no,status=no');
+    if (!win || win.closed) {
+      window.location.href = 'juegos1.html';
+    }
+  });
 });
