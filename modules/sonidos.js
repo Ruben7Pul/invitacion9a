@@ -1,6 +1,7 @@
-console.log('📦 sonidos (con sonidos por material)');
+console.log('📦 sonidos optimizados (buffers)');
 
 let audioCtx = null;
+let soundBuffers = {};
 let soundEnabled = true;
 
 export function ensureAudioCtx() {
@@ -8,55 +9,88 @@ export function ensureAudioCtx() {
     if (!audioCtx) {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
-    if (audioCtx.state === 'suspended') {
-      audioCtx.resume();
-    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
     return audioCtx;
   } catch (e) {
-    console.warn('⚠️ Web Audio no soportado, sonidos desactivados');
     soundEnabled = false;
     return null;
   }
 }
 
-function chime(freqs, dur) {
+function createSoundBuffer(ctx, freqs, dur) {
+  const sampleRate = ctx.sampleRate;
+  const length = Math.floor(sampleRate * dur * 1.5);
+  const buffer = ctx.createBuffer(1, length, sampleRate);
+  const data = buffer.getChannelData(0);
+  const totalFreqs = freqs.length;
+  for (let i = 0; i < length; i++) {
+    let t = i / sampleRate;
+    let value = 0;
+    for (let f = 0; f < totalFreqs; f++) {
+      const freq = freqs[f];
+      const startDelay = f * 0.04;
+      if (t >= startDelay) {
+        const envelope = Math.exp(-6 * (t - startDelay) / dur) * 0.3;
+        value += Math.sin(2 * Math.PI * freq * (t - startDelay)) * envelope;
+      }
+    }
+    data[i] = value / totalFreqs;
+  }
+  return buffer;
+}
+
+function preloadSounds() {
+  const ctx = ensureAudioCtx();
+  if (!ctx) return;
+  const soundDefs = {
+    tap: { freqs: [1046, 1568], dur: 0.25 },
+    brick: { freqs: [1200 + Math.random()*400], dur: 0.15 },
+    lose: { freqs: [392, 330], dur: 0.4 },
+    open: { freqs: [880, 1318, 1760], dur: 0.4 },
+    close: { freqs: [1318, 880], dur: 0.3 },
+    win: { freqs: [784, 988, 1175, 1568], dur: 0.6 },
+    clay: { freqs: [600, 800], dur: 0.15 },
+    wood: { freqs: [400, 500, 300], dur: 0.25 },
+    iron: { freqs: [200, 250, 300, 350], dur: 0.3 }
+  };
+  for (const [name, def] of Object.entries(soundDefs)) {
+    soundBuffers[name] = createSoundBuffer(ctx, def.freqs, def.dur);
+  }
+}
+
+function playSound(name) {
   if (!soundEnabled) return;
   try {
     const ctx = ensureAudioCtx();
     if (!ctx) return;
-    const now = ctx.currentTime;
-    freqs.forEach((f, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = f;
-      gain.gain.setValueAtTime(0, now + i * 0.04);
-      gain.gain.linearRampToValueAtTime(0.03, now + i * 0.04 + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.04 + dur);
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(now + i * 0.04);
-      osc.stop(now + i * 0.04 + dur + 0.05);
-    });
+    const buffer = soundBuffers[name];
+    if (!buffer) return;
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gain = ctx.createGain();
+    gain.gain.value = 0.5;
+    source.connect(gain).connect(ctx.destination);
+    source.start();
   } catch (e) {
     soundEnabled = false;
-    console.warn('🔇 Sonidos desactivados por error');
   }
 }
 
-// Sonidos específicos
-export const soundClay = () => chime([600, 800], 0.15);
-export const soundWood = () => chime([400, 500, 300], 0.25);
-export const soundIron = () => chime([200, 250, 300, 350], 0.3);
-
-// Sonidos genéricos
-export const soundOpen = () => chime([880, 1318, 1760], 0.4);
-export const soundClose = () => chime([1318, 880], 0.3);
-export const soundTap = () => chime([1046, 1568], 0.25);
-export const soundBrick = () => chime([1200 + Math.random()*400], 0.15);
-export const soundWin = () => chime([784, 988, 1175, 1568], 0.6);
-export const soundLose = () => chime([392, 330], 0.4);
+export const soundTap = () => playSound('tap');
+export const soundBrick = () => playSound('brick');
+export const soundLose = () => playSound('lose');
+export const soundOpen = () => playSound('open');
+export const soundClose = () => playSound('close');
+export const soundWin = () => playSound('win');
+export const soundClay = () => playSound('clay');
+export const soundWood = () => playSound('wood');
+export const soundIron = () => playSound('iron');
 
 export function initSonidos() {
-  console.log('🔊 Sonidos listos (se activarán al hacer clic)');
-  document.addEventListener('click', () => ensureAudioCtx(), { once: true });
+  document.addEventListener('click', () => {
+    const ctx = ensureAudioCtx();
+    if (ctx && Object.keys(soundBuffers).length === 0) {
+      preloadSounds();
+    }
+  }, { once: true });
 }
