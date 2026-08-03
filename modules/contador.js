@@ -4,8 +4,8 @@ export function initContador(config) {
   console.log('🕒 Iniciando contador con fecha:', config.fechaISO);
   const target = new Date(config.fechaISO).getTime();
   if (isNaN(target)) {
-    console.error('❌ Fecha inválida en config.json:', config.fechaISO);
-    document.getElementById('clock').innerHTML = '<p style="color:#ff9999;">Error: fecha inválida en la configuración.</p>';
+    console.error('❌ Fecha inválida');
+    document.getElementById('clock').innerHTML = '<p style="color:#ff9999;">Error: fecha inválida.</p>';
     return;
   }
 
@@ -22,9 +22,8 @@ export function initContador(config) {
     const diff = target - Date.now();
     if (diff <= 0) {
       clockEl.style.display = 'none';
-      doneEl.style.display = 'block';
+      if (doneEl) doneEl.style.display = 'block';
       clearInterval(timer);
-      console.log('🎉 Contador finalizado');
       return;
     }
     els.d.textContent = String(Math.floor(diff / 86400000)).padStart(2, '0');
@@ -34,5 +33,4 @@ export function initContador(config) {
   }
   tick();
   const timer = setInterval(tick, 1000);
-  console.log('✅ Contador iniciado con fecha:', new Date(target).toLocaleString());
 }
