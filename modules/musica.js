@@ -1,10 +1,9 @@
-console.log('📦 música con icono dinámico');
+console.log('📦 música');
 
 let audio = null;
 let config = null;
 const muteBtn = document.getElementById('music-toggle');
 
-// Iconos SVG
 const iconSound = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
   <path d="M4 9 L4 15 L8 15 L13 20 L13 4 L8 9 Z"/>
   <path d="M16.5 8.5 a6 6 0 0 1 0 7"/>
@@ -23,11 +22,8 @@ export function initMusica(cfg) {
   audio.loop = true;
   audio.volume = 0.8;
   audio.addEventListener('error', (e) => {
-    console.warn('⚠️ Error al cargar el audio:', e);
-    if (muteBtn) {
-      muteBtn.style.opacity = '0.3';
-      muteBtn.title = 'Error al cargar la música';
-    }
+    console.warn('⚠️ Error audio:', e);
+    if (muteBtn) { muteBtn.style.opacity = '0.3'; muteBtn.title = 'Error'; }
   });
   audio.load();
   if (muteBtn) {
@@ -35,7 +31,6 @@ export function initMusica(cfg) {
     muteBtn.innerHTML = iconSound;
     muteBtn.title = 'Silenciar música';
   }
-  console.log('🎵 Audio cargado:', config.audioFile);
 }
 
 export function playMusic() {
@@ -43,7 +38,6 @@ export function playMusic() {
   if (!audio.paused) return;
   audio.play().catch(() => {});
   if (muteBtn) {
-    muteBtn.style.opacity = '1';
     muteBtn.innerHTML = iconSound;
     muteBtn.title = 'Silenciar música';
   }
@@ -54,11 +48,9 @@ export function resetMusic() {
   audio.pause();
   audio.currentTime = 0;
   if (muteBtn) {
-    muteBtn.style.opacity = '1';
     muteBtn.innerHTML = iconSound;
     muteBtn.title = 'Silenciar música';
   }
-  console.log('⏹️ Música reiniciada y pausada');
 }
 
 export function toggleMusic() {
@@ -66,14 +58,12 @@ export function toggleMusic() {
   if (audio.paused) {
     audio.play().catch(() => {});
     if (muteBtn) {
-      muteBtn.style.opacity = '1';
       muteBtn.innerHTML = iconSound;
       muteBtn.title = 'Silenciar música';
     }
   } else {
     audio.pause();
     if (muteBtn) {
-      muteBtn.style.opacity = '0.5';
       muteBtn.innerHTML = iconMute;
       muteBtn.title = 'Activar música';
     }
