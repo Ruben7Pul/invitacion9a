@@ -31,7 +31,7 @@ html, body {
   100% { background-position:300% 50%; }
 }
 
-/* GAME OVERLAY (siempre visible en esta página) */
+/* GAME OVERLAY */
 #game-overlay {
   position:fixed;
   inset:0;
@@ -40,13 +40,27 @@ html, body {
   display:flex;
   align-items:center;
   justify-content:center;
+  opacity:0;
+  visibility:hidden;
+  transition:opacity 0.3s ease, visibility 0.3s ease;
+}
+#game-overlay.open {
+  opacity:1;
+  visibility:visible;
 }
 #game-panel {
   display:flex;
   flex-direction:column;
   align-items:center;
   gap:0.5rem;
+  transform:scale(0.9);
+  opacity:0;
+  transition:transform 0.3s ease, opacity 0.3s ease;
   max-width:96vw;
+}
+#game-overlay.open #game-panel {
+  transform:scale(1);
+  opacity:1;
 }
 #game-header {
   display:flex;
@@ -203,26 +217,24 @@ html, body {
 /* BOTONES DEL JUEGO */
 .game-btn {
   font-family:'Cinzel',serif;
-  font-size:clamp(0.9rem,2.2vw,1.2rem);
+  font-size:clamp(0.8rem,2vw,1rem);
   letter-spacing:0.14em;
   text-transform:uppercase;
   color:#f0d9a3;
-  background:rgba(201,162,77,0.2);
-  border:2px solid rgba(201,162,77,0.6);
-  padding:0.6rem 1.8rem;
+  background:rgba(201,162,77,0.15);
+  border:1.5px solid rgba(201,162,77,0.4);
+  padding:0.5rem 1.2rem;
   border-radius:30px;
   cursor:pointer;
   transition:all 0.3s ease;
-  box-shadow:0 0 20px rgba(212,175,55,0.2);
-  text-shadow:0 0 10px rgba(201,162,77,0.3);
+  box-shadow:0 0 15px rgba(212,175,55,0.15);
+  text-shadow:0 0 8px rgba(201,162,77,0.2);
   backdrop-filter:blur(4px);
-  min-width:180px;
-  background:#1a1a2e;
 }
 .game-btn:hover {
-  background:rgba(201,162,77,0.35);
-  border-color:#fae3a0;
-  box-shadow:0 0 30px rgba(212,175,55,0.5);
+  background:rgba(201,162,77,0.25);
+  border-color:rgba(201,162,77,0.6);
+  box-shadow:0 0 25px rgba(212,175,55,0.35);
   transform:translateY(-2px);
 }
 .game-btn:active { transform:translateY(0); background:rgba(201,162,77,0.2); }
@@ -239,9 +251,21 @@ html, body {
   position:absolute;
   inset:0;
   z-index:50;
-  background:rgba(0,0,0,0.9);
+  background:rgba(10,7,16,0.9);
   border:2px solid #b8860b;
   box-shadow:inset 0 0 60px rgba(25,60,120,0.3);
+  overflow:hidden;
+}
+/* Fijamos explícitamente la dirección: modules/juego.js hace
+   menuContent.style.display = 'flex' por JS pero nunca define
+   flex-direction, así que sin esta regla el navegador puede
+   ponerlos en fila y desbordar la tarjeta. */
+#menu-content {
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  width:100%;
+  gap:0.6rem;
 }
 #game-menu h2 {
   color:#fae3a0;
@@ -296,16 +320,28 @@ html, body {
 
 /* MODAL DE REGLAS (dentro del juego) */
 .modal-overlay {
-  display:none;
   position:fixed;
   inset:0;
+  z-index:100;
   background:rgba(6,10,25,0.72);
+  display:flex;
   align-items:center;
   justify-content:center;
   padding:1rem;
-  z-index:100;
+  opacity:0;
+  visibility:hidden;
+  transition:opacity 0.25s ease, visibility 0.25s ease;
 }
-.modal-overlay.open { display:flex; }
+@media (min-width:768px) {
+  .modal-overlay {
+    backdrop-filter:blur(4px);
+    -webkit-backdrop-filter:blur(4px);
+  }
+}
+.modal-overlay.open {
+  opacity:1;
+  visibility:visible;
+}
 .modal-card {
   max-width:500px;
   width:100%;
@@ -316,7 +352,44 @@ html, body {
   border-radius:30px;
   padding:2rem 1.6rem;
   position:relative;
+  transform:scale(0.95);
+  opacity:0;
+  transition:transform 0.2s ease, opacity 0.2s ease;
   box-shadow:0 0 0 2px rgba(184,134,11,0.2), 0 0 0 6px rgba(26,42,70,0.5), 0 0 50px rgba(184,134,11,0.12), inset 0 0 60px rgba(25,50,100,0.15);
+  -webkit-overflow-scrolling:touch;
+}
+.modal-overlay.open .modal-card {
+  transform:scale(1);
+  opacity:1;
+}
+.modal-card::before {
+  content:'⚜ ✦ ⚜';
+  position:absolute;
+  top:-10px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#0d1424;
+  padding:0 14px;
+  color:#d4af37;
+  font-size:0.8rem;
+  letter-spacing:0.5em;
+  border-radius:20px;
+  border:1px solid #b8860b;
+  font-family:'Cinzel',serif;
+  white-space:nowrap;
+  z-index:2;
+}
+.modal-card::after {
+  content:'';
+  position:absolute;
+  top:16px;
+  left:16px;
+  right:16px;
+  bottom:16px;
+  border:1px solid rgba(212,175,55,0.15);
+  border-radius:20px;
+  pointer-events:none;
+  box-shadow:inset 0 0 30px rgba(212,175,55,0.04);
 }
 .modal-close {
   position:absolute;
@@ -380,7 +453,9 @@ html, body {
 /* RESPONSIVE */
 @media (max-width:400px) {
   #game-panel { max-width:98vw; }
-  .game-btn { font-size:0.7rem; padding:0.3rem 0.8rem; min-width:140px; }
+  .game-btn { font-size:0.7rem; padding:0.3rem 0.8rem; }
+  .modal-card { padding:1rem 0.6rem; }
+  .modal-card h2 { font-size:clamp(1.1rem,3.5vw,1.5rem) !important; }
   #paddle { height:10px; width:50px; top:406px; }
   #ball { width:10px; height:10px; }
 }
