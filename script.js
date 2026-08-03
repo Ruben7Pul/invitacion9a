@@ -99,3 +99,5 @@ export function resumeParticulas() {
 }
 
 export function burst() { /* compatibilidad */ }
+
+
