@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Invitación XV</title>
+  <script>
+    // Si volvemos del botón "Salir" del juego, marcamos el <html>
+    // ANTES de pintar nada, para que el CSS oculte la reja de una vez
+    // y no se alcance a ver ni un instante (ver reglas ".sin-reja" en style-principal.css).
+    if (location.search.indexOf('volver=1') !== -1) {
+      document.documentElement.classList.add('sin-reja');
+    }
+  </script>
 
   <meta property="og:title" content="Invitación a mis XV años" />
   <meta property="og:description" content="Te invitamos a celebrar mis 15 años. ¡No faltes!" />
@@ -15,7 +23,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style-principal.css?v=20260803">
+  <link rel="stylesheet" href="style-principal.css?v=20260804">
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌹</text></svg>">
 </head>
