@@ -150,6 +150,7 @@ export function initJuego(config, mobile = false) {
   const menuScoresBack = document.getElementById('menu-scores-back');
   const menuGameover = document.getElementById('menu-gameover');
   const gameoverScore = document.getElementById('gameover-score');
+  const gameoverThemeMsg = document.getElementById('gameover-theme-msg');
   const gameoverInputContainer = document.getElementById('gameover-input-container');
   const playerNameInput = document.getElementById('player-name-input');
   const gameoverSave = document.getElementById('gameover-save');
@@ -297,6 +298,31 @@ export function initJuego(config, mobile = false) {
   let gameOver = false;
   let pendingHighScore = false;
   let gameIsOpen = false;
+
+  // ========== MENSAJES TEMÁTICOS DE FIN DE JUEGO (XV años / Bella y Bestia) ==========
+  // Sube de nivel cada 10,000 puntos, con tope en 150,000.
+  const THEME_MESSAGES = [
+    'La rosa apenas empieza a florecer... ¡vuelve a intentarlo!',
+    'Como Bella cruzando el portón por primera vez: buen comienzo, sigue así.',
+    'El hechizo comienza a ceder ante ti. ¡Vas por buen camino!',
+    'Los candelabros del salón se encienden para acompañarte. ¡Bien hecho!',
+    'Bailas con la gracia de una quinceañera en su vals. ¡Sigue brillando!',
+    'La Bestia sonríe al ver tu talento. ¡Vas a medio camino!',
+    'Todo el castillo murmura tu nombre. ¡Vas impresionando!',
+    'Tu corona de XV brilla un poco más con cada punto. ¡Adelante!',
+    'Como en el cuento, la magia está de tu lado. ¡Vas muy arriba!',
+    'Los pétalos de la rosa encantada aún no caen: tu magia sigue viva.',
+    '¡Cien mil puntos! Dignos de una noche de gala en el gran salón.',
+    'Bailas como la propia Bella con su vestido dorado. ¡Espectacular!',
+    'El hechizo se rompe gracias a ti: puntaje digno de leyenda.',
+    'Toda la corte del castillo aplaude de pie. ¡Ya casi al tope!',
+    'A un paso de la perfección... una quinceañera legendaria.',
+    '🌹 ¡Puntaje máximo! Un final de cuento de hadas — fuiste el alma de esta fiesta encantada. ¡Feliz XV!'
+  ];
+  function getThemeMessage(score) {
+    const tier = Math.min(Math.floor(Math.max(score, 0) / 10000), THEME_MESSAGES.length - 1);
+    return THEME_MESSAGES[tier];
+  }
 
   // ========== FUNCIONES DEL MENÚ ==========
   function showMenu(showGameOver = false, score = 0) {
@@ -1659,5 +1685,3 @@ export function initJuego(config, mobile = false) {
   layoutStage();
   console.log('✅ Juego inicializado (completo y corregido)');
 }
-
-
