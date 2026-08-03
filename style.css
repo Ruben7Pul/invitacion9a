@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS ARCADE-PRINCESAS (optimizado)
+   🌹 INVITACIÓN XV – ESTILOS ARCADE-PRINCESAS (optimizado estable)
    ============================================================ */
 
 :root {
@@ -79,7 +79,7 @@ body {
 }
 
 /* ============================================================
-   PORTAL / REJA (optimizado: box-shadow en lugar de drop-shadow)
+   PORTAL / REJA
    ============================================================ */
 #portal {
   position: fixed;
@@ -124,16 +124,14 @@ body {
   perspective: 1000px;
   cursor: pointer;
   pointer-events: none;
-  box-shadow: 0 0 15px rgba(201,162,77,0.2);
-  transition: box-shadow 0.3s ease;
+  animation: glowPulse 3s ease-in-out infinite;
 }
 .gate-wrapper.active {
   pointer-events: auto;
-  animation: glowPulse 3s ease-in-out infinite;
 }
 @keyframes glowPulse {
-  0%, 100% { box-shadow: 0 0 15px rgba(201,162,77,0.2); }
-  50% { box-shadow: 0 0 35px rgba(201,162,77,0.6); }
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(201,162,77,0.2)); }
+  50% { filter: drop-shadow(0 0 25px rgba(201,162,77,0.6)); }
 }
 .gate-leaf {
   position: absolute;
@@ -147,7 +145,7 @@ body {
   width: 100%;
   height: 100%;
   display: block;
-  /* eliminamos filter: drop-shadow para ahorrar recursos */
+  filter: drop-shadow(0 0 20px rgba(201, 162, 77, 0.3));
 }
 .gate-left { left: 0; transform-origin: left center; }
 .gate-right { right: 0; transform-origin: right center; }
@@ -437,7 +435,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   MODALES – SEMITRANSPARENTES (backdrop-filter reducido)
+   MODALES – SEMITRANSPARENTES CON ANIMACIÓN
    ============================================================ */
 .modal-overlay {
   position: fixed;
@@ -1211,7 +1209,7 @@ h1#nombre-hero {
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 3px; }
 
-/* ---- MARIPOSAS (optimizadas: 4 en lugar de 6, translate3d) ---- */
+/* ---- MARIPOSAS (4 mariposas, animación con translate3d) ---- */
 .mariposa {
   position: fixed;
   pointer-events: none;
@@ -1229,4 +1227,3 @@ h1#nombre-hero {
   75% { transform: translate3d(30px, -50px,0) rotate(20deg) scale(1.02); }
   100% { transform: translate3d(-20px, 10px,0) rotate(-5deg) scale(0.98); }
 }
-
