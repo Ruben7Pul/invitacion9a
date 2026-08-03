@@ -39,11 +39,12 @@ const BRICK_TYPES = {
 };
 
 function getCrackImageSrc(brick) {
+  // Rutas relativas al documento juego1/index.html (un nivel arriba de "archivos/")
   if (brick.hits >= brick.maxHits) return null;
-  if (brick.maxHits === 2) return 'archivos/griet2.png';
+  if (brick.maxHits === 2) return '../archivos/griet2.png';
   if (brick.maxHits === 3) {
-    if (brick.hits === 2) return 'archivos/griet1.png';
-    if (brick.hits === 1) return 'archivos/griet2.png';
+    if (brick.hits === 2) return '../archivos/griet1.png';
+    if (brick.hits === 1) return '../archivos/griet2.png';
   }
   return null;
 }
@@ -336,6 +337,7 @@ export function initJuego(config, mobile = false) {
       menuGameover.style.display = 'block';
       menuContent.style.display = 'none';
       gameoverScore.textContent = `Puntuación: ${score}`;
+      if (gameoverThemeMsg) gameoverThemeMsg.textContent = getThemeMessage(score);
       const statsEl = document.getElementById('gameover-stats');
       if (statsEl) statsEl.style.display = 'none';
 
@@ -413,11 +415,13 @@ export function initJuego(config, mobile = false) {
     menuContent.style.display = 'flex';
   });
 
-  // ========== BOTÓN SALIR – REDIRIGE A INDEX.HTML ==========
+  // ========== BOTÓN SALIR – REGRESA A LA PARTE PRINCIPAL (no a la reja) ==========
   menuExit.addEventListener('click', (e) => {
     e.stopPropagation();
     soundTap();
-    window.location.href = 'index.html';
+    // "?volver=1" le indica a index.html que debe mostrar directamente
+    // la parte principal (sin repetir la animación de la reja)
+    window.location.href = '../index.html?volver=1';
   });
 
   menuRules.addEventListener('click', (e) => {
