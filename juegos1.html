@@ -10,81 +10,89 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- AQUÍ VA TODO EL CONTENIDO DEL JUEGO (OVERLAY) -->
-  <div id="game-overlay" class="open" style="display:flex; opacity:1; visibility:visible; position:fixed; inset:0; z-index:90; background:rgba(6,4,10,0.95); align-items:center; justify-content:center;">
-    <div id="game-panel" style="display:flex; flex-direction:column; align-items:center; gap:0.5rem; transform:scale(1); opacity:1; max-width:96vw;">
-      <div id="game-header" style="display:flex; align-items:center; justify-content:space-between; width:100%; font-family:'Cinzel',serif; text-transform:uppercase; font-size:clamp(0.7rem,2vw,0.9rem); padding:0 0.1rem; gap:0.05rem; color:#fae3a0; text-shadow:0 0 15px rgba(212,175,55,0.3);">
-        <span id="lives" style="font-family:'Press Start 2P',monospace; font-size:1.2rem; letter-spacing:0.1em; display:none;">♥ ♥ ♥</span>
-        <span id="game-score" style="font-family:'Press Start 2P',monospace; font-size:0.9rem; background:linear-gradient(90deg,#ff0000,#ff8800,#ffff00,#00ff00,#0088ff,#8800ff); background-size:300% 100%; animation:rainbowScore 3s linear infinite; -webkit-background-clip:text; background-clip:text; color:transparent; display:none;">0</span>
-        <button id="pause-btn" style="flex-shrink:0; background:rgba(201,162,77,0.12); border:1.5px solid #c9a24d; color:#f0d9a3; font-size:1.4rem; cursor:pointer; padding:0.2rem 0.5rem; display:flex; align-items:center; justify-content:center; border-radius:30px; box-shadow:0 0 12px rgba(201,162,77,0.15); transition:all 0.3s ease; min-width:40px; height:40px; display:none;" aria-label="Pausar o reanudar juego">⏸️</button>
-        <button id="menu-btn" style="flex-shrink:0; background:rgba(201,162,77,0.12); border:1.5px solid #c9a24d; color:#f0d9a3; font-size:1.4rem; cursor:pointer; padding:0.2rem 0.5rem; display:flex; align-items:center; justify-content:center; border-radius:30px; box-shadow:0 0 12px rgba(201,162,77,0.15); transition:all 0.3s ease; min-width:40px; height:40px; display:none;" aria-label="Volver al menú principal">📋</button>
+  <!-- OVERLAY DEL JUEGO -->
+  <div id="game-overlay" class="open">
+    <div id="game-panel">
+      <!-- Cabecera -->
+      <div id="game-header">
+        <span id="lives">♥ ♥ ♥</span>
+        <span id="game-score">0</span>
+        <button id="pause-btn">⏸️</button>
+        <button id="menu-btn">📋</button>
       </div>
-      <div id="game-stage" style="position:relative; background:#0e0a18; border:2px solid #b8860b; border-radius:16px; overflow:hidden; touch-action:none; background-image:url('archivos/jueg1.png'); background-size:cover; background-position:center; box-shadow:0 0 30px rgba(212,175,55,0.15), inset 0 0 40px rgba(25,60,120,0.2); width:100%; max-width:450px; aspect-ratio:300/420;">
-        <div id="game-inner" style="position:absolute; top:0; left:0; width:100%; height:100%;">
-          <div id="paddle" style="position:absolute; top:406px; left:0; height:12px; width:72px; border-radius:8px; background:#111; border:2px solid #d4af37; box-shadow:0 0 25px rgba(212,175,55,0.3); will-change:transform; z-index:100; pointer-events:none;"></div>
-          <div id="ball" style="position:absolute; width:12px; height:12px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #fff, #d68a96 60%, #a13545); box-shadow:0 0 12px rgba(255,200,200,0.5); z-index:11;"></div>
+
+      <!-- Escenario -->
+      <div id="game-stage">
+        <div id="game-inner">
+          <div id="paddle"></div>
+          <div id="ball"></div>
         </div>
 
         <!-- MENÚ PRINCIPAL -->
-        <div id="game-menu" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.8rem; border-radius:16px; padding:1rem; position:absolute; inset:0; z-index:50; background:rgba(0,0,0,0.9); border:2px solid #b8860b; box-shadow:inset 0 0 60px rgba(25,60,120,0.3);">
-          <h2 style="color:#fae3a0; font-family:'Press Start 2P',monospace; font-size:clamp(1rem,3vw,1.4rem); text-align:center; margin:0;">MENÚ</h2>
-          <div id="menu-content" style="display:flex; flex-direction:column; gap:0.8rem; align-items:center;">
-            <button id="menu-play" class="game-btn" style="font-family:'Cinzel',serif; font-size:clamp(0.9rem,2.2vw,1.2rem); letter-spacing:0.14em; text-transform:uppercase; color:#f0d9a3; background:rgba(201,162,77,0.2); border:2px solid rgba(201,162,77,0.6); padding:0.6rem 1.8rem; border-radius:30px; cursor:pointer; transition:all 0.3s ease; box-shadow:0 0 20px rgba(212,175,55,0.2); text-shadow:0 0 10px rgba(201,162,77,0.3); backdrop-filter:blur(4px); min-width:180px; background:#1a1a2e;">▶ Jugar</button>
-            <button id="menu-scores" class="game-btn" style="font-family:'Cinzel',serif; font-size:clamp(0.9rem,2.2vw,1.2rem); letter-spacing:0.14em; text-transform:uppercase; color:#f0d9a3; background:rgba(201,162,77,0.2); border:2px solid rgba(201,162,77,0.6); padding:0.6rem 1.8rem; border-radius:30px; cursor:pointer; transition:all 0.3s ease; box-shadow:0 0 20px rgba(212,175,55,0.2); text-shadow:0 0 10px rgba(201,162,77,0.3); backdrop-filter:blur(4px); min-width:180px; background:#1a1a2e;">🏆 Mejores puntuaciones</button>
-            <button id="menu-rules" class="game-btn" style="font-family:'Cinzel',serif; font-size:clamp(0.9rem,2.2vw,1.2rem); letter-spacing:0.14em; text-transform:uppercase; color:#f0d9a3; background:rgba(201,162,77,0.2); border:2px solid rgba(201,162,77,0.6); padding:0.6rem 1.8rem; border-radius:30px; cursor:pointer; transition:all 0.3s ease; box-shadow:0 0 20px rgba(212,175,55,0.2); text-shadow:0 0 10px rgba(201,162,77,0.3); backdrop-filter:blur(4px); min-width:180px; background:#1a1a2e;">📖 Reglas</button>
-            <button id="menu-exit" class="game-btn" style="font-family:'Cinzel',serif; font-size:clamp(0.9rem,2.2vw,1.2rem); letter-spacing:0.14em; text-transform:uppercase; color:#f0d9a3; background:rgba(201,162,77,0.2); border:2px solid rgba(201,162,77,0.6); padding:0.6rem 1.8rem; border-radius:30px; cursor:pointer; transition:all 0.3s ease; box-shadow:0 0 20px rgba(212,175,55,0.2); text-shadow:0 0 10px rgba(201,162,77,0.3); backdrop-filter:blur(4px); min-width:180px; background:#1a1a2e;">🚪 Salir</button>
-            <button id="menu-reset-tops" class="game-btn" style="font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.14em; text-transform:uppercase; color:#f0d9a3; background:rgba(201,162,77,0.2); border:2px solid rgba(201,162,77,0.6); padding:0.4rem 1.2rem; border-radius:30px; cursor:pointer; transition:all 0.3s ease; box-shadow:0 0 20px rgba(212,175,55,0.2); text-shadow:0 0 10px rgba(201,162,77,0.3); backdrop-filter:blur(4px); min-width:auto; background:#1a1a2e; opacity:0.6;">🔄 Reiniciar tops</button>
+        <div id="game-menu">
+          <h2>MENÚ</h2>
+          <div id="menu-content">
+            <button id="menu-play" class="game-btn">▶ Jugar</button>
+            <button id="menu-scores" class="game-btn">🏆 Mejores puntuaciones</button>
+            <button id="menu-rules" class="game-btn">📖 Reglas</button>
+            <button id="menu-exit" class="game-btn">🚪 Salir</button>
+            <button id="menu-reset-tops" class="game-btn" style="font-size:0.7rem; opacity:0.6;">🔄 Reiniciar tops</button>
           </div>
-          <div id="menu-scores-list" style="display:none; color:white; font-family:'Press Start 2P',monospace; text-align:center; width:100%; max-width:300px;">
-            <h3 style="color:#fae3a0; font-size:clamp(0.8rem,2vw,1rem);">Mejores puntuaciones</h3>
-            <ul id="scores-list" style="list-style:none; padding:0; margin:0.5rem 0;"></ul>
-            <button id="menu-scores-back" class="game-btn" style="font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.14em; text-transform:uppercase; color:#f0d9a3; background:rgba(201,162,77,0.2); border:2px solid rgba(201,162,77,0.6); padding:0.4rem 1.2rem; border-radius:30px; cursor:pointer; transition:all 0.3s ease; box-shadow:0 0 20px rgba(212,175,55,0.2); text-shadow:0 0 10px rgba(201,162,77,0.3); backdrop-filter:blur(4px); min-width:auto; background:#1a1a2e;">Volver</button>
+          <div id="menu-scores-list">
+            <h3>Mejores puntuaciones</h3>
+            <ul id="scores-list"></ul>
+            <button id="menu-scores-back" class="game-btn" style="font-size:0.7rem;">Volver</button>
           </div>
-          <div id="menu-gameover" style="display:none; color:#fae3a0; font-family:'Press Start 2P',monospace; font-size:clamp(0.8rem,2vw,1rem); text-align:center; width:100%; max-width:300px;">
+          <div id="menu-gameover">
             <p style="font-size:1.2rem; color:#ff6b6b;">GAME OVER</p>
             <p id="gameover-score">Puntuación: 0</p>
-            <div id="gameover-stats" style="display:none;"></div>
-            <div id="gameover-input-container" style="display:none; margin-top:0.5rem;">
+            <div id="gameover-stats"></div>
+            <div id="gameover-input-container">
               <p style="color:#ffd700;">¡Puntuación dentro del Top 5!</p>
-              <input type="text" id="player-name-input" maxlength="12" placeholder="Tu nombre" style="padding:0.3rem; border-radius:4px; border:none; font-family:'Press Start 2P',monospace; font-size:0.7rem; text-align:center; background:#222; color:white; width:80%;" pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+">
-              <button id="gameover-save" class="game-btn" style="font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.14em; text-transform:uppercase; color:#f0d9a3; background:rgba(201,162,77,0.2); border:2px solid rgba(201,162,77,0.6); padding:0.4rem 1.2rem; border-radius:30px; cursor:pointer; transition:all 0.3s ease; box-shadow:0 0 20px rgba(212,175,55,0.2); text-shadow:0 0 10px rgba(201,162,77,0.3); backdrop-filter:blur(4px); min-width:auto; background:#1a1a2e; margin-top:0.3rem;">Guardar</button>
+              <input type="text" id="player-name-input" maxlength="12" placeholder="Tu nombre" pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+">
+              <button id="gameover-save" class="game-btn" style="font-size:0.7rem; margin-top:0.3rem;">Guardar</button>
               <p id="name-error" style="color:#ff6b6b; font-size:0.6rem; display:none;">Por favor, ingresa un nombre válido (solo letras).</p>
             </div>
-            <button id="gameover-menu-btn" class="game-btn" style="font-family:'Cinzel',serif; font-size:0.8rem; letter-spacing:0.14em; text-transform:uppercase; color:#f0d9a3; background:rgba(201,162,77,0.2); border:2px solid rgba(201,162,77,0.6); padding:0.6rem 1.8rem; border-radius:30px; cursor:pointer; transition:all 0.3s ease; box-shadow:0 0 20px rgba(212,175,55,0.2); text-shadow:0 0 10px rgba(201,162,77,0.3); backdrop-filter:blur(4px); min-width:auto; background:#1a1a2e; display:none; margin-top:0.5rem;">🏠 Volver al menú</button>
+            <button id="gameover-menu-btn" class="game-btn" style="font-size:0.8rem; margin-top:0.5rem; display:none;">🏠 Volver al menú</button>
           </div>
         </div>
 
-        <div id="game-msg" style="display:none; position:absolute; inset:0; align-items:center; justify-content:center; flex-direction:column; gap:0.5rem; background:rgba(10,7,16,0.85); text-align:center; padding:1rem;">
-          <p id="game-msg-text" style="font-family:'Cinzel',serif; color:#fae3a0; font-size:clamp(1rem,3vw,1.3rem); white-space:pre-line; text-shadow:0 0 20px rgba(212,175,55,0.5);">¡Game Over!</p>
+        <!-- Mensaje emergente -->
+        <div id="game-msg">
+          <p id="game-msg-text">¡Game Over!</p>
         </div>
       </div>
-      <p class="game-help" style="font-size:clamp(0.7rem,2vw,0.9rem); opacity:0.7; margin-top:0.5rem; font-family:'Cinzel',serif; font-style:italic; text-shadow:0 0 10px rgba(201,162,77,0.2); color:#e0d0b0;">Mueve con dedo, A/D o flechas del teclado</p>
+
+      <p class="game-help">Mueve con dedo, A/D o flechas del teclado</p>
     </div>
   </div>
 
-  <script type="module">
-    // Cargar configuración
-    const config = await fetch('config.json').then(r => r.json()).catch(() => ({
-      nombre: 'Dania',
-      fechaTexto: '24 de octubre de 2026',
-      fechaISO: '2026-10-24T13:00:00',
-      frase: 'Con la bendición de Dios...',
-      horaMisa: '3:00 pm',
-      ubicacionMisa: 'Iglesia',
-      mapaMisa: '#',
-      horaFiesta: '1:00 pm',
-      ubicacionFiesta: 'Salón',
-      mapaFiesta: '#',
-      padre: 'Papá',
-      madre: 'Mamá',
-      padrino: 'Padrino',
-      madrina: 'Madrina',
-      audioFile: 'archivos/cancion.mp3'
-    }));
+  <!-- MODAL DE REGLAS -->
+  <div class="modal-overlay" id="modal-rules">
+    <div class="modal-card">
+      <button class="modal-close" id="rules-close">&times;</button>
+      <h2 id="modal-rules-title">📖 Reglas del juego</h2>
+      <div style="color:#f0e0c0; font-family:'Cinzel',serif; font-size:0.9rem; text-align:left; padding:0.5rem 0; line-height:1.6;">
+        <p><strong style="color:#fae3a0;">🎯 Objetivo:</strong> Rompe todos los ladrillos para ganar puntos.</p>
+        <p><strong style="color:#fae3a0;">🖱️ Controles:</strong> Mueve la pala con el ratón, el dedo (en móvil) o las teclas A/D y flechas izquierda/derecha.</p>
+        <p><strong style="color:#fae3a0;">💥 Poderes:</strong> Al romper un ladrillo, puede caer un poder (verde = bueno, rojo = malo).</p>
+        <ul style="list-style:none; padding-left:0.5rem;">
+          <li>🌀 <span style="color:#2ecc71;">Multibola</span> – multiplica las bolas (máx 9).</li>
+          <li>📏 <span style="color:#2ecc71;">Pala Grande</span> – aumenta el tamaño de la pala.</li>
+          <li>⚡ <span style="color:#2ecc71;">Dureza</span> – sube un nivel de dureza de la pelota.</li>
+          <li>🌫️ <span style="color:#e74c3c;">Bola de Niebla</span> – oscurece la pantalla.</li>
+          <li>📐 <span style="color:#e74c3c;">Pala Mini</span> – reduce la pala.</li>
+          <li>⬇️ <span style="color:#e74c3c;">Flaquesa</span> – baja un nivel de dureza.</li>
+        </ul>
+        <p><strong style="color:#fae3a0;">❤️ Vidas:</strong> Tienes 3 vidas. Al perder una, la pelota vuelve a la pala.</p>
+        <p><strong style="color:#fae3a0;">⭐ Bola Azul:</strong> Cada 8500 puntos, si tienes 3 vidas, aparece una bola azul que da +2000 pts y un poder positivo aleatorio.</p>
+        <p><strong style="color:#fae3a0;">🏆 Puntuaciones:</strong> Las mejores 5 puntuaciones se guardan localmente.</p>
+        <p style="margin-top:0.5rem; text-align:center; font-family:'Pinyon Script',cursive; font-size:1.4rem; color:#d4af37;">— La magia te espera —</p>
+      </div>
+    </div>
+  </div>
 
-    const { initJuego } = await import('./modules/juego.js');
-    const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    initJuego(config, isMobile);
-  </script>
+  <!-- SCRIPT EXTERNO DEL JUEGO -->
+  <script src="script-juego.js" type="module"></script>
 </body>
 </html>
