@@ -5,9 +5,11 @@ console.log('🎮 script-juego.js cargado');
 
 const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
+// script-juego.js se ejecuta ahora desde /juego1/index.html, por lo que
+// config.json y los archivos de audio viven un nivel arriba ("../").
 async function cargarConfig() {
   try {
-    const res = await fetch(`config.json?t=${Date.now()}`);
+    const res = await fetch(`../config.json?t=${Date.now()}`);
     if (!res.ok) throw new Error('HTTP error ' + res.status);
     const data = await res.json();
     if (!data.nombre) throw new Error('Falta "nombre"');
@@ -29,7 +31,7 @@ async function cargarConfig() {
       madre: 'Mamá',
       padrino: 'Padrino',
       madrina: 'Madrina',
-      audioFile: 'archivos/cancion.mp3'
+      audioFile: '../archivos/cancion.mp3'
     };
   }
 }

@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ========== IR AL JUEGO (navegación real, cambia la URL) ==========
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => {
-    window.location.href = 'juegos1.html';
+    window.location.href = 'juego1/';
   });
 
   // ========== REJA ==========
@@ -122,13 +122,29 @@ document.addEventListener('DOMContentLoaded', async () => {
   const backBtn = document.getElementById('back-link');
   const caption = document.querySelector('.portal-caption');
 
-  gateWrapper.classList.remove('active');
-  caption.classList.remove('show');
+  // ¿Venimos de "Salir" en el juego? Si es así, mostramos directamente
+  // la parte principal (sin la reja) y limpiamos la URL.
+  const params = new URLSearchParams(window.location.search);
+  const volviendoDelJuego = params.get('volver') === '1';
 
-  setTimeout(() => {
-    caption.classList.add('show');
+  if (volviendoDelJuego) {
+    portal.classList.add('hide');
+    app.classList.add('show');
     gateWrapper.classList.add('active');
-  }, 2000);
+    caption.classList.add('show');
+    iniciarApp();
+    if (window.playMusic) window.playMusic();
+    // Deja la URL limpia: https://.../invitacion9a/
+    history.replaceState(null, '', window.location.pathname);
+  } else {
+    gateWrapper.classList.remove('active');
+    caption.classList.remove('show');
+
+    setTimeout(() => {
+      caption.classList.add('show');
+      gateWrapper.classList.add('active');
+    }, 2000);
+  }
 
   function abrirReja(e) {
     if (e) e.stopPropagation();

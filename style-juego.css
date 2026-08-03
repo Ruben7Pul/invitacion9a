@@ -286,8 +286,31 @@ html, body {
   padding:0.3rem 0;
   list-style:none;
 }
+#menu-gameover {
+  text-align:center;
+  width:100%;
+}
 #menu-gameover p { font-family:'Cinzel',serif; }
 #gameover-score { font-size:1.1rem; color:#fae3a0; }
+#gameover-theme-msg {
+  font-family:'Cormorant Garamond','Cinzel',serif;
+  font-style:italic;
+  font-size:clamp(0.8rem,2.4vw,0.95rem);
+  color:#f0d9a3;
+  text-shadow:0 0 10px rgba(212,175,55,0.25);
+  max-width:280px;
+  margin:0.4rem auto 0;
+  line-height:1.4;
+}
+#menu-scores-list {
+  text-align:center;
+  width:100%;
+}
+#scores-list {
+  list-style:none;
+  padding:0;
+  margin:0;
+}
 #gameover-input-container input {
   font-family:'Press Start 2P',monospace;
   background:#1a1a2e;
