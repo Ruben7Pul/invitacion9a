@@ -1648,3 +1648,5 @@ export function initJuego(config, mobile = false) {
   layoutStage();
   console.log('✅ Juego inicializado (paleta corregida, tamaño dinámico)');
 }
+
+
