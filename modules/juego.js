@@ -18,14 +18,7 @@ const TARGET_GAME_POINTS = 18;
 const REGEN_THRESHOLD = 9;
 const BALL_LOW_Y = STAGE_H - 60;
 const MAX_NIEBLA = 3;
-// Altura (en px, sobre STAGE_H=420) hasta donde llega la niebla en cada nivel.
-// Nivel 1: cubre la zona de ladrillos (170px) + 15% más.
-// Nivel 2: cubre el 60% del tablero.
-// Nivel 3: cubre el 90% del tablero (deja un 10% visible junto a la paleta).
 const NIEBLA_HEIGHTS = [0, Math.round(170 * 1.15), Math.round(STAGE_H * 0.60), Math.round(STAGE_H * 0.90)];
-// Margen extra (px) donde la niebla se desvanece suavemente. Este margen
-// queda SIEMPRE por debajo del límite real de cada nivel, así el degradado
-// nunca resta opacidad dentro de la zona que debe quedar tapada.
 const NIEBLA_FEATHER = 26;
 const MAX_LIVES = 3;
 const SCORE_PER_LIFE = 8500;
@@ -37,11 +30,6 @@ const BRICK_TYPES = {
   IRON:   { value: 3, playerPoints: 300, hits: 3, color: '#7a8a9a', label: 'IRON' }
 };
 
-// Grietas visuales según el tipo de ladrillo y golpes restantes:
-// - Arcilla (1 golpe): se rompe de una, nunca muestra grieta.
-// - Madera (2 golpes): tras el primer golpe muestra griet2.
-// - Hierro (3 golpes): tras el primer golpe muestra griet1, tras el
-//   segundo muestra griet2 (más dañado), antes de romperse del todo.
 function getCrackImageSrc(brick) {
   if (brick.hits >= brick.maxHits) return null;
   if (brick.maxHits === 2) return 'archivos/griet2.png';
@@ -58,22 +46,15 @@ const POWERUP_PROBS = {
   IRON: 0.24
 };
 
-// Control de ritmo: evita que caigan varios power-ups juntos (racha) y
-// evita también que pasen demasiados segundos sin que caiga ninguno (sequía).
-const POWERUP_MIN_GAP_MS = 3500;  // mínimo entre dos power-ups normales
-const POWERUP_PITY_GAP_MS = 11000; // si pasa esto sin ninguno, se fuerza el próximo
+const POWERUP_MIN_GAP_MS = 3500;
+const POWERUP_PITY_GAP_MS = 11000;
 
-// Patrones de forma para variar cómo se ven las regeneraciones de ladrillos.
-// Cada uno es una función (fila, columna) -> boolean sobre la grilla 6x6.
-// Al regenerar se elige uno al azar y se prioriza ubicar los ladrillos ahí;
-// si no alcanzan celdas del patrón, se completa con celdas libres normales
-// (nunca se bloquea la partida por falta de espacio del patrón elegido).
 const BRICK_PATTERNS = [
-  (r, c) => Math.abs(r - 2.5) + Math.abs(c - 2.5) <= 2.5, // diamante
-  (r, c) => (r === 2 || r === 3) || (c === 2 || c === 3),  // cruz
-  (r, c) => r === 0 || r === 5 || c === 0 || c === 5,       // marco
-  (r, c) => c % 2 === 0,                                    // columnas
-  (r, c) => (r + c) % 2 === 0                                // ajedrez
+  (r, c) => Math.abs(r - 2.5) + Math.abs(c - 2.5) <= 2.5,
+  (r, c) => (r === 2 || r === 3) || (c === 2 || c === 3),
+  (r, c) => r === 0 || r === 5 || c === 0 || c === 5,
+  (r, c) => c % 2 === 0,
+  (r, c) => (r + c) % 2 === 0
 ];
 
 function buildPatternCells(predicate) {
@@ -87,14 +68,9 @@ function buildPatternCells(predicate) {
   return cells;
 }
 
-// Ladrillo dorado: ocasional, mismo comportamiento pero da el triple de
-// puntos. Solo puede haber uno activo a la vez, y dura 5s: si no se rompe
-// a tiempo, vuelve a ser un ladrillo normal de su mismo tipo.
 const GOLDEN_BRICK_CHANCE = 0.08;
 const GOLDEN_BRICK_DURATION_MS = 5000;
 
-// Racha/combo: cada ladrillo seguido sin perder una vida suma bonus de
-// puntos, con un techo para que no se desbalancee (máx. +50%).
 const COMBO_BONUS_PER_HIT = 0.02;
 const COMBO_BONUS_CAP = 0.5;
 
@@ -323,14 +299,12 @@ export function initJuego(config) {
   let paused = false;
   let gameOver = false;
   let pendingHighScore = false;
-  let gameIsOpen = false; // control para resumeParticulas
+  let gameIsOpen = false;
 
   // ---- FUNCIONES DEL MENÚ ----
   function showMenu(showGameOver = false, score = 0) {
-    // Ocultar paddle y bolas cuando se muestra el menú
     paddleEl.style.display = 'none';
     document.querySelectorAll('.ball-dynamic').forEach(el => el.style.display = 'none');
-    // Ocultar la bola original
     document.getElementById('ball').style.display = 'none';
 
     if (!menuEl) return;
@@ -672,271 +646,4 @@ export function initJuego(config) {
     const startY = TOP_OFFSET;
     const cells = new Set();
     for (const b of balls) {
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const x = startX + c * (brickW + gap);
-          const y = startY + r * (brickH + gap);
-          if (b.x > x - 10 && b.x < x + brickW + 10 &&
-              b.y > y - 10 && b.y < y + brickH + 10) {
-            cells.add(r * cols + c);
-          }
-        }
-      }
-    }
-    return cells;
-  }
-
-  function placeBricks(values, excludeCells = new Set(), preferredCells = null) {
-    const cols = 6, brickW = 38, brickH = 16, gap = 3;
-    const totalWidth = cols * (brickW + gap) - gap;
-    const startX = (STAGE_W - totalWidth) / 2;
-    const startY = TOP_OFFSET;
-
-    const freeCells = getFreeCells(excludeCells);
-    if (freeCells.length === 0) return;
-
-    let shuffled;
-    if (preferredCells && preferredCells.length > 0) {
-      const preferredSet = new Set(preferredCells);
-      const inPattern = freeCells.filter(c => preferredSet.has(c)).sort(() => Math.random() - 0.5);
-      const outPattern = freeCells.filter(c => !preferredSet.has(c)).sort(() => Math.random() - 0.5);
-      shuffled = inPattern.concat(outPattern);
-    } else {
-      shuffled = freeCells.sort(() => Math.random() - 0.5);
-    }
-    const toPlace = Math.min(values.length, shuffled.length);
-    for (let i = 0; i < toPlace; i++) {
-      const cell = shuffled[i];
-      const row = Math.floor(cell / cols);
-      const col = cell % cols;
-      const x = startX + col * (brickW + gap);
-      const y = startY + row * (brickH + gap);
-      const value = values[i];
-      const type = getBrickTypeFromValue(value);
-
-      const el = document.createElement('div');
-      el.className = 'brick';
-      el.style.left = x + 'px';
-      el.style.top = y + 'px';
-      el.style.width = brickW + 'px';
-      el.style.height = brickH + 'px';
-      el.style.borderRadius = '4px';
-      el.style.border = '1px solid rgba(0,0,0,0.3)';
-      el.style.display = 'flex';
-      el.style.alignItems = 'center';
-      el.style.justifyContent = 'center';
-      el.style.color = '#fff';
-      el.style.fontWeight = 'bold';
-      el.style.fontSize = '11px';
-      el.style.textShadow = '0 1px 2px rgba(0,0,0,0.5)';
-
-      const crackImg = document.createElement('img');
-      crackImg.style.cssText = `
-        max-width: 78%; max-height: 62%;
-        width: auto; height: auto;
-        object-fit: contain;
-        pointer-events: none;
-        display: none;
-      `;
-      el.appendChild(crackImg);
-
-      inner.appendChild(el);
-
-      const brick = {
-        x, y, w: brickW, h: brickH,
-        el,
-        alive: true,
-        hits: type.hits,
-        maxHits: type.hits,
-        value: type.value,
-        playerPoints: type.playerPoints,
-        cell: cell,
-        type: type,
-        originalType: type,
-        originalHits: type.hits,
-        isGolden: false,
-        goldenExpiresAt: 0,
-        crackImg
-      };
-      bricks.push(brick);
-      gamePoints += type.value;
-      updateBrickVisual(brick);
-    }
-  }
-
-  function requestRegeneration() {
-    if (pendingRegeneration) return;
-    if (getFreeCells().size === 0) return;
-    pendingRegeneration = true;
-  }
-
-  function maybeMakeGolden(fromIndex) {
-    if (goldenBrickRef && goldenBrickRef.alive) return; // ya hay uno activo
-    if (Math.random() >= GOLDEN_BRICK_CHANCE) return;
-    const recent = bricks.slice(fromIndex);
-    if (recent.length === 0) return;
-    const chosen = recent[Math.floor(Math.random() * recent.length)];
-    chosen.isGolden = true;
-    chosen.goldenExpiresAt = performance.now() + GOLDEN_BRICK_DURATION_MS;
-    goldenBrickRef = chosen;
-    updateBrickVisual(chosen);
-  }
-
-  // Revisa si el ladrillo dorado activo se venció sin ser destruido; si es
-  // así, vuelve a ser un ladrillo normal de su mismo tipo.
-  function checkGoldenExpiry() {
-    if (!goldenBrickRef) return;
-    if (!goldenBrickRef.alive) { goldenBrickRef = null; return; }
-    if (performance.now() >= goldenBrickRef.goldenExpiresAt) {
-      goldenBrickRef.isGolden = false;
-      updateBrickVisual(goldenBrickRef);
-      goldenBrickRef = null;
-    }
-  }
-
-  function checkAndRegenerate() {
-    if (!pendingRegeneration || !running) return;
-    const pattern = BRICK_PATTERNS[Math.floor(Math.random() * BRICK_PATTERNS.length)];
-    const preferredCells = buildPatternCells(pattern);
-    if (balls.length > 1) {
-      const exclude = getCellsWithBalls();
-      const values = generateBrickValues();
-      const before = bricks.length;
-      placeBricks(values, exclude, preferredCells);
-      maybeMakeGolden(before);
-      pendingRegeneration = false;
-      return;
-    }
-    if (launched && balls.some(b => b.y < BALL_LOW_Y)) {
-      const values = generateBrickValues();
-      const before = bricks.length;
-      placeBricks(values, undefined, preferredCells);
-      maybeMakeGolden(before);
-      pendingRegeneration = false;
-    }
-  }
-
-  function getElapsedMinutes() {
-    if (!gameTimeActive || gameStartTime <= 0) return 0;
-    const now = performance.now();
-    return Math.max(0, (now - gameStartTime - pausedTime) / 60000);
-  }
-
-  // Multiplicador de velocidad de la pelota según el tiempo jugado.
-  // Sube poco a poco al principio, llega muy difícil (~1.9x) cerca del
-  // minuto 8, y sigue subiendo (más lento) hasta volverse prácticamente
-  // imposible (~2.7x) alrededor del minuto 14, donde se estabiliza. El
-  // juego nunca termina por esto: solo se vuelve cada vez más difícil
-  // sostener el ritmo de puntos.
-  const BALL_SPEED_RAMP_MINUTES = 14;
-  const BALL_SPEED_MAX_MULT = 2.7;
-  function getSpeedMultiplier(minutes) {
-    const t = Math.min(minutes, BALL_SPEED_RAMP_MINUTES) / BALL_SPEED_RAMP_MINUTES;
-    const eased = t * t * (3 - 2 * t); // smoothstep: crecimiento suave, no lineal
-    return 1 + eased * (BALL_SPEED_MAX_MULT - 1);
-  }
-
-  function getCurrentBallSpeed() {
-    return BALL_SPEED * getSpeedMultiplier(getElapsedMinutes());
-  }
-
-  function getGreenProbability(minutes) {
-    // La tabla avanza cada 0.5 minutos (17 entradas = minuto 0 al 8), así que
-    // el índice real es minutes*2, no minutes directo.
-    const step = minutes * 2;
-    if (step <= 0) return GREEN_PROB_TABLE[0];
-    if (step >= GREEN_PROB_TABLE.length - 1) return GREEN_PROB_TABLE[GREEN_PROB_TABLE.length - 1];
-    const idx = Math.floor(step);
-    const frac = step - idx;
-    return GREEN_PROB_TABLE[idx] + (GREEN_PROB_TABLE[idx + 1] - GREEN_PROB_TABLE[idx]) * frac;
-  }
-
-  function selectPowerupByColor(color) {
-    const weights = color === 'verde' ? GREEN_WEIGHTS : RED_WEIGHTS;
-    const total = Object.values(weights).reduce((a, b) => a + b, 0);
-    let r = Math.random() * total;
-    for (const [key, weight] of Object.entries(weights)) {
-      r -= weight;
-      if (r <= 0) return key;
-    }
-    return Object.keys(weights)[0];
-  }
-
-  function isSaturated(typeKey) {
-    switch (typeKey) {
-      case 'PALA_GRANDE': return paddleSizeMultiplier > 1;
-      case 'PALA_MINI': return paddleSizeMultiplier < 1;
-      case 'DUREZA': return ballDurability === 3;
-      case 'FLAQUESA': return ballDurability === 1;
-      case 'MULTIBOLA': return balls.length >= 3;
-      case 'BOLA_NIEBLA': return nieblaLevel === 3;
-      default: return false;
-    }
-  }
-
-  function getAvailableTypes(color) {
-    const types = color === 'verde' ? Object.keys(GREEN_WEIGHTS) : Object.keys(RED_WEIGHTS);
-    return types.filter(t => !isSaturated(t) && !activePowerupTypes.has(t));
-  }
-
-  function getAlternativeType(color, currentType) {
-    const available = getAvailableTypes(color);
-    if (!isSaturated(currentType) && !activePowerupTypes.has(currentType)) return currentType;
-    if (available.length === 0) return null;
-    return available[Math.floor(Math.random() * available.length)];
-  }
-
-  function spawnPowerup(brick) {
-    if (ladrillosRotos <= 36) return;
-    if (powerupsInAir >= 2) return;
-
-    const now = performance.now();
-    const sinceLast = lastPowerupTime === 0 ? Infinity : now - lastPowerupTime;
-
-    // Racha: si cayó un power-up hace muy poco, no dejamos que caiga otro
-    // enseguida, sin importar la tirada de probabilidad.
-    if (sinceLast < POWERUP_MIN_GAP_MS) return;
-
-    // Sequía: si ya pasó demasiado tiempo sin ninguno, forzamos que este
-    // ladrillo sí suelte uno (nos saltamos la tirada de probabilidad normal).
-    const forced = sinceLast >= POWERUP_PITY_GAP_MS;
-
-    if (!forced) {
-      let prob = 0;
-      if (brick.type === BRICK_TYPES.CLAY) prob = POWERUP_PROBS.CLAY;
-      else if (brick.type === BRICK_TYPES.WOOD) prob = POWERUP_PROBS.WOOD;
-      else if (brick.type === BRICK_TYPES.IRON) prob = POWERUP_PROBS.IRON;
-      if (Math.random() >= prob) return;
-    }
-
-    let elapsed = 0;
-    if (gameTimeActive && gameStartTime > 0) {
-      elapsed = (now - gameStartTime - pausedTime) / 60000;
-    }
-    const minutes = Math.max(0, elapsed);
-    const greenProb = getGreenProbability(minutes);
-    const color = Math.random() * 100 < greenProb ? 'verde' : 'rojo';
-    let typeKey = selectPowerupByColor(color);
-
-    const alternative = getAlternativeType(color, typeKey);
-    if (alternative === null) return;
-    typeKey = alternative;
-
-    activePowerupTypes.add(typeKey);
-    powerupsInAir++;
-    lastPowerupTime = now;
-
-    const isGreen = color === 'verde';
-    console.log(`⚡ Powerup generado: ${typeKey} (${color})`);
-
-    const size = isGreen ? 24 : 36;
-    const speed = isGreen ? 120 : 40;
-
-    const cx = brick.x + brick.w / 2;
-    const cy = brick.y + brick.h / 2;
-
-    const el = document.createElement('div');
-    el.style.cssText = `
-      position: absolute;
-      width: ${size}px; height: ${size}px;
-      border-radius: 
+      for (let r = 
