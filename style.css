@@ -316,8 +316,8 @@ h1#nombre-hero {
   box-shadow: 0 0 30px rgba(212, 175, 55, 0.1);
 }
 .nav-btn {
-  background: none;
-  border: none;
+  background: rgba(201, 162, 77, 0.12);
+  border: 1.5px solid rgba(201, 162, 77, 0.35);
   color: var(--cream);
   display: flex;
   flex-direction: column;
@@ -326,6 +326,13 @@ h1#nombre-hero {
   padding: 0.6rem 0.2rem;
   border-radius: 14px;
   cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: all 0.3s ease;
+}
+.nav-btn:hover {
+  background: rgba(201, 162, 77, 0.2);
+  border-color: rgba(201, 162, 77, 0.5);
+  box-shadow: 0 0 15px rgba(201, 162, 77, 0.2);
 }
 .nav-btn:active { transform: scale(0.95); }
 .nav-btn svg {
@@ -549,6 +556,36 @@ h1#nombre-hero {
 .detalle-card:hover {
   border-color: #fae3a0;
   box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.1), 0 4px 30px rgba(0,0,0,0.5);
+}
+
+/* MODAL DETALLES - LAYOUT VERTICAL COMPACTO */
+#modal-detalles .modal-card {
+  max-width: 380px;
+}
+#modal-detalles .detalle-card {
+  padding: 0.8rem 0.9rem;
+  margin-bottom: 0.6rem;
+}
+#modal-detalles .detalle-card .icono {
+  width: 28px;
+  height: 28px;
+  margin: 0 auto 0.15rem;
+}
+#modal-detalles .detalle-card h3 {
+  font-size: clamp(0.8rem, 2vw, 0.95rem);
+  margin: 0 0 0.25rem;
+}
+#modal-detalles .detalle-info .hora {
+  font-size: clamp(0.75rem, 2vw, 0.9rem);
+  padding: 0.05rem 0.8rem;
+}
+#modal-detalles .detalle-info .lugar {
+  font-size: clamp(0.8rem, 2.2vw, 1rem);
+  margin: 0.1rem 0;
+}
+#modal-detalles .btn-mapa {
+  font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+  padding: 0.4rem 1rem;
 }
 .detalle-card .icono {
   width: 34px;
@@ -978,23 +1015,26 @@ h1#nombre-hero {
   font-size: clamp(0.8rem, 2vw, 1rem);
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #0a1a2f;
-  background: linear-gradient(180deg, #fae3a0, #d4af37, #b8860b);
-  border: 2px solid #fae3a0;
+  color: #f0d9a3;
+  background: rgba(201, 162, 77, 0.15);
+  border: 1.5px solid rgba(201, 162, 77, 0.4);
   padding: 0.5rem 1.2rem;
   border-radius: 30px;
   cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
-  box-shadow: 0 4px 0 #6b4c1a, 0 0 20px rgba(212,175,55,0.2);
-  text-shadow: 0 1px 2px rgba(255,255,255,0.3);
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(212,175,55,0.15);
+  text-shadow: 0 0 8px rgba(201, 162, 77, 0.2);
+  backdrop-filter: blur(4px);
 }
 .game-btn:hover {
+  background: rgba(201, 162, 77, 0.25);
+  border-color: rgba(201, 162, 77, 0.6);
+  box-shadow: 0 0 25px rgba(212,175,55,0.35);
   transform: translateY(-2px);
-  box-shadow: 0 6px 0 #6b4c1a, 0 0 30px rgba(212,175,55,0.4);
 }
 .game-btn:active {
-  transform: translateY(2px);
-  box-shadow: 0 2px 0 #6b4c1a;
+  transform: translateY(0px);
+  background: rgba(201, 162, 77, 0.2);
 }
 
 #game-close {
