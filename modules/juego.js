@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – COMPLETO, PALETA 35% DINÁMICA, BORDE DORADO
+// juego.js – COMPLETO, PALETA DINÁMICA, REDIRECCIÓN AL SALIR
 // ============================================================
-console.log('📦 juego.js (paleta 35%, borde dorado)');
+console.log('📦 juego.js (completo, redirección al salir)');
 
 import { soundTap, soundBrick, soundLose, soundClose } from './sonidos.js';
 
@@ -108,7 +108,7 @@ function isHighScore(score) {
 }
 
 export function initJuego(config, mobile = false) {
-  console.log('🎮 Iniciando juego (paleta 35%, borde dorado)');
+  console.log('🎮 Iniciando juego (paleta dinámica, redirección al salir)');
 
   if (!document.querySelector('#pixel-font')) {
     const link = document.createElement('link');
@@ -350,11 +350,15 @@ export function initJuego(config, mobile = false) {
     menuScoresList.style.display = 'none';
     menuContent.style.display = 'flex';
   });
+
+  // ========== BOTÓN SALIR – REDIRIGE A INDEX.HTML ==========
   menuExit.addEventListener('click', (e) => {
     e.stopPropagation();
     soundTap();
-    closeGame();
+    // Redirigir a la página principal
+    window.location.href = 'index.html';
   });
+
   menuRules.addEventListener('click', (e) => {
     e.stopPropagation();
     soundTap();
@@ -1253,7 +1257,6 @@ export function initJuego(config, mobile = false) {
     nieblaEl.style.opacity = boundary > 0 ? 1 : 0;
   }
 
-  // ========== FUNCIÓN DRAW (borde dorado) ==========
   function draw() {
     paddleWidth = PADDLE_W_BASE * paddleSizeMultiplier;
     paddleEl.style.visibility = 'visible';
@@ -1265,7 +1268,7 @@ export function initJuego(config, mobile = false) {
     paddleEl.style.left = '0';
     paddleEl.style.background = '#111';
     paddleEl.style.border = '2px solid #d4af37';
-    paddleEl.style.boxShadow = '0 0 25px rgba(201, 162, 77, 0.4)';
+    paddleEl.style.boxShadow = '0 0 25px rgba(212,175,55,0.3)';
     paddleEl.style.borderRadius = '8px';
     paddleEl.style.height = PADDLE_H + 'px';
     paddleEl.style.zIndex = '100';
@@ -1301,7 +1304,6 @@ export function initJuego(config, mobile = false) {
     }
   }
 
-  // ========== GAME LOOP ==========
   function gameLoop(timestamp) {
     if (!running) {
       animFrameId = requestAnimationFrame(gameLoop);
@@ -1468,18 +1470,15 @@ export function initJuego(config, mobile = false) {
     animFrameId = requestAnimationFrame(gameLoop);
   }
 
-  // ========== APLICAR POWER-UP (con 35% y alternancia) ==========
   function applyPowerup(pu) {
     const type = pu.type;
     switch (type) {
       case 'PALA_GRANDE':
-        // Si ya está grande, no hacer nada; si está pequeña, primero normalizar
-        if (paddleSizeMultiplier === 0.65) paddleSizeMultiplier = 1;
+        if (paddleSizeMultiplier < 1) paddleSizeMultiplier = 1;
         paddleSizeMultiplier = 1.35;
         break;
       case 'PALA_MINI':
-        // Si ya está pequeña, no hacer nada; si está grande, primero normalizar
-        if (paddleSizeMultiplier === 1.35) paddleSizeMultiplier = 1;
+        if (paddleSizeMultiplier > 1) paddleSizeMultiplier = 1;
         paddleSizeMultiplier = 0.65;
         break;
       case 'MULTIBOLA': {
@@ -1515,7 +1514,6 @@ export function initJuego(config, mobile = false) {
     draw();
   }
 
-  // ========== ABRIR Y CERRAR JUEGO ==========
   function openGame() {
     cleanGameState();
     overlay.classList.add('open');
@@ -1548,7 +1546,6 @@ export function initJuego(config, mobile = false) {
     console.log('🧹 Juego cerrado y limpiado');
   }
 
-  // ========== LAYOUT ==========
   function layoutStage() {
     const availW = Math.min(window.innerWidth * 0.92, 450);
     const availH = Math.min(window.innerHeight * 0.72, 560);
@@ -1623,8 +1620,5 @@ export function initJuego(config, mobile = false) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego inicializado (paleta 35%, borde dorado)');
+  console.log('✅ Juego inicializado (paleta dinámica, redirección al salir)');
 }
-
-
-
