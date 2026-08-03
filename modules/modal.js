@@ -1,4 +1,4 @@
-console.log('📦 módulo modal b2.js cargado');
+console.log('📦 módulo modal b2.js cargado (transición simple)');
 
 import { soundOpen, soundClose, soundTap } from './sonidos.js';
 import { burst } from './particulas.js';
@@ -48,12 +48,12 @@ function openModal(id) {
   if (!modal) return;
   modal.classList.add('open');
   soundOpen();
-  pauseParticulas(); // Pausar pétalos al abrir cualquier modal
+  pauseParticulas();
 }
 
 function closeModal(el) {
   if (!el) return;
   el.classList.remove('open');
   soundClose();
-  resumeParticulas(); // Reanudar pétalos al cerrar el modal (solo si es el último abierto)
+  resumeParticulas();
 }
