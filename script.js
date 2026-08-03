@@ -1,4 +1,4 @@
-console.log('🚀 script 23.js optimizado');
+console.log('🚀 script.js (sin pétalos)');
 
 const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
 
@@ -72,16 +72,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   const config = await cargarConfig();
   rellenarDatos(config);
 
+  // Sonidos
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
     initSonidos();
   } catch (e) { console.error('❌ Sonidos:', e); }
 
-  try {
-    const { initParticulas } = await import('./modules/particulas.js');
-    initParticulas(isMobile);
-  } catch (e) { console.error('❌ Partículas:', e); }
-
+  // Música
   try {
     const { initMusica, playMusic, toggleMusic, resetMusic } = await import('./modules/musica.js');
     initMusica(config);
@@ -163,4 +160,3 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   backBtn.addEventListener('click', cerrarReja);
 });
-
