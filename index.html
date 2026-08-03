@@ -15,33 +15,25 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css?v=20260802">
+  <link rel="stylesheet" href="style.css?v=20260803">
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌹</text></svg>">
 </head>
 <body>
   <div id="bg"></div>
-
-  <!-- VÍDEO DE FONDO PARA LA APP (mar1.mp4) – sobre bella.jpg, debajo de todo lo demás -->
   <video id="video-app" autoplay loop muted playsinline>
     <source src="archivos/mar1.mp4" type="video/mp4">
-    Tu navegador no soporta video.
   </video>
-
   <div id="petals-layer" role="presentation"></div>
 
   <!-- PORTAL / REJA -->
   <div id="portal" role="dialog" aria-label="Puerta de entrada">
-    <!-- VÍDEO DE FONDO PARA EL PORTAL (mar2.mp4) – debajo del mensaje y la reja -->
     <video id="video-portal" autoplay loop muted playsinline>
       <source src="archivos/mar2.mp4" type="video/mp4">
-      Tu navegador no soporta video.
     </video>
-
     <div class="portal-inner">
       <span class="eyebrow gold-text">Una invitación encantada</span>
       <div class="gate-wrapper" id="gate-wrapper" role="button" tabindex="0" aria-label="Abrir la reja">
-        <!-- Hoja izquierda -->
         <div class="gate-leaf gate-left" aria-hidden="true">
           <svg viewBox="0 0 150 200" width="100%" height="100%">
             <defs>
@@ -127,7 +119,6 @@
             <use href="#scrollR" x="129" y="176"/>
           </svg>
         </div>
-        <!-- Hoja derecha -->
         <div class="gate-leaf gate-right" aria-hidden="true">
           <svg viewBox="0 0 150 200" width="100%" height="100%">
             <defs>
@@ -235,7 +226,6 @@
         </svg>
       </button>
     </div>
-
     <div id="app-mid">
       <div id="oval-wrap">
         <div class="oval-frame">
@@ -244,16 +234,13 @@
           </div>
         </div>
       </div>
-
       <div class="name-wrap">
         <h1 id="nombre-hero">X</h1>
       </div>
-
       <p class="frase-inline gold-text" id="frase-texto">Cargando...</p>
       <p class="fecha-fija gold-text" id="fecha-fija">Cargando...</p>
       <p class="hint gold-text" id="hint-juego">👆 Toca el nombre para jugar</p>
     </div>
-
     <nav id="nav" aria-label="Navegación principal">
       <button class="nav-btn" data-modal="modal-contador" aria-label="Cuenta regresiva">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="13" r="8"/><path d="M12 9 L12 13 L15 15 M9 2 L15 2"/></svg>
@@ -288,7 +275,7 @@
   <div class="modal-overlay" id="modal-detalles" role="dialog" aria-modal="true" aria-labelledby="modal-detalles-title">
     <div class="modal-card">
       <button class="modal-close" data-close aria-label="Cerrar">&times;</button>
-      <h2 id="modal-detalles-title" class="gold-text">🏰 Donde 🏰 </h2>
+      <h2 id="modal-detalles-title" class="gold-text">🏰 Donde 🏰</h2>
       <div class="detalle-card">
         <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2 L12 8 M8 6 L16 6 M6 22 L18 22 L18 12 L6 12 Z M9 22 L9 16 L15 16 L15 22"/></svg>
         <h3 class="gold-text">Misa</h3>
@@ -326,7 +313,7 @@
           <p class="gold-text"><span class="tratamiento">Sr.</span> <span id="padre1">--</span></p>
           <p class="gold-text"><span class="tratamiento">Sra.</span> <span id="padre2">--</span></p>
         </div>
-        <p class="familia-detalle gold-text" style="font-family: var(--serif-body); font-style: italic;">"Su amor me ha dado alas"</p>
+        <p class="familia-detalle gold-text">"Su amor me ha dado alas"</p>
       </div>
       <div class="divider-thin" aria-hidden="true"></div>
       <div class="familia-grupo">
@@ -339,7 +326,7 @@
           <p class="gold-text"><span class="tratamiento">Sr.</span> <span id="padrino1">--</span></p>
           <p class="gold-text"><span class="tratamiento">Sra.</span> <span id="padrino2">--</span></p>
         </div>
-        <p class="familia-detalle gold-text" style="font-family: var(--serif-body); font-style: italic;">"Su guía ilumina mi camino"</p>
+        <p class="familia-detalle gold-text">"Su guía ilumina mi camino"</p>
       </div>
     </div>
   </div>
@@ -400,7 +387,7 @@
   <div class="modal-overlay" id="modal-rules" role="dialog" aria-modal="true" aria-labelledby="modal-rules-title" style="z-index:100;">
     <div class="modal-card" style="max-width:500px;">
       <button class="modal-close" id="rules-close" aria-label="Cerrar reglas">&times;</button>
-      <h2 id="modal-rules-title" class="gold-text" style="font-family:'Cinzel',serif; text-shadow:0 0 15px #d4af37;">📖 Reglas del juego</h2>
+      <h2 id="modal-rules-title" class="gold-text">📖 Reglas del juego</h2>
       <div style="color:#f0e0c0; font-family:'Cinzel',serif; font-size:0.9rem; text-align:left; padding:0.5rem 0; line-height:1.6;">
         <p><strong style="color:#fae3a0;">🎯 Objetivo:</strong> Rompe todos los ladrillos para ganar puntos.</p>
         <p><strong style="color:#fae3a0;">🖱️ Controles:</strong> Mueve la pala con el ratón, el dedo (en móvil) o las teclas A/D y flechas izquierda/derecha.</p>
