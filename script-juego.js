@@ -7,7 +7,7 @@ const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(nav
 
 async function cargarConfig() {
   try {
-    const res = await fetch('config.json');
+    const res = await fetch(`config.json?t=${Date.now()}`);
     if (!res.ok) throw new Error('HTTP error ' + res.status);
     const data = await res.json();
     if (!data.nombre) throw new Error('Falta "nombre"');
