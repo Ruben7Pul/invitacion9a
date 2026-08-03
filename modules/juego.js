@@ -1,35 +1,41 @@
 // ============================================================
-// juego.js – CORREGIDO (bug pelota y resumeParticulas)
+// juego.js – OPTIMIZADO PARA MÓVIL (completo)
 // ============================================================
-console.log('📦 juego w.js (corregido: bug pelota y resumeParticulas)');
+console.log('📦 juego.js optimizado');
 
-import { soundTap, soundBrick, soundWin, soundLose, soundClose } from './sonidos.js';
+import { soundTap, soundBrick, soundLose, soundClose, soundWin } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
 
-const PADDLE_W_BASE = 72;
+// Detección de móvil
+const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+console.log('📱 Modo móvil:', isMobile);
+
+// Constantes ajustables
+const MAX_DELTA = 0.03;
+const PADDLE_W_BASE = isMobile ? 64 : 72;
 const PADDLE_H = 10;
 const BALL_R = 6;
 const STAGE_W = 300;
 const STAGE_H = 420;
 const TOP_OFFSET = 30;
-const BALL_SPEED = 264;
+const BALL_SPEED = isMobile ? 200 : 264;
 const PADDLE_SPEED = 300;
-const TARGET_GAME_POINTS = 18;
+const TARGET_GAME_POINTS = isMobile ? 15 : 18;
 const REGEN_THRESHOLD = 9;
 const BALL_LOW_Y = STAGE_H - 60;
 const MAX_NIEBLA = 3;
-// Altura (en px, sobre STAGE_H=420) hasta donde llega la niebla en cada nivel.
-// Nivel 1: cubre la zona de ladrillos (170px) + 15% más.
-// Nivel 2: cubre el 60% del tablero.
-// Nivel 3: cubre el 90% del tablero (deja un 10% visible junto a la paleta).
 const NIEBLA_HEIGHTS = [0, Math.round(170 * 1.15), Math.round(STAGE_H * 0.60), Math.round(STAGE_H * 0.90)];
-// Margen extra (px) donde la niebla se desvanece suavemente. Este margen
-// queda SIEMPRE por debajo del límite real de cada nivel, así el degradado
-// nunca resta opacidad dentro de la zona que debe quedar tapada.
 const NIEBLA_FEATHER = 26;
 const MAX_LIVES = 3;
 const SCORE_PER_LIFE = 8500;
 const TOP_SCORES_COUNT = 5;
+
+// Ladrillos: menos filas/columnas en móvil
+const BRICK_ROWS = isMobile ? 5 : 6;
+const BRICK_COLS = isMobile ? 5 : 6;
+const BRICK_W = 38;
+const BRICK_H = 16;
+const BRICK_GAP = 3;
 
 const BRICK_TYPES = {
   CLAY:   { value: 1, playerPoints: 100, hits: 1, color: '#d9534f', label: 'CLAY' },
@@ -37,11 +43,6 @@ const BRICK_TYPES = {
   IRON:   { value: 3, playerPoints: 300, hits: 3, color: '#7a8a9a', label: 'IRON' }
 };
 
-// Grietas visuales según el tipo de ladrillo y golpes restantes:
-// - Arcilla (1 golpe): se rompe de una, nunca muestra grieta.
-// - Madera (2 golpes): tras el primer golpe muestra griet2.
-// - Hierro (3 golpes): tras el primer golpe muestra griet1, tras el
-//   segundo muestra griet2 (más dañado), antes de romperse del todo.
 function getCrackImageSrc(brick) {
   if (brick.hits >= brick.maxHits) return null;
   if (brick.maxHits === 2) return 'archivos/griet2.png';
@@ -58,43 +59,30 @@ const POWERUP_PROBS = {
   IRON: 0.24
 };
 
-// Control de ritmo: evita que caigan varios power-ups juntos (racha) y
-// evita también que pasen demasiados segundos sin que caiga ninguno (sequía).
-const POWERUP_MIN_GAP_MS = 3500;  // mínimo entre dos power-ups normales
-const POWERUP_PITY_GAP_MS = 11000; // si pasa esto sin ninguno, se fuerza el próximo
+const POWERUP_MIN_GAP_MS = isMobile ? 5000 : 3500;
+const POWERUP_PITY_GAP_MS = isMobile ? 15000 : 11000;
 
-// Patrones de forma para variar cómo se ven las regeneraciones de ladrillos.
-// Cada uno es una función (fila, columna) -> boolean sobre la grilla 6x6.
-// Al regenerar se elige uno al azar y se prioriza ubicar los ladrillos ahí;
-// si no alcanzan celdas del patrón, se completa con celdas libres normales
-// (nunca se bloquea la partida por falta de espacio del patrón elegido).
 const BRICK_PATTERNS = [
-  (r, c) => Math.abs(r - 2.5) + Math.abs(c - 2.5) <= 2.5, // diamante
-  (r, c) => (r === 2 || r === 3) || (c === 2 || c === 3),  // cruz
-  (r, c) => r === 0 || r === 5 || c === 0 || c === 5,       // marco
-  (r, c) => c % 2 === 0,                                    // columnas
-  (r, c) => (r + c) % 2 === 0                                // ajedrez
+  (r, c) => Math.abs(r - 2.5) + Math.abs(c - 2.5) <= 2.5,
+  (r, c) => (r === 2 || r === 3) || (c === 2 || c === 3),
+  (r, c) => r === 0 || r === BRICK_ROWS-1 || c === 0 || c === BRICK_COLS-1,
+  (r, c) => c % 2 === 0,
+  (r, c) => (r + c) % 2 === 0
 ];
 
 function buildPatternCells(predicate) {
-  const cols = 6, rows = 6;
   const cells = [];
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      if (predicate(r, c)) cells.push(r * cols + c);
+  for (let r = 0; r < BRICK_ROWS; r++) {
+    for (let c = 0; c < BRICK_COLS; c++) {
+      if (predicate(r, c)) cells.push(r * BRICK_COLS + c);
     }
   }
   return cells;
 }
 
-// Ladrillo dorado: ocasional, mismo comportamiento pero da el triple de
-// puntos. Solo puede haber uno activo a la vez, y dura 5s: si no se rompe
-// a tiempo, vuelve a ser un ladrillo normal de su mismo tipo.
 const GOLDEN_BRICK_CHANCE = 0.08;
 const GOLDEN_BRICK_DURATION_MS = 5000;
 
-// Racha/combo: cada ladrillo seguido sin perder una vida suma bonus de
-// puntos, con un techo para que no se desbalancee (máx. +50%).
 const COMBO_BONUS_PER_HIT = 0.02;
 const COMBO_BONUS_CAP = 0.5;
 
@@ -105,19 +93,6 @@ const GREEN_PROB_TABLE = [
 
 const GREEN_WEIGHTS = { MULTIBOLA: 15, PALA_GRANDE: 35, DUREZA: 50 };
 const RED_WEIGHTS   = { BOLA_NIEBLA: 10, PALA_MINI: 35, FLAQUESA: 55 };
-
-const SCORE_MESSAGES = [
-  "¡Ánimo! Cada punto cuenta.",
-  "¡Vas bien! Sigue así.",
-  "¡Buen ritmo! No te detengas.",
-  "¡Excelente! Cada vez mejor.",
-  "¡Increíble! Eres un campeón.",
-  "¡Fantástico! Nadie te detiene.",
-  "¡Genial! Estás en la cima.",
-  "¡Brillante! Eres imparable.",
-  "¡Legendario! Dejas huella.",
-  "¡Dios del juego! Eres el mejor."
-];
 
 function getHighScores() {
   try {
@@ -144,13 +119,8 @@ function isHighScore(score) {
   return score > scores[scores.length - 1].score;
 }
 
-function getRandomName() {
-  const names = ['Jugador', 'Campeón', 'Leyenda', 'Guerrero', 'Mago', 'Ninja', 'Samurai', 'Vikingo', 'Fénix', 'Titan'];
-  return names[Math.floor(Math.random() * names.length)];
-}
-
-export function initJuego(config) {
-  console.log('🎮 Iniciando juego (corregido)');
+export function initJuego(config, mobile = false) {
+  console.log('🎮 Iniciando juego (optimizado)');
 
   if (!document.querySelector('#pixel-font')) {
     const link = document.createElement('link');
@@ -161,7 +131,7 @@ export function initJuego(config) {
   }
 
   const nombreEl = document.getElementById('nombre-hero');
-  nombreEl?.addEventListener('click', () => {
+  nombreEl.addEventListener('click', () => {
     soundTap();
     openGame();
   });
@@ -279,28 +249,6 @@ export function initJuego(config) {
     transition: height 0.6s ease, opacity 0.6s ease;
     opacity: 0; z-index: 20;
   `;
-  // La niebla ya no es "un rectángulo blanco con degradado": el fondo es una
-  // mezcla de manchas radiales (blanco / gris muy claro) que le dan textura
-  // de nube, y el borde inferior ondulado lo define un mask-image (no el
-  // fondo). Toda la parte del fondo es SIEMPRE 100% opaca (colores sólidos,
-  // sin alpha) — lo único que puede ocultar algo es el mask, y el mask
-  // garantiza opacidad total desde 0 hasta "boundary" (límite real del
-  // nivel); el desvanecido ondulado ocurre solo en el margen extra
-  // (NIEBLA_FEATHER), que siempre queda MÁS ABAJO del límite real. Si el
-  // navegador no soporta mask-image, simplemente no se aplica ningún
-  // recorte y se ve el rectángulo completo opaco: nunca revela nada, en el
-  // peor caso tapa un poco más de lo necesario.
-  //
-  // Se agrega a "inner" (no a "stage"): así comparte el mismo sistema de
-  // coordenadas lógico (300x420) que ladrillos/pelota/power-ups, y el mismo
-  // contexto de apilamiento, para que el z-index de la pelota y la bola azul
-  // realmente la deje por encima de la niebla.
-  //
-  // La niebla es una capa sólida y opaca que se dibuja ENCIMA del tablero,
-  // como una cortina: no oculta ladrillos ni power-ups individualmente
-  // (siguen 100% visibles en el DOM y su colisión funciona igual), solo los
-  // tapa visualmente mientras están debajo de ella. Al no tener degradado ni
-  // transparencia no hay forma de "ver a través" de la niebla lo que hay atrás.
   inner.appendChild(nieblaEl);
 
   let scale = 1;
@@ -345,10 +293,15 @@ export function initJuego(config) {
   let paused = false;
   let gameOver = false;
   let pendingHighScore = false;
-  let gameIsOpen = false; // control para resumeParticulas
+  let gameIsOpen = false;
+  let uiCounter = 0; // para actualizar UI cada 2 frames
 
   // ---- FUNCIONES DEL MENÚ ----
   function showMenu(showGameOver = false, score = 0) {
+    paddleEl.style.display = 'none';
+    document.querySelectorAll('.ball-dynamic').forEach(el => el.style.display = 'none');
+    document.getElementById('ball').style.display = 'none';
+
     if (!menuEl) return;
     menuEl.style.display = 'flex';
     if (showGameOver) {
@@ -604,45 +557,6 @@ export function initJuego(config) {
     return `rgb(${r},${g},${b})`;
   }
 
-  function upgradeBrickType(brick) {
-    if (brick.type === BRICK_TYPES.CLAY) {
-      brick.type = BRICK_TYPES.WOOD;
-    } else if (brick.type === BRICK_TYPES.WOOD) {
-      brick.type = BRICK_TYPES.IRON;
-    } else return false;
-    brick.hits = brick.type.hits;
-    brick.maxHits = brick.type.hits;
-    brick.value = brick.type.value;
-    brick.playerPoints = brick.type.playerPoints;
-    updateBrickVisual(brick);
-    return true;
-  }
-
-  function downgradeBrickType(brick) {
-    if (brick.type === BRICK_TYPES.IRON) {
-      brick.type = BRICK_TYPES.WOOD;
-    } else if (brick.type === BRICK_TYPES.WOOD) {
-      brick.type = BRICK_TYPES.CLAY;
-    } else return false;
-    brick.hits = brick.type.hits;
-    brick.maxHits = brick.type.hits;
-    brick.value = brick.type.value;
-    brick.playerPoints = brick.type.playerPoints;
-    updateBrickVisual(brick);
-    return true;
-  }
-
-  function resetBricksToOriginal() {
-    for (const b of bricks) {
-      b.type = b.originalType;
-      b.hits = b.originalHits;
-      b.maxHits = b.originalHits;
-      b.value = b.type.value;
-      b.playerPoints = b.type.playerPoints;
-      updateBrickVisual(b);
-    }
-  }
-
   function generateBrickValues() {
     const total = TARGET_GAME_POINTS;
     const values = [];
@@ -666,14 +580,13 @@ export function initJuego(config) {
   }
 
   function getFreeCells(excludeCells = new Set()) {
-    const cols = 6, rows = 6;
     const used = new Set();
     bricks.forEach(b => { if (b.alive) used.add(b.cell); });
     for (const cell of excludeCells) used.add(cell);
     const free = [];
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const idx = r * cols + c;
+    for (let r = 0; r < BRICK_ROWS; r++) {
+      for (let c = 0; c < BRICK_COLS; c++) {
+        const idx = r * BRICK_COLS + c;
         if (!used.has(idx)) free.push(idx);
       }
     }
@@ -681,20 +594,18 @@ export function initJuego(config) {
   }
 
   function getCellsWithBalls() {
-    const cols = 6, rows = 6;
-    const brickW = 38, brickH = 16, gap = 3;
-    const totalWidth = cols * (brickW + gap) - gap;
+    const totalWidth = BRICK_COLS * (BRICK_W + BRICK_GAP) - BRICK_GAP;
     const startX = (STAGE_W - totalWidth) / 2;
     const startY = TOP_OFFSET;
     const cells = new Set();
     for (const b of balls) {
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const x = startX + c * (brickW + gap);
-          const y = startY + r * (brickH + gap);
-          if (b.x > x - 10 && b.x < x + brickW + 10 &&
-              b.y > y - 10 && b.y < y + brickH + 10) {
-            cells.add(r * cols + c);
+      for (let r = 0; r < BRICK_ROWS; r++) {
+        for (let c = 0; c < BRICK_COLS; c++) {
+          const x = startX + c * (BRICK_W + BRICK_GAP);
+          const y = startY + r * (BRICK_H + BRICK_GAP);
+          if (b.x > x - 10 && b.x < x + BRICK_W + 10 &&
+              b.y > y - 10 && b.y < y + BRICK_H + 10) {
+            cells.add(r * BRICK_COLS + c);
           }
         }
       }
@@ -703,8 +614,7 @@ export function initJuego(config) {
   }
 
   function placeBricks(values, excludeCells = new Set(), preferredCells = null) {
-    const cols = 6, brickW = 38, brickH = 16, gap = 3;
-    const totalWidth = cols * (brickW + gap) - gap;
+    const totalWidth = BRICK_COLS * (BRICK_W + BRICK_GAP) - BRICK_GAP;
     const startX = (STAGE_W - totalWidth) / 2;
     const startY = TOP_OFFSET;
 
@@ -723,10 +633,10 @@ export function initJuego(config) {
     const toPlace = Math.min(values.length, shuffled.length);
     for (let i = 0; i < toPlace; i++) {
       const cell = shuffled[i];
-      const row = Math.floor(cell / cols);
-      const col = cell % cols;
-      const x = startX + col * (brickW + gap);
-      const y = startY + row * (brickH + gap);
+      const row = Math.floor(cell / BRICK_COLS);
+      const col = cell % BRICK_COLS;
+      const x = startX + col * (BRICK_W + BRICK_GAP);
+      const y = startY + row * (BRICK_H + BRICK_GAP);
       const value = values[i];
       const type = getBrickTypeFromValue(value);
 
@@ -734,8 +644,8 @@ export function initJuego(config) {
       el.className = 'brick';
       el.style.left = x + 'px';
       el.style.top = y + 'px';
-      el.style.width = brickW + 'px';
-      el.style.height = brickH + 'px';
+      el.style.width = BRICK_W + 'px';
+      el.style.height = BRICK_H + 'px';
       el.style.borderRadius = '4px';
       el.style.border = '1px solid rgba(0,0,0,0.3)';
       el.style.display = 'flex';
@@ -759,7 +669,7 @@ export function initJuego(config) {
       inner.appendChild(el);
 
       const brick = {
-        x, y, w: brickW, h: brickH,
+        x, y, w: BRICK_W, h: BRICK_H,
         el,
         alive: true,
         hits: type.hits,
@@ -787,7 +697,7 @@ export function initJuego(config) {
   }
 
   function maybeMakeGolden(fromIndex) {
-    if (goldenBrickRef && goldenBrickRef.alive) return; // ya hay uno activo
+    if (goldenBrickRef && goldenBrickRef.alive) return;
     if (Math.random() >= GOLDEN_BRICK_CHANCE) return;
     const recent = bricks.slice(fromIndex);
     if (recent.length === 0) return;
@@ -798,8 +708,6 @@ export function initJuego(config) {
     updateBrickVisual(chosen);
   }
 
-  // Revisa si el ladrillo dorado activo se venció sin ser destruido; si es
-  // así, vuelve a ser un ladrillo normal de su mismo tipo.
   function checkGoldenExpiry() {
     if (!goldenBrickRef) return;
     if (!goldenBrickRef.alive) { goldenBrickRef = null; return; }
@@ -838,17 +746,11 @@ export function initJuego(config) {
     return Math.max(0, (now - gameStartTime - pausedTime) / 60000);
   }
 
-  // Multiplicador de velocidad de la pelota según el tiempo jugado.
-  // Sube poco a poco al principio, llega muy difícil (~1.9x) cerca del
-  // minuto 8, y sigue subiendo (más lento) hasta volverse prácticamente
-  // imposible (~2.7x) alrededor del minuto 14, donde se estabiliza. El
-  // juego nunca termina por esto: solo se vuelve cada vez más difícil
-  // sostener el ritmo de puntos.
   const BALL_SPEED_RAMP_MINUTES = 14;
-  const BALL_SPEED_MAX_MULT = 2.7;
+  const BALL_SPEED_MAX_MULT = isMobile ? 2.2 : 2.7;
   function getSpeedMultiplier(minutes) {
     const t = Math.min(minutes, BALL_SPEED_RAMP_MINUTES) / BALL_SPEED_RAMP_MINUTES;
-    const eased = t * t * (3 - 2 * t); // smoothstep: crecimiento suave, no lineal
+    const eased = t * t * (3 - 2 * t);
     return 1 + eased * (BALL_SPEED_MAX_MULT - 1);
   }
 
@@ -857,8 +759,6 @@ export function initJuego(config) {
   }
 
   function getGreenProbability(minutes) {
-    // La tabla avanza cada 0.5 minutos (17 entradas = minuto 0 al 8), así que
-    // el índice real es minutes*2, no minutes directo.
     const step = minutes * 2;
     if (step <= 0) return GREEN_PROB_TABLE[0];
     if (step >= GREEN_PROB_TABLE.length - 1) return GREEN_PROB_TABLE[GREEN_PROB_TABLE.length - 1];
@@ -903,18 +803,14 @@ export function initJuego(config) {
   }
 
   function spawnPowerup(brick) {
-    if (ladrillosRotos <= 36) return;
+    if (ladrillosRotos <= (BRICK_ROWS * BRICK_COLS)) return;
     if (powerupsInAir >= 2) return;
 
     const now = performance.now();
     const sinceLast = lastPowerupTime === 0 ? Infinity : now - lastPowerupTime;
 
-    // Racha: si cayó un power-up hace muy poco, no dejamos que caiga otro
-    // enseguida, sin importar la tirada de probabilidad.
     if (sinceLast < POWERUP_MIN_GAP_MS) return;
 
-    // Sequía: si ya pasó demasiado tiempo sin ninguno, forzamos que este
-    // ladrillo sí suelte uno (nos saltamos la tirada de probabilidad normal).
     const forced = sinceLast >= POWERUP_PITY_GAP_MS;
 
     if (!forced) {
@@ -943,8 +839,6 @@ export function initJuego(config) {
     lastPowerupTime = now;
 
     const isGreen = color === 'verde';
-    console.log(`⚡ Powerup generado: ${typeKey} (${color})`);
-
     const size = isGreen ? 24 : 36;
     const speed = isGreen ? 120 : 40;
 
@@ -1057,28 +951,6 @@ export function initJuego(config) {
     blueBallActive = false;
   }
 
-  function showFloatingMessage(text, color = '#fff') {
-    const el = document.createElement('div');
-    el.style.cssText = `
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-family: 'Press Start 2P', monospace;
-      font-size: 1.2rem;
-      color: ${color};
-      text-shadow: 0 0 20px rgba(0,0,0,0.8);
-      pointer-events: none;
-      z-index: 30;
-      animation: floatMsg 2s ease forwards;
-      text-align: center;
-      white-space: nowrap;
-    `;
-    el.textContent = text;
-    inner.appendChild(el);
-    setTimeout(() => el.remove(), 2500);
-  }
-
   function launchBall() {
     if (launched) return;
     const speed = getCurrentBallSpeed();
@@ -1103,7 +975,6 @@ export function initJuego(config) {
     powerups = [];
     activePowerupTypes.clear();
     powerupsInAir = 0;
-    inner.querySelectorAll('[style*="floatMsg"]').forEach(el => el.remove());
     bricks = [];
     balls = [];
     paddle.x = (STAGE_W - PADDLE_W_BASE) / 2;
@@ -1181,7 +1052,6 @@ export function initJuego(config) {
     inner.querySelectorAll('.brick').forEach(b => b.remove());
     powerups.forEach(p => p.el.remove());
     powerups = [];
-    inner.querySelectorAll('[style*="floatMsg"]').forEach(el => el.remove());
 
     const initialX = paddle.x + paddleWidth / 2;
     const initialY = STAGE_H - 14 - BALL_R;
@@ -1213,23 +1083,18 @@ export function initJuego(config) {
     }
   }
 
-  // CORRECCIÓN: perder vida sin bug de teletransporte
   function loseLife() {
     lives--;
     animateHeartLoss();
     gameTimeActive = false;
     comboCount = 0;
 
-    // Detener la pelota inmediatamente
     launched = false;
-    // Vaciar las bolas actuales para evitar colisiones durante el setTimeout
     balls = [];
-    // Limpiar powerups en caída
     powerups.forEach(p => p.el.remove());
     powerups = [];
     activePowerupTypes.clear();
     powerupsInAir = 0;
-    // Reiniciar efectos
     paddleSizeMultiplier = 1;
     paddleWidth = PADDLE_W_BASE;
     ballDurability = 1;
@@ -1244,13 +1109,11 @@ export function initJuego(config) {
       return;
     }
 
-    // Después de 300ms, colocar nueva bola pegada a la pala
     setTimeout(() => {
       const newX = paddle.x + paddleWidth / 2;
       const newY = STAGE_H - 14 - BALL_R;
       balls = [{ x: newX, y: newY, vx: 0, vy: 0 }];
       launched = false;
-      // Asegurarse de que no haya powerups residuales
       powerups.forEach(p => p.el.remove());
       powerups = [];
       activePowerupTypes.clear();
@@ -1275,7 +1138,7 @@ export function initJuego(config) {
 
   function startGame() {
     resetGameState();
-    const clayValues = new Array(36).fill(1);
+    const clayValues = new Array(BRICK_ROWS * BRICK_COLS).fill(1);
     inner.querySelectorAll('.brick').forEach(b => b.remove());
     bricks = [];
     gamePoints = 0;
@@ -1302,6 +1165,7 @@ export function initJuego(config) {
     updateDurabilityVisual();
     draw();
     lastTime = 0;
+    uiCounter = 0;
     if (animFrameId) cancelAnimationFrame(animFrameId);
     animFrameId = requestAnimationFrame(gameLoop);
   }
@@ -1322,8 +1186,6 @@ export function initJuego(config) {
       }
     }
 
-    // No sueltes la bola azul mientras ya hay un power-up normal cayendo:
-    // así evitamos que el jugador tenga que atender 3 cosas a la vez.
     if (pendingBlueBall && !blueBallActive && powerupsInAir <= 1) {
       pendingBlueBall = false;
       spawnBlueBall();
@@ -1365,16 +1227,9 @@ export function initJuego(config) {
 
   function updateNiebla() {
     const boundary = getNieblaBoundary();
-    // El alto real incluye el margen de desvanecido (NIEBLA_FEATHER), que
-    // siempre queda MÁS ABAJO del límite lógico "boundary". Así, todo lo que
-    // hay entre 0 y "boundary" queda 100% opaco (nada se ve debajo), y el
-    // degradado suave solo ocurre en la franja extra, donde no hay nada que
-    // deba seguir oculto.
     const totalHeight = boundary > 0 ? boundary + NIEBLA_FEATHER : 0;
     nieblaEl.style.height = totalHeight + 'px';
     nieblaEl.style.opacity = boundary > 0 ? 1 : 0;
-    // Ladrillos y power-ups siempre quedan visibles en el DOM: la niebla
-    // solo los tapa visualmente al dibujarse encima de ellos.
   }
 
   function draw() {
@@ -1424,10 +1279,9 @@ export function initJuego(config) {
       return;
     }
 
-    const delta = lastTime ? Math.min((timestamp - lastTime) / 1000, 0.05) : 0.016;
+    // Delta limitado para evitar saltos
+    const delta = lastTime ? Math.min((timestamp - lastTime) / 1000, MAX_DELTA) : 0.016;
     lastTime = timestamp;
-
-    updateUI();
 
     let paddleMoved = false;
     if (keys.left) { paddle.x = Math.max(0, paddle.x - PADDLE_SPEED * delta); paddleMoved = true; }
@@ -1453,15 +1307,18 @@ export function initJuego(config) {
       return;
     }
 
+    // ---- MOVER BOLAS ----
     for (let i = balls.length - 1; i >= 0; i--) {
       const b = balls[i];
       b.x += b.vx * delta;
       b.y += b.vy * delta;
 
+      // Paredes
       if (b.x - BALL_R < 0) { b.x = BALL_R; b.vx = Math.abs(b.vx); }
       if (b.x + BALL_R > STAGE_W) { b.x = STAGE_W - BALL_R; b.vx = -Math.abs(b.vx); }
       if (b.y - BALL_R < 0) { b.y = BALL_R; b.vy = Math.abs(b.vy); }
 
+      // Pala
       const py = STAGE_H - 14;
       if (b.vy > 0 && b.y + BALL_R >= py && b.y + BALL_R <= py + 10 &&
           b.x >= paddle.x - BALL_R && b.x <= paddle.x + paddleWidth + BALL_R) {
@@ -1472,11 +1329,10 @@ export function initJuego(config) {
         const speed = getCurrentBallSpeed();
         b.vx = Math.sin(angle) * speed;
         b.vy = -Math.cos(angle) * speed;
-        // El combo se mide entre un toque de paleta y el siguiente: cada
-        // vez que la pelota vuelve a la paleta, arranca una racha nueva.
         comboCount = 0;
       }
 
+      // Ladrillos
       for (const br of bricks) {
         if (!br.alive) continue;
         if (b.x + BALL_R > br.x && b.x - BALL_R < br.x + br.w &&
@@ -1507,7 +1363,7 @@ export function initJuego(config) {
             playerScore += Math.round(basePoints * comboMult);
             gamePoints -= br.value;
             ladrillosRotos++;
-            updateUI();
+            // UI se actualiza cada 2 frames
             spawnPowerup(br);
             if (gamePoints <= REGEN_THRESHOLD) requestRegeneration();
           } else {
@@ -1527,12 +1383,11 @@ export function initJuego(config) {
             animFrameId = requestAnimationFrame(gameLoop);
             return;
           }
-          // Si después de perder vida no hay bolas, se maneja en loseLife
-          // No hacer nada aquí porque loseLife ya se encarga
         }
       }
     }
 
+    // Powerups
     for (let i = powerups.length - 1; i >= 0; i--) {
       const pu = powerups[i];
       pu.y += pu.vy * delta;
@@ -1568,6 +1423,12 @@ export function initJuego(config) {
 
     checkGoldenExpiry();
     if (pendingRegeneration) checkAndRegenerate();
+
+    // Actualizar UI cada 2 frames para ahorrar CPU
+    uiCounter++;
+    if (uiCounter % 2 === 0) {
+      updateUI();
+    }
 
     draw();
     animFrameId = requestAnimationFrame(gameLoop);
@@ -1616,7 +1477,6 @@ export function initJuego(config) {
     activePowerupTypes.delete(type);
   }
 
-  // ---- ABRIR Y CERRAR JUEGO ----
   function openGame() {
     cleanGameState();
     overlay.classList.add('open');
@@ -1646,14 +1506,13 @@ export function initJuego(config) {
     overlay.classList.remove('open');
     cleanGameState();
 
-    // Solo reanudar pétalos si el juego estaba abierto
     if (gameIsOpen) {
       resumeParticulas();
       gameIsOpen = false;
     }
 
     soundClose();
-    console.log('🧹 Juego cerrado y limpiado');
+    console.log('🧹 Juego cerrado');
   }
 
   function layoutStage() {
@@ -1729,7 +1588,6 @@ export function initJuego(config) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego inicializado con correcciones');
+  console.log('✅ Juego optimizado listo');
 }
-
 
