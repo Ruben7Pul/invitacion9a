@@ -327,8 +327,8 @@ body {
 }
 .pergamino-card {
   position: relative;
-  background: linear-gradient(135deg, rgba(232, 220, 192, 0.15), rgba(212, 196, 168, 0.1));
-  border: 2px solid rgba(212, 175, 55, 0.3);
+  background: linear-gradient(135deg, rgba(232, 220, 192, 0.28), rgba(212, 196, 168, 0.2));
+  border: 2px solid rgba(212, 175, 55, 0.45);
   border-radius: 15px;
   overflow: hidden;
   backdrop-filter: blur(8px);
@@ -368,24 +368,25 @@ body {
   text-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
 }
 .pergamino-roll {
-  width: 20px;
-  height: 30px;
-  background: rgba(212, 175, 55, 0.2);
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  border-radius: 8px;
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle at 35% 30%, #fae3a0, #d4af37 60%, #8a6d1b 100%);
+  border: 1px solid rgba(250, 227, 160, 0.6);
+  border-radius: 50%;
   position: relative;
   flex-shrink: 0;
+  box-shadow: 0 0 6px rgba(212, 175, 55, 0.5);
 }
 .pergamino-roll::before {
   content: '';
   position: absolute;
-  width: 60%;
-  height: 2px;
-  background: rgba(212, 175, 55, 0.4);
+  width: 40%;
+  height: 40%;
+  background: rgba(36, 26, 13, 0.5);
+  border-radius: 50%;
   top: 50%;
   left: 50%;
   transform: translateX(-50%) translateY(-50%);
-  border-radius: 1px;
 }
 .expand-indicator {
   font-size: 0.8rem;
