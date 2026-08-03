@@ -1,7 +1,7 @@
 // ============================================================
 // juego.js – COMPLETO Y CORREGIDO (verifica elementos, redirige al salir)
 // ============================================================
-console.log('📦 juego.js (completo y corregido)');
+console.log('📦 juego z1.js (completo y corregido)');
 
 import { soundTap, soundBrick, soundLose, soundClose } from './sonidos.js';
 
@@ -1659,3 +1659,5 @@ export function initJuego(config, mobile = false) {
   layoutStage();
   console.log('✅ Juego inicializado (completo y corregido)');
 }
+
+
