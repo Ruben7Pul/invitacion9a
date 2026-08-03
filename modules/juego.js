@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – COMPLETO, PALETA NEGRA, SIN PARTÍCULAS
+// juego.js – COMPLETO, PALETA NEGRA VISIBLE, SIN PARTÍCULAS
 // ============================================================
-console.log('📦 juego.js (paleta negra visible)');
+console.log('📦 juego.js (completo, paleta negra)');
 
 import { soundTap, soundBrick, soundLose, soundClose } from './sonidos.js';
 
@@ -9,10 +9,10 @@ import { soundTap, soundBrick, soundLose, soundClose } from './sonidos.js';
 const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 console.log('📱 isMobile:', isMobile);
 
-// ========== CONSTANTES AJUSTABLES ==========
+// ========== CONSTANTES ==========
 const MAX_DELTA = 0.03;
 const PADDLE_W_BASE = isMobile ? 64 : 72;
-const PADDLE_H = 10;
+const PADDLE_H = 12;
 const BALL_R = 6;
 const STAGE_W = 300;
 const STAGE_H = 420;
@@ -162,22 +162,23 @@ export function initJuego(config, mobile = false) {
   const menuTitle = menuEl?.querySelector('h2');
   if (menuTitle) menuTitle.style.display = 'none';
 
-  // ========== PALETA NEGRA (NO SOBREESCRIBIR estilo.css) ==========
-  // Configuramos solo las propiedades que faltan, sin usar .cssText
+  // ========== FORZAR PALETA NEGRA DESDE EL PRINCIPIO ==========
   paddleEl.style.background = '#111';
-  paddleEl.style.border = '2px solid #fff';
-  paddleEl.style.boxShadow = '0 0 15px rgba(255,255,255,0.3)';
-  paddleEl.style.borderRadius = '6px';
+  paddleEl.style.border = '3px solid #fff';
+  paddleEl.style.boxShadow = '0 0 25px rgba(255,255,255,0.6)';
+  paddleEl.style.borderRadius = '8px';
   paddleEl.style.height = PADDLE_H + 'px';
   paddleEl.style.width = PADDLE_W_BASE + 'px';
   paddleEl.style.position = 'absolute';
   paddleEl.style.top = (STAGE_H - 14) + 'px';
   paddleEl.style.left = '0';
   paddleEl.style.willChange = 'transform';
-  paddleEl.style.zIndex = '10';
-  // No tocamos display, ni otras propiedades que ya vienen del CSS
+  paddleEl.style.zIndex = '100';
+  paddleEl.style.display = 'block';
+  paddleEl.style.visibility = 'visible';
+  paddleEl.style.opacity = '1';
 
-  // Estilos de lives y score
+  // ========== ESTILOS DE UI ==========
   livesEl.style.fontFamily = "'Press Start 2P', monospace";
   livesEl.style.fontSize = '1.2rem';
   livesEl.style.letterSpacing = '0.1em';
@@ -206,7 +207,6 @@ export function initJuego(config, mobile = false) {
     document.head.appendChild(style2);
   }
 
-  // Niebla
   const nieblaEl = document.createElement('div');
   nieblaEl.id = 'niebla-overlay';
   nieblaEl.style.cssText = `
@@ -288,9 +288,10 @@ export function initJuego(config, mobile = false) {
 
   // ========== FUNCIONES DEL MENÚ ==========
   function showMenu(showGameOver = false, score = 0) {
-    paddleEl.style.display = 'none';
-    document.querySelectorAll('.ball-dynamic').forEach(el => el.style.display = 'none');
-    document.getElementById('ball').style.display = 'none';
+    // Oculta visualmente, pero no con display: none
+    paddleEl.style.visibility = 'hidden';
+    document.querySelectorAll('.ball-dynamic').forEach(el => el.style.visibility = 'hidden');
+    document.getElementById('ball').style.visibility = 'hidden';
 
     if (!menuEl) return;
     menuEl.style.display = 'flex';
@@ -1203,6 +1204,9 @@ export function initJuego(config, mobile = false) {
     scoreEl.style.display = 'block';
     pauseBtn.style.display = 'block';
     menuBtn.style.display = 'block';
+    // Forzar paleta visible
+    paddleEl.style.visibility = 'visible';
+    paddleEl.style.display = 'block';
     updateUI();
     updateDurabilityVisual();
     draw();
@@ -1274,10 +1278,20 @@ export function initJuego(config, mobile = false) {
     nieblaEl.style.opacity = boundary > 0 ? 1 : 0;
   }
 
+  // ========== DRAW – PALETA FORZADA ==========
   function draw() {
     paddleWidth = PADDLE_W_BASE * paddleSizeMultiplier;
+    // Forzar visibilidad y estilo de la paleta
+    paddleEl.style.visibility = 'visible';
+    paddleEl.style.display = 'block';
+    paddleEl.style.opacity = '1';
     paddleEl.style.width = paddleWidth + 'px';
     paddleEl.style.transform = 'translateX(' + paddle.x + 'px)';
+    paddleEl.style.top = (STAGE_H - 14) + 'px';
+    paddleEl.style.left = '0';
+    paddleEl.style.background = '#111';
+    paddleEl.style.border = '3px solid #fff';
+    paddleEl.style.boxShadow = '0 0 25px rgba(255,255,255,0.6)';
 
     let ballElements = inner.querySelectorAll('.ball-dynamic');
     while (ballElements.length < balls.length) {
@@ -1310,6 +1324,7 @@ export function initJuego(config, mobile = false) {
     }
   }
 
+  // ========== GAME LOOP ==========
   function gameLoop(timestamp) {
     if (!running) {
       animFrameId = requestAnimationFrame(gameLoop);
