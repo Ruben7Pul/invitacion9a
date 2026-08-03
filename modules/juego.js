@@ -3,15 +3,15 @@
 // ============================================================
 console.log('📦 juego.js optimizado');
 
-import { soundTap, soundBrick, soundLose, soundClose, soundWin } from './sonidos.js';
+import { soundTap, soundBrick, soundLose, soundClose } from './sonidos.js';
 import { pauseParticulas, resumeParticulas } from './particulas.js';
 
-// Detección de móvil
+// ========== DETECCIÓN DE MÓVIL ==========
 const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-console.log('📱 Modo móvil:', isMobile);
+console.log('📱 isMobile:', isMobile);
 
-// Constantes ajustables
-const MAX_DELTA = 0.03;
+// ========== CONSTANTES AJUSTABLES ==========
+const MAX_DELTA = 0.03; // limitado para evitar saltos
 const PADDLE_W_BASE = isMobile ? 64 : 72;
 const PADDLE_H = 10;
 const BALL_R = 6;
@@ -20,6 +20,8 @@ const STAGE_H = 420;
 const TOP_OFFSET = 30;
 const BALL_SPEED = isMobile ? 200 : 264;
 const PADDLE_SPEED = 300;
+const BRICK_ROWS = isMobile ? 5 : 6;
+const BRICK_COLS = isMobile ? 5 : 6;
 const TARGET_GAME_POINTS = isMobile ? 15 : 18;
 const REGEN_THRESHOLD = 9;
 const BALL_LOW_Y = STAGE_H - 60;
@@ -29,13 +31,6 @@ const NIEBLA_FEATHER = 26;
 const MAX_LIVES = 3;
 const SCORE_PER_LIFE = 8500;
 const TOP_SCORES_COUNT = 5;
-
-// Ladrillos: menos filas/columnas en móvil
-const BRICK_ROWS = isMobile ? 5 : 6;
-const BRICK_COLS = isMobile ? 5 : 6;
-const BRICK_W = 38;
-const BRICK_H = 16;
-const BRICK_GAP = 3;
 
 const BRICK_TYPES = {
   CLAY:   { value: 1, playerPoints: 100, hits: 1, color: '#d9534f', label: 'CLAY' },
@@ -58,23 +53,23 @@ const POWERUP_PROBS = {
   WOOD: 0.12,
   IRON: 0.24
 };
-
 const POWERUP_MIN_GAP_MS = isMobile ? 5000 : 3500;
-const POWERUP_PITY_GAP_MS = isMobile ? 15000 : 11000;
+const POWERUP_PITY_GAP_MS = isMobile ? 14000 : 11000;
 
 const BRICK_PATTERNS = [
   (r, c) => Math.abs(r - 2.5) + Math.abs(c - 2.5) <= 2.5,
   (r, c) => (r === 2 || r === 3) || (c === 2 || c === 3),
-  (r, c) => r === 0 || r === BRICK_ROWS-1 || c === 0 || c === BRICK_COLS-1,
+  (r, c) => r === 0 || r === 5 || c === 0 || c === 5,
   (r, c) => c % 2 === 0,
   (r, c) => (r + c) % 2 === 0
 ];
 
 function buildPatternCells(predicate) {
+  const cols = BRICK_COLS, rows = BRICK_ROWS;
   const cells = [];
-  for (let r = 0; r < BRICK_ROWS; r++) {
-    for (let c = 0; c < BRICK_COLS; c++) {
-      if (predicate(r, c)) cells.push(r * BRICK_COLS + c);
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (predicate(r, c)) cells.push(r * cols + c);
     }
   }
   return cells;
@@ -82,7 +77,6 @@ function buildPatternCells(predicate) {
 
 const GOLDEN_BRICK_CHANCE = 0.08;
 const GOLDEN_BRICK_DURATION_MS = 5000;
-
 const COMBO_BONUS_PER_HIT = 0.02;
 const COMBO_BONUS_CAP = 0.5;
 
@@ -94,17 +88,16 @@ const GREEN_PROB_TABLE = [
 const GREEN_WEIGHTS = { MULTIBOLA: 15, PALA_GRANDE: 35, DUREZA: 50 };
 const RED_WEIGHTS   = { BOLA_NIEBLA: 10, PALA_MINI: 35, FLAQUESA: 55 };
 
+// ========== PUNTUACIONES ==========
 function getHighScores() {
   try {
     const data = localStorage.getItem('highscores');
     return data ? JSON.parse(data) : [];
   } catch { return []; }
 }
-
 function saveHighScores(scores) {
   localStorage.setItem('highscores', JSON.stringify(scores));
 }
-
 function addHighScore(name, score) {
   let scores = getHighScores();
   scores.push({ name: name || 'Jugador', score });
@@ -112,16 +105,17 @@ function addHighScore(name, score) {
   if (scores.length > TOP_SCORES_COUNT) scores = scores.slice(0, TOP_SCORES_COUNT);
   saveHighScores(scores);
 }
-
 function isHighScore(score) {
   const scores = getHighScores();
   if (scores.length < TOP_SCORES_COUNT) return true;
   return score > scores[scores.length - 1].score;
 }
 
+// ========== EXPORT PRINCIPAL ==========
 export function initJuego(config, mobile = false) {
-  console.log('🎮 Iniciando juego (optimizado)');
+  console.log('🎮 Iniciando juego (optimizado, isMobile:', isMobile, ')');
 
+  // Cargar fuente pixel si no existe
   if (!document.querySelector('#pixel-font')) {
     const link = document.createElement('link');
     link.id = 'pixel-font';
@@ -170,6 +164,7 @@ export function initJuego(config, mobile = false) {
   const menuTitle = menuEl?.querySelector('h2');
   if (menuTitle) menuTitle.style.display = 'none';
 
+  // Estilos de la pala y bola
   paddleEl.style.cssText += `
     background: linear-gradient(90deg, #ff00cc, #3333ff, #00ffcc, #ffcc00, #ff00cc);
     background-size: 300% 100%;
@@ -218,6 +213,7 @@ export function initJuego(config, mobile = false) {
     document.head.appendChild(style2);
   }
 
+  // Niebla
   const nieblaEl = document.createElement('div');
   nieblaEl.id = 'niebla-overlay';
   nieblaEl.style.cssText = `
@@ -251,6 +247,7 @@ export function initJuego(config, mobile = false) {
   `;
   inner.appendChild(nieblaEl);
 
+  // ========== VARIABLES DE ESTADO ==========
   let scale = 1;
   let bricks = [];
   let balls = [];
@@ -283,6 +280,7 @@ export function initJuego(config, mobile = false) {
   let pauseStartTime = 0;
   let gameTimeActive = false;
   let lastTime = 0;
+  let uiCounter = 0;
 
   let mouseActive = false;
   let mouseX = 0;
@@ -294,9 +292,8 @@ export function initJuego(config, mobile = false) {
   let gameOver = false;
   let pendingHighScore = false;
   let gameIsOpen = false;
-  let uiCounter = 0; // para actualizar UI cada 2 frames
 
-  // ---- FUNCIONES DEL MENÚ ----
+  // ========== FUNCIONES DEL MENÚ ==========
   function showMenu(showGameOver = false, score = 0) {
     paddleEl.style.display = 'none';
     document.querySelectorAll('.ball-dynamic').forEach(el => el.style.display = 'none');
@@ -362,13 +359,13 @@ export function initJuego(config, mobile = false) {
     }
   }
 
+  // Eventos del menú
   menuPlay.addEventListener('click', (e) => {
     e.stopPropagation();
     soundTap();
     hideMenu();
     startGame();
   });
-
   menuScores.addEventListener('click', (e) => {
     e.stopPropagation();
     soundTap();
@@ -376,30 +373,25 @@ export function initJuego(config, mobile = false) {
     menuContent.style.display = 'none';
     menuScoresList.style.display = 'block';
   });
-
   menuScoresBack.addEventListener('click', (e) => {
     e.stopPropagation();
     soundTap();
     menuScoresList.style.display = 'none';
     menuContent.style.display = 'flex';
   });
-
   menuExit.addEventListener('click', (e) => {
     e.stopPropagation();
     soundTap();
     closeGame();
   });
-
   menuRules.addEventListener('click', (e) => {
     e.stopPropagation();
     soundTap();
     if (modalRules) modalRules.classList.add('open');
   });
-
   rulesClose.addEventListener('click', () => {
     if (modalRules) modalRules.classList.remove('open');
   });
-
   if (menuResetTops) {
     menuResetTops.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -472,7 +464,7 @@ export function initJuego(config, mobile = false) {
     if (animFrameId) cancelAnimationFrame(animFrameId);
   });
 
-  // ---- PAUSA ----
+  // ========== PAUSA ==========
   function togglePause() {
     if (!running || gameOver) return;
     const now = performance.now();
@@ -508,11 +500,26 @@ export function initJuego(config, mobile = false) {
     if (document.hidden && running && !paused && !gameOver) togglePause();
   });
 
-  // ---- FUNCIONES DEL JUEGO ----
+  // ========== FUNCIONES DEL JUEGO ==========
   function getBrickTypeFromValue(val) {
     if (val === 1) return BRICK_TYPES.CLAY;
     if (val === 2) return BRICK_TYPES.WOOD;
     return BRICK_TYPES.IRON;
+  }
+
+  function adjustColor(hex, percent) {
+    let r = parseInt(hex.slice(1,2), 16) * 17;
+    let g = parseInt(hex.slice(2,3), 16) * 17;
+    let b = parseInt(hex.slice(3,4), 16) * 17;
+    if (hex.length === 7) {
+      r = parseInt(hex.slice(1,3), 16);
+      g = parseInt(hex.slice(3,5), 16);
+      b = parseInt(hex.slice(5,7), 16);
+    }
+    r = Math.min(255, Math.max(0, r + percent));
+    g = Math.min(255, Math.max(0, g + percent));
+    b = Math.min(255, Math.max(0, b + percent));
+    return `rgb(${r},${g},${b})`;
   }
 
   function updateBrickVisual(brick) {
@@ -542,19 +549,32 @@ export function initJuego(config, mobile = false) {
     }
   }
 
-  function adjustColor(hex, percent) {
-    let r = parseInt(hex.slice(1,2), 16) * 17;
-    let g = parseInt(hex.slice(2,3), 16) * 17;
-    let b = parseInt(hex.slice(3,4), 16) * 17;
-    if (hex.length === 7) {
-      r = parseInt(hex.slice(1,3), 16);
-      g = parseInt(hex.slice(3,5), 16);
-      b = parseInt(hex.slice(5,7), 16);
-    }
-    r = Math.min(255, Math.max(0, r + percent));
-    g = Math.min(255, Math.max(0, g + percent));
-    b = Math.min(255, Math.max(0, b + percent));
-    return `rgb(${r},${g},${b})`;
+  function upgradeBrickType(brick) {
+    if (brick.type === BRICK_TYPES.CLAY) {
+      brick.type = BRICK_TYPES.WOOD;
+    } else if (brick.type === BRICK_TYPES.WOOD) {
+      brick.type = BRICK_TYPES.IRON;
+    } else return false;
+    brick.hits = brick.type.hits;
+    brick.maxHits = brick.type.hits;
+    brick.value = brick.type.value;
+    brick.playerPoints = brick.type.playerPoints;
+    updateBrickVisual(brick);
+    return true;
+  }
+
+  function downgradeBrickType(brick) {
+    if (brick.type === BRICK_TYPES.IRON) {
+      brick.type = BRICK_TYPES.WOOD;
+    } else if (brick.type === BRICK_TYPES.WOOD) {
+      brick.type = BRICK_TYPES.CLAY;
+    } else return false;
+    brick.hits = brick.type.hits;
+    brick.maxHits = brick.type.hits;
+    brick.value = brick.type.value;
+    brick.playerPoints = brick.type.playerPoints;
+    updateBrickVisual(brick);
+    return true;
   }
 
   function generateBrickValues() {
@@ -580,13 +600,14 @@ export function initJuego(config, mobile = false) {
   }
 
   function getFreeCells(excludeCells = new Set()) {
+    const cols = BRICK_COLS, rows = BRICK_ROWS;
     const used = new Set();
     bricks.forEach(b => { if (b.alive) used.add(b.cell); });
     for (const cell of excludeCells) used.add(cell);
     const free = [];
-    for (let r = 0; r < BRICK_ROWS; r++) {
-      for (let c = 0; c < BRICK_COLS; c++) {
-        const idx = r * BRICK_COLS + c;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const idx = r * cols + c;
         if (!used.has(idx)) free.push(idx);
       }
     }
@@ -594,18 +615,20 @@ export function initJuego(config, mobile = false) {
   }
 
   function getCellsWithBalls() {
-    const totalWidth = BRICK_COLS * (BRICK_W + BRICK_GAP) - BRICK_GAP;
+    const cols = BRICK_COLS, rows = BRICK_ROWS;
+    const brickW = 38, brickH = 16, gap = 3;
+    const totalWidth = cols * (brickW + gap) - gap;
     const startX = (STAGE_W - totalWidth) / 2;
     const startY = TOP_OFFSET;
     const cells = new Set();
     for (const b of balls) {
-      for (let r = 0; r < BRICK_ROWS; r++) {
-        for (let c = 0; c < BRICK_COLS; c++) {
-          const x = startX + c * (BRICK_W + BRICK_GAP);
-          const y = startY + r * (BRICK_H + BRICK_GAP);
-          if (b.x > x - 10 && b.x < x + BRICK_W + 10 &&
-              b.y > y - 10 && b.y < y + BRICK_H + 10) {
-            cells.add(r * BRICK_COLS + c);
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const x = startX + c * (brickW + gap);
+          const y = startY + r * (brickH + gap);
+          if (b.x > x - 10 && b.x < x + brickW + 10 &&
+              b.y > y - 10 && b.y < y + brickH + 10) {
+            cells.add(r * cols + c);
           }
         }
       }
@@ -614,7 +637,9 @@ export function initJuego(config, mobile = false) {
   }
 
   function placeBricks(values, excludeCells = new Set(), preferredCells = null) {
-    const totalWidth = BRICK_COLS * (BRICK_W + BRICK_GAP) - BRICK_GAP;
+    const cols = BRICK_COLS, rows = BRICK_ROWS;
+    const brickW = 38, brickH = 16, gap = 3;
+    const totalWidth = cols * (brickW + gap) - gap;
     const startX = (STAGE_W - totalWidth) / 2;
     const startY = TOP_OFFSET;
 
@@ -633,10 +658,10 @@ export function initJuego(config, mobile = false) {
     const toPlace = Math.min(values.length, shuffled.length);
     for (let i = 0; i < toPlace; i++) {
       const cell = shuffled[i];
-      const row = Math.floor(cell / BRICK_COLS);
-      const col = cell % BRICK_COLS;
-      const x = startX + col * (BRICK_W + BRICK_GAP);
-      const y = startY + row * (BRICK_H + BRICK_GAP);
+      const row = Math.floor(cell / cols);
+      const col = cell % cols;
+      const x = startX + col * (brickW + gap);
+      const y = startY + row * (brickH + gap);
       const value = values[i];
       const type = getBrickTypeFromValue(value);
 
@@ -644,8 +669,8 @@ export function initJuego(config, mobile = false) {
       el.className = 'brick';
       el.style.left = x + 'px';
       el.style.top = y + 'px';
-      el.style.width = BRICK_W + 'px';
-      el.style.height = BRICK_H + 'px';
+      el.style.width = brickW + 'px';
+      el.style.height = brickH + 'px';
       el.style.borderRadius = '4px';
       el.style.border = '1px solid rgba(0,0,0,0.3)';
       el.style.display = 'flex';
@@ -669,7 +694,7 @@ export function initJuego(config, mobile = false) {
       inner.appendChild(el);
 
       const brick = {
-        x, y, w: BRICK_W, h: BRICK_H,
+        x, y, w: brickW, h: brickH,
         el,
         alive: true,
         hits: type.hits,
@@ -747,7 +772,7 @@ export function initJuego(config, mobile = false) {
   }
 
   const BALL_SPEED_RAMP_MINUTES = 14;
-  const BALL_SPEED_MAX_MULT = isMobile ? 2.2 : 2.7;
+  const BALL_SPEED_MAX_MULT = 2.7;
   function getSpeedMultiplier(minutes) {
     const t = Math.min(minutes, BALL_SPEED_RAMP_MINUTES) / BALL_SPEED_RAMP_MINUTES;
     const eased = t * t * (3 - 2 * t);
@@ -803,7 +828,7 @@ export function initJuego(config, mobile = false) {
   }
 
   function spawnPowerup(brick) {
-    if (ladrillosRotos <= (BRICK_ROWS * BRICK_COLS)) return;
+    if (ladrillosRotos <= 36) return;
     if (powerupsInAir >= 2) return;
 
     const now = performance.now();
@@ -951,6 +976,28 @@ export function initJuego(config, mobile = false) {
     blueBallActive = false;
   }
 
+  function showFloatingMessage(text, color = '#fff') {
+    const el = document.createElement('div');
+    el.style.cssText = `
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1.2rem;
+      color: ${color};
+      text-shadow: 0 0 20px rgba(0,0,0,0.8);
+      pointer-events: none;
+      z-index: 30;
+      animation: floatMsg 2s ease forwards;
+      text-align: center;
+      white-space: nowrap;
+    `;
+    el.textContent = text;
+    inner.appendChild(el);
+    setTimeout(() => el.remove(), 2500);
+  }
+
   function launchBall() {
     if (launched) return;
     const speed = getCurrentBallSpeed();
@@ -975,6 +1022,7 @@ export function initJuego(config, mobile = false) {
     powerups = [];
     activePowerupTypes.clear();
     powerupsInAir = 0;
+    inner.querySelectorAll('[style*="floatMsg"]').forEach(el => el.remove());
     bricks = [];
     balls = [];
     paddle.x = (STAGE_W - PADDLE_W_BASE) / 2;
@@ -1052,6 +1100,7 @@ export function initJuego(config, mobile = false) {
     inner.querySelectorAll('.brick').forEach(b => b.remove());
     powerups.forEach(p => p.el.remove());
     powerups = [];
+    inner.querySelectorAll('[style*="floatMsg"]').forEach(el => el.remove());
 
     const initialX = paddle.x + paddleWidth / 2;
     const initialY = STAGE_H - 14 - BALL_R;
@@ -1279,9 +1328,14 @@ export function initJuego(config, mobile = false) {
       return;
     }
 
-    // Delta limitado para evitar saltos
     const delta = lastTime ? Math.min((timestamp - lastTime) / 1000, MAX_DELTA) : 0.016;
     lastTime = timestamp;
+
+    // Actualizar UI cada 2 frames para ahorrar CPU
+    uiCounter++;
+    if (uiCounter % 2 === 0) {
+      updateUI();
+    }
 
     let paddleMoved = false;
     if (keys.left) { paddle.x = Math.max(0, paddle.x - PADDLE_SPEED * delta); paddleMoved = true; }
@@ -1307,18 +1361,15 @@ export function initJuego(config, mobile = false) {
       return;
     }
 
-    // ---- MOVER BOLAS ----
     for (let i = balls.length - 1; i >= 0; i--) {
       const b = balls[i];
       b.x += b.vx * delta;
       b.y += b.vy * delta;
 
-      // Paredes
       if (b.x - BALL_R < 0) { b.x = BALL_R; b.vx = Math.abs(b.vx); }
       if (b.x + BALL_R > STAGE_W) { b.x = STAGE_W - BALL_R; b.vx = -Math.abs(b.vx); }
       if (b.y - BALL_R < 0) { b.y = BALL_R; b.vy = Math.abs(b.vy); }
 
-      // Pala
       const py = STAGE_H - 14;
       if (b.vy > 0 && b.y + BALL_R >= py && b.y + BALL_R <= py + 10 &&
           b.x >= paddle.x - BALL_R && b.x <= paddle.x + paddleWidth + BALL_R) {
@@ -1332,7 +1383,6 @@ export function initJuego(config, mobile = false) {
         comboCount = 0;
       }
 
-      // Ladrillos
       for (const br of bricks) {
         if (!br.alive) continue;
         if (b.x + BALL_R > br.x && b.x - BALL_R < br.x + br.w &&
@@ -1363,7 +1413,7 @@ export function initJuego(config, mobile = false) {
             playerScore += Math.round(basePoints * comboMult);
             gamePoints -= br.value;
             ladrillosRotos++;
-            // UI se actualiza cada 2 frames
+            if (uiCounter % 2 === 0) updateUI();
             spawnPowerup(br);
             if (gamePoints <= REGEN_THRESHOLD) requestRegeneration();
           } else {
@@ -1387,7 +1437,6 @@ export function initJuego(config, mobile = false) {
       }
     }
 
-    // Powerups
     for (let i = powerups.length - 1; i >= 0; i--) {
       const pu = powerups[i];
       pu.y += pu.vy * delta;
@@ -1423,12 +1472,6 @@ export function initJuego(config, mobile = false) {
 
     checkGoldenExpiry();
     if (pendingRegeneration) checkAndRegenerate();
-
-    // Actualizar UI cada 2 frames para ahorrar CPU
-    uiCounter++;
-    if (uiCounter % 2 === 0) {
-      updateUI();
-    }
 
     draw();
     animFrameId = requestAnimationFrame(gameLoop);
@@ -1512,7 +1555,7 @@ export function initJuego(config, mobile = false) {
     }
 
     soundClose();
-    console.log('🧹 Juego cerrado');
+    console.log('🧹 Juego cerrado y limpiado');
   }
 
   function layoutStage() {
@@ -1588,6 +1631,6 @@ export function initJuego(config, mobile = false) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego optimizado listo');
+  console.log('✅ Juego inicializado con correcciones');
 }
 
