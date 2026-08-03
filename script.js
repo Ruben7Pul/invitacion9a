@@ -1,18 +1,16 @@
-console.log('🚀 script hol.js (sin mariposas)');
+console.log('🚀 script 23.js optimizado');
+
+const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
 
 async function cargarConfig() {
   try {
     const res = await fetch(`config.json?t=${Date.now()}`);
     if (!res.ok) throw new Error('HTTP error ' + res.status);
     const data = await res.json();
-    if (!data.nombre) throw new Error('Falta el campo "nombre"');
+    if (!data.nombre) throw new Error('Falta "nombre"');
     return data;
   } catch (e) {
-    console.warn('⚠️ Error al cargar config.json:', e);
-    const errorDiv = document.createElement('div');
-    errorDiv.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.8); color:#fff; padding:1rem 2rem; border-radius:12px; z-index:999; text-align:center; font-family:sans-serif;';
-    errorDiv.innerHTML = `<p>⚠️ No se pudo cargar la configuración.</p><p style="font-size:0.8rem; opacity:0.7;">Usando valores de respaldo.</p>`;
-    document.body.prepend(errorDiv);
+    console.warn('⚠️ Error config:', e);
     return {
       nombre: 'Dania',
       fechaTexto: '24 de octubre de 2026',
@@ -74,8 +72,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const config = await cargarConfig();
   rellenarDatos(config);
 
-  // No se inician mariposas
-
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
     initSonidos();
@@ -83,7 +79,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     const { initParticulas } = await import('./modules/particulas.js');
-    initParticulas();
+    initParticulas(isMobile);
   } catch (e) { console.error('❌ Partículas:', e); }
 
   try {
@@ -111,7 +107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
       const { initJuego } = await import('./modules/juego.js');
-      initJuego(config);
+      initJuego(config, isMobile);
     } catch (e) { console.error('❌ Juego:', e); }
 
     const muteBtn = document.getElementById('music-toggle');
@@ -137,7 +133,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }, 2000);
 
   function abrirReja() {
-    console.log('🔄 Abriendo la reja');
     gateWrapper.classList.add('open');
     portal.classList.add('hide');
     app.classList.add('show');
@@ -146,7 +141,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function cerrarReja() {
-    console.log('↩️ Volviendo a la reja');
     app.classList.remove('show');
     portal.classList.remove('hide');
     portal.classList.add('closing');
@@ -163,26 +157,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 2000);
   }
 
-  if (gateWrapper) {
-    gateWrapper.addEventListener('click', (e) => {
-      e.preventDefault();
-      abrirReja();
-    });
-    gateWrapper.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        abrirReja();
-      }
-    });
-  } else {
-    console.error('❌ No se encontró #gate-wrapper');
-  }
-
-  if (backBtn) {
-    backBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      cerrarReja();
-    });
-  }
+  gateWrapper.addEventListener('click', abrirReja);
+  gateWrapper.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirReja(); }
+  });
+  backBtn.addEventListener('click', cerrarReja);
 });
 
