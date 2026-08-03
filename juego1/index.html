@@ -4,31 +4,503 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Juego XV</title>
-  <!-- Estilos críticos en línea: evitan el "flash" de estilo sin aplicar
-       mientras se descargan la hoja de estilos y las fuentes de Google -->
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      background: #0e0a18;
-      font-family: 'Cinzel', serif;
-    }
-    #game-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 90;
-      background: rgba(6,4,10,0.95);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-  </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&family=Press+Start+2P&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../style-juego.css?v=20260803c">
+  <!-- El CSS del juego va embebido aquí mismo (en vez de un <link> externo)
+       para que no haya ni un instante de estilos "desordenados" mientras
+       se descarga un archivo aparte: todo llega en el mismo HTML.
+       Si se edita el diseño del juego, hay que editar este bloque
+       (o el archivo style-juego.css y volver a copiarlo aquí). -->
+  <style>
+/* ============================================================
+   ESTILOS DEL JUEGO – COMPLETO E INDEPENDIENTE
+   ============================================================ */
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body {
+  height:100%;
+  overflow:hidden;
+  background:#0e0a18;
+  font-family:'Cinzel',serif;
+}
+
+/* ANIMACIONES */
+@keyframes rainbowScore {
+  0% { background-position:0% 50%; }
+  100% { background-position:300% 50%; }
+}
+@keyframes heartFade {
+  0% { opacity:1; transform:scale(1); }
+  50% { opacity:0.5; transform:scale(1.5); color:#ff4444; }
+  100% { opacity:0; transform:scale(0); }
+}
+@keyframes floatMsg {
+  0% { opacity:0; transform:translate(-50%,30%) scale(0.5); }
+  20% { opacity:1; transform:translate(-50%,-50%) scale(1.2); }
+  80% { opacity:1; transform:translate(-50%,-60%) scale(1); }
+  100% { opacity:0; transform:translate(-50%,-80%) scale(0.8); }
+}
+@keyframes neonPaddle {
+  0% { background-position:0% 50%; }
+  100% { background-position:300% 50%; }
+}
+
+/* GAME OVERLAY */
+#game-overlay {
+  position:fixed;
+  inset:0;
+  z-index:90;
+  background:rgba(6,4,10,0.95);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0;
+  visibility:hidden;
+  transition:opacity 0.3s ease, visibility 0.3s ease;
+}
+#game-overlay.open {
+  opacity:1;
+  visibility:visible;
+}
+#game-panel {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:0.5rem;
+  transform:scale(0.9);
+  opacity:0;
+  transition:transform 0.3s ease, opacity 0.3s ease;
+  max-width:96vw;
+}
+#game-overlay.open #game-panel {
+  transform:scale(1);
+  opacity:1;
+}
+#game-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  width:100%;
+  font-family:'Cinzel',serif;
+  text-transform:uppercase;
+  font-size:clamp(0.7rem,2vw,0.9rem);
+  padding:0 0.1rem;
+  gap:0.05rem;
+  color:#fae3a0;
+  text-shadow:0 0 15px rgba(212,175,55,0.3);
+}
+#game-header span { white-space:nowrap; }
+#game-score {
+  font-size:clamp(0.7rem,2vw,0.9rem);
+  min-width:80px;
+  text-align:center;
+  flex-shrink:0;
+  font-family:'Press Start 2P',monospace;
+  background:linear-gradient(90deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#9b59b6);
+  background-size:300% 100%;
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  animation:rainbowScore 3s linear infinite;
+  text-shadow:none;
+}
+#pause-btn, #menu-btn {
+  flex-shrink:0;
+  background:rgba(201,162,77,0.12);
+  border:1.5px solid #c9a24d;
+  color:#f0d9a3;
+  font-size:1.4rem;
+  cursor:pointer;
+  padding:0.2rem 0.5rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:30px;
+  box-shadow:0 0 12px rgba(201,162,77,0.15);
+  transition:all 0.3s ease;
+  min-width:40px;
+  height:40px;
+}
+#pause-btn:hover, #menu-btn:hover {
+  background:rgba(201,162,77,0.25);
+  box-shadow:0 0 20px rgba(201,162,77,0.3);
+}
+
+#game-stage {
+  position:relative;
+  background:#0e0a18;
+  border:2px solid #b8860b;
+  border-radius:16px;
+  overflow:hidden;
+  touch-action:none;
+  background-image:url('../archivos/jueg1.png');
+  background-size:cover;
+  background-position:center;
+  box-shadow:0 0 30px rgba(212,175,55,0.15), inset 0 0 40px rgba(25,60,120,0.2);
+  width:100%;
+  max-width:450px;
+  aspect-ratio:300/420;
+}
+#game-inner {
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+}
+
+/* LADRILLOS */
+.brick {
+  position:absolute;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:4px;
+  transition:opacity 0.2s ease, transform 0.2s ease;
+  will-change:transform, opacity;
+  color:#fff;
+  font-weight:bold;
+  text-shadow:0 1px 2px rgba(0,0,0,0.5);
+  border:1px solid rgba(0,0,0,0.25);
+  box-shadow:inset 0 2px 4px rgba(255,255,255,0.15), inset 0 -2px 4px rgba(0,0,0,0.3);
+}
+.brick.gone { opacity:0; transform:scale(0.3); pointer-events:none; }
+.brick-clay { background:#d9534f; background:linear-gradient(145deg,#e57373,#c62828); box-shadow:inset 0 2px 4px rgba(255,200,200,0.3), inset 0 -2px 4px rgba(0,0,0,0.4); }
+.brick-wood { background:#8b5a2b; background:linear-gradient(145deg,#a67c52,#6d4c2a); box-shadow:inset 0 2px 4px rgba(255,220,180,0.3), inset 0 -2px 4px rgba(0,0,0,0.4); }
+.brick-wood.cracked-1 { background:#7a4f24; background:linear-gradient(145deg,#8b6b3e,#5a3d1a); box-shadow:inset 0 2px 4px rgba(255,220,180,0.2), inset 0 -2px 4px rgba(0,0,0,0.5); position:relative; overflow:hidden; }
+.brick-wood.cracked-1::after { content:''; position:absolute; top:10%; left:30%; width:2px; height:80%; background:rgba(0,0,0,0.4); transform:rotate(15deg); box-shadow:1px 0 2px rgba(0,0,0,0.2); }
+.brick-wood.cracked-1::before { content:''; position:absolute; top:20%; left:60%; width:2px; height:60%; background:rgba(0,0,0,0.3); transform:rotate(-10deg); }
+.brick-iron { background:#7a8a9a; background:linear-gradient(145deg,#9aa9b9,#5a6a7a); box-shadow:inset 0 2px 4px rgba(200,220,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.4); }
+.brick-iron.cracked-1 { background:#6a7a8a; background:linear-gradient(145deg,#7a8a9a,#4a5a6a); box-shadow:inset 0 2px 4px rgba(200,220,255,0.2), inset 0 -2px 4px rgba(0,0,0,0.5); position:relative; overflow:hidden; }
+.brick-iron.cracked-1::after { content:''; position:absolute; top:5%; left:20%; width:2px; height:90%; background:rgba(0,0,0,0.5); transform:rotate(20deg); box-shadow:1px 0 2px rgba(0,0,0,0.3); }
+.brick-iron.cracked-1::before { content:''; position:absolute; top:15%; left:50%; width:2px; height:70%; background:rgba(0,0,0,0.4); transform:rotate(-15deg); }
+.brick-iron.cracked-2 { background:#5a6a7a; background:linear-gradient(145deg,#5a6a7a,#3a4a5a); box-shadow:inset 0 2px 4px rgba(200,220,255,0.1), inset 0 -2px 4px rgba(0,0,0,0.6); position:relative; overflow:hidden; }
+.brick-iron.cracked-2::after { content:''; position:absolute; top:0; left:10%; width:2px; height:100%; background:rgba(0,0,0,0.6); transform:rotate(30deg); box-shadow:1px 0 3px rgba(0,0,0,0.3); }
+.brick-iron.cracked-2::before { content:''; position:absolute; top:10%; left:40%; width:2px; height:80%; background:rgba(0,0,0,0.5); transform:rotate(-20deg); box-shadow:1px 0 2px rgba(0,0,0,0.2); }
+.brick-iron.cracked-2 .crack-extra { position:absolute; top:5%; left:70%; width:2px; height:60%; background:rgba(0,0,0,0.4); transform:rotate(5deg); }
+
+/* PALETA Y BOLA */
+#paddle, #ball {
+  position:absolute;
+  top:0;
+  left:0;
+  will-change:transform;
+  transform-origin:0 0;
+}
+#paddle {
+  height:12px;
+  border-radius:8px;
+  background:#111;
+  border:2px solid #d4af37;
+  box-shadow:0 0 25px rgba(212,175,55,0.3);
+  z-index:100;
+  pointer-events:none;
+  top:406px;
+}
+#ball {
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #fff, #d68a96 60%, #a13545);
+  box-shadow:0 0 12px rgba(255,200,200,0.5);
+  z-index:11;
+}
+
+/* MENSAJE EMERGENTE */
+#game-msg {
+  position:absolute;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:0.5rem;
+  background:rgba(10,7,16,0.85);
+  text-align:center;
+  padding:1rem;
+}
+#game-msg.show { display:flex; }
+#game-msg p {
+  font-family:'Cinzel',serif;
+  color:#fae3a0;
+  font-size:clamp(1rem,3vw,1.3rem);
+  white-space:pre-line;
+  text-shadow:0 0 20px rgba(212,175,55,0.5);
+}
+
+/* BOTONES DEL JUEGO */
+.game-btn {
+  font-family:'Cinzel',serif;
+  font-size:clamp(0.8rem,2vw,1rem);
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:#f0d9a3;
+  background:rgba(201,162,77,0.15);
+  border:1.5px solid rgba(201,162,77,0.4);
+  padding:0.5rem 1.2rem;
+  border-radius:30px;
+  cursor:pointer;
+  transition:all 0.3s ease;
+  box-shadow:0 0 15px rgba(212,175,55,0.15);
+  text-shadow:0 0 8px rgba(201,162,77,0.2);
+  backdrop-filter:blur(4px);
+}
+.game-btn:hover {
+  background:rgba(201,162,77,0.25);
+  border-color:rgba(201,162,77,0.6);
+  box-shadow:0 0 25px rgba(212,175,55,0.35);
+  transform:translateY(-2px);
+}
+.game-btn:active { transform:translateY(0); background:rgba(201,162,77,0.2); }
+
+/* MENÚ PRINCIPAL */
+#game-menu {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:0.8rem;
+  border-radius:16px;
+  padding:1rem;
+  position:absolute;
+  inset:0;
+  z-index:50;
+  background:rgba(10,7,16,0.9);
+  border:2px solid #b8860b;
+  box-shadow:inset 0 0 60px rgba(25,60,120,0.3);
+  overflow:hidden;
+}
+/* Fijamos explícitamente la dirección: modules/juego.js hace
+   menuContent.style.display = 'flex' por JS pero nunca define
+   flex-direction, así que sin esta regla el navegador puede
+   ponerlos en fila y desbordar la tarjeta. */
+#menu-content {
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  width:100%;
+  gap:0.6rem;
+}
+#game-menu h2 {
+  color:#fae3a0;
+  font-family:'Press Start 2P',monospace;
+  font-size:clamp(1rem,3vw,1.4rem);
+  text-align:center;
+  margin:0;
+}
+#menu-scores-list h3 {
+  color:#fae3a0;
+  font-size:clamp(0.8rem,2vw,1rem);
+}
+#scores-list li {
+  font-family:'Press Start 2P',monospace;
+  font-size:0.7rem;
+  color:#fae3a0;
+  border-bottom:1px solid rgba(212,175,55,0.2);
+  padding:0.3rem 0;
+  list-style:none;
+}
+#menu-gameover {
+  text-align:center;
+  width:100%;
+}
+#menu-gameover p { font-family:'Cinzel',serif; }
+#gameover-score { font-size:1.1rem; color:#fae3a0; }
+#gameover-theme-msg {
+  font-family:'Cormorant Garamond','Cinzel',serif;
+  font-style:italic;
+  font-size:clamp(0.8rem,2.4vw,0.95rem);
+  color:#f0d9a3;
+  text-shadow:0 0 10px rgba(212,175,55,0.25);
+  max-width:280px;
+  margin:0.4rem auto 0;
+  line-height:1.4;
+}
+#menu-scores-list {
+  text-align:center;
+  width:100%;
+}
+#scores-list {
+  list-style:none;
+  padding:0;
+  margin:0;
+}
+#gameover-input-container input {
+  font-family:'Press Start 2P',monospace;
+  background:#1a1a2e;
+  border:2px solid #b8860b;
+  border-radius:8px;
+  color:white;
+  padding:0.4rem;
+}
+#name-error { color:#ff6b6b; font-size:0.6rem; }
+
+/* VIDA */
+#lives {
+  letter-spacing:0.15em;
+  font-size:clamp(1rem,3vw,1.3rem);
+  color:#ff6b6b;
+  text-shadow:0 0 15px #ff6b6b;
+}
+.heart-fade { animation:heartFade 0.6s ease forwards; }
+
+/* AYUDA */
+.game-help {
+  font-size:clamp(0.7rem,2vw,0.9rem);
+  opacity:0.7;
+  margin-top:0.5rem;
+  font-family:'Cinzel',serif;
+  font-style:italic;
+  text-shadow:0 0 10px rgba(201,162,77,0.2);
+  color:#e0d0b0;
+}
+
+/* MODAL DE REGLAS (dentro del juego) */
+.modal-overlay {
+  position:fixed;
+  inset:0;
+  z-index:100;
+  background:rgba(6,10,25,0.72);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:1rem;
+  opacity:0;
+  visibility:hidden;
+  transition:opacity 0.25s ease, visibility 0.25s ease;
+}
+@media (min-width:768px) {
+  .modal-overlay {
+    backdrop-filter:blur(4px);
+    -webkit-backdrop-filter:blur(4px);
+  }
+}
+.modal-overlay.open {
+  opacity:1;
+  visibility:visible;
+}
+.modal-card {
+  max-width:500px;
+  width:100%;
+  max-height:85vh;
+  overflow-y:auto;
+  background:radial-gradient(ellipse at 50% 30%, #1c2a44, #0d1424 80%);
+  border:3px solid #b8860b;
+  border-radius:30px;
+  padding:2rem 1.6rem;
+  position:relative;
+  transform:scale(0.95);
+  opacity:0;
+  transition:transform 0.2s ease, opacity 0.2s ease;
+  box-shadow:0 0 0 2px rgba(184,134,11,0.2), 0 0 0 6px rgba(26,42,70,0.5), 0 0 50px rgba(184,134,11,0.12), inset 0 0 60px rgba(25,50,100,0.15);
+  -webkit-overflow-scrolling:touch;
+}
+.modal-overlay.open .modal-card {
+  transform:scale(1);
+  opacity:1;
+}
+.modal-card::before {
+  content:'⚜ ✦ ⚜';
+  position:absolute;
+  top:-10px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#0d1424;
+  padding:0 14px;
+  color:#d4af37;
+  font-size:0.8rem;
+  letter-spacing:0.5em;
+  border-radius:20px;
+  border:1px solid #b8860b;
+  font-family:'Cinzel',serif;
+  white-space:nowrap;
+  z-index:2;
+}
+.modal-card::after {
+  content:'';
+  position:absolute;
+  top:16px;
+  left:16px;
+  right:16px;
+  bottom:16px;
+  border:1px solid rgba(212,175,55,0.15);
+  border-radius:20px;
+  pointer-events:none;
+  box-shadow:inset 0 0 30px rgba(212,175,55,0.04);
+}
+.modal-close {
+  position:absolute;
+  top:0.6rem;
+  right:0.6rem;
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:rgba(212,175,55,0.06);
+  border:1.5px solid #b8860b;
+  color:#fae3a0;
+  cursor:pointer;
+  font-size:1.4rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:background 0.2s, color 0.2s;
+  z-index:10;
+  line-height:1;
+  opacity:0.8;
+}
+.modal-close:hover {
+  background:rgba(212,175,55,0.2);
+  color:#ffffff;
+  opacity:1;
+}
+.modal-card h2 {
+  font-family:'Cinzel',serif;
+  text-align:center;
+  font-size:clamp(1.3rem,3.5vw,1.9rem);
+  letter-spacing:0.25em;
+  text-transform:uppercase;
+  color:#fae3a0;
+  text-shadow:0 0 25px rgba(212,175,55,0.3);
+  margin:0.2rem 0 0.5rem;
+  padding-bottom:0.5rem;
+  border-bottom:2px solid rgba(212,175,55,0.2);
+  position:relative;
+}
+.modal-card h2::before {
+  content:'✦';
+  position:absolute;
+  left:0;
+  top:50%;
+  transform:translateY(-50%);
+  color:#d4af37;
+  font-size:0.8rem;
+  opacity:0.5;
+}
+.modal-card h2::after {
+  content:'✦';
+  position:absolute;
+  right:0;
+  top:50%;
+  transform:translateY(-50%);
+  color:#d4af37;
+  font-size:0.8rem;
+  opacity:0.5;
+}
+
+/* RESPONSIVE */
+@media (max-width:400px) {
+  #game-panel { max-width:98vw; }
+  .game-btn { font-size:0.7rem; padding:0.3rem 0.8rem; }
+  .modal-card { padding:1rem 0.6rem; }
+  .modal-card h2 { font-size:clamp(1.1rem,3.5vw,1.5rem) !important; }
+  #paddle { height:10px; width:50px; top:406px; }
+  #ball { width:10px; height:10px; }
+}
+@media (min-width:768px) {
+  #game-stage { max-width:450px; }
+}
+  </style>
 </head>
 <body style="background:#0e0a18">
   <!-- OVERLAY DEL JUEGO -->
