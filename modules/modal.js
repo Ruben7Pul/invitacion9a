@@ -1,11 +1,9 @@
-console.log('📦 módulo modal zzz.js cargado (transición simple)');
+console.log('📦 modal.js');
 
 import { soundOpen, soundClose, soundTap } from './sonidos.js';
-import { burst } from './particulas.js';
-import { pauseParticulas, resumeParticulas } from './particulas.js';
+import { burst, pauseParticulas, resumeParticulas } from './particulas.js';
 
 export function initModal() {
-  console.log('📋 Iniciando modales...');
   document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       btn.classList.remove('tap');
@@ -20,11 +18,8 @@ export function initModal() {
 
   document.querySelectorAll('.modal-overlay').forEach(ov => {
     ov.addEventListener('click', (e) => {
-      if (e.target === ov) {
-        closeModal(ov);
-      }
+      if (e.target === ov) closeModal(ov);
     });
-
     const closeBtn = ov.querySelector('[data-close]');
     if (closeBtn) {
       closeBtn.addEventListener('click', (e) => {
@@ -40,7 +35,6 @@ export function initModal() {
       document.querySelectorAll('.modal-overlay.open').forEach(closeModal);
     }
   });
-  console.log('✅ Modales listos');
 }
 
 function openModal(id) {
@@ -57,5 +51,3 @@ function closeModal(el) {
   soundClose();
   resumeParticulas();
 }
-
-
