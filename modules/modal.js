@@ -1,7 +1,8 @@
-console.log('📦 modal.js');
+console.log('📦 modal.js (sin partículas)');
 
 import { soundOpen, soundClose, soundTap } from './sonidos.js';
-import { burst, pauseParticulas, resumeParticulas } from './particulas.js';
+
+// No usamos partículas, así que eliminamos import y funciones relacionadas
 
 export function initModal() {
   document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -9,8 +10,6 @@ export function initModal() {
       btn.classList.remove('tap');
       void btn.offsetWidth;
       btn.classList.add('tap');
-      const r = btn.getBoundingClientRect();
-      burst(r.left + r.width / 2, r.top + r.height / 2, 16);
       const modalId = btn.dataset.modal;
       openModal(modalId);
     });
@@ -22,9 +21,7 @@ export function initModal() {
     });
     const closeBtn = ov.querySelector('[data-close]');
     if (closeBtn) {
-      closeBtn.addEventListener('click', (e) => {
-        const r = e.currentTarget.getBoundingClientRect();
-        burst(r.left + r.width / 2, r.top + r.height / 2, 10);
+      closeBtn.addEventListener('click', () => {
         closeModal(ov);
       });
     }
@@ -42,12 +39,10 @@ function openModal(id) {
   if (!modal) return;
   modal.classList.add('open');
   soundOpen();
-  pauseParticulas();
 }
 
 function closeModal(el) {
   if (!el) return;
   el.classList.remove('open');
   soundClose();
-  resumeParticulas();
 }
