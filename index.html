@@ -20,20 +20,24 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌹</text></svg>">
 </head>
 <body>
-  <!-- FONDO IMAGEN -->
   <div id="bg"></div>
 
-  <!-- VIDEO DE FONDO (sobre bella.jpg, debajo de todo lo demás) -->
-  <video id="video-fondo" autoplay loop muted playsinline>
+  <!-- VÍDEO DE FONDO PARA LA APP (mar1.mp4) – sobre bella.jpg, debajo de todo lo demás -->
+  <video id="video-app" autoplay loop muted playsinline>
     <source src="archivos/mar1.mp4" type="video/mp4">
     Tu navegador no soporta video.
   </video>
 
-  <!-- PÉTALOS -->
   <div id="petals-layer" role="presentation"></div>
 
   <!-- PORTAL / REJA -->
   <div id="portal" role="dialog" aria-label="Puerta de entrada">
+    <!-- VÍDEO DE FONDO PARA EL PORTAL (mar2.mp4) – debajo del mensaje y la reja -->
+    <video id="video-portal" autoplay loop muted playsinline>
+      <source src="archivos/mar2.mp4" type="video/mp4">
+      Tu navegador no soporta video.
+    </video>
+
     <div class="portal-inner">
       <span class="eyebrow gold-text">Una invitación encantada</span>
       <div class="gate-wrapper" id="gate-wrapper" role="button" tabindex="0" aria-label="Abrir la reja">
@@ -392,7 +396,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE REGLAS (con z-index alto para que esté encima) -->
+  <!-- MODAL DE REGLAS -->
   <div class="modal-overlay" id="modal-rules" role="dialog" aria-modal="true" aria-labelledby="modal-rules-title" style="z-index:100;">
     <div class="modal-card" style="max-width:500px;">
       <button class="modal-close" id="rules-close" aria-label="Cerrar reglas">&times;</button>
