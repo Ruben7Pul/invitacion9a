@@ -1,4 +1,4 @@
-console.log('🚀 script.js (sin pétalos)');
+console.log('🚀 script.js (con stopPropagation en reja)');
 
 const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
 
@@ -129,7 +129,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     gateWrapper.classList.add('active');
   }, 2000);
 
-  function abrirReja() {
+  function abrirReja(e) {
+    if (e) e.stopPropagation(); // Evita propagación accidental
     gateWrapper.classList.add('open');
     portal.classList.add('hide');
     app.classList.add('show');
@@ -137,7 +138,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (window.playMusic) window.playMusic();
   }
 
-  function cerrarReja() {
+  function cerrarReja(e) {
+    if (e) e.stopPropagation();
     app.classList.remove('show');
     portal.classList.remove('hide');
     portal.classList.add('closing');
@@ -156,7 +158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   gateWrapper.addEventListener('click', abrirReja);
   gateWrapper.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirReja(); }
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirReja(e); }
   });
   backBtn.addEventListener('click', cerrarReja);
 });
