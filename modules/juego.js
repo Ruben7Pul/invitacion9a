@@ -1,17 +1,16 @@
 // ============================================================
-// juego.js – OPTIMIZADO PARA MÓVIL (completo)
+// juego.js – OPTIMIZADO, SIN PARTÍCULAS, PALETA NEGRA
 // ============================================================
-console.log('📦 juego.js optimizado');
+console.log('📦 juego.js (sin partículas, paleta negra)');
 
 import { soundTap, soundBrick, soundLose, soundClose } from './sonidos.js';
-import { pauseParticulas, resumeParticulas } from './particulas.js';
 
 // ========== DETECCIÓN DE MÓVIL ==========
 const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 console.log('📱 isMobile:', isMobile);
 
 // ========== CONSTANTES AJUSTABLES ==========
-const MAX_DELTA = 0.03; // limitado para evitar saltos
+const MAX_DELTA = 0.03;
 const PADDLE_W_BASE = isMobile ? 64 : 72;
 const PADDLE_H = 10;
 const BALL_R = 6;
@@ -113,9 +112,8 @@ function isHighScore(score) {
 
 // ========== EXPORT PRINCIPAL ==========
 export function initJuego(config, mobile = false) {
-  console.log('🎮 Iniciando juego (optimizado, isMobile:', isMobile, ')');
+  console.log('🎮 Iniciando juego (sin partículas, paleta negra)');
 
-  // Cargar fuente pixel si no existe
   if (!document.querySelector('#pixel-font')) {
     const link = document.createElement('link');
     link.id = 'pixel-font';
@@ -164,26 +162,20 @@ export function initJuego(config, mobile = false) {
   const menuTitle = menuEl?.querySelector('h2');
   if (menuTitle) menuTitle.style.display = 'none';
 
-  // Estilos de la pala y bola
-  paddleEl.style.cssText += `
-    background: linear-gradient(90deg, #ff00cc, #3333ff, #00ffcc, #ffcc00, #ff00cc);
-    background-size: 300% 100%;
-    animation: neonPaddle 2s linear infinite;
+  // ========== PALETA NEGRA (sin animación, visible) ==========
+  paddleEl.style.cssText = `
+    background: #111;
     border: 2px solid #fff;
-    box-shadow: 0 0 20px rgba(255,255,255,0.6);
     border-radius: 6px;
+    box-shadow: 0 0 12px rgba(255,255,255,0.2);
+    height: ${PADDLE_H}px;
+    width: ${PADDLE_W_BASE}px;
+    position: absolute;
+    top: ${STAGE_H - 14}px;
+    left: 0;
+    will-change: transform;
   `;
-  if (!document.querySelector('#neon-style')) {
-    const style = document.createElement('style');
-    style.id = 'neon-style';
-    style.textContent = `
-      @keyframes neonPaddle {
-        0% { background-position: 0% 50%; }
-        100% { background-position: 300% 50%; }
-      }
-    `;
-    document.head.appendChild(style);
-  }
+  // Eliminamos cualquier estilo previo que pudiera tener
 
   livesEl.style.fontFamily = "'Press Start 2P', monospace";
   livesEl.style.fontSize = '1.2rem';
@@ -1331,7 +1323,6 @@ export function initJuego(config, mobile = false) {
     const delta = lastTime ? Math.min((timestamp - lastTime) / 1000, MAX_DELTA) : 0.016;
     lastTime = timestamp;
 
-    // Actualizar UI cada 2 frames para ahorrar CPU
     uiCounter++;
     if (uiCounter % 2 === 0) {
       updateUI();
@@ -1523,7 +1514,7 @@ export function initJuego(config, mobile = false) {
   function openGame() {
     cleanGameState();
     overlay.classList.add('open');
-    pauseParticulas();
+    // No hay partículas que pausar
     gameIsOpen = true;
     showMenu(false);
     layoutStage();
@@ -1549,10 +1540,8 @@ export function initJuego(config, mobile = false) {
     overlay.classList.remove('open');
     cleanGameState();
 
-    if (gameIsOpen) {
-      resumeParticulas();
-      gameIsOpen = false;
-    }
+    // No hay partículas que reanudar
+    gameIsOpen = false;
 
     soundClose();
     console.log('🧹 Juego cerrado y limpiado');
@@ -1570,6 +1559,7 @@ export function initJuego(config, mobile = false) {
     inner.style.transformOrigin = 'top left';
   }
 
+  // Eventos de entrada
   stage.addEventListener('mousedown', (e) => {
     if (e.target.closest('#game-menu')) return;
     if (!running || paused || gameOver) return;
@@ -1631,6 +1621,5 @@ export function initJuego(config, mobile = false) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego inicializado con correcciones');
+  console.log('✅ Juego inicializado (sin partículas, paleta negra)');
 }
-
