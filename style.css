@@ -878,7 +878,7 @@ h1#nombre-hero {
 ::-webkit-scrollbar-thumb { background: rgba(201, 162, 77, 0.3); border-radius: 3px; }
 
 /* ============================================================
-   PALETA NEGRA – FORZADA Y VISIBLE
+   PALETA NEGRA – SIN ANCHO FIJO, PARA QUE JS CONTROLE EL TAMAÑO
    ============================================================ */
 #paddle {
   display: block !important;
@@ -888,7 +888,7 @@ h1#nombre-hero {
   border: 3px solid #ffffff !important;
   box-shadow: 0 0 25px rgba(255,255,255,0.6) !important;
   height: 12px !important;
-  width: 80px !important;
+  /* width: controlado por JS */ 
   border-radius: 8px !important;
   position: absolute !important;
   top: 406px !important;
