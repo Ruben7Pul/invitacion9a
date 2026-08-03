@@ -232,8 +232,8 @@
         <h1 id="nombre-hero">X</h1>
       </div>
 
-      <p class="frase-inline gold-text" id="frase-texto">Cargando...</p>
-      <p class="fecha-fija gold-text" id="fecha-fija">Cargando...</p>
+      <p class="frase-inline gold-text" id="frase-texto">Cargando...</p></p>
+      <p class="fecha-fija gold-text" id="fecha-fija">Cargando...</p></p>
       <p class="hint gold-text" id="hint-juego">👆 Toca el nombre para jugar</p>
     </div>
 
@@ -346,7 +346,7 @@
         <div id="game-menu" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.8rem; border-radius:12px; padding:1rem; position:absolute; inset:0; z-index:50; background:rgba(0,0,0,0.85);">
           <h2 style="color:var(--gold-light); font-family:'Press Start 2P', monospace; font-size:clamp(1rem,3vw,1.4rem); text-align:center; margin:0;">MENÚ</h2>
           <div id="menu-content" style="display:flex; flex-direction:column; gap:0.8rem; align-items:center;">
-            <button id="menu-play" class="game-btn gold-text">▶ Jugar de nuevo</button>
+            <button id="menu-play" class="game-btn gold-text">▶ Jugar</button>
             <button id="menu-scores" class="game-btn gold-text">🏆 Mejores puntuaciones</button>
             <button id="menu-rules" class="game-btn gold-text">📖 Reglas</button>
             <button id="menu-exit" class="game-btn gold-text">🚪 Salir</button>
@@ -358,11 +358,11 @@
             <button id="menu-scores-back" class="game-btn gold-text" style="font-size:0.7rem;">Volver</button>
           </div>
           <div id="menu-gameover" style="display:none; color:var(--gold-light); font-family:'Press Start 2P', monospace; font-size:clamp(0.8rem,2vw,1rem); text-align:center; width:100%; max-width:300px;">
-            <p style="font-size:1.2rem; color:#ff6b6b;">💀 GAME OVER</p>
+            <p style="font-size:1.2rem; color:#ff6b6b;">GAME OVER</p>
             <p id="gameover-score">Puntuación: 0</p>
             <div id="gameover-stats" style="display:none;"></div>
             <div id="gameover-input-container" style="display:none; margin-top:0.5rem;">
-              <p style="color:#ffd700;">¡Puntuación dentro del Top 5 de mejores puntuaciones!</p>
+              <p style="color:#ffd700;">¡Puntuación dentro del Top 5!</p>
               <input type="text" id="player-name-input" maxlength="12" placeholder="Tu nombre" style="padding:0.3rem; border-radius:4px; border:none; font-family:'Press Start 2P', monospace; font-size:0.7rem; text-align:center; background:#222; color:white; width:80%;" pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+">
               <button id="gameover-save" class="game-btn gold-text" style="font-size:0.7rem; margin-top:0.3rem;">Guardar</button>
               <p id="name-error" style="color:#ff6b6b; font-size:0.6rem; display:none;">Por favor, ingresa un nombre válido (solo letras).</p>
