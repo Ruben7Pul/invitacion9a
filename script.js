@@ -1,4 +1,4 @@
-console.log('🚀 script.js (invitación sin juego)');
+console.log('🚀 script.js (invitación sin juego, navegación a pestaña)');
 
 const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
@@ -187,12 +187,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.querySelector('[data-modal="modal-detalles"]')?.addEventListener('click', cargarModal);
   document.querySelector('[data-modal="modal-familia"]')?.addEventListener('click', cargarModal);
 
-  // ABRIR JUEGO EN NUEVA PESTAÑA
+  // ========== ABRIR JUEGO EN MISMA PESTAÑA (cambio de pestaña) ==========
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => {
-    const win = window.open('juegos1.html', '_blank', 'width=500,height=700,menubar=no,toolbar=no,location=no,status=no');
-    if (!win || win.closed) {
-      window.location.href = 'juegos1.html';
-    }
+    // Navega a juegos1.html en la misma ventana/pestaña
+    window.location.href = 'juegos1.html';
   });
 });
