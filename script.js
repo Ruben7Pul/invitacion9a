@@ -1,4 +1,4 @@
-console.log('🚀 script 1b.js');
+console.log('🚀 script 1b.js (sin mariposas)');
 
 async function cargarConfig() {
   try {
@@ -70,118 +70,11 @@ function rellenarDatos(config) {
   if (ogDesc) ogDesc.content = `Te invitamos a celebrar los 15 años de ${config.nombre}. ¡No faltes!`;
 }
 
-// ---- MARIPOSAS CON MOVIMIENTO REALISTA (JS) — versión corregida ----
-function iniciarMariposas() {
-  const emojis = ['🦋', '🦋', '🦋', '🦋'];
-  const container = document.body;
-  const mariposas = [];
-
-  emojis.forEach((emoji) => {
-    const el = document.createElement('div');
-    el.className = 'mariposa';
-    el.textContent = emoji;
-    // Importante: NO usar left/top, toda la posición vive en el transform.
-    el.style.left = '0';
-    el.style.top = '0';
-
-    const x = 10 + Math.random() * 80; // 10-90 vw
-    const y = 10 + Math.random() * 80; // 10-90 vh
-
-    const mariposa = {
-      el,
-      x, y,
-      angle: 0,
-      speed: 0.4 + Math.random() * 0.6,
-      targetX: x,
-      targetY: y,
-      changeTimer: 0,
-      currentAngle: 0,
-      facing: 1,               // 1 = mira a la derecha, -1 = mira a la izquierda
-      wingPhase: Math.random() * Math.PI * 2,
-      wingSpeed: 2 + Math.random() * 2,
-    };
-
-    // Colocamos el transform inicial ANTES de insertarla, así no hay salto/flash.
-    el.style.transform = `translate(${x}vw, ${y}vh)`;
-    container.appendChild(el);
-    mariposas.push(mariposa);
-  });
-
-  function nuevoObjetivo(m) {
-    const margin = 10;
-    m.targetX = margin + Math.random() * (100 - 2 * margin);
-    m.targetY = margin + Math.random() * (100 - 2 * margin);
-    m.changeTimer = 3 + Math.random() * 5;
-  }
-
-  mariposas.forEach(m => {
-    nuevoObjetivo(m);
-    const dx = m.targetX - m.x;
-    const dy = m.targetY - m.y;
-    m.angle = Math.atan2(dy, dx);
-    m.currentAngle = m.angle;
-    m.facing = Math.cos(m.angle) >= 0 ? 1 : -1;
-  });
-
-  let lastTimestamp = 0;
-
-  function animarMariposas(timestamp) {
-    const delta = lastTimestamp ? Math.min((timestamp - lastTimestamp) / 1000, 0.05) : 0.016;
-    lastTimestamp = timestamp;
-
-    for (const m of mariposas) {
-      m.changeTimer -= delta;
-      if (m.changeTimer <= 0) nuevoObjetivo(m);
-
-      const dx = m.targetX - m.x;
-      const dy = m.targetY - m.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-
-      if (dist > 0.5) {
-        const targetAngle = Math.atan2(dy, dx);
-        let diff = targetAngle - m.currentAngle;
-        diff = ((diff % (2 * Math.PI)) + 3 * Math.PI) % (2 * Math.PI) - Math.PI;
-        m.currentAngle += diff * Math.min(1, 4 * delta); // giro suave
-
-        const speedFactor = Math.min(1, dist / 5); // frena cerca del objetivo
-        const moveSpeed = m.speed * speedFactor * delta * 60;
-        m.x += Math.cos(m.currentAngle) * moveSpeed;
-        m.y += Math.sin(m.currentAngle) * moveSpeed;
-        m.angle = m.currentAngle;
-
-        // Solo cambia de "cara" cuando el rumbo es claramente horizontal,
-        // para que no se voltee constantemente con giros pequeños.
-        if (Math.cos(m.angle) > 0.15) m.facing = 1;
-        else if (Math.cos(m.angle) < -0.15) m.facing = -1;
-      }
-
-      // Aleteo suave e independiente del rumbo (rango sutil, ya no agresivo)
-      m.wingPhase += delta * m.wingSpeed;
-      const wingScale = 0.88 + 0.12 * Math.sin(m.wingPhase);
-
-      // Inclinación limitada según si sube o baja — nada de rotación completa
-      const tiltDeg = Math.max(-14, Math.min(14, Math.sin(m.angle) * 14));
-
-      m.el.style.transform = `
-        translate(${m.x}vw, ${m.y}vh)
-        rotate(${tiltDeg}deg)
-        scale(${m.facing}, ${wingScale})
-      `;
-      m.el.style.opacity = 0.65 + 0.25 * (0.5 + 0.5 * Math.sin(m.wingPhase * 0.5));
-    }
-
-    requestAnimationFrame(animarMariposas);
-  }
-
-  requestAnimationFrame(animarMariposas);
-}
-
 document.addEventListener('DOMContentLoaded', async () => {
   const config = await cargarConfig();
   rellenarDatos(config);
 
-  // Mariposas (con JS)
-  iniciarMariposas();
+  // No se inician mariposas
 
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
