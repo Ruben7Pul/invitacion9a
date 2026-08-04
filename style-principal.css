@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS COMPLETOS (CON CAMBIOS)
+   🌹 INVITACIÓN XV – ESTILOS COMPLETOS (CON AJUSTES FINALES)
    ============================================================ */
 
 :root {
@@ -88,7 +88,7 @@ body {
   color: #fae3a0;
   text-shadow: 0 0 10px rgba(212, 175, 55, 0.6), 0 0 20px rgba(212, 175, 55, 0.3), 0 0 40px rgba(212, 175, 55, 0.1);
 }
-.frase-inline, .fecha-fija, .hint, .portal-caption {
+.frase-inline, .fecha-fija, .portal-caption {
   text-shadow: 0 0 10px rgba(212, 175, 55, 0.6), 0 0 20px rgba(212, 175, 55, 0.3);
 }
 
@@ -291,10 +291,10 @@ html.sin-reja #app {
   container-name: tarjeta;
 }
 
-/* GIF OVALADO VERTICAL */
+/* GIF OVALADO VERTICAL (más estrecho para hacerlo más ovalado) */
 #oval-wrap {
-  width: clamp(170px, 30cqw, 170px);
-  height: clamp(230px, 42cqw, 240px); /* más alto que ancho para efecto ovalado vertical */
+  width: clamp(140px, 25cqw, 160px);
+  height: clamp(200px, 36cqw, 220px);
   margin-bottom: 0.2rem;
   position: relative;
 }
@@ -314,10 +314,11 @@ html.sin-reja #app {
   display: block;
 }
 
+/* NOMBRE DE QUINCEAÑERA +30% */
 h1#nombre-hero {
   font-family: var(--script);
   font-weight: 400;
-  font-size: clamp(4.6rem, 13cqw, 4.6rem);
+  font-size: clamp(6rem, 17cqw, 6rem);
   line-height: 1.1;
   margin: 0;
   cursor: pointer;
@@ -359,13 +360,14 @@ h1#nombre-hero {
   letter-spacing: 0.04em;
 }
 
+/* HINT - FUENTE MÁS LEGIBLE */
 .hint {
-  font-size: clamp(1.2rem, 3.3cqw, 1.2rem);
+  font-size: clamp(0.9rem, 2.5cqw, 1rem);
   opacity: 0.9;
   margin: 0.2rem 0;
-  font-family: var(--serif-body);
-  font-style: italic;
-  letter-spacing: 0.04em;
+  font-family: 'Cinzel', serif;
+  font-style: normal;
+  letter-spacing: 0.06em;
   color: #fae3a0;
   text-shadow: 0 0 10px rgba(212, 175, 55, 0.6), 0 0 20px rgba(212, 175, 55, 0.3);
 }
@@ -652,7 +654,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   DETALLE CARD (LUGARES) - QUITADO EL HOVER BRILLANTE
+   DETALLE CARD (LUGARES) - SIN HOVER BRILLANTE
    ============================================================ */
 .detalle-card {
   background: rgba(10, 18, 34, 0.55);
@@ -661,7 +663,6 @@ h1#nombre-hero {
   padding: 1rem 1.2rem 0.8rem;
   margin-bottom: 1rem;
   box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.03), 0 4px 20px rgba(0,0,0,0.4);
-  /* Eliminamos transition para que no haya hover */
   position: relative;
 }
 .detalle-card::before {
@@ -685,9 +686,8 @@ h1#nombre-hero {
   padding: 0 6px;
   transform: scaleX(-1);
 }
-/* QUITAMOS el hover que hacía brillar */
 .detalle-card:hover {
-  /* No hacemos nada */ 
+  /* No hacer nada, se quitó el efecto de brillo */
 }
 .detalle-card .icono {
   width: 34px;
