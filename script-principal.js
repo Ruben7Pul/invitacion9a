@@ -177,13 +177,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   backBtn.addEventListener('click', cerrarReja);
 
   // ============================================================
-  // 🌀 PARALLAX GLOBAL CON DETECCIÓN MEJORADA
+  // 🌀 PARALLAX GLOBAL CON DETECCIÓN INTELIGENTE
   // ============================================================
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
   let gyroWorking = false;
-  let gyroTestCount = 0;
-  let gyroTestTimeout = null;
 
   // Elementos a mover
   const portalInner = document.querySelector('.portal-inner');
@@ -200,12 +198,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const offsetX = Math.min(Math.max(invertX, -maxOffset), maxOffset);
     const offsetY = Math.min(Math.max(invertY, -maxOffset), maxOffset);
 
-    // Reja
+    // --- REJA ---
     if (!portal.classList.contains('hide') && portalInner) {
       portalInner.style.transform = `translate(${offsetX * 0.6}px, ${offsetY * 0.6}px)`;
     }
 
-    // App principal
+    // --- APP PRINCIPAL ---
     if (app.classList.contains('show')) {
       if (appMid) {
         appMid.style.transform = `translate(${offsetX * 0.8}px, ${offsetY * 0.8}px)`;
@@ -223,9 +221,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (eyebrow) eyebrow.style.transform = `translate(${offsetX * 0.3}px, ${offsetY * 0.3}px)`;
     }
 
-    // ===== MODALES: factor aumentado a 1.2 para que se note más =====
+    // ===== MODALES: mover .modal-card usando left/top para no interferir con scale =====
     document.querySelectorAll('.modal-overlay.open .modal-card').forEach(card => {
-      card.style.transform = `translate(${offsetX * 1.2}px, ${offsetY * 1.2}px)`;
+      // Usamos left y top (position: relative) en lugar de transform
+      card.style.left = `${offsetX * 0.8}px`;
+      card.style.top = `${offsetY * 0.8}px`;
     });
   }
 
@@ -256,33 +256,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // --- Giroscopio (móvil) con detección mejorada ---
+  // --- Giroscopio (móvil) ---
   if (isMobile && hasGyro) {
-    // Listener de prueba para detectar si el giroscopio realmente envía datos
+    // Listener de prueba para detectar si funciona
     const gyroTest = (e) => {
-      if (e.gamma !== null && e.beta !== null && !isNaN(e.gamma) && !isNaN(e.beta)) {
-        gyroTestCount++;
-        if (gyroTestCount >= 3) {
-          // Después de 3 eventos válidos, asumimos que funciona
-          gyroWorking = true;
-          console.log('✅ Giroscopio detectado y funcionando');
-          window.removeEventListener('deviceorientation', gyroTest);
-          if (gyroTestTimeout) clearTimeout(gyroTestTimeout);
-          // Ahora el listener principal
-          window.addEventListener('deviceorientation', handleOrientation);
-        }
+      if (e.gamma !== null || e.beta !== null) {
+        gyroWorking = true;
+        console.log('✅ Giroscopio detectado y funcionando');
+        window.removeEventListener('deviceorientation', gyroTest);
+        // Ahora el listener principal
+        window.addEventListener('deviceorientation', handleOrientation);
       }
     };
-
     window.addEventListener('deviceorientation', gyroTest);
 
-    // Timeout: si en 1.5 segundos no llegan 3 eventos, asumimos que no funciona
-    gyroTestTimeout = setTimeout(() => {
+    // Timeout: si en 3 segundos no se recibe evento, asumimos que no funciona
+    setTimeout(() => {
       if (!gyroWorking) {
         console.log('⚠️ Giroscopio no responde, se usará mouse como respaldo');
         window.removeEventListener('deviceorientation', gyroTest);
+        // No añadimos handleOrientation, el mouse seguirá activo
       }
-    }, 1500);
+    }, 3000);
   }
 
   function handleOrientation(e) {
@@ -297,6 +292,4 @@ document.addEventListener('DOMContentLoaded', async () => {
       requestAnimationFrame(smoothParallax);
     }
   }
-
-  console.log('📱 isMobile:', isMobile, 'hasGyro:', hasGyro);
 });
