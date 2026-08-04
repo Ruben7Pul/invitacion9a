@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ============================================================
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
-  let gyroWorking = false;
+  let gyroWorking = false; // se activará al recibir el primer evento
 
   // Elementos a mover
   const portalInner = document.querySelector('.portal-inner');
@@ -198,12 +198,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const offsetX = Math.min(Math.max(invertX, -maxOffset), maxOffset);
     const offsetY = Math.min(Math.max(invertY, -maxOffset), maxOffset);
 
-    // --- REJA ---
+    // Reja
     if (!portal.classList.contains('hide') && portalInner) {
       portalInner.style.transform = `translate(${offsetX * 0.6}px, ${offsetY * 0.6}px)`;
     }
 
-    // --- APP PRINCIPAL ---
+    // App principal
     if (app.classList.contains('show')) {
       if (appMid) {
         appMid.style.transform = `translate(${offsetX * 0.8}px, ${offsetY * 0.8}px)`;
@@ -221,11 +221,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (eyebrow) eyebrow.style.transform = `translate(${offsetX * 0.3}px, ${offsetY * 0.3}px)`;
     }
 
-    // ===== MODALES: mover .modal-card usando left/top para no interferir con scale =====
+    // ===== MODALES: mover .modal-card cuando el overlay esté abierto =====
     document.querySelectorAll('.modal-overlay.open .modal-card').forEach(card => {
-      // Usamos left y top (position: relative) en lugar de transform
-      card.style.left = `${offsetX * 0.8}px`;
-      card.style.top = `${offsetY * 0.8}px`;
+      card.style.transform = `translate(${offsetX * 0.5}px, ${offsetY * 0.5}px)`;
     });
   }
 
@@ -245,6 +243,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // --- Mouse (solo si NO es móvil con giro activo) ---
   document.addEventListener('mousemove', (e) => {
+    // Si es móvil y el giroscopio funciona, ignoramos el mouse
     if (isMobile && gyroWorking) return;
     if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
     const x = (e.clientX / window.innerWidth - 0.5) * 30;
@@ -258,7 +257,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // --- Giroscopio (móvil) ---
   if (isMobile && hasGyro) {
-    // Listener de prueba para detectar si funciona
+    // Listener para detectar si realmente funciona
     const gyroTest = (e) => {
       if (e.gamma !== null || e.beta !== null) {
         gyroWorking = true;
@@ -270,14 +269,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     window.addEventListener('deviceorientation', gyroTest);
 
-    // Timeout: si en 3 segundos no se recibe evento, asumimos que no funciona
+    // Timeout: si en 2 segundos no se recibe evento, asumimos que no funciona
     setTimeout(() => {
       if (!gyroWorking) {
         console.log('⚠️ Giroscopio no responde, se usará mouse como respaldo');
         window.removeEventListener('deviceorientation', gyroTest);
         // No añadimos handleOrientation, el mouse seguirá activo
       }
-    }, 3000);
+    }, 2000);
   }
 
   function handleOrientation(e) {
