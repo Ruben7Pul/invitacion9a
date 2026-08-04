@@ -1,8 +1,7 @@
-console.log('📦 música');
+console.log('📦 música (corregido)');
 
 let audio = null;
 let config = null;
-const muteBtn = document.getElementById('music-toggle');
 
 const iconSound = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
   <path d="M4 9 L4 15 L8 15 L13 20 L13 4 L8 9 Z"/>
@@ -16,6 +15,10 @@ const iconMute = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
   <line x1="2" y1="2" x2="22" y2="22" stroke="currentColor" stroke-width="1.2"/>
 </svg>`;
 
+function getMuteBtn() {
+  return document.getElementById('music-toggle');
+}
+
 export function initMusica(cfg) {
   config = cfg;
   audio = new Audio(config.audioFile);
@@ -23,13 +26,16 @@ export function initMusica(cfg) {
   audio.volume = 0.8;
   audio.addEventListener('error', (e) => {
     console.warn('⚠️ Error audio:', e);
-    if (muteBtn) { muteBtn.style.opacity = '0.3'; muteBtn.title = 'Error'; }
+    const btn = getMuteBtn();
+    if (btn) { btn.style.opacity = '0.3'; btn.title = 'Error'; }
   });
   audio.load();
-  if (muteBtn) {
-    muteBtn.style.opacity = '1';
-    muteBtn.innerHTML = iconSound;
-    muteBtn.title = 'Silenciar música';
+
+  const btn = getMuteBtn();
+  if (btn) {
+    btn.style.opacity = '1';
+    btn.innerHTML = iconSound;
+    btn.title = 'Silenciar música';
   }
 }
 
@@ -37,9 +43,10 @@ export function playMusic() {
   if (!audio) return;
   if (!audio.paused) return;
   audio.play().catch(() => {});
-  if (muteBtn) {
-    muteBtn.innerHTML = iconSound;
-    muteBtn.title = 'Silenciar música';
+  const btn = getMuteBtn();
+  if (btn) {
+    btn.innerHTML = iconSound;
+    btn.title = 'Silenciar música';
   }
 }
 
@@ -47,25 +54,27 @@ export function resetMusic() {
   if (!audio) return;
   audio.pause();
   audio.currentTime = 0;
-  if (muteBtn) {
-    muteBtn.innerHTML = iconSound;
-    muteBtn.title = 'Silenciar música';
+  const btn = getMuteBtn();
+  if (btn) {
+    btn.innerHTML = iconSound;
+    btn.title = 'Silenciar música';
   }
 }
 
 export function toggleMusic() {
   if (!audio) return;
+  const btn = getMuteBtn();
   if (audio.paused) {
     audio.play().catch(() => {});
-    if (muteBtn) {
-      muteBtn.innerHTML = iconSound;
-      muteBtn.title = 'Silenciar música';
+    if (btn) {
+      btn.innerHTML = iconSound;
+      btn.title = 'Silenciar música';
     }
   } else {
     audio.pause();
-    if (muteBtn) {
-      muteBtn.innerHTML = iconMute;
-      muteBtn.title = 'Activar música';
+    if (btn) {
+      btn.innerHTML = iconMute;
+      btn.title = 'Activar música';
     }
   }
 }
