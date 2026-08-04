@@ -32,7 +32,6 @@ async function cargarConfig() {
 function rellenarDatos(config) {
   const nombreEl = document.getElementById('nombre-hero');
   if (nombreEl) {
-    // Ya no envolvemos en <span>, solo texto plano
     nombreEl.textContent = config.nombre;
     nombreEl.setAttribute('data-text', config.nombre);
   }
@@ -115,6 +114,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const backBtn = document.getElementById('back-link');
   const caption = document.querySelector('.portal-caption');
 
+  // Forzar que la reja sea visible al inicio
   portal.classList.remove('hide');
   gateWrapper.classList.remove('open');
   caption.classList.remove('show');
@@ -134,6 +134,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     history.replaceState(null, '', window.location.pathname);
     document.documentElement.classList.remove('sin-reja');
   } else {
+    // Activar la reja después de 2s
     setTimeout(() => {
       caption.classList.add('show');
       gateWrapper.classList.add('active');
@@ -182,13 +183,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   backBtn.addEventListener('click', cerrarReja);
 
   // ============================================================
-  // 🌀 PARALLAX + DETECCIÓN DE GIROSCOPIO
+  // 🌀 PARALLAX POR CONTENEDORES + PAUSA EN MODALES
   // ============================================================
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
   let gyroWorking = false;
 
-  // === Crear wrapper para la app ===
+  // === Crear wrapper para la app (si no existe) ===
   let appInner = document.getElementById('app-inner');
   if (!appInner) {
     appInner = document.createElement('div');
@@ -239,6 +240,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     modalObserver.observe(el, { attributes: true, attributeFilter: ['class'] });
   });
 
+  // Observar nuevos modales
   const bodyObserver = new MutationObserver(() => {
     document.querySelectorAll('.modal-overlay:not([data-observed])').forEach(el => {
       el.setAttribute('data-observed', 'true');
@@ -261,7 +263,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       portalInner.style.transform = `translate(${offsetX * 0.6}px, ${offsetY * 0.6}px)`;
     }
     if (app.classList.contains('show') && appInner) {
-      appInner.style.transform = `translate(${offsetX * 0.45}px, ${offsetY * 0.45}px)`;
+      appInner.style.transform = `translate(${offsetX * 0.6}px, ${offsetY * 0.6}px)`;
     }
   }
 
@@ -279,9 +281,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // --- Mouse (solo en escritorio) ---
+  // --- Mouse (solo si NO es móvil con giro activo) ---
   document.addEventListener('mousemove', (e) => {
-    if (isMobile) return; // en móvil, el mouse NO activa parallax
+    if (isMobile && gyroWorking) return;
     if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
     const x = (e.clientX / window.innerWidth - 0.5) * 30;
     const y = (e.clientY / window.innerHeight - 0.5) * 30;
@@ -298,7 +300,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (e.gamma !== null || e.beta !== null) {
         gyroWorking = true;
         console.log('✅ Giroscopio detectado y funcionando');
-        document.body.classList.remove('no-gyro');
         window.removeEventListener('deviceorientation', gyroTest);
         window.addEventListener('deviceorientation', handleOrientation);
       }
@@ -307,16 +308,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     setTimeout(() => {
       if (!gyroWorking) {
-        console.log('⚠️ Giroscopio no responde → activar animaciones de respaldo');
-        document.body.classList.add('no-gyro');
+        console.log('⚠️ Giroscopio no responde, se usará mouse como respaldo');
         window.removeEventListener('deviceorientation', gyroTest);
       }
     }, 3000);
-  } else if (!isMobile) {
-    document.body.classList.remove('no-gyro');
-  } else {
-    console.log('⚠️ Navegador sin soporte de giroscopio → activar respaldo');
-    document.body.classList.add('no-gyro');
   }
 
   function handleOrientation(e) {
@@ -335,5 +330,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Si hay modal abierto al inicio, pausar
   if (document.querySelector('.modal-overlay.open')) {
     pausarVideos();
+  }
+
+  // ============================================================
+  // 🔇 BOTÓN DE MÚSICA (asegurar evento)
+  // ============================================================
+  const muteBtn = document.getElementById('music-toggle');
+  if (muteBtn) {
+    // El evento ya está asignado en iniciarApp, pero por si acaso:
+    muteBtn.addEventListener('click', () => {
+      if (window.toggleMusic) window.toggleMusic();
+    });
   }
 });
