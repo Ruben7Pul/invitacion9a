@@ -32,7 +32,13 @@ async function cargarConfig() {
 function rellenarDatos(config) {
   const nombreEl = document.getElementById('nombre-hero');
   if (nombreEl) {
-    nombreEl.textContent = config.nombre;
+    // Envolver cada letra en <span class="letter"> para el efecto ola
+    const nombre = config.nombre;
+    const letras = nombre.split('').map(letra => {
+      if (letra === ' ') return ' ';
+      return `<span class="letter">${letra}</span>`;
+    }).join('');
+    nombreEl.innerHTML = letras;
     nombreEl.setAttribute('data-text', config.nombre);
   }
   const fechaEl = document.getElementById('fecha-fija');
@@ -181,13 +187,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   backBtn.addEventListener('click', cerrarReja);
 
   // ============================================================
-  // 🌀 PARALLAX POR CONTENEDORES (CON AJUSTES)
+  // 🌀 PARALLAX + DETECCIÓN DE GIROSCOPIO
   // ============================================================
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
   let gyroWorking = false;
 
-  // === Crear wrapper para la app (si no existe) ===
+  // === Crear wrapper para la app ===
   let appInner = document.getElementById('app-inner');
   if (!appInner) {
     appInner = document.createElement('div');
@@ -246,7 +252,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   bodyObserver.observe(document.body, { childList: true, subtree: true });
 
-  // === Parallax con factores ajustados ===
+  // === Parallax ===
   function applyParallax(x, y) {
     if (document.querySelector('.modal-overlay.open')) return;
 
@@ -256,11 +262,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const offsetX = Math.min(Math.max(invertX, -maxOffset), maxOffset);
     const offsetY = Math.min(Math.max(invertY, -maxOffset), maxOffset);
 
-    // Portal: factor 0.6 (sin cambios)
     if (!portal.classList.contains('hide') && portalInner) {
       portalInner.style.transform = `translate(${offsetX * 0.6}px, ${offsetY * 0.6}px)`;
     }
-    // App: factor reducido 25% (0.6 * 0.75 = 0.45)
     if (app.classList.contains('show') && appInner) {
       appInner.style.transform = `translate(${offsetX * 0.45}px, ${offsetY * 0.45}px)`;
     }
@@ -280,10 +284,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // --- Mouse (solo en escritorio, NUNCA en móvil) ---
+  // --- Mouse (solo en escritorio) ---
   document.addEventListener('mousemove', (e) => {
-    // En móvil, el mouse NO debe activar el parallax bajo ninguna circunstancia
-    if (isMobile) return;
+    if (isMobile) return; // en móvil, el mouse NO activa parallax
     if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
     const x = (e.clientX / window.innerWidth - 0.5) * 30;
     const y = (e.clientY / window.innerHeight - 0.5) * 30;
@@ -300,6 +303,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (e.gamma !== null || e.beta !== null) {
         gyroWorking = true;
         console.log('✅ Giroscopio detectado y funcionando');
+        document.body.classList.remove('no-gyro'); // quitar clase de respaldo
         window.removeEventListener('deviceorientation', gyroTest);
         window.addEventListener('deviceorientation', handleOrientation);
       }
@@ -308,10 +312,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     setTimeout(() => {
       if (!gyroWorking) {
-        console.log('⚠️ Giroscopio no responde, se usará mouse como respaldo');
+        console.log('⚠️ Giroscopio no responde → activar animaciones de respaldo');
+        document.body.classList.add('no-gyro'); // añadir clase para activar float + wave
         window.removeEventListener('deviceorientation', gyroTest);
       }
     }, 3000);
+  } else if (!isMobile) {
+    // En escritorio, no necesitamos respaldo
+    document.body.classList.remove('no-gyro');
+  } else {
+    // Móvil sin gyro (navegador sin soporte)
+    console.log('⚠️ Navegador sin soporte de giroscopio → activar respaldo');
+    document.body.classList.add('no-gyro');
   }
 
   function handleOrientation(e) {
