@@ -28,16 +28,6 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌹</text></svg>">
 </head>
 <body>
-  <!-- CORTINA DE CARGA: Cubre la pantalla mientras se cargan los recursos -->
-  <div id="loading-veil-main" style="
-    position: fixed; inset: 0; z-index: 9999;
-    background-color: #0e0a18;
-    background-image: url('archivos/bella.jpg');
-    background-size: cover; background-position: center;
-    opacity: 1; transition: opacity 0.6s ease;
-    pointer-events: none;
-  "></div>
-
   <div id="bg"></div>
   <video id="video-app" autoplay loop muted playsinline>
     <source src="archivos/mar1.webm" type="video/webm">
@@ -265,8 +255,9 @@
 
       <p class="frase-inline gold-text" id="frase-texto">Cargando...</p>
       <p class="fecha-fija gold-text" id="fecha-fija">Cargando...</p>
-      <p class="hint gold-text" id="hint-juego">👆 Toca el nombre para jugar</p>
     </div>
+
+    <p class="hint gold-text" id="hint-juego">👆 Toca el nombre para jugar</p>
 
     <nav id="nav" aria-label="Navegación principal">
       <button class="nav-btn" data-modal="modal-contador" aria-label="Cuenta regresiva">
@@ -359,68 +350,5 @@
   </div>
 
   <script type="module" src="script-principal.js"></script>
-
-  <!-- SCRIPT: Esperar a que los recursos carguen y luego ocultar la cortina -->
-  <script>
-    // Solo ejecutar si estamos volviendo del juego
-    const volviendoDelJuego = location.search.indexOf('volver=1') !== -1;
-    const veilMain = document.getElementById('loading-veil-main');
-    
-    if (volviendoDelJuego && veilMain) {
-      // Función para verificar si TODO está listo
-      function todoListo() {
-        // 1. Verificar que los videos estén listos
-        const videoApp = document.getElementById('video-app');
-        const videoPortal = document.getElementById('video-portal');
-        
-        const videoAppReady = videoApp && (videoApp.readyState >= 2 || videoApp.duration > 0);
-        const videoPortalReady = videoPortal && (videoPortal.readyState >= 2 || videoPortal.duration > 0);
-        
-        // 2. Verificar que config.json se cargó (el nombre cambió de "X" a algo real)
-        const nombreEl = document.getElementById('nombre-hero');
-        const configCargado = nombreEl && nombreEl.textContent !== 'X' && nombreEl.textContent.trim() !== '';
-        
-        // Retorna true cuando AMBOS están listos
-        return (videoAppReady || videoPortalReady) && configCargado;
-      }
-      
-      // Esperar a que TODO esté listo
-      let intentos = 0;
-      const maxIntentos = 50; // 5 segundos máximo (50 * 100ms)
-      
-      const verificarCarga = setInterval(() => {
-        intentos++;
-        
-        // Si todo cargó O pasaron 5 segundos máximo, ocultar cortina
-        if (todoListo() || intentos >= maxIntentos) {
-          clearInterval(verificarCarga);
-          
-          // Ocultar la cortina suavemente
-          veilMain.style.opacity = '0';
-          veilMain.style.pointerEvents = 'none';
-          
-          // Remover del DOM después de la transición
-          setTimeout(() => {
-            veilMain.style.display = 'none';
-          }, 600);
-        }
-      }, 100); // Verificar cada 100ms
-      
-      // Alternativa: si todo carga muy rápido, usar window load event
-      window.addEventListener('load', () => {
-        clearInterval(verificarCarga);
-        if (veilMain.style.opacity !== '0') {
-          veilMain.style.opacity = '0';
-          veilMain.style.pointerEvents = 'none';
-          setTimeout(() => {
-            veilMain.style.display = 'none';
-          }, 600);
-        }
-      }, { once: true });
-    } else if (veilMain && !volviendoDelJuego) {
-      // Si NO estamos volviendo del juego, ocultar la cortina rápido
-      veilMain.style.display = 'none';
-    }
-  </script>
 </body>
 </html>
