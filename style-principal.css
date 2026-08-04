@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS COMPLETOS
+   🌹 INVITACIÓN XV – ESTILOS COMPLETOS (CON CAMBIOS)
    ============================================================ */
 
 :root {
@@ -28,7 +28,7 @@ body {
 }
 
 /* ============================================================
-   FONDO CON IMAGEN OPTIMIZADA (bella.jpg)
+   FONDO CON IMAGEN OPTIMIZADA
    ============================================================ */
 #bg {
   position: fixed;
@@ -49,6 +49,7 @@ body {
   inset: 0;
   background: rgba(0, 0, 0, 0.35);
 }
+
 @media (max-width: 768px) and (orientation: portrait) {
   #bg {
     background-position: 50% 30%;
@@ -57,7 +58,7 @@ body {
 }
 
 /* ============================================================
-   VIDEOS MÁS BRILLANTES
+   VIDEOS
    ============================================================ */
 #video-app, #video-portal {
   position: fixed;
@@ -71,23 +72,24 @@ body {
 }
 #video-app {
   z-index: 1;
-  opacity: 0.85;
+  opacity: 0.7;
   mix-blend-mode: screen;
-  filter: brightness(1.2) saturate(1.1);
 }
 #video-portal {
   z-index: 0;
-  opacity: 0.75;
+  opacity: 0.6;
   mix-blend-mode: screen;
-  filter: brightness(1.2) saturate(1.1);
 }
 
+/* ============================================================
+   TEXTO DORADO BRILLANTE (para frase, fecha, hint)
+   ============================================================ */
 .gold-text {
-  color: var(--gold-light);
-  text-shadow: 0 0 8px rgba(201, 162, 77, 0.2);
+  color: #fae3a0;
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.6), 0 0 20px rgba(212, 175, 55, 0.3), 0 0 40px rgba(212, 175, 55, 0.1);
 }
 .frase-inline, .fecha-fija, .hint, .portal-caption {
-  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.6), 0 0 20px rgba(212, 175, 55, 0.3);
 }
 
 /* ============================================================
@@ -188,7 +190,7 @@ body {
   font-size: 1rem;
   letter-spacing: 0.26em;
   text-transform: uppercase;
-  color: var(--gold-light);
+  color: #fae3a0;
   opacity: 0;
   transition: opacity 0.6s ease;
 }
@@ -289,12 +291,10 @@ html.sin-reja #app {
   container-name: tarjeta;
 }
 
-/* ============================================================
-   ÓVALO VERTICAL (círculo dorado)
-   ============================================================ */
+/* GIF OVALADO VERTICAL */
 #oval-wrap {
-  width: clamp(140px, 25cqw, 150px);
-  height: clamp(200px, 35cqw, 220px);
+  width: clamp(170px, 30cqw, 170px);
+  height: clamp(230px, 42cqw, 240px); /* más alto que ancho para efecto ovalado vertical */
   margin-bottom: 0.2rem;
   position: relative;
 }
@@ -314,9 +314,6 @@ html.sin-reja #app {
   display: block;
 }
 
-/* ============================================================
-   NOMBRE MÁS ILUMINADO
-   ============================================================ */
 h1#nombre-hero {
   font-family: var(--script);
   font-weight: 400;
@@ -324,23 +321,19 @@ h1#nombre-hero {
   line-height: 1.1;
   margin: 0;
   cursor: pointer;
-  background: linear-gradient(90deg, #ff3333, #ffcc00, #33ff33, #00ccff, #cc33ff, #ff3333);
+  background: linear-gradient(90deg, #ff0000, #ff8800, #ffd700, #00ff00, #0088ff, #8800ff, #ff0000);
   background-size: 300% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   animation: rainbowMove 4s linear infinite;
   user-select: none;
-  text-shadow: 0 0 30px rgba(255,255,255,0.4), 0 0 60px rgba(255,200,100,0.2);
 }
 @keyframes rainbowMove {
   0% { background-position: 0% 50%; }
   100% { background-position: 300% 50%; }
 }
 
-/* ============================================================
-   FRASE EN ROJO
-   ============================================================ */
 .frase-inline {
   font-family: var(--serif-body);
   font-style: italic;
@@ -348,21 +341,21 @@ h1#nombre-hero {
   line-height: 1.5;
   margin: 0.1rem 0;
   max-width: 34ch;
-  color: #ff0000; /* CAMBIADO A ROJO */
+  color: #fae3a0;
   border-bottom: 1px solid rgba(201,162,77,0.25);
   padding-bottom: 0.2rem;
-  text-shadow: 0 0 12px rgba(255,0,0,0.4); /* sombra roja */
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.6), 0 0 20px rgba(212, 175, 55, 0.3);
 }
-.frase-inline::before { content: "\201C"; color: #ff3333; }
-.frase-inline::after { content: "\201D"; color: #ff3333; }
+.frase-inline::before { content: "\201C"; color: #d4af37; }
+.frase-inline::after { content: "\201D"; color: #d4af37; }
 
 .fecha-fija {
   font-family: var(--serif-body);
   font-style: italic;
   font-size: clamp(1.3rem, 3.6cqw, 1.3rem);
   margin: 0.1rem 0;
-  color: #d4af37;
-  text-shadow: 0 0 20px rgba(212,175,55,0.4);
+  color: #fae3a0;
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.6), 0 0 20px rgba(212, 175, 55, 0.3);
   letter-spacing: 0.04em;
 }
 
@@ -373,8 +366,8 @@ h1#nombre-hero {
   font-family: var(--serif-body);
   font-style: italic;
   letter-spacing: 0.04em;
-  color: #f5a0b0;
-  text-shadow: 0 0 18px rgba(245,160,176,0.3);
+  color: #fae3a0;
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.6), 0 0 20px rgba(212, 175, 55, 0.3);
 }
 
 #nav {
@@ -658,6 +651,9 @@ h1#nombre-hero {
   font-size: 0.8rem;
 }
 
+/* ============================================================
+   DETALLE CARD (LUGARES) - QUITADO EL HOVER BRILLANTE
+   ============================================================ */
 .detalle-card {
   background: rgba(10, 18, 34, 0.55);
   border: 2px solid #b8860b;
@@ -665,7 +661,7 @@ h1#nombre-hero {
   padding: 1rem 1.2rem 0.8rem;
   margin-bottom: 1rem;
   box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.03), 0 4px 20px rgba(0,0,0,0.4);
-  transition: border-color 0.3s, box-shadow 0.3s;
+  /* Eliminamos transition para que no haya hover */
   position: relative;
 }
 .detalle-card::before {
@@ -689,9 +685,9 @@ h1#nombre-hero {
   padding: 0 6px;
   transform: scaleX(-1);
 }
+/* QUITAMOS el hover que hacía brillar */
 .detalle-card:hover {
-  border-color: #fae3a0;
-  box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.08), 0 4px 30px rgba(0,0,0,0.6);
+  /* No hacemos nada */ 
 }
 .detalle-card .icono {
   width: 34px;
@@ -850,12 +846,6 @@ h1#nombre-hero {
 /* ============================================================
    RESPONSIVE
    ============================================================ */
-@media (max-width: 768px) {
-  /* En móvil, desactivar cualquier transición de parallax */
-  #app-inner, .portal-inner {
-    transition: none !important;
-  }
-}
 @media (max-width: 400px) {
   #app { padding: 0.6rem 0.8rem; }
   #app-top .eyebrow { font-size: 0.8rem; }
