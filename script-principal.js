@@ -107,21 +107,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.location.href = 'juego1/';
   });
 
-  // ========== REJA (corregida para mostrar siempre) ==========
+  // ========== REJA (forzar visibilidad) ==========
   const portal = document.getElementById('portal');
   const gateWrapper = document.getElementById('gate-wrapper');
   const app = document.getElementById('app');
   const backBtn = document.getElementById('back-link');
   const caption = document.querySelector('.portal-caption');
 
-  // FORZAR VISIBILIDAD DE LA REJA AL INICIO
-  console.log('🔓 Forzando visibilidad de la reja');
+  // Forzar que la reja sea visible al inicio
   portal.classList.remove('hide');
   gateWrapper.classList.remove('open');
   caption.classList.remove('show');
   gateWrapper.classList.remove('active');
 
-  // Si venimos del juego, mostrar app directamente
   const params = new URLSearchParams(window.location.search);
   const volviendoDelJuego = params.get('volver') === '1';
 
@@ -136,7 +134,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     history.replaceState(null, '', window.location.pathname);
     document.documentElement.classList.remove('sin-reja');
   } else {
-    // Asegurar que la reja esté visible y activa después de 2s
+    // Activar la reja después de 2s
     setTimeout(() => {
       caption.classList.add('show');
       gateWrapper.classList.add('active');
@@ -229,7 +227,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('▶️ Videos reanudados');
   }
 
-  const modalObserver = new MutationObserver((mutations) => {
+  const modalObserver = new MutationObserver(() => {
     const hayModalAbierto = document.querySelector('.modal-overlay.open') !== null;
     if (hayModalAbierto) {
       pausarVideos();
