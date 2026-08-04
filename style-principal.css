@@ -843,3 +843,17 @@ h1#nombre-hero {
 }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: rgba(201, 162, 77, 0.3); border-radius: 3px; }
+
+
+/* ============================================================
+   PARALLAX – SOPORTE DE TRANSFORM
+   ============================================================ */
+.gate-wrapper,
+#app-mid,
+#nombre-hero,
+.frase-inline,
+.fecha-fija,
+.hint,
+#oval-wrap {
+  will-change: transform;
+}
