@@ -3,7 +3,7 @@
 // ============================================================
 console.log('📦 juego z1.js (completo y corregido)');
 
-import { soundTap, soundBrick, soundLose, soundClose } from './sonidos.js';
+import { soundTap, soundBrick, soundLose, soundClose } from './modules/sonidos.js';
 
 // ========== DETECCIÓN DE MÓVIL ==========
 const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
