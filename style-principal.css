@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS COMPLETOS (CON IMAGEN OPTIMIZADA)
+   🌹 INVITACIÓN XV – ESTILOS COMPLETOS
    ============================================================ */
 
 :root {
@@ -28,7 +28,7 @@ body {
 }
 
 /* ============================================================
-   FONDO CON IMAGEN OPTIMIZADA (bella.jpg)
+   FONDO CON IMAGEN OPTIMIZADA
    ============================================================ */
 #bg {
   position: fixed;
@@ -38,7 +38,7 @@ body {
   background-image: url('archivos/bella.jpg');
   background-size: cover;
   background-repeat: no-repeat;
-  background-position: 50% 35%; /* punto focal: centrado horizontal, 35% vertical (rostro) */
+  background-position: 50% 35%;
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;
   will-change: transform;
@@ -49,8 +49,6 @@ body {
   inset: 0;
   background: rgba(0, 0, 0, 0.35);
 }
-
-/* Ajuste para móviles verticales */
 @media (max-width: 768px) and (orientation: portrait) {
   #bg {
     background-position: 50% 30%;
@@ -59,7 +57,7 @@ body {
 }
 
 /* ============================================================
-   VIDEOS
+   VIDEOS DE FONDO (más iluminados)
    ============================================================ */
 #video-app, #video-portal {
   position: fixed;
@@ -70,24 +68,99 @@ body {
   object-fit: cover;
   pointer-events: none;
   will-change: transform;
+  filter: brightness(1.2) saturate(1.1);
 }
 #video-app {
   z-index: 1;
-  opacity: 0.7;
+  opacity: 0.8;
   mix-blend-mode: screen;
 }
 #video-portal {
   z-index: 0;
-  opacity: 0.6;
+  opacity: 0.7;
   mix-blend-mode: screen;
 }
 
+/* ============================================================
+   VIDEOS DE MODALES (sin transparencia)
+   ============================================================ */
+.modal-video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 65;
+  display: none;
+  pointer-events: none;
+  filter: brightness(1.1) saturate(1.0);
+}
+
+/* ============================================================
+   TEXTO Y DECORACIONES
+   ============================================================ */
 .gold-text {
   color: var(--gold-light);
   text-shadow: 0 0 8px rgba(201, 162, 77, 0.2);
 }
 .frase-inline, .fecha-fija, .hint, .portal-caption {
   text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+}
+#frase-texto {
+  color: #ff3333 !important;
+  text-shadow: 0 0 20px rgba(255, 50, 50, 0.4);
+}
+
+/* ============================================================
+   NOMBRE DE LA QUINCEAÑERA
+   ============================================================ */
+h1#nombre-hero {
+  font-family: var(--script);
+  font-weight: 400;
+  font-size: clamp(4.6rem, 13cqw, 4.6rem);
+  line-height: 1.1;
+  margin: 0;
+  cursor: pointer;
+  background: linear-gradient(90deg, #ff0000, #ff8800, #ffd700, #00ff00, #0088ff, #8800ff, #ff0000);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: rainbowMove 4s linear infinite;
+  user-select: none;
+  filter: brightness(1.3);
+}
+@keyframes rainbowMove {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+/* ============================================================
+   OVALO VERTICAL
+   ============================================================ */
+#oval-wrap {
+  width: clamp(150px, 25cqw, 170px);
+  height: clamp(210px, 35cqw, 240px);
+  margin-bottom: 0.2rem;
+  position: relative;
+  border-radius: 50% / 60%;
+  overflow: visible;
+}
+.oval-mask {
+  width: 100%;
+  height: 100%;
+  border-radius: 50% / 60%;
+  overflow: hidden;
+  border: 4px solid var(--gold);
+  box-shadow: 0 0 30px rgba(201, 162, 77, 0.4);
+  background: var(--bg-deep);
+}
+.gif-central {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 /* ============================================================
@@ -289,84 +362,9 @@ html.sin-reja #app {
   container-name: tarjeta;
 }
 
-#oval-wrap {
-  width: clamp(170px, 30cqw, 170px);
-  height: clamp(221px, 39cqw, 221px);
-  margin-bottom: 0.2rem;
-  position: relative;
-}
-.oval-mask {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 4px solid var(--gold);
-  box-shadow: 0 0 30px rgba(201, 162, 77, 0.4);
-  background: var(--bg-deep);
-}
-.gif-central {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-h1#nombre-hero {
-  font-family: var(--script);
-  font-weight: 400;
-  font-size: clamp(4.6rem, 13cqw, 4.6rem);
-  line-height: 1.1;
-  margin: 0;
-  cursor: pointer;
-  background: linear-gradient(90deg, #ff0000, #ff8800, #ffd700, #00ff00, #0088ff, #8800ff, #ff0000);
-  background-size: 300% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: rainbowMove 4s linear infinite;
-  user-select: none;
-}
-@keyframes rainbowMove {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 300% 50%; }
-}
-
-.frase-inline {
-  font-family: var(--serif-body);
-  font-style: italic;
-  font-size: clamp(1.2rem, 3.3cqw, 1.2rem);
-  line-height: 1.5;
-  margin: 0.1rem 0;
-  max-width: 34ch;
-  color: #f5e6c8;
-  border-bottom: 1px solid rgba(201,162,77,0.25);
-  padding-bottom: 0.2rem;
-  text-shadow: 0 0 12px rgba(201,162,77,0.2);
-}
-.frase-inline::before { content: "\201C"; color: #d4af37; }
-.frase-inline::after { content: "\201D"; color: #d4af37; }
-
-.fecha-fija {
-  font-family: var(--serif-body);
-  font-style: italic;
-  font-size: clamp(1.3rem, 3.6cqw, 1.3rem);
-  margin: 0.1rem 0;
-  color: #d4af37;
-  text-shadow: 0 0 20px rgba(212,175,55,0.4);
-  letter-spacing: 0.04em;
-}
-
-.hint {
-  font-size: clamp(1.2rem, 3.3cqw, 1.2rem);
-  opacity: 0.9;
-  margin: 0.2rem 0;
-  font-family: var(--serif-body);
-  font-style: italic;
-  letter-spacing: 0.04em;
-  color: #f5a0b0;
-  text-shadow: 0 0 18px rgba(245,160,176,0.3);
-}
-
+/* ============================================================
+   NAVEGACIÓN (sin rectángulo)
+   ============================================================ */
 #nav {
   width: 100%;
   max-width: 480px;
@@ -374,8 +372,7 @@ h1#nombre-hero {
   grid-template-columns: repeat(3, 1fr);
   gap: 0.4rem;
   background: transparent;
-  border: 1.5px solid #b8860b;
-  border-radius: 20px;
+  border: none;
   padding: 0.5rem;
   margin-top: 0.2rem;
 }
