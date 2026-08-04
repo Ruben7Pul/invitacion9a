@@ -153,27 +153,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (window.playMusic) window.playMusic();
   }
 
-  // ========== CERRAR REJA (CORREGIDO) ==========
   function cerrarReja(e) {
     if (e) e.stopPropagation();
     console.log('🔒 Cerrando reja...');
-
     app.classList.remove('show');
     portal.classList.remove('hide');
     gateWrapper.classList.remove('open');
-
     if (window.resetMusic) window.resetMusic();
-
     caption.classList.remove('show');
     gateWrapper.classList.remove('active');
-
     void portal.offsetHeight;
-
     requestAnimationFrame(() => {
       portal.classList.add('closing');
       console.log('⏳ Animación de cierre iniciada');
     });
-
     setTimeout(() => {
       portal.classList.remove('closing');
       console.log('✅ Animación de cierre completada');
@@ -190,4 +183,86 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirReja(e); }
   });
   backBtn.addEventListener('click', cerrarReja);
+
+  // ============================================================
+  // 🌀 PARALLAX EN LA REJA (solo en el wrapper de la reja)
+  // ============================================================
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
+
+  // Función que aplica la traslación suave
+  function applyParallax(x, y) {
+    // Limitar movimiento máximo a ±8px para que sea sutil
+    const maxOffset = 8;
+    const offsetX = Math.min(Math.max(x, -maxOffset), maxOffset);
+    const offsetY = Math.min(Math.max(y, -maxOffset), maxOffset);
+    gateWrapper.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+  }
+
+  // Variable para suavizar la transición (evita movimientos bruscos)
+  let currentX = 0, currentY = 0;
+  let targetX = 0, targetY = 0;
+
+  function smoothParallax() {
+    // Interpolación lineal para suavizar
+    currentX += (targetX - currentX) * 0.12;
+    currentY += (targetY - currentY) * 0.12;
+    if (Math.abs(currentX - targetX) > 0.01 || Math.abs(currentY - targetY) > 0.01) {
+      applyParallax(currentX, currentY);
+      requestAnimationFrame(smoothParallax);
+    } else {
+      applyParallax(targetX, targetY);
+    }
+  }
+
+  // --- Movimiento con mouse (escritorio) ---
+  document.addEventListener('mousemove', (e) => {
+    // Solo si la reja está visible (no oculta)
+    if (portal.classList.contains('hide')) return;
+    const x = (e.clientX / window.innerWidth - 0.5) * 16; // -8..8
+    const y = (e.clientY / window.innerHeight - 0.5) * 16;
+    targetX = x;
+    targetY = y;
+    if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
+      requestAnimationFrame(smoothParallax);
+    }
+  });
+
+  // --- Movimiento con giroscopio (móvil) ---
+  if (isMobile && hasGyro) {
+    // Solicitar permiso en iOS 13+
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission()
+        .then(state => {
+          if (state === 'granted') {
+            window.addEventListener('deviceorientation', handleOrientation);
+          }
+        })
+        .catch(() => {});
+    } else {
+      window.addEventListener('deviceorientation', handleOrientation);
+    }
+  }
+
+  function handleOrientation(e) {
+    if (portal.classList.contains('hide')) return;
+    const gamma = e.gamma || 0; // -90..90
+    const beta = e.beta || 0;   // -180..180
+    // Normalizar a -8..8
+    const x = Math.min(Math.max(gamma / 10, -8), 8);
+    const y = Math.min(Math.max((beta - 45) / 10, -8), 8);
+    targetX = x;
+    targetY = y;
+    if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
+      requestAnimationFrame(smoothParallax);
+    }
+  }
+
+  // Fallback: si no hay mouse ni giroscopio, no hacemos nada (la reja se queda quieta)
+
+  // También activar el parallax cuando la reja se abre (por si se oculta)
+  // No es necesario, porque el evento se dispara mientras la reja está visible.
+
+  // Nota: al cerrar la reja (portal oculto), no movemos, pero el evento sigue.
+  // Podríamos detenerlo, pero no afecta rendimiento.
 });
