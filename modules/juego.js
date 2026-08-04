@@ -1,10 +1,9 @@
 // ============================================================
-// juego.js – COMPLETO Y CORREGIDO (salida a la página principal + música)
+// juego.js – COMPLETO Y CORREGIDO (verifica elementos, redirige al salir)
 // ============================================================
-console.log('📦 juego.js (corregido: salida top, música propia)');
+console.log('📦 juego z1.js (completo y corregido)');
 
 import { soundTap, soundBrick, soundLose, soundClose } from './sonidos.js';
-// NOTA: no importamos config aquí; lo recibimos por parámetro en initJuego
 
 // ========== DETECCIÓN DE MÓVIL ==========
 const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -40,6 +39,7 @@ const BRICK_TYPES = {
 };
 
 function getCrackImageSrc(brick) {
+  // Rutas relativas al documento juego1/index.html (un nivel arriba de "archivos/")
   if (brick.hits >= brick.maxHits) return null;
   if (brick.maxHits === 2) return '../archivos/griet2.png';
   if (brick.maxHits === 3) {
@@ -300,11 +300,8 @@ export function initJuego(config, mobile = false) {
   let pendingHighScore = false;
   let gameIsOpen = false;
 
-  // ========== MÚSICA DEL JUEGO (propia) ==========
-  let gameAudio = null;
-  const audioFile = config?.audioFile || '../archivos/cancion.mp3';
-
   // ========== MENSAJES TEMÁTICOS DE FIN DE JUEGO (XV años / Bella y Bestia) ==========
+  // Sube de nivel cada 10,000 puntos, con tope en 150,000.
   const THEME_MESSAGES = [
     'La rosa apenas empieza a florecer... ¡vuelve a intentarlo!',
     'Como Bella cruzando el portón por primera vez: buen comienzo, sigue así.',
@@ -418,11 +415,12 @@ export function initJuego(config, mobile = false) {
     menuContent.style.display = 'flex';
   });
 
-  // ========== BOTÓN SALIR – REGRESA A LA PARTE PRINCIPAL (con ventana superior) ==========
+  // ========== BOTÓN SALIR – REGRESA A LA PARTE PRINCIPAL (no a la reja) ==========
   menuExit.addEventListener('click', (e) => {
     e.stopPropagation();
     soundTap();
-    // Cortina de refuerzo: tapa la pantalla con la imagen de fondo antes de salir
+    // Cortina de refuerzo: tapa la pantalla con la imagen de fondo antes de
+    // salir, para que la transición se vea limpia aunque algo tarde en cargar.
     const veil = document.getElementById('loading-veil');
     if (veil) {
       veil.style.transition = 'none';
@@ -430,10 +428,10 @@ export function initJuego(config, mobile = false) {
       veil.classList.remove('hide');
       void veil.offsetHeight; // fuerza a aplicar el cambio antes de navegar
     }
-    // "?volver=1" le indica a index.html que debe mostrar directamente la parte principal
+    // "?volver=1" le indica a index.html que debe mostrar directamente
+    // la parte principal (sin repetir la animación de la reja)
     setTimeout(() => {
-      // Redirigir la ventana PRINCIPAL (no el iframe)
-      window.top.location.href = '../index.html?volver=1';
+      window.location.href = '../index.html?volver=1';
     }, 220);
   });
 
@@ -1233,12 +1231,6 @@ export function initJuego(config, mobile = false) {
     gameOver = true;
     gameTimeActive = false;
     if (animFrameId) cancelAnimationFrame(animFrameId);
-    // Detener música
-    if (gameAudio) {
-      gameAudio.pause();
-      gameAudio.currentTime = 0;
-      gameAudio = null;
-    }
     showMenu(true, playerScore);
     livesEl.style.display = 'none';
     scoreEl.style.display = 'none';
@@ -1249,13 +1241,6 @@ export function initJuego(config, mobile = false) {
 
   function startGame() {
     resetGameState();
-    // Iniciar música propia
-    if (config && config.audioFile) {
-      gameAudio = new Audio(config.audioFile);
-      gameAudio.loop = true;
-      gameAudio.volume = 0.4;  // volumen más bajo que la invitación
-      gameAudio.play().catch(() => console.warn('⚠️ No se pudo reproducir música del juego'));
-    }
     const clayValues = new Array(BRICK_ROWS * BRICK_COLS).fill(1);
     inner.querySelectorAll('.brick').forEach(b => b.remove());
     bricks = [];
@@ -1632,12 +1617,6 @@ export function initJuego(config, mobile = false) {
     gameOver = false;
     gameTimeActive = false;
     pauseBtn.textContent = '⏸️';
-    // Detener música
-    if (gameAudio) {
-      gameAudio.pause();
-      gameAudio.currentTime = 0;
-      gameAudio = null;
-    }
     overlay.classList.remove('open');
     cleanGameState();
     gameIsOpen = false;
@@ -1719,5 +1698,5 @@ export function initJuego(config, mobile = false) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego inicializado (corregido: salida top, música propia)');
+  console.log('✅ Juego inicializado (completo y corregido)');
 }

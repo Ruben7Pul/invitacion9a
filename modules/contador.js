@@ -1,6 +1,4 @@
-console.log('📦 contador.js (con sonido de tic)');
-
-import { ensureAudioCtx } from './sonidos.js';
+console.log('📦 contador.js');
 
 export function initContador(config) {
   console.log('🕒 Iniciando contador con fecha:', config.fechaISO);
@@ -32,26 +30,7 @@ export function initContador(config) {
     els.h.textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
     els.m.textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
     els.s.textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
-
-    // --- Sonido de tic (segundero) ---
-    const ctx = ensureAudioCtx();
-    if (ctx) {
-      try {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.frequency.value = 1200;           // tono agudo
-        gain.gain.setValueAtTime(0.06, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.04);
-      } catch (e) {
-        // Silencio si falla, no interrumpimos el contador
-      }
-    }
   }
-
   tick();
   const timer = setInterval(tick, 1000);
 }
