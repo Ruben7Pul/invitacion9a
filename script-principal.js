@@ -107,13 +107,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.location.href = 'juego1/';
   });
 
-  // ========== REJA ==========
+  // ========== REJA (corregida para mostrar siempre) ==========
   const portal = document.getElementById('portal');
   const gateWrapper = document.getElementById('gate-wrapper');
   const app = document.getElementById('app');
   const backBtn = document.getElementById('back-link');
   const caption = document.querySelector('.portal-caption');
 
+  // FORZAR VISIBILIDAD DE LA REJA AL INICIO
+  console.log('🔓 Forzando visibilidad de la reja');
+  portal.classList.remove('hide');
+  gateWrapper.classList.remove('open');
+  caption.classList.remove('show');
+  gateWrapper.classList.remove('active');
+
+  // Si venimos del juego, mostrar app directamente
   const params = new URLSearchParams(window.location.search);
   const volviendoDelJuego = params.get('volver') === '1';
 
@@ -128,11 +136,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     history.replaceState(null, '', window.location.pathname);
     document.documentElement.classList.remove('sin-reja');
   } else {
-    gateWrapper.classList.remove('active');
-    caption.classList.remove('show');
+    // Asegurar que la reja esté visible y activa después de 2s
     setTimeout(() => {
       caption.classList.add('show');
       gateWrapper.classList.add('active');
+      console.log('🔄 Reja activada');
     }, 2000);
   }
 
@@ -221,7 +229,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('▶️ Videos reanudados');
   }
 
-  const modalObserver = new MutationObserver(() => {
+  const modalObserver = new MutationObserver((mutations) => {
     const hayModalAbierto = document.querySelector('.modal-overlay.open') !== null;
     if (hayModalAbierto) {
       pausarVideos();
@@ -275,10 +283,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // --- Mouse (solo en escritorio) ---
+  // --- Mouse (solo si NO es móvil con giro activo) ---
   document.addEventListener('mousemove', (e) => {
-    // En móvil, no se usa mouse para parallax
-    if (isMobile) return;
+    if (isMobile && gyroWorking) return;
     if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
     const x = (e.clientX / window.innerWidth - 0.5) * 30;
     const y = (e.clientY / window.innerHeight - 0.5) * 30;
@@ -303,9 +310,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     setTimeout(() => {
       if (!gyroWorking) {
-        console.log('⚠️ Giroscopio no responde, parallax desactivado en móvil');
+        console.log('⚠️ Giroscopio no responde, se usará mouse como respaldo');
         window.removeEventListener('deviceorientation', gyroTest);
-        // No se añade handleOrientation, así que no hay parallax
       }
     }, 3000);
   }
