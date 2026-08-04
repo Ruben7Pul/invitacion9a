@@ -47,6 +47,19 @@ html, body {
 }
 
 /* GAME OVERLAY */
+#loading-veil {
+  position:fixed;
+  inset:0;
+  z-index:999;
+  background-color:#0e0a18;
+  background-image:url('../archivos/bella.jpg');
+  background-size:cover;
+  background-position:center;
+  opacity:1;
+  transition:opacity 0.45s ease;
+  pointer-events:none;
+}
+#loading-veil.hide { opacity:0; }
 #game-overlay {
   position:fixed;
   inset:0;
@@ -507,6 +520,21 @@ html, body {
   </style>
 </head>
 <body style="background:#0e0a18">
+  <!-- CORTINA DE CARGA: tapa la pantalla con la misma imagen de fondo de la
+       invitación (ya está en caché del navegador porque viene de la página
+       anterior, así que aparece al instante) mientras el menú del juego
+       termina de acomodarse, y luego se desvanece suave y rápido. -->
+  <div id="loading-veil" aria-hidden="true"></div>
+  <script>
+    setTimeout(function () {
+      var veil = document.getElementById('loading-veil');
+      if (!veil) return;
+      veil.classList.add('hide');
+      veil.addEventListener('transitionend', function () {
+        veil.style.display = 'none';
+      }, { once: true });
+    }, 750);
+  </script>
   <!-- OVERLAY DEL JUEGO -->
   <div id="game-overlay" class="open">
     <div id="game-panel">
@@ -527,7 +555,14 @@ html, body {
 
         <!-- MENÚ PRINCIPAL -->
         <div id="game-menu">
-         
+          <h2>MENÚ</h2>
+          <div id="menu-content">
+            <button id="menu-play" class="game-btn">▶ Jugar</button>
+            <button id="menu-scores" class="game-btn">🏆 Mejores puntuaciones</button>
+            <button id="menu-rules" class="game-btn">📖 Reglas</button>
+            <button id="menu-exit" class="game-btn">🚪 Salir</button>
+            <button id="menu-reset-tops" class="game-btn" style="font-size:0.7rem; opacity:0.6;">🔄 Reiniciar tops</button>
+          </div>
           <div id="menu-scores-list">
             <h3>Mejores puntuaciones</h3>
             <ul id="scores-list"></ul>
