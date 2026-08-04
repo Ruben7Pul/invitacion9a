@@ -1,12 +1,10 @@
 // ============================================================
-// script-juego.js – SCRIPT DEL JUEGO (independiente)
+// script-juego.js – SCRIPT DEL JUEGO (con carga robusta de sonidos)
 // ============================================================
-console.log('🎮 script-juego.js cargado (con initSonidos)');
+console.log('🎮 script-juego.js cargado');
 
 const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-// script-juego.js se ejecuta ahora desde /juego1/index.html, por lo que
-// config.json y los archivos de audio viven un nivel arriba ("../").
 async function cargarConfig() {
   try {
     const res = await fetch(`../config.json?t=${Date.now()}`);
@@ -38,15 +36,20 @@ async function cargarConfig() {
 
 (async function init() {
   try {
-    // 1. Inicializar el motor de sonidos (esto activa el AudioContext)
-    const { initSonidos } = await import('../modules/sonidos.js');
-    initSonidos();
+    // 1. Construir la ruta absoluta al módulo de sonidos usando import.meta.url
+    const baseUrl = new URL('.', import.meta.url).href;  // apunta a /juego1/
+    const sonidosUrl = new URL('../modules/sonidos.js', import.meta.url).href;
+
+    console.log('🔊 Cargando sonidos desde:', sonidosUrl);
+    const sonidosModule = await import(sonidosUrl);
+    const { initSonidos } = sonidosModule;
+    initSonidos();  // activa el AudioContext y precarga sonidos
 
     // 2. Cargar configuración
     const config = await cargarConfig();
 
     // 3. Iniciar el juego propiamente dicho
-    const { initJuego } = await import('../modules/juego.js');
+    const { initJuego } = await import(new URL('../modules/juego.js', import.meta.url).href);
     initJuego(config, isMobile);
 
     console.log('✅ Juego iniciado correctamente con sonidos');
