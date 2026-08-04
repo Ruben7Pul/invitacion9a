@@ -442,7 +442,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   MODALES
+   MODALES (con parallax)
    ============================================================ */
 .modal-overlay {
   position: fixed;
@@ -494,6 +494,7 @@ h1#nombre-hero {
     inset 0 0 60px rgba(25, 50, 100, 0.15);
   z-index: 1;
   -webkit-overflow-scrolling: touch;
+  will-change: transform; /* Para parallax */
 }
 .modal-overlay.open .modal-card {
   transform: scale(1);
