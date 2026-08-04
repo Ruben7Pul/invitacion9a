@@ -5,40 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Invitación XV</title>
   <script>
-    // Si volvemos del botón "Salir" del juego, marcamos el <html>
-    // ANTES de pintar nada, para que el CSS oculte la reja de una vez
-    // y no se alcance a ver ni un instante (ver reglas ".sin-reja" en style-principal.css).
     if (location.search.indexOf('volver=1') !== -1) {
       document.documentElement.classList.add('sin-reja');
     }
   </script>
-
   <meta property="og:title" content="Invitación a mis XV años" />
   <meta property="og:description" content="Te invitamos a celebrar mis 15 años. ¡No faltes!" />
   <meta property="og:image" content="https://tudominio.com/archivos/og-image.jpg" />
   <meta property="og:url" content="https://tudominio.com/invitacion" />
   <meta name="twitter:card" content="summary_large_image" />
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
-  
   <link rel="stylesheet" href="style-principal.css?v=20260804">
-
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌹</text></svg>">
 </head>
 <body>
-  <!-- CORTINA DE CARGA: Cubre la pantalla mientras se cargan los recursos -->
-  <div id="loading-veil-main" style="
-    position: fixed; inset: 0; z-index: 9999;
-    background-color: #0e0a18;
-    background-image: url('archivos/bella.jpg');
-    background-size: cover; background-position: center;
-    opacity: 1; transition: opacity 0.6s ease;
-    pointer-events: none;
-  "></div>
+  <!-- Cortina de carga -->
+  <div id="loading-veil-main" style="position:fixed; inset:0; z-index:9999; background-color:#0e0a18; background-image:url('archivos/bella.jpg'); background-size:cover; background-position:center; opacity:1; transition:opacity 0.6s ease; pointer-events:none;"></div>
 
   <div id="bg"></div>
+
+  <!-- VIDEO APP PRINCIPAL (mar1) -->
   <video id="video-app" autoplay loop muted playsinline>
     <source src="archivos/mar1.webm" type="video/webm">
     <source src="archivos/mar1.mp4" type="video/mp4">
@@ -46,6 +34,7 @@
 
   <!-- PORTAL / REJA -->
   <div id="portal" role="dialog" aria-label="Puerta de entrada">
+    <!-- VIDEO DEL PORTAL (mar2) -->
     <video id="video-portal" autoplay loop muted playsinline>
       <source src="archivos/mar2.webm" type="video/webm">
       <source src="archivos/mar2.mp4" type="video/mp4">
@@ -56,7 +45,6 @@
         <!-- Hoja izquierda -->
         <div class="gate-leaf gate-left" aria-hidden="true">
           <svg viewBox="0 0 150 200" width="100%" height="100%">
-            <!-- SVG completo de la hoja izquierda (copiar el que ya tenías) -->
             <defs>
               <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#f5e6b8"/>
@@ -143,7 +131,6 @@
         <!-- Hoja derecha -->
         <div class="gate-leaf gate-right" aria-hidden="true">
           <svg viewBox="0 0 150 200" width="100%" height="100%">
-            <!-- SVG completo de la hoja derecha (copiar el que ya tenías) -->
             <defs>
               <linearGradient id="goldGrad2" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#f5e6b8"/>
@@ -360,53 +347,32 @@
 
   <script type="module" src="script-principal.js"></script>
 
-  <!-- SCRIPT: Esperar a que los recursos carguen y luego ocultar la cortina -->
   <script>
-    // Solo ejecutar si estamos volviendo del juego
     const volviendoDelJuego = location.search.indexOf('volver=1') !== -1;
     const veilMain = document.getElementById('loading-veil-main');
-    
     if (volviendoDelJuego && veilMain) {
-      // Función para verificar si TODO está listo
       function todoListo() {
-        // 1. Verificar que los videos estén listos
         const videoApp = document.getElementById('video-app');
         const videoPortal = document.getElementById('video-portal');
-        
         const videoAppReady = videoApp && (videoApp.readyState >= 2 || videoApp.duration > 0);
         const videoPortalReady = videoPortal && (videoPortal.readyState >= 2 || videoPortal.duration > 0);
-        
-        // 2. Verificar que config.json se cargó (el nombre cambió de "X" a algo real)
         const nombreEl = document.getElementById('nombre-hero');
         const configCargado = nombreEl && nombreEl.textContent !== 'X' && nombreEl.textContent.trim() !== '';
-        
-        // Retorna true cuando AMBOS están listos
         return (videoAppReady || videoPortalReady) && configCargado;
       }
-      
-      // Esperar a que TODO esté listo
       let intentos = 0;
-      const maxIntentos = 50; // 5 segundos máximo (50 * 100ms)
-      
+      const maxIntentos = 50;
       const verificarCarga = setInterval(() => {
         intentos++;
-        
-        // Si todo cargó O pasaron 5 segundos máximo, ocultar cortina
         if (todoListo() || intentos >= maxIntentos) {
           clearInterval(verificarCarga);
-          
-          // Ocultar la cortina suavemente
           veilMain.style.opacity = '0';
           veilMain.style.pointerEvents = 'none';
-          
-          // Remover del DOM después de la transición
           setTimeout(() => {
             veilMain.style.display = 'none';
           }, 600);
         }
-      }, 100); // Verificar cada 100ms
-      
-      // Alternativa: si todo carga muy rápido, usar window load event
+      }, 100);
       window.addEventListener('load', () => {
         clearInterval(verificarCarga);
         if (veilMain.style.opacity !== '0') {
@@ -418,7 +384,6 @@
         }
       }, { once: true });
     } else if (veilMain && !volviendoDelJuego) {
-      // Si NO estamos volviendo del juego, ocultar la cortina rápido
       veilMain.style.display = 'none';
     }
   </script>
