@@ -442,7 +442,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   MODALES (con parallax)
+   MODALES (con soporte para parallax via left/top)
    ============================================================ */
 .modal-overlay {
   position: fixed;
@@ -483,10 +483,10 @@ h1#nombre-hero {
   border: 3px solid #b8860b;
   border-radius: 30px;
   padding: 2rem 1.6rem;
-  position: relative;
+  position: relative; /* Necesario para left/top */
   transform: scale(0.95);
   opacity: 0;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, left 0.2s ease, top 0.2s ease;
   box-shadow: 
     0 0 0 2px rgba(184, 134, 11, 0.2),
     0 0 0 6px rgba(26, 42, 70, 0.5),
@@ -494,7 +494,7 @@ h1#nombre-hero {
     inset 0 0 60px rgba(25, 50, 100, 0.15);
   z-index: 1;
   -webkit-overflow-scrolling: touch;
-  will-change: transform; /* Para parallax */
+  will-change: transform, left, top;
 }
 .modal-overlay.open .modal-card {
   transform: scale(1);
