@@ -1,7 +1,7 @@
-console.log('📦 contador.js (con sonido de tick solo en modal)');
+console.log('📦 contador.js (con tick corregido)');
 
 let tickAudioCtx = null;
-let tickInterval = null;
+let tickTimerId = null;
 
 function createTickSound() {
   try {
@@ -60,14 +60,15 @@ export function initContador(config) {
   const clockEl = document.getElementById('clock');
   const modalContador = document.getElementById('modal-contador');
 
+  // Función que actualiza el reloj y programa el siguiente tick
   function tick() {
-    const diff = target - Date.now();
+    const now = Date.now();
+    const diff = target - now;
     if (diff <= 0) {
       clockEl.style.display = 'none';
       if (document.getElementById('contador-terminado')) {
         document.getElementById('contador-terminado').style.display = 'block';
       }
-      clearInterval(tickInterval);
       return;
     }
     els.d.textContent = String(Math.floor(diff / 86400000)).padStart(2, '0');
@@ -75,18 +76,36 @@ export function initContador(config) {
     els.m.textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
     els.s.textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
 
+    // Reproducir tick solo si el modal está abierto
     if (modalContador && modalContador.classList.contains('open')) {
       playTick();
     }
+
+    // Calcular el próximo tick exacto (siguiente segundo)
+    const nextTick = now + 1000 - (now % 1000);
+    const delay = nextTick - now;
+    // Programar el siguiente tick con setTimeout recursivo
+    tickTimerId = setTimeout(tick, delay);
   }
 
-  tick();
-  tickInterval = setInterval(tick, 1000);
+  // Iniciar el primer tick
+  const now = Date.now();
+  const nextTick = now + 1000 - (now % 1000);
+  const delay = nextTick - now;
+  tickTimerId = setTimeout(tick, delay);
 
+  // Limpiar el timeout si el modal se cierra (opcional)
   if (modalContador) {
     const observer = new MutationObserver(() => {
-      // No es necesario hacer nada al cerrar, el tick ya no se reproduce
+      if (!modalContador.classList.contains('open')) {
+        // No hacemos nada, el tick sigue pero no reproduce sonido
+      }
     });
     observer.observe(modalContador, { attributes: true, attributeFilter: ['class'] });
   }
+
+  // Exportar función de limpieza (opcional)
+  window._cleanContador = function() {
+    if (tickTimerId) clearTimeout(tickTimerId);
+  };
 }
