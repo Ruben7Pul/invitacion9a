@@ -1,7 +1,7 @@
 // ============================================================
 // script-juego.js – SCRIPT DEL JUEGO (independiente)
 // ============================================================
-console.log('🎮 script-juego.js cargado');
+console.log('🎮 script-juego 12.js cargado');
 
 const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
@@ -58,3 +58,5 @@ async function cargarConfig() {
     `;
   }
 })();
+
+
