@@ -185,87 +185,81 @@ document.addEventListener('DOMContentLoaded', async () => {
   backBtn.addEventListener('click', cerrarReja);
 
   // ============================================================
-  // 🌀 PARALLAX DE CAPAS (con inversión de dirección)
+  // 🌀 PARALLAX GLOBAL E INVERSO (reja + app principal)
   // ============================================================
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
 
-  // Elementos a los que aplicaremos parallax con distintas intensidades
-  const layers = [
-    { el: gateWrapper, factor: 1.2, invert: true },    // Reja: se mueve en dirección opuesta (invertida)
-    { el: document.getElementById('app-mid'), factor: 0.6, invert: false }, // Contenido central (nombre, imagen, etc.) se mueve en la misma dirección
-    { el: document.getElementById('nombre-hero'), factor: 0.8, invert: true }, // Nombre: movimiento opuesto y más pronunciado
-    { el: document.querySelector('.frase-inline'), factor: 0.4, invert: false },
-    { el: document.querySelector('.fecha-fija'), factor: 0.4, invert: false },
-    { el: document.querySelector('.hint'), factor: 0.3, invert: false },
-    { el: document.querySelector('#oval-wrap'), factor: 0.5, invert: true } // Imagen central: movimiento opuesto
-  ];
+  // Elementos a mover: portal (cuando visible) y app (cuando visible)
+  // Usamos un contenedor común: el body o un wrapper, pero mejor mover cada sección por separado
+  // para que no se solapen los transforms con las animaciones.
+  // Vamos a mover: .portal-inner (todo el contenido de la reja) y #app-mid (zona central de la app)
+  // Además, moveremos ligeramente los botones de navegación para dar sensación de profundidad.
+  const portalInner = document.querySelector('.portal-inner');
+  const appMid = document.getElementById('app-mid');
+  const nav = document.getElementById('nav');
 
-  // Limpiar elementos nulos
-  const validLayers = layers.filter(l => l.el);
+  // Función que aplica el desplazamiento con inversión (si mueves derecha, se desplaza izquierda)
+  function applyParallax(x, y) {
+    // Invertimos el signo para efecto inverso
+    const invertX = -x;
+    const invertY = -y;
+    // Rango máximo ±18px para que sea sutil pero visible
+    const maxOffset = 18;
+    const offsetX = Math.min(Math.max(invertX, -maxOffset), maxOffset);
+    const offsetY = Math.min(Math.max(invertY, -maxOffset), maxOffset);
 
-  // Estado de cada capa
-  const layerStates = validLayers.map(() => ({ currentX: 0, currentY: 0, targetX: 0, targetY: 0 }));
-
-  // Función para actualizar una capa con suavizado
-  function updateLayer(index, x, y) {
-    const state = layerStates[index];
-    const layer = validLayers[index];
-    if (!layer) return;
-    const maxOffset = 20; // máximo desplazamiento en px (se ajusta con factor)
-    const offsetX = x * layer.factor * (layer.invert ? -1 : 1);
-    const offsetY = y * layer.factor * (layer.invert ? -1 : 1);
-    const clampedX = Math.min(Math.max(offsetX, -maxOffset), maxOffset);
-    const clampedY = Math.min(Math.max(offsetY, -maxOffset), maxOffset);
-    state.targetX = clampedX;
-    state.targetY = clampedY;
-  }
-
-  // Bucle de suavizado para todas las capas
-  function smoothAllLayers() {
-    let anyMoving = false;
-    for (let i = 0; i < validLayers.length; i++) {
-      const state = layerStates[i];
-      const layer = validLayers[i];
-      if (!layer) continue;
-      state.currentX += (state.targetX - state.currentX) * 0.12;
-      state.currentY += (state.targetY - state.currentY) * 0.12;
-      if (Math.abs(state.currentX - state.targetX) > 0.01 || Math.abs(state.currentY - state.targetY) > 0.01) {
-        anyMoving = true;
+    // Aplicar a la reja si está visible
+    if (!portal.classList.contains('hide') && portalInner) {
+      portalInner.style.transform = `translate(${offsetX * 0.6}px, ${offsetY * 0.6}px)`;
+    }
+    // Aplicar a la app si está visible
+    if (app.classList.contains('show')) {
+      if (appMid) {
+        appMid.style.transform = `translate(${offsetX * 0.8}px, ${offsetY * 0.8}px)`;
       }
-      layer.el.style.transform = `translate(${state.currentX}px, ${state.currentY}px)`;
-    }
-    if (anyMoving) {
-      requestAnimationFrame(smoothAllLayers);
-    }
-  }
-
-  // Variable para controlar que el bucle no se ejecute innecesariamente
-  let parallaxRunning = false;
-
-  function triggerParallax() {
-    if (!parallaxRunning) {
-      parallaxRunning = true;
-      requestAnimationFrame(smoothAllLayers);
+      if (nav) {
+        nav.style.transform = `translate(${offsetX * 0.4}px, ${offsetY * 0.4}px)`;
+      }
+      // También mover el nombre y la frase ligeramente diferente para efecto de profundidad
+      const nombre = document.getElementById('nombre-hero');
+      const frase = document.getElementById('frase-texto');
+      if (nombre) nombre.style.transform = `translate(${offsetX * 0.3}px, ${offsetY * 0.3}px)`;
+      if (frase) frase.style.transform = `translate(${offsetX * 0.2}px, ${offsetY * 0.2}px)`;
     }
   }
 
-  // --- Movimiento con mouse ---
+  // Variables para suavizado
+  let currentX = 0, currentY = 0;
+  let targetX = 0, targetY = 0;
+
+  function smoothParallax() {
+    currentX += (targetX - currentX) * 0.1;
+    currentY += (targetY - currentY) * 0.1;
+    if (Math.abs(currentX - targetX) > 0.05 || Math.abs(currentY - targetY) > 0.05) {
+      applyParallax(currentX, currentY);
+      requestAnimationFrame(smoothParallax);
+    } else {
+      applyParallax(targetX, targetY);
+    }
+  }
+
+  // --- Movimiento con mouse (escritorio) ---
   document.addEventListener('mousemove', (e) => {
-    if (portal.classList.contains('hide') && !app.classList.contains('show')) {
-      // Si la reja está oculta y la app no está visible, no mover
-      return;
+    // Solo si la reja o la app están visibles
+    if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
+    const x = (e.clientX / window.innerWidth - 0.5) * 30; // rango ±15px
+    const y = (e.clientY / window.innerHeight - 0.5) * 30;
+    targetX = x;
+    targetY = y;
+    if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
+      requestAnimationFrame(smoothParallax);
     }
-    const x = (e.clientX / window.innerWidth - 0.5) * 2; // valor entre -1 y 1
-    const y = (e.clientY / window.innerHeight - 0.5) * 2;
-    for (let i = 0; i < validLayers.length; i++) {
-      updateLayer(i, x, y);
-    }
-    triggerParallax();
   });
 
-  // --- Movimiento con giroscopio ---
+  // --- Movimiento con giroscopio (móvil) ---
   if (isMobile && hasGyro) {
+    // No pedimos permisos, solo escuchamos (en Android funciona)
     window.addEventListener('deviceorientation', handleOrientation);
   }
 
@@ -273,16 +267,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
     const gamma = e.gamma || 0; // -90..90
     const beta = e.beta || 0;   // -180..180
-    // Normalizar a -1..1 (gamma/90, beta/90)
-    const x = gamma / 90;
-    const y = (beta - 45) / 90;
-    for (let i = 0; i < validLayers.length; i++) {
-      updateLayer(i, x, y);
+    // Ajuste de sensibilidad: rango ±30px con factor 0.6
+    const x = (gamma / 90) * 30;  // ±30px
+    const y = ((beta - 45) / 90) * 30; // ±30px
+    targetX = x;
+    targetY = y;
+    if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
+      requestAnimationFrame(smoothParallax);
     }
-    triggerParallax();
   }
 
-  // Iniciar el bucle de suavizado una vez para que esté listo
-  // (se ejecutará cuando haya cambios)
-  // No es necesario iniciarlo ahora, se iniciará con triggerParallax.
+  // Fallback: si no hay mouse ni giro, no pasa nada.
+  // Pero en móvil con giro, ya debería moverse.
+
+  // Nota: al cerrar la reja, el portal se oculta pero el parallax sigue activo en segundo plano.
+  // No afecta rendimiento.
 });
