@@ -70,12 +70,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   const config = await cargarConfig();
   rellenarDatos(config);
 
-  // ===== CARGAR MÓDULOS AL INICIO =====
+  // Cargar sonidos (ligero)
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
     initSonidos();
   } catch (e) { console.error('❌ Sonidos:', e); }
 
+  // Cargar música (ligero)
   try {
     const { initMusica, playMusic, toggleMusic, resetMusic } = await import('./modules/musica.js');
     initMusica(config);
@@ -84,42 +85,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.resetMusic = resetMusic;
   } catch (e) { console.error('❌ Música:', e); }
 
-  try {
-    const { initModal } = await import('./modules/modal.js');
-    initModal();
-    console.log('✅ Modales inicializados');
-  } catch (e) { console.error('❌ Modal:', e); }
-
-  // ===== CONTADOR (bajo demanda) =====
   let appIniciada = false;
-  async function cargarContador() {
+  async function iniciarApp() {
     if (appIniciada) return;
     appIniciada = true;
+
+    // Cargar contador y modales (ligeros)
     try {
       const { initContador } = await import('./modules/contador.js');
       initContador(config);
     } catch (e) { console.error('❌ Contador:', e); }
+
+    try {
+      const { initModal } = await import('./modules/modal.js');
+      initModal();
+    } catch (e) { console.error('❌ Modal:', e); }
+
+    const muteBtn = document.getElementById('music-toggle');
+    if (muteBtn) {
+      muteBtn.addEventListener('click', () => {
+        if (window.toggleMusic) window.toggleMusic();
+      });
+    }
   }
 
-  // ========== IR AL JUEGO ==========
+  // ========== IR AL JUEGO (navegación real, cambia la URL) ==========
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => {
     window.location.href = 'juego1/';
   });
 
-  // ========== REJA (forzar visibilidad) ==========
+  // ========== REJA ==========
   const portal = document.getElementById('portal');
   const gateWrapper = document.getElementById('gate-wrapper');
   const app = document.getElementById('app');
   const backBtn = document.getElementById('back-link');
   const caption = document.querySelector('.portal-caption');
 
-  // Forzar que la reja sea visible al inicio
-  portal.classList.remove('hide');
-  gateWrapper.classList.remove('open');
-  caption.classList.remove('show');
-  gateWrapper.classList.remove('active');
-
+  // ¿Venimos de "Salir" en el juego? Si es así, mostramos directamente
+  // la parte principal (sin la reja) y limpiamos la URL.
   const params = new URLSearchParams(window.location.search);
   const volviendoDelJuego = params.get('volver') === '1';
 
@@ -127,18 +131,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     portal.classList.add('hide');
     app.classList.add('show');
     gateWrapper.classList.add('active');
-    gateWrapper.classList.add('open');
+    gateWrapper.classList.add('open'); // Marcar como "abierto" para que la animación de cierre funcione
     caption.classList.add('show');
-    cargarContador();
+    iniciarApp();
     if (window.playMusic) window.playMusic();
+    // Deja la URL limpia: https://.../invitacion9a/
     history.replaceState(null, '', window.location.pathname);
+    // Ya cumplió su función (evitar el parpadeo de la reja). La quitamos
+    // para que el botón de "volver a la reja" funcione con normalidad.
     document.documentElement.classList.remove('sin-reja');
   } else {
-    // Activar la reja después de 2s
+    gateWrapper.classList.remove('active');
+    caption.classList.remove('show');
+
     setTimeout(() => {
       caption.classList.add('show');
       gateWrapper.classList.add('active');
-      console.log('🔄 Reja activada');
     }, 2000);
   }
 
@@ -147,33 +155,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     gateWrapper.classList.add('open');
     portal.classList.add('hide');
     app.classList.add('show');
-    cargarContador();
+    iniciarApp();
     if (window.playMusic) window.playMusic();
   }
 
   function cerrarReja(e) {
     if (e) e.stopPropagation();
-    console.log('🔒 Cerrando reja...');
     app.classList.remove('show');
     portal.classList.remove('hide');
+    portal.classList.add('closing');
     gateWrapper.classList.remove('open');
     if (window.resetMusic) window.resetMusic();
-    caption.classList.remove('show');
-    gateWrapper.classList.remove('active');
-    void portal.offsetHeight;
-    requestAnimationFrame(() => {
-      portal.classList.add('closing');
-      console.log('⏳ Animación de cierre iniciada');
-    });
     setTimeout(() => {
       portal.classList.remove('closing');
-      console.log('✅ Animación de cierre completada');
-      setTimeout(() => {
-        caption.classList.add('show');
-        gateWrapper.classList.add('active');
-        console.log('🔄 Reja reactivada');
-      }, 2000);
     }, 700);
+    caption.classList.remove('show');
+    gateWrapper.classList.remove('active');
+    setTimeout(() => {
+      caption.classList.add('show');
+      gateWrapper.classList.add('active');
+    }, 2000);
   }
 
   gateWrapper.addEventListener('click', abrirReja);
@@ -181,154 +182,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirReja(e); }
   });
   backBtn.addEventListener('click', cerrarReja);
-
-  // ============================================================
-  // 🌀 PARALLAX POR CONTENEDORES + PAUSA EN MODALES
-  // ============================================================
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
-  let gyroWorking = false;
-
-  // === Crear wrapper para la app (si no existe) ===
-  let appInner = document.getElementById('app-inner');
-  if (!appInner) {
-    appInner = document.createElement('div');
-    appInner.id = 'app-inner';
-    appInner.style.cssText = `
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      height: 100%;
-      max-width: 560px;
-      will-change: transform;
-    `;
-    while (app.firstChild) {
-      appInner.appendChild(app.firstChild);
-    }
-    app.appendChild(appInner);
-  }
-
-  const portalInner = document.querySelector('.portal-inner');
-  const videoApp = document.getElementById('video-app');
-  const videoPortal = document.getElementById('video-portal');
-
-  // === Pausa de videos al abrir modales ===
-  function pausarVideos() {
-    if (videoApp && !videoApp.paused) videoApp.pause();
-    if (videoPortal && !videoPortal.paused) videoPortal.pause();
-    console.log('⏸️ Videos pausados por modal');
-  }
-
-  function reanudarVideos() {
-    if (videoApp && videoApp.paused) videoApp.play().catch(() => {});
-    if (videoPortal && videoPortal.paused) videoPortal.play().catch(() => {});
-    console.log('▶️ Videos reanudados');
-  }
-
-  const modalObserver = new MutationObserver(() => {
-    const hayModalAbierto = document.querySelector('.modal-overlay.open') !== null;
-    if (hayModalAbierto) {
-      pausarVideos();
-    } else {
-      reanudarVideos();
-    }
-  });
-
-  document.querySelectorAll('.modal-overlay').forEach(el => {
-    modalObserver.observe(el, { attributes: true, attributeFilter: ['class'] });
-  });
-
-  // Observar nuevos modales
-  const bodyObserver = new MutationObserver(() => {
-    document.querySelectorAll('.modal-overlay:not([data-observed])').forEach(el => {
-      el.setAttribute('data-observed', 'true');
-      modalObserver.observe(el, { attributes: true, attributeFilter: ['class'] });
-    });
-  });
-  bodyObserver.observe(document.body, { childList: true, subtree: true });
-
-  // === Parallax ===
-  function applyParallax(x, y) {
-    if (document.querySelector('.modal-overlay.open')) return;
-
-    const invertX = -x;
-    const invertY = -y;
-    const maxOffset = 18;
-    const offsetX = Math.min(Math.max(invertX, -maxOffset), maxOffset);
-    const offsetY = Math.min(Math.max(invertY, -maxOffset), maxOffset);
-
-    if (!portal.classList.contains('hide') && portalInner) {
-      portalInner.style.transform = `translate(${offsetX * 0.6}px, ${offsetY * 0.6}px)`;
-    }
-    if (app.classList.contains('show') && appInner) {
-      appInner.style.transform = `translate(${offsetX * 0.6}px, ${offsetY * 0.6}px)`;
-    }
-  }
-
-  let currentX = 0, currentY = 0;
-  let targetX = 0, targetY = 0;
-
-  function smoothParallax() {
-    currentX += (targetX - currentX) * 0.1;
-    currentY += (targetY - currentY) * 0.1;
-    if (Math.abs(currentX - targetX) > 0.05 || Math.abs(currentY - targetY) > 0.05) {
-      applyParallax(currentX, currentY);
-      requestAnimationFrame(smoothParallax);
-    } else {
-      applyParallax(targetX, targetY);
-    }
-  }
-
-  // --- Mouse (solo si NO es móvil con giro activo) ---
-  document.addEventListener('mousemove', (e) => {
-    if (isMobile && gyroWorking) return;
-    if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
-    const x = (e.clientX / window.innerWidth - 0.5) * 30;
-    const y = (e.clientY / window.innerHeight - 0.5) * 30;
-    targetX = x;
-    targetY = y;
-    if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
-      requestAnimationFrame(smoothParallax);
-    }
-  });
-
-  // --- Giroscopio (móvil) ---
-  if (isMobile && hasGyro) {
-    const gyroTest = (e) => {
-      if (e.gamma !== null || e.beta !== null) {
-        gyroWorking = true;
-        console.log('✅ Giroscopio detectado y funcionando');
-        window.removeEventListener('deviceorientation', gyroTest);
-        window.addEventListener('deviceorientation', handleOrientation);
-      }
-    };
-    window.addEventListener('deviceorientation', gyroTest);
-
-    setTimeout(() => {
-      if (!gyroWorking) {
-        console.log('⚠️ Giroscopio no responde, se usará mouse como respaldo');
-        window.removeEventListener('deviceorientation', gyroTest);
-      }
-    }, 3000);
-  }
-
-  function handleOrientation(e) {
-    if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
-    const gamma = e.gamma || 0;
-    const beta = e.beta || 0;
-    const x = (gamma / 90) * 30;
-    const y = ((beta - 45) / 90) * 30;
-    targetX = x;
-    targetY = y;
-    if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
-      requestAnimationFrame(smoothParallax);
-    }
-  }
-
-  // Si hay modal abierto al inicio, pausar
-  if (document.querySelector('.modal-overlay.open')) {
-    pausarVideos();
-  }
 });
