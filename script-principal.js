@@ -32,13 +32,8 @@ async function cargarConfig() {
 function rellenarDatos(config) {
   const nombreEl = document.getElementById('nombre-hero');
   if (nombreEl) {
-    // Envolver cada letra en <span class="letter"> para el efecto ola
-    const nombre = config.nombre;
-    const letras = nombre.split('').map(letra => {
-      if (letra === ' ') return ' ';
-      return `<span class="letter">${letra}</span>`;
-    }).join('');
-    nombreEl.innerHTML = letras;
+    // Ya no envolvemos en <span>, solo texto plano
+    nombreEl.textContent = config.nombre;
     nombreEl.setAttribute('data-text', config.nombre);
   }
   const fechaEl = document.getElementById('fecha-fija');
@@ -303,7 +298,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (e.gamma !== null || e.beta !== null) {
         gyroWorking = true;
         console.log('✅ Giroscopio detectado y funcionando');
-        document.body.classList.remove('no-gyro'); // quitar clase de respaldo
+        document.body.classList.remove('no-gyro');
         window.removeEventListener('deviceorientation', gyroTest);
         window.addEventListener('deviceorientation', handleOrientation);
       }
@@ -313,15 +308,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     setTimeout(() => {
       if (!gyroWorking) {
         console.log('⚠️ Giroscopio no responde → activar animaciones de respaldo');
-        document.body.classList.add('no-gyro'); // añadir clase para activar float + wave
+        document.body.classList.add('no-gyro');
         window.removeEventListener('deviceorientation', gyroTest);
       }
     }, 3000);
   } else if (!isMobile) {
-    // En escritorio, no necesitamos respaldo
     document.body.classList.remove('no-gyro');
   } else {
-    // Móvil sin gyro (navegador sin soporte)
     console.log('⚠️ Navegador sin soporte de giroscopio → activar respaldo');
     document.body.classList.add('no-gyro');
   }
