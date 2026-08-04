@@ -121,6 +121,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const backBtn = document.getElementById('back-link');
   const caption = document.querySelector('.portal-caption');
 
+  // ¿Venimos de "Salir" en el juego?
   const params = new URLSearchParams(window.location.search);
   const volviendoDelJuego = params.get('volver') === '1';
 
@@ -184,21 +185,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   backBtn.addEventListener('click', cerrarReja);
 
   // ============================================================
-  // 🌀 PARALLAX EN LA REJA (con detección de móvil y permisos)
+  // 🌀 PARALLAX EN LA REJA (CORREGIDO PARA MÓVIL)
   // ============================================================
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
 
-  let currentX = 0, currentY = 0;
-  let targetX = 0, targetY = 0;
-  let parallaxActive = false;
-
+  // Función que aplica la traslación suave
   function applyParallax(x, y) {
-    const maxOffset = 8;
+    // Rango más amplio: ±20px para que se note bien en móvil
+    const maxOffset = 20;
     const offsetX = Math.min(Math.max(x, -maxOffset), maxOffset);
     const offsetY = Math.min(Math.max(y, -maxOffset), maxOffset);
     gateWrapper.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
   }
+
+  let currentX = 0, currentY = 0;
+  let targetX = 0, targetY = 0;
 
   function smoothParallax() {
     currentX += (targetX - currentX) * 0.12;
@@ -214,8 +216,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // --- Movimiento con mouse (escritorio) ---
   document.addEventListener('mousemove', (e) => {
     if (portal.classList.contains('hide')) return;
-    const x = (e.clientX / window.innerWidth - 0.5) * 16;
-    const y = (e.clientY / window.innerHeight - 0.5) * 16;
+    const x = (e.clientX / window.innerWidth - 0.5) * 30; // rango ±15px
+    const y = (e.clientY / window.innerHeight - 0.5) * 30;
     targetX = x;
     targetY = y;
     if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
@@ -225,41 +227,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // --- Movimiento con giroscopio (móvil) ---
   if (isMobile && hasGyro) {
-    // Para Android: se usa directamente. Para iOS: se pide permiso.
-    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-    if (isIOS && typeof DeviceOrientationEvent.requestPermission === 'function') {
-      // iOS 13+: pedir permiso solo si el usuario interactúa (lo haremos al tocar la reja)
-      // Pero no queremos pedir permiso automáticamente para no crear sospechas.
-      // En su lugar, lo activamos al primer toque en la reja.
-      gateWrapper.addEventListener('touchstart', function requestPermissionOnce() {
-        DeviceOrientationEvent.requestPermission()
-          .then(state => {
-            if (state === 'granted') {
-              window.addEventListener('deviceorientation', handleOrientation);
-              parallaxActive = true;
-            } else {
-              console.log('Permiso de giroscopio denegado en iOS');
-              // Fallback: animación CSS suave (ya la tenemos por si acaso)
-            }
-          })
-          .catch(() => {});
-        gateWrapper.removeEventListener('touchstart', requestPermissionOnce);
-      }, { once: true });
-    } else {
-      // Android u otros: directamente
-      window.addEventListener('deviceorientation', handleOrientation);
-      parallaxActive = true;
-    }
+    // Sin pedir permisos: solo escuchamos el evento si ya está disponible.
+    // En Android funciona sin requestPermission; en iOS 13+ podría no funcionar
+    // si no se pide permiso, pero lo dejamos así para evitar alertas.
+    window.addEventListener('deviceorientation', handleOrientation);
   }
 
   function handleOrientation(e) {
     if (portal.classList.contains('hide')) return;
     const gamma = e.gamma || 0; // -90..90
-    const beta = e.beta || 0;   // -180..180 (45 es vertical)
-    // Normalizar a -8..8
-    const x = Math.min(Math.max(gamma / 10, -8), 8);
-    const y = Math.min(Math.max((beta - 45) / 10, -8), 8);
+    const beta = e.beta || 0;   // -180..180
+    // Ajuste de sensibilidad: multiplicamos por 0.5 para que el rango sea ~±22px
+    // (gamma/90 * 40 = ±40, pero lo reducimos a ±20 con factor 0.5)
+    const x = (gamma / 90) * 30;  // ±30px máximo
+    const y = ((beta - 45) / 90) * 30; // ±30px máximo
     targetX = x;
     targetY = y;
     if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
@@ -267,6 +248,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Fallback: si no hay mouse ni giroscopio, no movemos.
-  // Podríamos añadir una pequeña animación aleatoria opcional, pero mejor no para no consumir recursos.
+  // Fallback: si no hay mouse ni giroscopio, no hacemos nada.
+  // Pero en móvil con giroscopio, ya debería funcionar.
 });
