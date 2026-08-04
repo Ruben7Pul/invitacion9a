@@ -126,6 +126,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (volviendoDelJuego) {
     portal.classList.add('hide');
     app.classList.add('show');
+    // Asegurar pointer-events en app
+    app.style.pointerEvents = 'auto';
     gateWrapper.classList.add('active');
     gateWrapper.classList.add('open');
     caption.classList.add('show');
@@ -147,6 +149,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     gateWrapper.classList.add('open');
     portal.classList.add('hide');
     app.classList.add('show');
+    app.style.pointerEvents = 'auto';
     cargarContador();
     if (window.playMusic) window.playMusic();
   }
@@ -155,6 +158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (e) e.stopPropagation();
     console.log('🔒 Cerrando reja...');
     app.classList.remove('show');
+    app.style.pointerEvents = 'none';
     portal.classList.remove('hide');
     gateWrapper.classList.remove('open');
     if (window.resetMusic) window.resetMusic();
@@ -249,7 +253,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   bodyObserver.observe(document.body, { childList: true, subtree: true });
 
-  // === Parallax ===
+  // === Parallax (solo en escritorio para mouse) ===
   function applyParallax(x, y) {
     if (document.querySelector('.modal-overlay.open')) return;
 
@@ -259,11 +263,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const offsetX = Math.min(Math.max(invertX, -maxOffset), maxOffset);
     const offsetY = Math.min(Math.max(invertY, -maxOffset), maxOffset);
 
+    // Reja: factor 0.6 (sin cambios)
     if (!portal.classList.contains('hide') && portalInner) {
       portalInner.style.transform = `translate(${offsetX * 0.6}px, ${offsetY * 0.6}px)`;
     }
+    // App principal: factor reducido un 25% → 0.45
     if (app.classList.contains('show') && appInner) {
-      appInner.style.transform = `translate(${offsetX * 0.6}px, ${offsetY * 0.6}px)`;
+      appInner.style.transform = `translate(${offsetX * 0.45}px, ${offsetY * 0.45}px)`;
     }
   }
 
@@ -281,18 +287,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // --- Mouse (solo si NO es móvil con giro activo) ---
-  document.addEventListener('mousemove', (e) => {
-    if (isMobile && gyroWorking) return;
-    if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
-    const x = (e.clientX / window.innerWidth - 0.5) * 30;
-    const y = (e.clientY / window.innerHeight - 0.5) * 30;
-    targetX = x;
-    targetY = y;
-    if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
-      requestAnimationFrame(smoothParallax);
-    }
-  });
+  // --- Mouse (solo en escritorio, no en móvil) ---
+  if (!isMobile) {
+    document.addEventListener('mousemove', (e) => {
+      if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
+      const x = (e.clientX / window.innerWidth - 0.5) * 30;
+      const y = (e.clientY / window.innerHeight - 0.5) * 30;
+      targetX = x;
+      targetY = y;
+      if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
+        requestAnimationFrame(smoothParallax);
+      }
+    });
+  }
 
   // --- Giroscopio (móvil) ---
   if (isMobile && hasGyro) {
@@ -308,8 +315,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     setTimeout(() => {
       if (!gyroWorking) {
-        console.log('⚠️ Giroscopio no responde, se usará mouse como respaldo');
+        console.log('⚠️ Giroscopio no responde, se desactiva parallax en móvil');
         window.removeEventListener('deviceorientation', gyroTest);
+        // No se añade handleOrientation, así que no hay parallax por giro.
       }
     }, 3000);
   }
@@ -337,7 +345,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ============================================================
   const muteBtn = document.getElementById('music-toggle');
   if (muteBtn) {
-    // El evento ya está asignado en iniciarApp, pero por si acaso:
     muteBtn.addEventListener('click', () => {
       if (window.toggleMusic) window.toggleMusic();
     });
