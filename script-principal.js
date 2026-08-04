@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const videoApp = document.getElementById('video-app');
   const videoPortal = document.getElementById('video-portal');
 
-  // Función para pausar/reanudar videos
+  // === Pausa de videos al abrir modales ===
   function pausarVideos() {
     if (videoApp && !videoApp.paused) videoApp.pause();
     if (videoPortal && !videoPortal.paused) videoPortal.pause();
@@ -221,21 +221,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('▶️ Videos reanudados');
   }
 
-  // Observer para detectar apertura/cierre de modales
   const modalObserver = new MutationObserver((mutations) => {
-    let modalAbierto = false;
-    for (const mutation of mutations) {
-      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-        const target = mutation.target;
-        if (target.classList.contains('modal-overlay')) {
-          if (target.classList.contains('open')) {
-            modalAbierto = true;
-            break;
-          }
-        }
-      }
-    }
-    // Verificar si algún modal está abierto
     const hayModalAbierto = document.querySelector('.modal-overlay.open') !== null;
     if (hayModalAbierto) {
       pausarVideos();
@@ -244,12 +230,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // Observar todos los modales existentes y futuros
   document.querySelectorAll('.modal-overlay').forEach(el => {
     modalObserver.observe(el, { attributes: true, attributeFilter: ['class'] });
   });
 
-  // También observar nuevos modales que se añadan dinámicamente
+  // Observar nuevos modales
   const bodyObserver = new MutationObserver(() => {
     document.querySelectorAll('.modal-overlay:not([data-observed])').forEach(el => {
       el.setAttribute('data-observed', 'true');
@@ -260,7 +245,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // === Parallax ===
   function applyParallax(x, y) {
-    // Si hay un modal abierto, NO aplicar parallax
     if (document.querySelector('.modal-overlay.open')) return;
 
     const invertX = -x;
@@ -269,21 +253,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const offsetX = Math.min(Math.max(invertX, -maxOffset), maxOffset);
     const offsetY = Math.min(Math.max(invertY, -maxOffset), maxOffset);
 
-    // 1. Reja
     if (!portal.classList.contains('hide') && portalInner) {
       portalInner.style.transform = `translate(${offsetX * 0.6}px, ${offsetY * 0.6}px)`;
     }
-
-    // 2. App
     if (app.classList.contains('show') && appInner) {
       appInner.style.transform = `translate(${offsetX * 0.6}px, ${offsetY * 0.6}px)`;
     }
-
-    // 3. Modales (solo se mueven si están abiertos, pero como ya salimos si hay modal, no se mueven)
-    // Dejamos esta parte comentada: los modales no se mueven mientras están abiertos
-    // document.querySelectorAll('.modal-overlay.open').forEach(overlay => {
-    //   overlay.style.transform = `translate(${offsetX * 0.5}px, ${offsetY * 0.5}px)`;
-    // });
   }
 
   let currentX = 0, currentY = 0;
@@ -346,7 +321,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Al inicio, si hay algún modal abierto (por ejemplo, al volver del juego), pausar videos
+  // Si hay modal abierto al inicio, pausar
   if (document.querySelector('.modal-overlay.open')) {
     pausarVideos();
   }
