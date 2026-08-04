@@ -1,4 +1,6 @@
-console.log('📦 contador.js');
+console.log('📦 contador.js con sonido tick');
+
+import { soundTap } from './sonidos.js';
 
 export function initContador(config) {
   console.log('🕒 Iniciando contador con fecha:', config.fechaISO);
@@ -18,6 +20,8 @@ export function initContador(config) {
   const clockEl = document.getElementById('clock');
   const doneEl = document.getElementById('contador-terminado');
 
+  let lastSecond = -1;
+
   function tick() {
     const diff = target - Date.now();
     if (diff <= 0) {
@@ -25,6 +29,11 @@ export function initContador(config) {
       if (doneEl) doneEl.style.display = 'block';
       clearInterval(timer);
       return;
+    }
+    const seconds = Math.floor(diff / 1000);
+    if (seconds !== lastSecond) {
+      lastSecond = seconds;
+      soundTap(); // Sonido cada segundo
     }
     els.d.textContent = String(Math.floor(diff / 86400000)).padStart(2, '0');
     els.h.textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
