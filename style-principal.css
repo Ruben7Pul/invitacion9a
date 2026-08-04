@@ -190,18 +190,6 @@ body {
   pointer-events: auto;
 }
 
-/* Al volver del juego (?volver=1): el script inline en <head> agrega
-   esta clase ANTES del primer render, así la reja nunca llega a pintarse
-   ni un instante y la app principal aparece ya visible. */
-html.sin-reja #portal {
-  display: none !important;
-}
-html.sin-reja #app {
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  transition: none !important;
-}
-
 #app-top {
   width: 100%;
   max-width: 560px;
