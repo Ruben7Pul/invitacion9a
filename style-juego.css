@@ -32,6 +32,19 @@ html, body {
 }
 
 /* GAME OVERLAY */
+#loading-veil {
+  position:fixed;
+  inset:0;
+  z-index:999;
+  background-color:#0e0a18;
+  background-image:url('archivos/bella.jpg');
+  background-size:cover;
+  background-position:center;
+  opacity:1;
+  transition:opacity 0.45s ease;
+  pointer-events:none;
+}
+#loading-veil.hide { opacity:0; }
 #game-overlay {
   position:fixed;
   inset:0;
