@@ -121,7 +121,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const backBtn = document.getElementById('back-link');
   const caption = document.querySelector('.portal-caption');
 
-  // ¿Venimos de "Salir" en el juego?
   const params = new URLSearchParams(window.location.search);
   const volviendoDelJuego = params.get('volver') === '1';
 
@@ -185,26 +184,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   backBtn.addEventListener('click', cerrarReja);
 
   // ============================================================
-  // 🌀 PARALLAX EN LA REJA (solo en el wrapper de la reja)
+  // 🌀 PARALLAX EN LA REJA (con detección de móvil y permisos)
   // ============================================================
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
 
-  // Función que aplica la traslación suave
+  let currentX = 0, currentY = 0;
+  let targetX = 0, targetY = 0;
+  let parallaxActive = false;
+
   function applyParallax(x, y) {
-    // Limitar movimiento máximo a ±8px para que sea sutil
     const maxOffset = 8;
     const offsetX = Math.min(Math.max(x, -maxOffset), maxOffset);
     const offsetY = Math.min(Math.max(y, -maxOffset), maxOffset);
     gateWrapper.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
   }
 
-  // Variable para suavizar la transición (evita movimientos bruscos)
-  let currentX = 0, currentY = 0;
-  let targetX = 0, targetY = 0;
-
   function smoothParallax() {
-    // Interpolación lineal para suavizar
     currentX += (targetX - currentX) * 0.12;
     currentY += (targetY - currentY) * 0.12;
     if (Math.abs(currentX - targetX) > 0.01 || Math.abs(currentY - targetY) > 0.01) {
@@ -217,9 +213,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // --- Movimiento con mouse (escritorio) ---
   document.addEventListener('mousemove', (e) => {
-    // Solo si la reja está visible (no oculta)
     if (portal.classList.contains('hide')) return;
-    const x = (e.clientX / window.innerWidth - 0.5) * 16; // -8..8
+    const x = (e.clientX / window.innerWidth - 0.5) * 16;
     const y = (e.clientY / window.innerHeight - 0.5) * 16;
     targetX = x;
     targetY = y;
@@ -230,24 +225,38 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // --- Movimiento con giroscopio (móvil) ---
   if (isMobile && hasGyro) {
-    // Solicitar permiso en iOS 13+
-    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-      DeviceOrientationEvent.requestPermission()
-        .then(state => {
-          if (state === 'granted') {
-            window.addEventListener('deviceorientation', handleOrientation);
-          }
-        })
-        .catch(() => {});
+    // Para Android: se usa directamente. Para iOS: se pide permiso.
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (isIOS && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      // iOS 13+: pedir permiso solo si el usuario interactúa (lo haremos al tocar la reja)
+      // Pero no queremos pedir permiso automáticamente para no crear sospechas.
+      // En su lugar, lo activamos al primer toque en la reja.
+      gateWrapper.addEventListener('touchstart', function requestPermissionOnce() {
+        DeviceOrientationEvent.requestPermission()
+          .then(state => {
+            if (state === 'granted') {
+              window.addEventListener('deviceorientation', handleOrientation);
+              parallaxActive = true;
+            } else {
+              console.log('Permiso de giroscopio denegado en iOS');
+              // Fallback: animación CSS suave (ya la tenemos por si acaso)
+            }
+          })
+          .catch(() => {});
+        gateWrapper.removeEventListener('touchstart', requestPermissionOnce);
+      }, { once: true });
     } else {
+      // Android u otros: directamente
       window.addEventListener('deviceorientation', handleOrientation);
+      parallaxActive = true;
     }
   }
 
   function handleOrientation(e) {
     if (portal.classList.contains('hide')) return;
     const gamma = e.gamma || 0; // -90..90
-    const beta = e.beta || 0;   // -180..180
+    const beta = e.beta || 0;   // -180..180 (45 es vertical)
     // Normalizar a -8..8
     const x = Math.min(Math.max(gamma / 10, -8), 8);
     const y = Math.min(Math.max((beta - 45) / 10, -8), 8);
@@ -258,11 +267,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Fallback: si no hay mouse ni giroscopio, no hacemos nada (la reja se queda quieta)
-
-  // También activar el parallax cuando la reja se abre (por si se oculta)
-  // No es necesario, porque el evento se dispara mientras la reja está visible.
-
-  // Nota: al cerrar la reja (portal oculto), no movemos, pero el evento sigue.
-  // Podríamos detenerlo, pero no afecta rendimiento.
+  // Fallback: si no hay mouse ni giroscopio, no movemos.
+  // Podríamos añadir una pequeña animación aleatoria opcional, pero mejor no para no consumir recursos.
 });
