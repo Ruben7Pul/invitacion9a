@@ -18,18 +18,6 @@ export function initContador(config) {
   const clockEl = document.getElementById('clock');
   const doneEl = document.getElementById('contador-terminado');
 
-  // Cargar sonido tick
-  let soundTick = null;
-  async function loadTickSound() {
-    try {
-      const { soundTap } = await import('./sonidos.js');
-      soundTick = soundTap;
-    } catch (e) {
-      console.warn('Sonido tick no disponible:', e);
-    }
-  }
-  loadTickSound();
-
   function tick() {
     const diff = target - Date.now();
     if (diff <= 0) {
@@ -42,11 +30,6 @@ export function initContador(config) {
     els.h.textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
     els.m.textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
     els.s.textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
-
-    // Reproducir sonido cada segundo
-    if (soundTick) {
-      try { soundTick(); } catch (e) {}
-    }
   }
   tick();
   const timer = setInterval(tick, 1000);
