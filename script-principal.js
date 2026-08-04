@@ -114,7 +114,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const backBtn = document.getElementById('back-link');
   const caption = document.querySelector('.portal-caption');
 
-  // Forzar que la reja sea visible al inicio
   portal.classList.remove('hide');
   gateWrapper.classList.remove('open');
   caption.classList.remove('show');
@@ -134,7 +133,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     history.replaceState(null, '', window.location.pathname);
     document.documentElement.classList.remove('sin-reja');
   } else {
-    // Activar la reja después de 2s
     setTimeout(() => {
       caption.classList.add('show');
       gateWrapper.classList.add('active');
@@ -183,7 +181,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   backBtn.addEventListener('click', cerrarReja);
 
   // ============================================================
-  // 🌀 PARALLAX POR CONTENEDORES + PAUSA EN MODALES
+  // 🌀 PARALLAX POR CONTENEDORES (CON AJUSTES)
   // ============================================================
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
@@ -240,7 +238,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     modalObserver.observe(el, { attributes: true, attributeFilter: ['class'] });
   });
 
-  // Observar nuevos modales
   const bodyObserver = new MutationObserver(() => {
     document.querySelectorAll('.modal-overlay:not([data-observed])').forEach(el => {
       el.setAttribute('data-observed', 'true');
@@ -249,7 +246,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   bodyObserver.observe(document.body, { childList: true, subtree: true });
 
-  // === Parallax ===
+  // === Parallax con factores ajustados ===
   function applyParallax(x, y) {
     if (document.querySelector('.modal-overlay.open')) return;
 
@@ -259,11 +256,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const offsetX = Math.min(Math.max(invertX, -maxOffset), maxOffset);
     const offsetY = Math.min(Math.max(invertY, -maxOffset), maxOffset);
 
+    // Portal: factor 0.6 (sin cambios)
     if (!portal.classList.contains('hide') && portalInner) {
       portalInner.style.transform = `translate(${offsetX * 0.6}px, ${offsetY * 0.6}px)`;
     }
+    // App: factor reducido 25% (0.6 * 0.75 = 0.45)
     if (app.classList.contains('show') && appInner) {
-      appInner.style.transform = `translate(${offsetX * 0.6}px, ${offsetY * 0.6}px)`;
+      appInner.style.transform = `translate(${offsetX * 0.45}px, ${offsetY * 0.45}px)`;
     }
   }
 
@@ -281,9 +280,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // --- Mouse (solo si NO es móvil con giro activo) ---
+  // --- Mouse (solo en escritorio, NUNCA en móvil) ---
   document.addEventListener('mousemove', (e) => {
-    if (isMobile && gyroWorking) return;
+    // En móvil, el mouse NO debe activar el parallax bajo ninguna circunstancia
+    if (isMobile) return;
     if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
     const x = (e.clientX / window.innerWidth - 0.5) * 30;
     const y = (e.clientY / window.innerHeight - 0.5) * 30;
