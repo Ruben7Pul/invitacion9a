@@ -838,3 +838,17 @@ h1#nombre-hero {
 }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: rgba(201, 162, 77, 0.3); border-radius: 3px; }
+
+
+/* Asegurar que la animación de cierre tenga prioridad */
+#portal.closing .gate-left,
+#portal.closing .gate-right {
+  animation: closeLeft 0.6s ease forwards, closeRight 0.6s ease forwards;
+}
+/* Desdoblar para cada hoja */
+#portal.closing .gate-left {
+  animation: closeLeft 0.6s ease forwards;
+}
+#portal.closing .gate-right {
+  animation: closeRight 0.6s ease forwards;
+}
