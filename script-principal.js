@@ -70,10 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const config = await cargarConfig();
   rellenarDatos(config);
 
-  // ===== CARGAR MÓDULOS LIGEROS AL INICIO =====
-  // Sonidos, música y modales se cargan ahora, no dentro de iniciarApp.
-  // Así los botones de navegación tienen eventos desde el principio.
-
+  // ===== CARGAR MÓDULOS AL INICIO =====
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
     initSonidos();
@@ -87,14 +84,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.resetMusic = resetMusic;
   } catch (e) { console.error('❌ Música:', e); }
 
-  // ===== MODALES (ahora cargado al inicio) =====
   try {
     const { initModal } = await import('./modules/modal.js');
     initModal();
     console.log('✅ Modales inicializados');
   } catch (e) { console.error('❌ Modal:', e); }
 
-  // ===== CONTADOR (solo se carga al abrir la reja para ahorrar recursos) =====
+  // ===== CONTADOR (bajo demanda) =====
   let appIniciada = false;
   async function cargarContador() {
     if (appIniciada) return;
@@ -118,7 +114,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const backBtn = document.getElementById('back-link');
   const caption = document.querySelector('.portal-caption');
 
-  // ¿Venimos de "Salir" en el juego?
   const params = new URLSearchParams(window.location.search);
   const volviendoDelJuego = params.get('volver') === '1';
 
@@ -182,11 +177,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   backBtn.addEventListener('click', cerrarReja);
 
   // ============================================================
-  // 🌀 PARALLAX GLOBAL CON TODOS LOS ELEMENTOS
+  // 🌀 PARALLAX GLOBAL CON DETECCIÓN INTELIGENTE
   // ============================================================
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
+  let gyroWorking = false; // se activará al recibir el primer evento
 
+  // Elementos a mover
   const portalInner = document.querySelector('.portal-inner');
   const appMid = document.getElementById('app-mid');
   const nav = document.getElementById('nav');
@@ -201,10 +198,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const offsetX = Math.min(Math.max(invertX, -maxOffset), maxOffset);
     const offsetY = Math.min(Math.max(invertY, -maxOffset), maxOffset);
 
+    // Reja
     if (!portal.classList.contains('hide') && portalInner) {
       portalInner.style.transform = `translate(${offsetX * 0.6}px, ${offsetY * 0.6}px)`;
     }
 
+    // App principal
     if (app.classList.contains('show')) {
       if (appMid) {
         appMid.style.transform = `translate(${offsetX * 0.8}px, ${offsetY * 0.8}px)`;
@@ -221,6 +220,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (musicToggle) musicToggle.style.transform = `translate(${offsetX * 0.5}px, ${offsetY * 0.5}px)`;
       if (eyebrow) eyebrow.style.transform = `translate(${offsetX * 0.3}px, ${offsetY * 0.3}px)`;
     }
+
+    // ===== MODALES: mover .modal-card cuando el overlay esté abierto =====
+    document.querySelectorAll('.modal-overlay.open .modal-card').forEach(card => {
+      card.style.transform = `translate(${offsetX * 0.5}px, ${offsetY * 0.5}px)`;
+    });
   }
 
   let currentX = 0, currentY = 0;
@@ -237,7 +241,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  // --- Mouse (solo si NO es móvil con giro activo) ---
   document.addEventListener('mousemove', (e) => {
+    // Si es móvil y el giroscopio funciona, ignoramos el mouse
+    if (isMobile && gyroWorking) return;
     if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
     const x = (e.clientX / window.innerWidth - 0.5) * 30;
     const y = (e.clientY / window.innerHeight - 0.5) * 30;
@@ -248,8 +255,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  // --- Giroscopio (móvil) ---
   if (isMobile && hasGyro) {
-    window.addEventListener('deviceorientation', handleOrientation);
+    // Listener para detectar si realmente funciona
+    const gyroTest = (e) => {
+      if (e.gamma !== null || e.beta !== null) {
+        gyroWorking = true;
+        console.log('✅ Giroscopio detectado y funcionando');
+        window.removeEventListener('deviceorientation', gyroTest);
+        // Ahora el listener principal
+        window.addEventListener('deviceorientation', handleOrientation);
+      }
+    };
+    window.addEventListener('deviceorientation', gyroTest);
+
+    // Timeout: si en 2 segundos no se recibe evento, asumimos que no funciona
+    setTimeout(() => {
+      if (!gyroWorking) {
+        console.log('⚠️ Giroscopio no responde, se usará mouse como respaldo');
+        window.removeEventListener('deviceorientation', gyroTest);
+        // No añadimos handleOrientation, el mouse seguirá activo
+      }
+    }, 2000);
   }
 
   function handleOrientation(e) {
