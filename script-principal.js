@@ -38,10 +38,7 @@ function rellenarDatos(config) {
   const fechaEl = document.getElementById('fecha-fija');
   if (fechaEl) fechaEl.textContent = config.fechaTexto;
   const fraseEl = document.getElementById('frase-texto');
-  if (fraseEl) {
-    fraseEl.textContent = config.frase;
-    fraseEl.style.color = '#ff3333'; // Rojo
-  }
+  if (fraseEl) fraseEl.textContent = config.frase;
   const horaMisa = document.getElementById('hora-misa');
   if (horaMisa) horaMisa.textContent = config.horaMisa;
   const lugarMisa = document.getElementById('lugar-misa');
@@ -180,62 +177,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   backBtn.addEventListener('click', cerrarReja);
 
   // ============================================================
-  // 🎬 VIDEOS DE MODALES
-  // ============================================================
-  const modalVideos = {
-    'modal-contador': document.getElementById('video-modal-a'),
-    'modal-detalles': document.getElementById('video-modal-b'),
-    'modal-familia': document.getElementById('video-modal-c'),
-  };
-  const allModalVideos = Object.values(modalVideos);
-
-  function mostrarVideoModal(modalId) {
-    allModalVideos.forEach(v => {
-      v.style.display = 'none';
-      v.pause();
-    });
-    const video = modalVideos[modalId];
-    if (video) {
-      video.style.display = 'block';
-      video.play().catch(() => {});
-    }
-  }
-
-  function ocultarTodosVideosModal() {
-    allModalVideos.forEach(v => {
-      v.style.display = 'none';
-      v.pause();
-    });
-  }
-
-  const modalObserver = new MutationObserver(() => {
-    const modalContador = document.getElementById('modal-contador');
-    const modalDetalles = document.getElementById('modal-detalles');
-    const modalFamilia = document.getElementById('modal-familia');
-
-    if (modalContador.classList.contains('open')) {
-      mostrarVideoModal('modal-contador');
-    } else if (modalDetalles.classList.contains('open')) {
-      mostrarVideoModal('modal-detalles');
-    } else if (modalFamilia.classList.contains('open')) {
-      mostrarVideoModal('modal-familia');
-    } else {
-      ocultarTodosVideosModal();
-    }
-  });
-
-  document.querySelectorAll('.modal-overlay').forEach(el => {
-    modalObserver.observe(el, { attributes: true, attributeFilter: ['class'] });
-  });
-
-  // ============================================================
-  // 🌀 PARALLAX (solo acelerómetro en móvil)
+  // 🌀 PARALLAX POR CONTENEDORES + PAUSA EN MODALES
   // ============================================================
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
   let gyroWorking = false;
 
-  // Crear wrapper para la app
+  // === Crear wrapper para la app (si no existe) ===
   let appInner = document.getElementById('app-inner');
   if (!appInner) {
     appInner = document.createElement('div');
@@ -257,9 +205,48 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   const portalInner = document.querySelector('.portal-inner');
+  const videoApp = document.getElementById('video-app');
+  const videoPortal = document.getElementById('video-portal');
 
+  // === Pausa de videos al abrir modales ===
+  function pausarVideos() {
+    if (videoApp && !videoApp.paused) videoApp.pause();
+    if (videoPortal && !videoPortal.paused) videoPortal.pause();
+    console.log('⏸️ Videos pausados por modal');
+  }
+
+  function reanudarVideos() {
+    if (videoApp && videoApp.paused) videoApp.play().catch(() => {});
+    if (videoPortal && videoPortal.paused) videoPortal.play().catch(() => {});
+    console.log('▶️ Videos reanudados');
+  }
+
+  const modalObserver = new MutationObserver(() => {
+    const hayModalAbierto = document.querySelector('.modal-overlay.open') !== null;
+    if (hayModalAbierto) {
+      pausarVideos();
+    } else {
+      reanudarVideos();
+    }
+  });
+
+  document.querySelectorAll('.modal-overlay').forEach(el => {
+    modalObserver.observe(el, { attributes: true, attributeFilter: ['class'] });
+  });
+
+  // Observar nuevos modales
+  const bodyObserver = new MutationObserver(() => {
+    document.querySelectorAll('.modal-overlay:not([data-observed])').forEach(el => {
+      el.setAttribute('data-observed', 'true');
+      modalObserver.observe(el, { attributes: true, attributeFilter: ['class'] });
+    });
+  });
+  bodyObserver.observe(document.body, { childList: true, subtree: true });
+
+  // === Parallax ===
   function applyParallax(x, y) {
     if (document.querySelector('.modal-overlay.open')) return;
+
     const invertX = -x;
     const invertY = -y;
     const maxOffset = 18;
@@ -288,7 +275,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // En móvil: solo giroscopio
+  // --- Mouse (solo en escritorio) ---
+  document.addEventListener('mousemove', (e) => {
+    // En móvil, no se usa mouse para parallax
+    if (isMobile) return;
+    if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
+    const x = (e.clientX / window.innerWidth - 0.5) * 30;
+    const y = (e.clientY / window.innerHeight - 0.5) * 30;
+    targetX = x;
+    targetY = y;
+    if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
+      requestAnimationFrame(smoothParallax);
+    }
+  });
+
+  // --- Giroscopio (móvil) ---
   if (isMobile && hasGyro) {
     const gyroTest = (e) => {
       if (e.gamma !== null || e.beta !== null) {
@@ -302,22 +303,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     setTimeout(() => {
       if (!gyroWorking) {
-        console.log('⚠️ Giroscopio no responde, no habrá parallax en móvil');
+        console.log('⚠️ Giroscopio no responde, parallax desactivado en móvil');
         window.removeEventListener('deviceorientation', gyroTest);
+        // No se añade handleOrientation, así que no hay parallax
       }
     }, 3000);
-  } else if (!isMobile) {
-    // En escritorio: solo mouse
-    document.addEventListener('mousemove', (e) => {
-      if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
-      const x = (e.clientX / window.innerWidth - 0.5) * 30;
-      const y = (e.clientY / window.innerHeight - 0.5) * 30;
-      targetX = x;
-      targetY = y;
-      if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
-        requestAnimationFrame(smoothParallax);
-      }
-    });
   }
 
   function handleOrientation(e) {
@@ -331,5 +321,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
       requestAnimationFrame(smoothParallax);
     }
+  }
+
+  // Si hay modal abierto al inicio, pausar
+  if (document.querySelector('.modal-overlay.open')) {
+    pausarVideos();
   }
 });
