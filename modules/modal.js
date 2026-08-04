@@ -1,35 +1,40 @@
-console.log('📦 modal.js (sin partículas)');
+console.log('📦 modal.js (con delegación de eventos)');
 
 import { soundOpen, soundClose, soundTap } from './sonidos.js';
 
-// No usamos partículas, así que eliminamos import y funciones relacionadas
-
 export function initModal() {
-  document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      btn.classList.remove('tap');
-      void btn.offsetWidth;
-      btn.classList.add('tap');
-      const modalId = btn.dataset.modal;
+  // Delegación de eventos en el documento para los botones .nav-btn
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.nav-btn');
+    if (!btn) return;
+    const modalId = btn.dataset.modal;
+    if (modalId) {
+      e.preventDefault();
       openModal(modalId);
-    });
-  });
-
-  document.querySelectorAll('.modal-overlay').forEach(ov => {
-    ov.addEventListener('click', (e) => {
-      if (e.target === ov) closeModal(ov);
-    });
-    const closeBtn = ov.querySelector('[data-close]');
-    if (closeBtn) {
-      closeBtn.addEventListener('click', () => {
-        closeModal(ov);
-      });
     }
   });
 
-  document.addEventListener('keydown', e => {
+  // Delegación para cerrar modales (clics en overlay y botón de cierre)
+  document.addEventListener('click', (e) => {
+    // Clic en overlay
+    const overlay = e.target.closest('.modal-overlay');
+    if (overlay && e.target === overlay) {
+      closeModal(overlay);
+      return;
+    }
+    // Clic en botón de cierre
+    const closeBtn = e.target.closest('[data-close]');
+    if (closeBtn) {
+      const overlay2 = closeBtn.closest('.modal-overlay');
+      if (overlay2) closeModal(overlay2);
+    }
+  });
+
+  // Cerrar con Escape
+  document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      document.querySelectorAll('.modal-overlay.open').forEach(closeModal);
+      const openModal = document.querySelector('.modal-overlay.open');
+      if (openModal) closeModal(openModal);
     }
   });
 }
