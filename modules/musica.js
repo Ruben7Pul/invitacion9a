@@ -30,8 +30,7 @@ export function initMusica(cfg) {
     muteBtn.style.opacity = '1';
     muteBtn.innerHTML = iconSound;
     muteBtn.title = 'Silenciar música';
-    // Asegurar que el evento click esté correctamente asignado
-    muteBtn.removeEventListener('click', toggleMusic); // evitar duplicados
+    muteBtn.removeEventListener('click', toggleMusic);
     muteBtn.addEventListener('click', toggleMusic);
   }
 }
