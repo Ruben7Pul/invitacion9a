@@ -1,8 +1,22 @@
 console.log('📦 modal.js (sin partículas)');
 
-import { soundOpen, soundClose, soundTap } from './sonidos.js';
+import { soundOpen, soundClose, soundTap, soundTick } from './sonidos.js';
 
 // No usamos partículas, así que eliminamos import y funciones relacionadas
+
+let tickInterval = null;
+
+function iniciarTicTac() {
+  detenerTicTac();
+  tickInterval = setInterval(soundTick, 1000);
+}
+
+function detenerTicTac() {
+  if (tickInterval) {
+    clearInterval(tickInterval);
+    tickInterval = null;
+  }
+}
 
 export function initModal() {
   document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -39,10 +53,16 @@ function openModal(id) {
   if (!modal) return;
   modal.classList.add('open');
   soundOpen();
+  if (id === 'modal-contador') {
+    iniciarTicTac();
+  }
 }
 
 function closeModal(el) {
   if (!el) return;
   el.classList.remove('open');
   soundClose();
+  if (el.id === 'modal-contador') {
+    detenerTicTac();
+  }
 }
