@@ -28,7 +28,7 @@ body {
 }
 
 /* ============================================================
-   FONDO CON IMAGEN OPTIMIZADA
+   FONDO CON IMAGEN OPTIMIZADA (bella.jpg)
    ============================================================ */
 #bg {
   position: fixed;
@@ -57,7 +57,7 @@ body {
 }
 
 /* ============================================================
-   VIDEOS DE FONDO (más iluminados)
+   VIDEOS MÁS BRILLANTES
    ============================================================ */
 #video-app, #video-portal {
   position: fixed;
@@ -68,99 +68,26 @@ body {
   object-fit: cover;
   pointer-events: none;
   will-change: transform;
-  filter: brightness(1.2) saturate(1.1);
 }
 #video-app {
   z-index: 1;
-  opacity: 0.8;
+  opacity: 0.85;
   mix-blend-mode: screen;
+  filter: brightness(1.2) saturate(1.1);
 }
 #video-portal {
   z-index: 0;
-  opacity: 0.7;
+  opacity: 0.75;
   mix-blend-mode: screen;
+  filter: brightness(1.2) saturate(1.1);
 }
 
-/* ============================================================
-   VIDEOS DE MODALES (sin transparencia)
-   ============================================================ */
-.modal-video {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 65;
-  display: none;
-  pointer-events: none;
-  filter: brightness(1.1) saturate(1.0);
-}
-
-/* ============================================================
-   TEXTO Y DECORACIONES
-   ============================================================ */
 .gold-text {
   color: var(--gold-light);
   text-shadow: 0 0 8px rgba(201, 162, 77, 0.2);
 }
 .frase-inline, .fecha-fija, .hint, .portal-caption {
   text-shadow: 0 2px 8px rgba(0,0,0,0.8);
-}
-#frase-texto {
-  color: #ff3333 !important;
-  text-shadow: 0 0 20px rgba(255, 50, 50, 0.4);
-}
-
-/* ============================================================
-   NOMBRE DE LA QUINCEAÑERA
-   ============================================================ */
-h1#nombre-hero {
-  font-family: var(--script);
-  font-weight: 400;
-  font-size: clamp(4.6rem, 13cqw, 4.6rem);
-  line-height: 1.1;
-  margin: 0;
-  cursor: pointer;
-  background: linear-gradient(90deg, #ff0000, #ff8800, #ffd700, #00ff00, #0088ff, #8800ff, #ff0000);
-  background-size: 300% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: rainbowMove 4s linear infinite;
-  user-select: none;
-  filter: brightness(1.3);
-}
-@keyframes rainbowMove {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 300% 50%; }
-}
-
-/* ============================================================
-   OVALO VERTICAL
-   ============================================================ */
-#oval-wrap {
-  width: clamp(150px, 25cqw, 170px);
-  height: clamp(210px, 35cqw, 240px);
-  margin-bottom: 0.2rem;
-  position: relative;
-  border-radius: 50% / 60%;
-  overflow: visible;
-}
-.oval-mask {
-  width: 100%;
-  height: 100%;
-  border-radius: 50% / 60%;
-  overflow: hidden;
-  border: 4px solid var(--gold);
-  box-shadow: 0 0 30px rgba(201, 162, 77, 0.4);
-  background: var(--bg-deep);
-}
-.gif-central {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
 }
 
 /* ============================================================
@@ -363,8 +290,93 @@ html.sin-reja #app {
 }
 
 /* ============================================================
-   NAVEGACIÓN (sin rectángulo)
+   ÓVALO VERTICAL (círculo dorado)
    ============================================================ */
+#oval-wrap {
+  width: clamp(140px, 25cqw, 150px);
+  height: clamp(200px, 35cqw, 220px);
+  margin-bottom: 0.2rem;
+  position: relative;
+}
+.oval-mask {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid var(--gold);
+  box-shadow: 0 0 30px rgba(201, 162, 77, 0.4);
+  background: var(--bg-deep);
+}
+.gif-central {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ============================================================
+   NOMBRE MÁS ILUMINADO
+   ============================================================ */
+h1#nombre-hero {
+  font-family: var(--script);
+  font-weight: 400;
+  font-size: clamp(4.6rem, 13cqw, 4.6rem);
+  line-height: 1.1;
+  margin: 0;
+  cursor: pointer;
+  background: linear-gradient(90deg, #ff3333, #ffcc00, #33ff33, #00ccff, #cc33ff, #ff3333);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: rainbowMove 4s linear infinite;
+  user-select: none;
+  text-shadow: 0 0 30px rgba(255,255,255,0.4), 0 0 60px rgba(255,200,100,0.2);
+}
+@keyframes rainbowMove {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+/* ============================================================
+   FRASE EN ROJO
+   ============================================================ */
+.frase-inline {
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-size: clamp(1.2rem, 3.3cqw, 1.2rem);
+  line-height: 1.5;
+  margin: 0.1rem 0;
+  max-width: 34ch;
+  color: #ff0000; /* CAMBIADO A ROJO */
+  border-bottom: 1px solid rgba(201,162,77,0.25);
+  padding-bottom: 0.2rem;
+  text-shadow: 0 0 12px rgba(255,0,0,0.4); /* sombra roja */
+}
+.frase-inline::before { content: "\201C"; color: #ff3333; }
+.frase-inline::after { content: "\201D"; color: #ff3333; }
+
+.fecha-fija {
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-size: clamp(1.3rem, 3.6cqw, 1.3rem);
+  margin: 0.1rem 0;
+  color: #d4af37;
+  text-shadow: 0 0 20px rgba(212,175,55,0.4);
+  letter-spacing: 0.04em;
+}
+
+.hint {
+  font-size: clamp(1.2rem, 3.3cqw, 1.2rem);
+  opacity: 0.9;
+  margin: 0.2rem 0;
+  font-family: var(--serif-body);
+  font-style: italic;
+  letter-spacing: 0.04em;
+  color: #f5a0b0;
+  text-shadow: 0 0 18px rgba(245,160,176,0.3);
+}
+
 #nav {
   width: 100%;
   max-width: 480px;
@@ -372,7 +384,8 @@ html.sin-reja #app {
   grid-template-columns: repeat(3, 1fr);
   gap: 0.4rem;
   background: transparent;
-  border: none;
+  border: 1.5px solid #b8860b;
+  border-radius: 20px;
   padding: 0.5rem;
   margin-top: 0.2rem;
 }
@@ -837,6 +850,12 @@ html.sin-reja #app {
 /* ============================================================
    RESPONSIVE
    ============================================================ */
+@media (max-width: 768px) {
+  /* En móvil, desactivar cualquier transición de parallax */
+  #app-inner, .portal-inner {
+    transition: none !important;
+  }
+}
 @media (max-width: 400px) {
   #app { padding: 0.6rem 0.8rem; }
   #app-top .eyebrow { font-size: 0.8rem; }
