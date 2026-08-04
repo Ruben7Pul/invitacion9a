@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS COMPLETOS (CORREGIDO)
+   🌹 INVITACIÓN XV – ESTILOS COMPLETOS (CON PARALLAX)
    ============================================================ */
 
 :root {
@@ -74,7 +74,7 @@ body {
 }
 
 /* ============================================================
-   PORTAL / REJA (CORREGIDO)
+   PORTAL / REJA (CON PARALLAX)
    ============================================================ */
 #portal {
   position: fixed;
@@ -121,6 +121,9 @@ body {
   perspective: 1000px;
   cursor: pointer;
   pointer-events: none;
+  /* Parallax se aplica como transform: translate(x, y) desde JS */
+  will-change: transform;
+  transition: transform 0.03s linear; /* suavizado rápido, no interfiere con animaciones */
 }
 .gate-wrapper.active {
   pointer-events: auto;
@@ -131,7 +134,7 @@ body {
   width: 50%;
   height: 100%;
   backface-visibility: hidden;
-  transition: none; /* Eliminamos transición para que no interfiera con las animaciones */
+  transition: none; /* eliminamos transición para que no interfiera con las animaciones */
 }
 .gate-leaf svg {
   width: 100%;
@@ -143,23 +146,19 @@ body {
 .gate-right { right: 0; transform-origin: right center; }
 .gate-right svg { transform: scaleX(-1); }
 
-/* --- Animación de apertura (reverse) --- */
+/* --- Animaciones de apertura y cierre --- */
 .gate-wrapper.open .gate-left {
   animation: closeLeft 0.6s ease reverse forwards;
 }
 .gate-wrapper.open .gate-right {
   animation: closeRight 0.6s ease reverse forwards;
 }
-
-/* --- Animación de cierre (normal) --- */
 #portal.closing .gate-left {
   animation: closeLeft 0.6s ease forwards;
 }
 #portal.closing .gate-right {
   animation: closeRight 0.6s ease forwards;
 }
-
-/* --- Keyframes (de abierto a cerrado) --- */
 @keyframes closeLeft {
   0% { transform: rotateY(-110deg) translateX(-20px); opacity: 0.2; }
   100% { transform: rotateY(0deg) translateX(0); opacity: 1; }
