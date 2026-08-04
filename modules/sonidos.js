@@ -51,8 +51,7 @@ function preloadSounds() {
     win: { freqs: [784, 988, 1175, 1568], dur: 0.6 },
     clay: { freqs: [600, 800], dur: 0.15 },
     wood: { freqs: [400, 500, 300], dur: 0.25 },
-    iron: { freqs: [200, 250, 300, 350], dur: 0.3 },
-    tick: { freqs: [1500], dur: 0.035 }
+    iron: { freqs: [200, 250, 300, 350], dur: 0.3 }
   };
   for (const [name, def] of Object.entries(soundDefs)) {
     soundBuffers[name] = createSoundBuffer(ctx, def.freqs, def.dur);
@@ -86,7 +85,6 @@ export const soundWin = () => playSound('win');
 export const soundClay = () => playSound('clay');
 export const soundWood = () => playSound('wood');
 export const soundIron = () => playSound('iron');
-export const soundTick = () => playSound('tick');
 
 export function initSonidos() {
   document.addEventListener('click', () => {
