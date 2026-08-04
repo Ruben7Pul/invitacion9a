@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS COMPLETOS (CORREGIDO)
+   🌹 INVITACIÓN XV – ESTILOS COMPLETOS
    ============================================================ */
 
 :root {
@@ -28,7 +28,7 @@ body {
 }
 
 /* ============================================================
-   FONDO CON IMAGEN OPTIMIZADA
+   FONDO CON IMAGEN OPTIMIZADA (bella.jpg)
    ============================================================ */
 #bg {
   position: fixed;
@@ -49,7 +49,6 @@ body {
   inset: 0;
   background: rgba(0, 0, 0, 0.35);
 }
-
 @media (max-width: 768px) and (orientation: portrait) {
   #bg {
     background-position: 50% 30%;
@@ -58,7 +57,7 @@ body {
 }
 
 /* ============================================================
-   VIDEOS
+   VIDEOS MÁS BRILLANTES
    ============================================================ */
 #video-app, #video-portal {
   position: fixed;
@@ -72,13 +71,15 @@ body {
 }
 #video-app {
   z-index: 1;
-  opacity: 0.7;
+  opacity: 0.85;
   mix-blend-mode: screen;
+  filter: brightness(1.2) saturate(1.1);
 }
 #video-portal {
   z-index: 0;
-  opacity: 0.6;
+  opacity: 0.75;
   mix-blend-mode: screen;
+  filter: brightness(1.2) saturate(1.1);
 }
 
 .gold-text {
@@ -288,17 +289,19 @@ html.sin-reja #app {
   container-name: tarjeta;
 }
 
-/* ===== ÓVALO DORADO (vertical) ===== */
+/* ============================================================
+   ÓVALO VERTICAL (círculo dorado)
+   ============================================================ */
 #oval-wrap {
-  width: clamp(140px, 25cqw, 160px);
-  height: clamp(200px, 35cqw, 230px);
+  width: clamp(140px, 25cqw, 150px);
+  height: clamp(200px, 35cqw, 220px);
   margin-bottom: 0.2rem;
   position: relative;
 }
 .oval-mask {
   width: 100%;
   height: 100%;
-  border-radius: 50% / 60%;
+  border-radius: 50%;
   overflow: hidden;
   border: 4px solid var(--gold);
   box-shadow: 0 0 30px rgba(201, 162, 77, 0.4);
@@ -311,37 +314,9 @@ html.sin-reja #app {
   display: block;
 }
 
-/* ===== TEXTO DORADO BRILLANTE ===== */
-.gold-brillante {
-  background: linear-gradient(90deg, #ffd700, #f5e6b8, #d4af37, #f5e6b8, #ffd700);
-  background-size: 300% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: shineGold 4s linear infinite;
-  text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
-}
-@keyframes shineGold {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 300% 50%; }
-}
-
-.frase-inline,
-.fecha-fija,
-.hint {
-  font-style: italic;
-  text-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
-  background: linear-gradient(90deg, #ffd700, #f5e6b8, #d4af37, #f5e6b8, #ffd700);
-  background-size: 300% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: shineGold 4s linear infinite;
-}
-.frase-inline { font-size: clamp(1.2rem, 3.3cqw, 1.2rem); }
-.fecha-fija { font-size: clamp(1.3rem, 3.6cqw, 1.3rem); }
-.hint { font-size: clamp(1.2rem, 3.3cqw, 1.2rem); }
-
+/* ============================================================
+   NOMBRE MÁS ILUMINADO
+   ============================================================ */
 h1#nombre-hero {
   font-family: var(--script);
   font-weight: 400;
@@ -349,13 +324,14 @@ h1#nombre-hero {
   line-height: 1.1;
   margin: 0;
   cursor: pointer;
-  background: linear-gradient(90deg, #ff0000, #ff8800, #ffd700, #00ff00, #0088ff, #8800ff, #ff0000);
+  background: linear-gradient(90deg, #ff3333, #ffcc00, #33ff33, #00ccff, #cc33ff, #ff3333);
   background-size: 300% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   animation: rainbowMove 4s linear infinite;
   user-select: none;
+  text-shadow: 0 0 30px rgba(255,255,255,0.4), 0 0 60px rgba(255,200,100,0.2);
 }
 @keyframes rainbowMove {
   0% { background-position: 0% 50%; }
@@ -363,8 +339,44 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   NAVEGACIÓN (botones con pointer-events: auto !important)
+   FRASE EN ROJO
    ============================================================ */
+.frase-inline {
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-size: clamp(1.2rem, 3.3cqw, 1.2rem);
+  line-height: 1.5;
+  margin: 0.1rem 0;
+  max-width: 34ch;
+  color: #ff0000; /* CAMBIADO A ROJO */
+  border-bottom: 1px solid rgba(201,162,77,0.25);
+  padding-bottom: 0.2rem;
+  text-shadow: 0 0 12px rgba(255,0,0,0.4); /* sombra roja */
+}
+.frase-inline::before { content: "\201C"; color: #ff3333; }
+.frase-inline::after { content: "\201D"; color: #ff3333; }
+
+.fecha-fija {
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-size: clamp(1.3rem, 3.6cqw, 1.3rem);
+  margin: 0.1rem 0;
+  color: #d4af37;
+  text-shadow: 0 0 20px rgba(212,175,55,0.4);
+  letter-spacing: 0.04em;
+}
+
+.hint {
+  font-size: clamp(1.2rem, 3.3cqw, 1.2rem);
+  opacity: 0.9;
+  margin: 0.2rem 0;
+  font-family: var(--serif-body);
+  font-style: italic;
+  letter-spacing: 0.04em;
+  color: #f5a0b0;
+  text-shadow: 0 0 18px rgba(245,160,176,0.3);
+}
+
 #nav {
   width: 100%;
   max-width: 480px;
@@ -390,7 +402,6 @@ h1#nombre-hero {
   cursor: pointer;
   backdrop-filter: blur(4px);
   transition: all 0.3s ease;
-  pointer-events: auto !important; /* Asegura que los botones sean clicables */
 }
 .nav-btn:hover {
   background: rgba(201, 162, 77, 0.2);
@@ -647,9 +658,6 @@ h1#nombre-hero {
   font-size: 0.8rem;
 }
 
-/* ============================================================
-   DETALLE DE LUGARES (SIN HOVER BRILLANTE)
-   ============================================================ */
 .detalle-card {
   background: rgba(10, 18, 34, 0.55);
   border: 2px solid #b8860b;
@@ -682,8 +690,8 @@ h1#nombre-hero {
   transform: scaleX(-1);
 }
 .detalle-card:hover {
-  border-color: #b8860b;
-  box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.03), 0 4px 20px rgba(0,0,0,0.4);
+  border-color: #fae3a0;
+  box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.08), 0 4px 30px rgba(0,0,0,0.6);
 }
 .detalle-card .icono {
   width: 34px;
@@ -757,9 +765,6 @@ h1#nombre-hero {
 #modal-detalles .detalle-info .lugar { font-size: clamp(0.7rem, 2vw, 0.9rem); margin: 0.1rem 0; }
 #modal-detalles .btn-mapa { font-size: clamp(0.6rem, 1.6vw, 0.7rem); padding: 0.3rem 1rem; }
 
-/* ============================================================
-   FAMILIA
-   ============================================================ */
 .familia-grupo {
   background: rgba(10, 18, 34, 0.5);
   border: 2px solid #b8860b;
@@ -845,6 +850,12 @@ h1#nombre-hero {
 /* ============================================================
    RESPONSIVE
    ============================================================ */
+@media (max-width: 768px) {
+  /* En móvil, desactivar cualquier transición de parallax */
+  #app-inner, .portal-inner {
+    transition: none !important;
+  }
+}
 @media (max-width: 400px) {
   #app { padding: 0.6rem 0.8rem; }
   #app-top .eyebrow { font-size: 0.8rem; }
