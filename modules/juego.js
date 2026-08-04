@@ -1,9 +1,25 @@
 // ============================================================
-// juego.js – COMPLETO Y CORREGIDO (sin isMobile)
+// juego.js – COMPLETO CON TODOS LOS SONIDOS
 // ============================================================
-console.log('📦 juego.js (sin isMobile)');
+console.log('📦 juego.js (con sonidos completos)');
 
-import { soundTap, soundBrick, soundLose, soundClose } from './sonidos.js';
+import { 
+  soundTap, 
+  soundBrick, 
+  soundLose, 
+  soundClose,
+  soundWin,
+  soundClay,
+  soundWood,
+  soundIron,
+  soundPowerupGood,
+  soundPowerupBad,
+  soundExtraLife,
+  soundBlueBall,
+  soundWallHit,
+  soundGameOver,
+  soundPaddleHit
+} from './sonidos.js';
 
 // ========== CONSTANTES FIJAS ==========
 const MAX_DELTA = 0.03;
@@ -113,7 +129,7 @@ function isHighScore(score) {
 
 // ========== FUNCIÓN PRINCIPAL ==========
 export function initJuego(config, mobile = false) {
-  // Ignoramos el parámetro mobile, siempre usamos configuraciones fijas.
+  // Ignoramos el parámetro mobile
   console.log('🎮 Iniciando juego (sin optimizaciones móviles)');
 
   if (!document.querySelector('#pixel-font')) {
@@ -165,7 +181,7 @@ export function initJuego(config, mobile = false) {
       openGame();
     });
   } else {
-    // En la página del juego, abrir el menú automáticamente con un retraso
+    // En la página del juego, abrir el menú automáticamente
     setTimeout(() => {
       openGame();
     }, 300);
@@ -542,7 +558,7 @@ export function initJuego(config, mobile = false) {
     if (document.hidden && running && !paused && !gameOver) togglePause();
   });
 
-  // ========== FUNCIONES DEL JUEGO (sin cambios, solo copiadas) ==========
+  // ========== FUNCIONES DEL JUEGO ==========
   function getBrickTypeFromValue(val) {
     if (val === 1) return BRICK_TYPES.CLAY;
     if (val === 2) return BRICK_TYPES.WOOD;
@@ -943,6 +959,13 @@ export function initJuego(config, mobile = false) {
       size: size, color: color, type: typeKey,
       el: el, alive: true
     });
+
+    // SONIDO: power-up aparece
+    if (color === 'verde') {
+      soundPowerupGood();
+    } else {
+      soundPowerupBad();
+    }
   }
 
   function spawnBlueBall() {
@@ -978,6 +1001,7 @@ export function initJuego(config, mobile = false) {
   }
 
   function applyBlueBall() {
+    soundBlueBall();
     playerScore += 2000;
     nieblaLevel = 0;
     updateNiebla();
@@ -1177,6 +1201,7 @@ export function initJuego(config, mobile = false) {
 
   function loseLife() {
     lives--;
+    soundLose();
     animateHeartLoss();
     gameTimeActive = false;
     comboCount = 0;
@@ -1197,6 +1222,7 @@ export function initJuego(config, mobile = false) {
     draw();
 
     if (lives <= 0) {
+      soundGameOver();
       setTimeout(() => endGame(), 300);
       return;
     }
@@ -1272,6 +1298,7 @@ export function initJuego(config, mobile = false) {
 
       if (lives < MAX_LIVES) {
         lives++;
+        soundExtraLife();
         updateLivesUI();
       } else {
         if (!blueBallActive) pendingBlueBall = true;
@@ -1425,14 +1452,27 @@ export function initJuego(config, mobile = false) {
       b.x += b.vx * delta;
       b.y += b.vy * delta;
 
-      if (b.x - BALL_R < 0) { b.x = BALL_R; b.vx = Math.abs(b.vx); }
-      if (b.x + BALL_R > STAGE_W) { b.x = STAGE_W - BALL_R; b.vx = -Math.abs(b.vx); }
-      if (b.y - BALL_R < 0) { b.y = BALL_R; b.vy = Math.abs(b.vy); }
+      if (b.x - BALL_R < 0) { 
+        b.x = BALL_R; 
+        b.vx = Math.abs(b.vx); 
+        soundWallHit();
+      }
+      if (b.x + BALL_R > STAGE_W) { 
+        b.x = STAGE_W - BALL_R; 
+        b.vx = -Math.abs(b.vx); 
+        soundWallHit();
+      }
+      if (b.y - BALL_R < 0) { 
+        b.y = BALL_R; 
+        b.vy = Math.abs(b.vy); 
+        soundWallHit();
+      }
 
       const py = STAGE_H - 14;
       if (b.vy > 0 && b.y + BALL_R >= py && b.y + BALL_R <= py + 10 &&
           b.x >= paddle.x - BALL_R && b.x <= paddle.x + paddleWidth + BALL_R) {
         b.y = py - BALL_R;
+        soundPaddleHit();
         let hit = (b.x - (paddle.x + paddleWidth / 2)) / (paddleWidth / 2);
         hit = Math.max(-0.85, Math.min(0.85, hit));
         const angle = hit * 0.7;
@@ -1473,6 +1513,14 @@ export function initJuego(config, mobile = false) {
             gamePoints -= br.value;
             ladrillosRotos++;
             if (uiCounter % 2 === 0) updateUI();
+            
+            // Sonido según tipo de ladrillo
+            switch (br.type) {
+              case BRICK_TYPES.CLAY: soundClay(); break;
+              case BRICK_TYPES.WOOD: soundWood(); break;
+              case BRICK_TYPES.IRON: soundIron(); break;
+            }
+            
             spawnPowerup(br);
             if (gamePoints <= REGEN_THRESHOLD) requestRegeneration();
           } else {
@@ -1539,6 +1587,13 @@ export function initJuego(config, mobile = false) {
 
   function applyPowerup(pu) {
     const type = pu.type;
+    // Sonido según tipo de power-up
+    if (type === 'PALA_GRANDE' || type === 'DUREZA' || type === 'MULTIBOLA') {
+      soundPowerupGood();
+    } else {
+      soundPowerupBad();
+    }
+    
     switch (type) {
       case 'PALA_GRANDE':
         if (paddleSizeMultiplier < 1) paddleSizeMultiplier = 1;
