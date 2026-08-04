@@ -1,80 +1,48 @@
-console.log('📦 música (corregido)');
+console.log('📦 modal.js (sin partículas)');
 
-let audio = null;
-let config = null;
+import { soundOpen, soundClose, soundTap } from './sonidos.js';
 
-const iconSound = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-  <path d="M4 9 L4 15 L8 15 L13 20 L13 4 L8 9 Z"/>
-  <path d="M16.5 8.5 a6 6 0 0 1 0 7"/>
-  <path d="M19 6 a10 10 0 0 1 0 12"/>
-</svg>`;
-const iconMute = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-  <path d="M4 9 L4 15 L8 15 L13 20 L13 4 L8 9 Z"/>
-  <line x1="17" y1="7" x2="22" y2="12"/>
-  <line x1="22" y1="7" x2="17" y2="12"/>
-  <line x1="2" y1="2" x2="22" y2="22" stroke="currentColor" stroke-width="1.2"/>
-</svg>`;
+// No usamos partículas, así que eliminamos import y funciones relacionadas
 
-function getMuteBtn() {
-  return document.getElementById('music-toggle');
-}
-
-export function initMusica(cfg) {
-  config = cfg;
-  audio = new Audio(config.audioFile);
-  audio.loop = true;
-  audio.volume = 0.8;
-  audio.addEventListener('error', (e) => {
-    console.warn('⚠️ Error audio:', e);
-    const btn = getMuteBtn();
-    if (btn) { btn.style.opacity = '0.3'; btn.title = 'Error'; }
+export function initModal() {
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      btn.classList.remove('tap');
+      void btn.offsetWidth;
+      btn.classList.add('tap');
+      const modalId = btn.dataset.modal;
+      openModal(modalId);
+    });
   });
-  audio.load();
 
-  const btn = getMuteBtn();
-  if (btn) {
-    btn.style.opacity = '1';
-    btn.innerHTML = iconSound;
-    btn.title = 'Silenciar música';
-  }
-}
-
-export function playMusic() {
-  if (!audio) return;
-  if (!audio.paused) return;
-  audio.play().catch(() => {});
-  const btn = getMuteBtn();
-  if (btn) {
-    btn.innerHTML = iconSound;
-    btn.title = 'Silenciar música';
-  }
-}
-
-export function resetMusic() {
-  if (!audio) return;
-  audio.pause();
-  audio.currentTime = 0;
-  const btn = getMuteBtn();
-  if (btn) {
-    btn.innerHTML = iconSound;
-    btn.title = 'Silenciar música';
-  }
-}
-
-export function toggleMusic() {
-  if (!audio) return;
-  const btn = getMuteBtn();
-  if (audio.paused) {
-    audio.play().catch(() => {});
-    if (btn) {
-      btn.innerHTML = iconSound;
-      btn.title = 'Silenciar música';
+  document.querySelectorAll('.modal-overlay').forEach(ov => {
+    ov.addEventListener('click', (e) => {
+      if (e.target === ov) closeModal(ov);
+    });
+    const closeBtn = ov.querySelector('[data-close]');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        closeModal(ov);
+      });
     }
-  } else {
-    audio.pause();
-    if (btn) {
-      btn.innerHTML = iconMute;
-      btn.title = 'Activar música';
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.open').forEach(closeModal);
     }
-  }
+  });
+}
+
+function openModal(id) {
+  const modal = document.getElementById(id);
+  if (!modal) return;
+  modal.classList.add('open');
+  soundOpen();
+}
+
+function closeModal(el) {
+  if (!el) return;
+  el.classList.remove('open');
+  soundClose();
 }
