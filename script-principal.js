@@ -107,13 +107,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.location.href = 'juego1/';
   });
 
-  // ========== REJA ==========
+  // ========== REJA (forzar visibilidad) ==========
   const portal = document.getElementById('portal');
   const gateWrapper = document.getElementById('gate-wrapper');
   const app = document.getElementById('app');
   const backBtn = document.getElementById('back-link');
   const caption = document.querySelector('.portal-caption');
 
+  // Forzar que la reja sea visible al inicio
   portal.classList.remove('hide');
   gateWrapper.classList.remove('open');
   caption.classList.remove('show');
@@ -133,6 +134,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     history.replaceState(null, '', window.location.pathname);
     document.documentElement.classList.remove('sin-reja');
   } else {
+    // Activar la reja después de 2s
     setTimeout(() => {
       caption.classList.add('show');
       gateWrapper.classList.add('active');
@@ -238,6 +240,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     modalObserver.observe(el, { attributes: true, attributeFilter: ['class'] });
   });
 
+  // Observar nuevos modales
   const bodyObserver = new MutationObserver(() => {
     document.querySelectorAll('.modal-overlay:not([data-observed])').forEach(el => {
       el.setAttribute('data-observed', 'true');
@@ -256,13 +259,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const offsetX = Math.min(Math.max(invertX, -maxOffset), maxOffset);
     const offsetY = Math.min(Math.max(invertY, -maxOffset), maxOffset);
 
-    // REJA: factor 0.6 (sin cambios)
     if (!portal.classList.contains('hide') && portalInner) {
       portalInner.style.transform = `translate(${offsetX * 0.6}px, ${offsetY * 0.6}px)`;
     }
-    // APP PRINCIPAL: factor reducido un 25% (0.6 * 0.75 = 0.45)
     if (app.classList.contains('show') && appInner) {
-      appInner.style.transform = `translate(${offsetX * 0.45}px, ${offsetY * 0.45}px)`;
+      appInner.style.transform = `translate(${offsetX * 0.6}px, ${offsetY * 0.6}px)`;
     }
   }
 
@@ -280,10 +281,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // --- Mouse (solo en escritorio; en móvil se desactiva completamente) ---
+  // --- Mouse (solo si NO es móvil con giro activo) ---
   document.addEventListener('mousemove', (e) => {
-    // En móvil, NO se usa mouse para parallax (incluso si no hay giroscopio)
-    if (isMobile) return;
+    if (isMobile && gyroWorking) return;
     if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
     const x = (e.clientX / window.innerWidth - 0.5) * 30;
     const y = (e.clientY / window.innerHeight - 0.5) * 30;
@@ -308,7 +308,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     setTimeout(() => {
       if (!gyroWorking) {
-        console.log('⚠️ Giroscopio no responde, no se usará parallax en móvil');
+        console.log('⚠️ Giroscopio no responde, se usará mouse como respaldo');
         window.removeEventListener('deviceorientation', gyroTest);
       }
     }, 3000);
@@ -330,15 +330,5 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Si hay modal abierto al inicio, pausar
   if (document.querySelector('.modal-overlay.open')) {
     pausarVideos();
-  }
-
-  // ============================================================
-  // 🔇 BOTÓN DE MÚSICA (asegurar evento)
-  // ============================================================
-  const muteBtn = document.getElementById('music-toggle');
-  if (muteBtn) {
-    muteBtn.addEventListener('click', () => {
-      if (window.toggleMusic) window.toggleMusic();
-    });
   }
 });
