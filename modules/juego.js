@@ -419,9 +419,20 @@ export function initJuego(config, mobile = false) {
   menuExit.addEventListener('click', (e) => {
     e.stopPropagation();
     soundTap();
+    // Cortina de refuerzo: tapa la pantalla con la imagen de fondo antes de
+    // salir, para que la transición se vea limpia aunque algo tarde en cargar.
+    const veil = document.getElementById('loading-veil');
+    if (veil) {
+      veil.style.transition = 'none';
+      veil.style.display = 'block';
+      veil.classList.remove('hide');
+      void veil.offsetHeight; // fuerza a aplicar el cambio antes de navegar
+    }
     // "?volver=1" le indica a index.html que debe mostrar directamente
     // la parte principal (sin repetir la animación de la reja)
-    window.location.href = '../index.html?volver=1';
+    setTimeout(() => {
+      window.location.href = '../index.html?volver=1';
+    }, 220);
   });
 
   menuRules.addEventListener('click', (e) => {
