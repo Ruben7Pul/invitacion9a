@@ -107,14 +107,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.location.href = 'juego1/';
   });
 
-  // ========== REJA (forzar visibilidad) ==========
+  // ========== REJA ==========
   const portal = document.getElementById('portal');
   const gateWrapper = document.getElementById('gate-wrapper');
   const app = document.getElementById('app');
   const backBtn = document.getElementById('back-link');
   const caption = document.querySelector('.portal-caption');
 
-  // Forzar que la reja sea visible al inicio
   portal.classList.remove('hide');
   gateWrapper.classList.remove('open');
   caption.classList.remove('show');
@@ -126,8 +125,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (volviendoDelJuego) {
     portal.classList.add('hide');
     app.classList.add('show');
-    // Asegurar pointer-events en app
-    app.style.pointerEvents = 'auto';
     gateWrapper.classList.add('active');
     gateWrapper.classList.add('open');
     caption.classList.add('show');
@@ -136,7 +133,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     history.replaceState(null, '', window.location.pathname);
     document.documentElement.classList.remove('sin-reja');
   } else {
-    // Activar la reja después de 2s
     setTimeout(() => {
       caption.classList.add('show');
       gateWrapper.classList.add('active');
@@ -149,7 +145,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     gateWrapper.classList.add('open');
     portal.classList.add('hide');
     app.classList.add('show');
-    app.style.pointerEvents = 'auto';
     cargarContador();
     if (window.playMusic) window.playMusic();
   }
@@ -158,7 +153,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (e) e.stopPropagation();
     console.log('🔒 Cerrando reja...');
     app.classList.remove('show');
-    app.style.pointerEvents = 'none';
     portal.classList.remove('hide');
     gateWrapper.classList.remove('open');
     if (window.resetMusic) window.resetMusic();
@@ -244,7 +238,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     modalObserver.observe(el, { attributes: true, attributeFilter: ['class'] });
   });
 
-  // Observar nuevos modales
   const bodyObserver = new MutationObserver(() => {
     document.querySelectorAll('.modal-overlay:not([data-observed])').forEach(el => {
       el.setAttribute('data-observed', 'true');
@@ -253,7 +246,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   bodyObserver.observe(document.body, { childList: true, subtree: true });
 
-  // === Parallax (solo en escritorio para mouse) ===
+  // === Parallax ===
   function applyParallax(x, y) {
     if (document.querySelector('.modal-overlay.open')) return;
 
@@ -263,11 +256,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const offsetX = Math.min(Math.max(invertX, -maxOffset), maxOffset);
     const offsetY = Math.min(Math.max(invertY, -maxOffset), maxOffset);
 
-    // Reja: factor 0.6 (sin cambios)
+    // REJA: factor 0.6 (sin cambios)
     if (!portal.classList.contains('hide') && portalInner) {
       portalInner.style.transform = `translate(${offsetX * 0.6}px, ${offsetY * 0.6}px)`;
     }
-    // App principal: factor reducido un 25% → 0.45
+    // APP PRINCIPAL: factor reducido un 25% (0.6 * 0.75 = 0.45)
     if (app.classList.contains('show') && appInner) {
       appInner.style.transform = `translate(${offsetX * 0.45}px, ${offsetY * 0.45}px)`;
     }
@@ -287,19 +280,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // --- Mouse (solo en escritorio, no en móvil) ---
-  if (!isMobile) {
-    document.addEventListener('mousemove', (e) => {
-      if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
-      const x = (e.clientX / window.innerWidth - 0.5) * 30;
-      const y = (e.clientY / window.innerHeight - 0.5) * 30;
-      targetX = x;
-      targetY = y;
-      if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
-        requestAnimationFrame(smoothParallax);
-      }
-    });
-  }
+  // --- Mouse (solo en escritorio; en móvil se desactiva completamente) ---
+  document.addEventListener('mousemove', (e) => {
+    // En móvil, NO se usa mouse para parallax (incluso si no hay giroscopio)
+    if (isMobile) return;
+    if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
+    const x = (e.clientX / window.innerWidth - 0.5) * 30;
+    const y = (e.clientY / window.innerHeight - 0.5) * 30;
+    targetX = x;
+    targetY = y;
+    if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
+      requestAnimationFrame(smoothParallax);
+    }
+  });
 
   // --- Giroscopio (móvil) ---
   if (isMobile && hasGyro) {
@@ -315,9 +308,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     setTimeout(() => {
       if (!gyroWorking) {
-        console.log('⚠️ Giroscopio no responde, se desactiva parallax en móvil');
+        console.log('⚠️ Giroscopio no responde, no se usará parallax en móvil');
         window.removeEventListener('deviceorientation', gyroTest);
-        // No se añade handleOrientation, así que no hay parallax por giro.
       }
     }, 3000);
   }
