@@ -1,8 +1,17 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS COMPLETOS
+   🌹 INVITACIÓN XV – ESTILOS COMPLETOS CON ILUMINACIÓN DINÁMICA
    ============================================================ */
 
 :root {
+  /* Variables que serán modificadas por JS */
+  --color-fondo: #f5f0e8;
+  --brillo-nombre: 0 0 10px rgba(255, 215, 0, 0.3);
+  --sombra-boton: 0 0 0px rgba(212, 175, 55, 0);
+  --borde-boton: rgba(212, 175, 55, 0.3);
+  --filtro-video: hue-rotate(0deg) saturate(1);
+  --overlay-opacity: 0.35;
+
+  /* Variables fijas */
   --bg-deep: #0b0818;
   --gold: #c9a24d;
   --gold-light: #f0d9a3;
@@ -10,6 +19,9 @@
   --serif-display: 'Cinzel', serif;
   --serif-body: 'Cormorant Garamond', serif;
   --script: 'Pinyon Script', cursive;
+
+  /* Transiciones suaves */
+  transition: background-color 0.8s ease, color 0.8s ease, text-shadow 0.8s ease, box-shadow 0.8s ease, border-color 0.8s ease;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -25,23 +37,27 @@ body {
   position: fixed;
   inset: 0;
   font-size: clamp(16px, 2.2vw, 20px);
+  transition: background-color 0.8s ease, color 0.8s ease;
 }
 
 #bg {
   position: fixed;
   inset: 0;
   z-index: 0;
-  background: var(--bg-deep);
+  background-color: var(--color-fondo);
   background-image: url('archivos/bella.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  background-blend-mode: overlay;
+  transition: background-color 0.8s ease;
 }
 #bg::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, var(--overlay-opacity));
+  transition: background 0.8s ease;
 }
 
 #video-app, #video-portal {
@@ -53,6 +69,8 @@ body {
   object-fit: cover;
   pointer-events: none;
   will-change: transform;
+  filter: var(--filtro-video);
+  transition: filter 0.8s ease;
 }
 #video-app {
   z-index: 1;
@@ -122,6 +140,8 @@ body {
   perspective: 1000px;
   cursor: pointer;
   pointer-events: none;
+  filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.1));
+  transition: filter 0.8s ease;
 }
 .gate-wrapper.active {
   pointer-events: auto;
@@ -229,7 +249,7 @@ html.sin-reja #app {
 }
 .top-btn {
   background: none;
-  border: 1.5px solid var(--gold);
+  border: 1.5px solid var(--borde-boton);
   color: var(--gold-light);
   font-size: 1.4rem;
   cursor: pointer;
@@ -239,8 +259,8 @@ html.sin-reja #app {
   justify-content: center;
   border-radius: 30px;
   background: rgba(201, 162, 77, 0.08);
-  box-shadow: 0 0 12px rgba(201,162,77,0.15);
-  transition: all 0.3s ease;
+  box-shadow: var(--sombra-boton);
+  transition: all 0.3s ease, border-color 0.8s ease, box-shadow 0.8s ease;
   min-width: 40px;
   height: 40px;
   will-change: transform;
@@ -303,6 +323,8 @@ h1#nombre-hero {
   animation: rainbowMove 4s linear infinite;
   user-select: none;
   will-change: transform;
+  text-shadow: var(--brillo-nombre);
+  transition: text-shadow 0.8s ease, transform 0.3s ease;
 }
 @keyframes rainbowMove {
   0% { background-position: 0% 50%; }
@@ -361,7 +383,7 @@ h1#nombre-hero {
 }
 .nav-btn {
   background: rgba(201, 162, 77, 0.12);
-  border: 1.5px solid rgba(201, 162, 77, 0.35);
+  border: 1.5px solid var(--borde-boton);
   color: var(--cream);
   display: flex;
   flex-direction: column;
@@ -371,7 +393,8 @@ h1#nombre-hero {
   border-radius: 14px;
   cursor: pointer;
   backdrop-filter: blur(4px);
-  transition: all 0.3s ease;
+  transition: all 0.3s ease, border-color 0.8s ease, box-shadow 0.8s ease;
+  box-shadow: var(--sombra-boton);
 }
 .nav-btn:hover {
   background: rgba(201, 162, 77, 0.2);
@@ -442,7 +465,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   MODALES (con soporte para parallax via left/top)
+   MODALES (con parallax via left/top)
    ============================================================ */
 .modal-overlay {
   position: fixed;
@@ -479,14 +502,14 @@ h1#nombre-hero {
   max-width: 480px;
   max-height: 85vh;
   overflow-y: auto;
-  background: radial-gradient(ellipse at 50% 30%, #1c2a44, #0d1424 80%);
+  background: radial-gradient(ellipse at 50% 30%, var(--color-fondo), #0d1424 80%);
   border: 3px solid #b8860b;
   border-radius: 30px;
   padding: 2rem 1.6rem;
-  position: relative; /* Necesario para left/top */
+  position: relative;
   transform: scale(0.95);
   opacity: 0;
-  transition: transform 0.2s ease, opacity 0.2s ease, left 0.2s ease, top 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, left 0.2s ease, top 0.2s ease, background 0.8s ease;
   box-shadow: 
     0 0 0 2px rgba(184, 134, 11, 0.2),
     0 0 0 6px rgba(26, 42, 70, 0.5),
