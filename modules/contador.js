@@ -1,7 +1,8 @@
-console.log('📦 contador.js (con tick corregido)');
+console.log('📦 contador.js (corregido, sin saltos)');
 
 let tickAudioCtx = null;
-let tickTimerId = null;
+let intervalId = null;
+let prevSeconds = -1;
 
 function createTickSound() {
   try {
@@ -60,41 +61,70 @@ export function initContador(config) {
   const clockEl = document.getElementById('clock');
   const modalContador = document.getElementById('modal-contador');
 
-  function tick() {
+  // Limpiar intervalo anterior si existe
+  if (intervalId) {
+    clearInterval(intervalId);
+    intervalId = null;
+  }
+
+  function actualizarContador() {
     const now = Date.now();
     const diff = target - now;
+
     if (diff <= 0) {
       clockEl.style.display = 'none';
       if (document.getElementById('contador-terminado')) {
         document.getElementById('contador-terminado').style.display = 'block';
       }
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
       return;
     }
-    els.d.textContent = String(Math.floor(diff / 86400000)).padStart(2, '0');
-    els.h.textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
-    els.m.textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
-    els.s.textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
 
+    const days = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+
+    els.d.textContent = String(days).padStart(2, '0');
+    els.h.textContent = String(hours).padStart(2, '0');
+    els.m.textContent = String(minutes).padStart(2, '0');
+    els.s.textContent = String(seconds).padStart(2, '0');
+
+    // Reproducir tick solo si el modal está abierto y el segundo cambió
     if (modalContador && modalContador.classList.contains('open')) {
-      playTick();
+      if (seconds !== prevSeconds) {
+        prevSeconds = seconds;
+        playTick();
+      }
     }
-
-    const nextTick = now + 1000 - (now % 1000);
-    const delay = nextTick - now;
-    tickTimerId = setTimeout(tick, delay);
   }
 
+  // Inicializar prevSeconds
   const now = Date.now();
-  const nextTick = now + 1000 - (now % 1000);
-  const delay = nextTick - now;
-  tickTimerId = setTimeout(tick, delay);
-
-  if (modalContador) {
-    const observer = new MutationObserver(() => {});
-    observer.observe(modalContador, { attributes: true, attributeFilter: ['class'] });
+  const diff = target - now;
+  if (diff > 0) {
+    prevSeconds = Math.floor((diff % 60000) / 1000);
+  } else {
+    prevSeconds = -1;
   }
 
+  // Ejecutar inmediatamente
+  actualizarContador();
+
+  // Programar actualización cada 100 ms para detectar cambios de segundo sin saltos
+  intervalId = setInterval(actualizarContador, 100);
+
+  // Si el modal se cierra, no hacemos nada, el sonido no se reproduce.
+  // Si se abre, el sonido se activa automáticamente.
+
+  // Función de limpieza (opcional)
   window._cleanContador = function() {
-    if (tickTimerId) clearTimeout(tickTimerId);
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
   };
 }
