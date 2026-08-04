@@ -122,6 +122,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   const backBtn = document.getElementById('back-link');
   const caption = document.querySelector('.portal-caption');
 
+  // Verificar que el botón de volver existe
+  if (!backBtn) {
+    console.error('❌ No se encontró el botón #back-link');
+  } else {
+    console.log('✅ Botón de volver encontrado');
+  }
+
   // ¿Venimos de "Salir" en el juego? Si es así, mostramos directamente
   // la parte principal (sin la reja) y limpiamos la URL.
   const params = new URLSearchParams(window.location.search);
@@ -135,11 +142,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     caption.classList.add('show');
     iniciarApp();
     if (window.playMusic) window.playMusic();
-    // Deja la URL limpia: https://.../invitacion9a/
+    // Deja la URL limpia
     history.replaceState(null, '', window.location.pathname);
-    // Ya cumplió su función (evitar el parpadeo de la reja). La quitamos
-    // para que el botón de "volver a la reja" funcione con normalidad.
     document.documentElement.classList.remove('sin-reja');
+    console.log('🔄 Volviendo del juego, reja oculta pero con open');
   } else {
     gateWrapper.classList.remove('active');
     caption.classList.remove('show');
@@ -152,6 +158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function abrirReja(e) {
     if (e) e.stopPropagation();
+    console.log('🔓 Abriendo reja');
     gateWrapper.classList.add('open');
     portal.classList.add('hide');
     app.classList.add('show');
@@ -159,18 +166,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (window.playMusic) window.playMusic();
   }
 
-  // ===== CORRECCIÓN DE LA FUNCIÓN cerrarReja =====
+  // ===== FUNCIÓN CERRAR REJA – CORREGIDA CON DEPURACIÓN =====
   function cerrarReja(e) {
     if (e) e.stopPropagation();
+    console.log('🔒 Cerrando reja...');
 
     // 1. Oculta la aplicación principal
     app.classList.remove('show');
 
-    // 2. Muestra el portal (quitamos 'hide') y añadimos la clase 'closing' para iniciar la animación de cierre
+    // 2. Muestra el portal (quitamos 'hide') y añadimos la clase 'closing'
     portal.classList.remove('hide');
     portal.classList.add('closing');
 
-    // 3. NO quitamos 'open' ahora; las puertas deben permanecer abiertas mientras se ejecuta la animación
+    // 3. Forzar un reflow para que el navegador aplique los cambios antes de la animación
+    void portal.offsetHeight;
 
     // 4. Detener música si estaba sonando
     if (window.resetMusic) window.resetMusic();
@@ -179,22 +188,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     caption.classList.remove('show');
     gateWrapper.classList.remove('active');
 
-    // 6. Esperar a que termine la animación (0.7s) para quitar 'open' y 'closing'
+    // 6. Esperar a que termine la animación (700ms) para quitar 'open' y 'closing'
     setTimeout(() => {
       gateWrapper.classList.remove('open');
       portal.classList.remove('closing');
+      console.log('✅ Animación de cierre completada');
 
       // 7. Reactivar la reja y mostrar el caption después de un breve retraso
       setTimeout(() => {
         caption.classList.add('show');
         gateWrapper.classList.add('active');
+        console.log('🔄 Reja reactivada');
       }, 2000);
     }, 700);
   }
 
+  // Asignar eventos
   gateWrapper.addEventListener('click', abrirReja);
   gateWrapper.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirReja(e); }
   });
-  backBtn.addEventListener('click', cerrarReja);
+
+  if (backBtn) {
+    backBtn.addEventListener('click', cerrarReja);
+    console.log('✅ Evento click asignado a #back-link');
+  } else {
+    console.error('❌ No se pudo asignar evento porque #back-link no existe');
+  }
 });
