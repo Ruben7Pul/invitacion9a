@@ -39,12 +39,11 @@ const BRICK_TYPES = {
 };
 
 function getCrackImageSrc(brick) {
-  // Rutas relativas al documento juego1/index.html (un nivel arriba de "archivos/")
   if (brick.hits >= brick.maxHits) return null;
-  if (brick.maxHits === 2) return '../archivos/griet2.png';
+  if (brick.maxHits === 2) return 'archivos/griet2.png';
   if (brick.maxHits === 3) {
-    if (brick.hits === 2) return '../archivos/griet1.png';
-    if (brick.hits === 1) return '../archivos/griet2.png';
+    if (brick.hits === 2) return 'archivos/griet1.png';
+    if (brick.hits === 1) return 'archivos/griet2.png';
   }
   return null;
 }
@@ -151,7 +150,6 @@ export function initJuego(config, mobile = false) {
   const menuScoresBack = document.getElementById('menu-scores-back');
   const menuGameover = document.getElementById('menu-gameover');
   const gameoverScore = document.getElementById('gameover-score');
-  const gameoverThemeMsg = document.getElementById('gameover-theme-msg');
   const gameoverInputContainer = document.getElementById('gameover-input-container');
   const playerNameInput = document.getElementById('player-name-input');
   const gameoverSave = document.getElementById('gameover-save');
@@ -300,31 +298,6 @@ export function initJuego(config, mobile = false) {
   let pendingHighScore = false;
   let gameIsOpen = false;
 
-  // ========== MENSAJES TEMÁTICOS DE FIN DE JUEGO (XV años / Bella y Bestia) ==========
-  // Sube de nivel cada 10,000 puntos, con tope en 150,000.
-  const THEME_MESSAGES = [
-    'La rosa apenas empieza a florecer... ¡vuelve a intentarlo!',
-    'Como Bella cruzando el portón por primera vez: buen comienzo, sigue así.',
-    'El hechizo comienza a ceder ante ti. ¡Vas por buen camino!',
-    'Los candelabros del salón se encienden para acompañarte. ¡Bien hecho!',
-    'Bailas con la gracia de una quinceañera en su vals. ¡Sigue brillando!',
-    'La Bestia sonríe al ver tu talento. ¡Vas a medio camino!',
-    'Todo el castillo murmura tu nombre. ¡Vas impresionando!',
-    'Tu corona de XV brilla un poco más con cada punto. ¡Adelante!',
-    'Como en el cuento, la magia está de tu lado. ¡Vas muy arriba!',
-    'Los pétalos de la rosa encantada aún no caen: tu magia sigue viva.',
-    '¡Cien mil puntos! Dignos de una noche de gala en el gran salón.',
-    'Bailas como la propia Bella con su vestido dorado. ¡Espectacular!',
-    'El hechizo se rompe gracias a ti: puntaje digno de leyenda.',
-    'Toda la corte del castillo aplaude de pie. ¡Ya casi al tope!',
-    'A un paso de la perfección... una quinceañera legendaria.',
-    '🌹 ¡Puntaje máximo! Un final de cuento de hadas — fuiste el alma de esta fiesta encantada. ¡Feliz XV!'
-  ];
-  function getThemeMessage(score) {
-    const tier = Math.min(Math.floor(Math.max(score, 0) / 10000), THEME_MESSAGES.length - 1);
-    return THEME_MESSAGES[tier];
-  }
-
   // ========== FUNCIONES DEL MENÚ ==========
   function showMenu(showGameOver = false, score = 0) {
     paddleEl.style.visibility = 'hidden';
@@ -337,7 +310,6 @@ export function initJuego(config, mobile = false) {
       menuGameover.style.display = 'block';
       menuContent.style.display = 'none';
       gameoverScore.textContent = `Puntuación: ${score}`;
-      if (gameoverThemeMsg) gameoverThemeMsg.textContent = getThemeMessage(score);
       const statsEl = document.getElementById('gameover-stats');
       if (statsEl) statsEl.style.display = 'none';
 
@@ -415,24 +387,11 @@ export function initJuego(config, mobile = false) {
     menuContent.style.display = 'flex';
   });
 
-  // ========== BOTÓN SALIR – REGRESA A LA PARTE PRINCIPAL (no a la reja) ==========
+  // ========== BOTÓN SALIR – REDIRIGE A INDEX.HTML ==========
   menuExit.addEventListener('click', (e) => {
     e.stopPropagation();
     soundTap();
-    // Cortina de refuerzo: tapa la pantalla con la imagen de fondo antes de
-    // salir, para que la transición se vea limpia aunque algo tarde en cargar.
-    const veil = document.getElementById('loading-veil');
-    if (veil) {
-      veil.style.transition = 'none';
-      veil.style.display = 'block';
-      veil.classList.remove('hide');
-      void veil.offsetHeight; // fuerza a aplicar el cambio antes de navegar
-    }
-    // "?volver=1" le indica a index.html que debe mostrar directamente
-    // la parte principal (sin repetir la animación de la reja)
-    setTimeout(() => {
-      window.location.href = '../index.html?volver=1';
-    }, 220);
+    window.location.href = 'index.html';
   });
 
   menuRules.addEventListener('click', (e) => {
@@ -1700,3 +1659,5 @@ export function initJuego(config, mobile = false) {
   layoutStage();
   console.log('✅ Juego inicializado (completo y corregido)');
 }
+
+
