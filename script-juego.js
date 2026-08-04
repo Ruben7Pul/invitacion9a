@@ -1,7 +1,7 @@
 // ============================================================
 // script-juego.js – SCRIPT DEL JUEGO (independiente)
 // ============================================================
-console.log('🎮 script-juego.js cargado');
+console.log('🎮 script-juego.js cargado (con initSonidos)');
 
 const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
@@ -38,10 +38,18 @@ async function cargarConfig() {
 
 (async function init() {
   try {
+    // 1. Inicializar el motor de sonidos (esto activa el AudioContext)
+    const { initSonidos } = await import('../modules/sonidos.js');
+    initSonidos();
+
+    // 2. Cargar configuración
     const config = await cargarConfig();
-    const { initJuego } = await import('./modules/juego.js');
+
+    // 3. Iniciar el juego propiamente dicho
+    const { initJuego } = await import('../modules/juego.js');
     initJuego(config, isMobile);
-    console.log('✅ Juego iniciado correctamente');
+
+    console.log('✅ Juego iniciado correctamente con sonidos');
   } catch (e) {
     console.error('❌ Error al iniciar el juego:', e);
     // Mostrar error en pantalla
