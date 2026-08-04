@@ -80,15 +80,6 @@ export function initContador(config) {
     tickInterval = setInterval(tick, 1000);
   }
 
-  // Observar apertura/cierre del modal
-  const modalContador = document.getElementById('modal-contador');
-  if (modalContador) {
-    const observer = new MutationObserver(() => {
-      // No hacemos nada especial, el sonido se controla en tick()
-    });
-    observer.observe(modalContador, { attributes: true, attributeFilter: ['class'] });
-  }
-
   startTicking();
 
   window.addEventListener('beforeunload', () => {
