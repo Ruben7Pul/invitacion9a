@@ -70,13 +70,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const config = await cargarConfig();
   rellenarDatos(config);
 
-  // Cargar sonidos
+  // ===== CARGAR MÓDULOS LIGEROS AL INICIO =====
+  // Sonidos, música y modales se cargan ahora, no dentro de iniciarApp.
+  // Así los botones de navegación tienen eventos desde el principio.
+
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
     initSonidos();
   } catch (e) { console.error('❌ Sonidos:', e); }
 
-  // Cargar música
   try {
     const { initMusica, playMusic, toggleMusic, resetMusic } = await import('./modules/musica.js');
     initMusica(config);
@@ -85,27 +87,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.resetMusic = resetMusic;
   } catch (e) { console.error('❌ Música:', e); }
 
+  // ===== MODALES (ahora cargado al inicio) =====
+  try {
+    const { initModal } = await import('./modules/modal.js');
+    initModal();
+    console.log('✅ Modales inicializados');
+  } catch (e) { console.error('❌ Modal:', e); }
+
+  // ===== CONTADOR (solo se carga al abrir la reja para ahorrar recursos) =====
   let appIniciada = false;
-  async function iniciarApp() {
+  async function cargarContador() {
     if (appIniciada) return;
     appIniciada = true;
-
     try {
       const { initContador } = await import('./modules/contador.js');
       initContador(config);
     } catch (e) { console.error('❌ Contador:', e); }
-
-    try {
-      const { initModal } = await import('./modules/modal.js');
-      initModal();
-    } catch (e) { console.error('❌ Modal:', e); }
-
-    const muteBtn = document.getElementById('music-toggle');
-    if (muteBtn) {
-      muteBtn.addEventListener('click', () => {
-        if (window.toggleMusic) window.toggleMusic();
-      });
-    }
   }
 
   // ========== IR AL JUEGO ==========
@@ -131,7 +128,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     gateWrapper.classList.add('active');
     gateWrapper.classList.add('open');
     caption.classList.add('show');
-    iniciarApp();
+    cargarContador();
     if (window.playMusic) window.playMusic();
     history.replaceState(null, '', window.location.pathname);
     document.documentElement.classList.remove('sin-reja');
@@ -149,7 +146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     gateWrapper.classList.add('open');
     portal.classList.add('hide');
     app.classList.add('show');
-    iniciarApp();
+    cargarContador();
     if (window.playMusic) window.playMusic();
   }
 
@@ -185,35 +182,29 @@ document.addEventListener('DOMContentLoaded', async () => {
   backBtn.addEventListener('click', cerrarReja);
 
   // ============================================================
-  // 🌀 PARALLAX GLOBAL E INVERSO (reja + app principal)
+  // 🌀 PARALLAX GLOBAL CON TODOS LOS ELEMENTOS
   // ============================================================
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
 
-  // Elementos a mover: portal (cuando visible) y app (cuando visible)
-  // Usamos un contenedor común: el body o un wrapper, pero mejor mover cada sección por separado
-  // para que no se solapen los transforms con las animaciones.
-  // Vamos a mover: .portal-inner (todo el contenido de la reja) y #app-mid (zona central de la app)
-  // Además, moveremos ligeramente los botones de navegación para dar sensación de profundidad.
   const portalInner = document.querySelector('.portal-inner');
   const appMid = document.getElementById('app-mid');
   const nav = document.getElementById('nav');
+  const backLink = document.getElementById('back-link');
+  const musicToggle = document.getElementById('music-toggle');
+  const eyebrow = document.querySelector('#app-top .eyebrow');
 
-  // Función que aplica el desplazamiento con inversión (si mueves derecha, se desplaza izquierda)
   function applyParallax(x, y) {
-    // Invertimos el signo para efecto inverso
     const invertX = -x;
     const invertY = -y;
-    // Rango máximo ±18px para que sea sutil pero visible
     const maxOffset = 18;
     const offsetX = Math.min(Math.max(invertX, -maxOffset), maxOffset);
     const offsetY = Math.min(Math.max(invertY, -maxOffset), maxOffset);
 
-    // Aplicar a la reja si está visible
     if (!portal.classList.contains('hide') && portalInner) {
       portalInner.style.transform = `translate(${offsetX * 0.6}px, ${offsetY * 0.6}px)`;
     }
-    // Aplicar a la app si está visible
+
     if (app.classList.contains('show')) {
       if (appMid) {
         appMid.style.transform = `translate(${offsetX * 0.8}px, ${offsetY * 0.8}px)`;
@@ -221,15 +212,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (nav) {
         nav.style.transform = `translate(${offsetX * 0.4}px, ${offsetY * 0.4}px)`;
       }
-      // También mover el nombre y la frase ligeramente diferente para efecto de profundidad
       const nombre = document.getElementById('nombre-hero');
       const frase = document.getElementById('frase-texto');
       if (nombre) nombre.style.transform = `translate(${offsetX * 0.3}px, ${offsetY * 0.3}px)`;
       if (frase) frase.style.transform = `translate(${offsetX * 0.2}px, ${offsetY * 0.2}px)`;
+
+      if (backLink) backLink.style.transform = `translate(${offsetX * 0.5}px, ${offsetY * 0.5}px)`;
+      if (musicToggle) musicToggle.style.transform = `translate(${offsetX * 0.5}px, ${offsetY * 0.5}px)`;
+      if (eyebrow) eyebrow.style.transform = `translate(${offsetX * 0.3}px, ${offsetY * 0.3}px)`;
     }
   }
 
-  // Variables para suavizado
   let currentX = 0, currentY = 0;
   let targetX = 0, targetY = 0;
 
@@ -244,11 +237,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // --- Movimiento con mouse (escritorio) ---
   document.addEventListener('mousemove', (e) => {
-    // Solo si la reja o la app están visibles
     if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
-    const x = (e.clientX / window.innerWidth - 0.5) * 30; // rango ±15px
+    const x = (e.clientX / window.innerWidth - 0.5) * 30;
     const y = (e.clientY / window.innerHeight - 0.5) * 30;
     targetX = x;
     targetY = y;
@@ -257,29 +248,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // --- Movimiento con giroscopio (móvil) ---
   if (isMobile && hasGyro) {
-    // No pedimos permisos, solo escuchamos (en Android funciona)
     window.addEventListener('deviceorientation', handleOrientation);
   }
 
   function handleOrientation(e) {
     if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
-    const gamma = e.gamma || 0; // -90..90
-    const beta = e.beta || 0;   // -180..180
-    // Ajuste de sensibilidad: rango ±30px con factor 0.6
-    const x = (gamma / 90) * 30;  // ±30px
-    const y = ((beta - 45) / 90) * 30; // ±30px
+    const gamma = e.gamma || 0;
+    const beta = e.beta || 0;
+    const x = (gamma / 90) * 30;
+    const y = ((beta - 45) / 90) * 30;
     targetX = x;
     targetY = y;
     if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
       requestAnimationFrame(smoothParallax);
     }
   }
-
-  // Fallback: si no hay mouse ni giro, no pasa nada.
-  // Pero en móvil con giro, ya debería moverse.
-
-  // Nota: al cerrar la reja, el portal se oculta pero el parallax sigue activo en segundo plano.
-  // No afecta rendimiento.
 });
