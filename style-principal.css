@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS COMPLETOS (CON ÓVALO DEFINITIVO)
+   🌹 INVITACIÓN XV – ESTILOS COMPLETOS (CORREGIDO)
    ============================================================ */
 
 :root {
@@ -81,15 +81,12 @@ body {
   mix-blend-mode: screen;
 }
 
-/* ============================================================
-   TEXTO DORADO BRILLANTE
-   ============================================================ */
 .gold-text {
-  color: #fae3a0;
-  text-shadow: 0 0 10px rgba(212, 175, 55, 0.6), 0 0 20px rgba(212, 175, 55, 0.3), 0 0 40px rgba(212, 175, 55, 0.1);
+  color: var(--gold-light);
+  text-shadow: 0 0 8px rgba(201, 162, 77, 0.2);
 }
-.frase-inline, .fecha-fija, .portal-caption {
-  text-shadow: 0 0 10px rgba(212, 175, 55, 0.6), 0 0 20px rgba(212, 175, 55, 0.3);
+.frase-inline, .fecha-fija, .hint, .portal-caption {
+  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
 }
 
 /* ============================================================
@@ -190,7 +187,7 @@ body {
   font-size: 1rem;
   letter-spacing: 0.26em;
   text-transform: uppercase;
-  color: #fae3a0;
+  color: var(--gold-light);
   opacity: 0;
   transition: opacity 0.6s ease;
 }
@@ -291,17 +288,17 @@ html.sin-reja #app {
   container-name: tarjeta;
 }
 
-/* ===== ÓVALO DORADO (definitivamente vertical) ===== */
+/* ===== ÓVALO DORADO (vertical) ===== */
 #oval-wrap {
-  width: clamp(90px, 16cqw, 110px);
-  height: clamp(170px, 30cqw, 190px);
+  width: clamp(140px, 25cqw, 160px);   /* más estrecho */
+  height: clamp(200px, 35cqw, 230px);  /* más alto */
   margin-bottom: 0.2rem;
   position: relative;
 }
 .oval-mask {
   width: 100%;
   height: 100%;
-  border-radius: 50% !important;
+  border-radius: 50% / 60%; /* óvalo vertical pronunciado */
   overflow: hidden;
   border: 4px solid var(--gold);
   box-shadow: 0 0 30px rgba(201, 162, 77, 0.4);
@@ -314,21 +311,44 @@ html.sin-reja #app {
   display: block;
 }
 
-/* ===== FLOTACIÓN DEL ÓVALO (respaldo sin giroscopio) ===== */
-body.no-gyro #oval-wrap {
-  animation: floatOval 3s ease-in-out infinite;
+/* ===== TEXTO DORADO BRILLANTE ===== */
+.gold-brillante {
+  background: linear-gradient(90deg, #ffd700, #f5e6b8, #d4af37, #f5e6b8, #ffd700);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shineGold 4s linear infinite;
+  text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
 }
-@keyframes floatOval {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+@keyframes shineGold {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
 }
 
-/* ===== NOMBRE DE QUINCEAÑERA (siempre visible) ===== */
+/* Aplicar a frase, fecha y hint */
+.frase-inline,
+.fecha-fija,
+.hint {
+  font-style: italic;
+  text-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+  background: linear-gradient(90deg, #ffd700, #f5e6b8, #d4af37, #f5e6b8, #ffd700);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shineGold 4s linear infinite;
+}
+.frase-inline { font-size: clamp(1.2rem, 3.3cqw, 1.2rem); }
+.fecha-fija { font-size: clamp(1.3rem, 3.6cqw, 1.3rem); }
+.hint { font-size: clamp(1.2rem, 3.3cqw, 1.2rem); }
+
+/* (El nombre ya tiene su propia animación rainbow) */
 h1#nombre-hero {
   font-family: var(--script);
   font-weight: 400;
-  font-size: clamp(6rem, 17cqw, 6rem);
-  line-height: 1.2;
+  font-size: clamp(4.6rem, 13cqw, 4.6rem);
+  line-height: 1.1;
   margin: 0;
   cursor: pointer;
   background: linear-gradient(90deg, #ff0000, #ff8800, #ffd700, #00ff00, #0088ff, #8800ff, #ff0000);
@@ -338,58 +358,15 @@ h1#nombre-hero {
   color: transparent;
   animation: rainbowMove 4s linear infinite;
   user-select: none;
-  display: inline-block;
 }
 @keyframes rainbowMove {
   0% { background-position: 0% 50%; }
   100% { background-position: 300% 50%; }
 }
 
-/* ===== FLOTACIÓN DEL NOMBRE (respaldo sin giroscopio) ===== */
-body.no-gyro #nombre-hero {
-  animation: floatName 3s ease-in-out infinite;
-}
-@keyframes floatName {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
-}
-
-.frase-inline {
-  font-family: var(--serif-body);
-  font-style: italic;
-  font-size: clamp(1.2rem, 3.3cqw, 1.2rem);
-  line-height: 1.5;
-  margin: 0.1rem 0;
-  max-width: 34ch;
-  color: #fae3a0;
-  border-bottom: 1px solid rgba(201,162,77,0.25);
-  padding-bottom: 0.2rem;
-  text-shadow: 0 0 10px rgba(212, 175, 55, 0.6), 0 0 20px rgba(212, 175, 55, 0.3);
-}
-.frase-inline::before { content: "\201C"; color: #d4af37; }
-.frase-inline::after { content: "\201D"; color: #d4af37; }
-
-.fecha-fija {
-  font-family: var(--serif-body);
-  font-style: italic;
-  font-size: clamp(1.3rem, 3.6cqw, 1.3rem);
-  margin: 0.1rem 0;
-  color: #fae3a0;
-  text-shadow: 0 0 10px rgba(212, 175, 55, 0.6), 0 0 20px rgba(212, 175, 55, 0.3);
-  letter-spacing: 0.04em;
-}
-
-.hint {
-  font-size: clamp(0.9rem, 2.5cqw, 1rem);
-  opacity: 0.9;
-  margin: 0.2rem 0;
-  font-family: 'Cinzel', serif;
-  font-style: normal;
-  letter-spacing: 0.06em;
-  color: #fae3a0;
-  text-shadow: 0 0 10px rgba(212, 175, 55, 0.6), 0 0 20px rgba(212, 175, 55, 0.3);
-}
-
+/* ============================================================
+   NAVEGACIÓN
+   ============================================================ */
 #nav {
   width: 100%;
   max-width: 480px;
@@ -672,7 +649,7 @@ body.no-gyro #nombre-hero {
 }
 
 /* ============================================================
-   DETALLE CARD (LUGARES) - SIN HOVER BRILLANTE
+   DETALLE DE LUGARES (SIN HOVER BRILLANTE)
    ============================================================ */
 .detalle-card {
   background: rgba(10, 18, 34, 0.55);
@@ -681,6 +658,7 @@ body.no-gyro #nombre-hero {
   padding: 1rem 1.2rem 0.8rem;
   margin-bottom: 1rem;
   box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.03), 0 4px 20px rgba(0,0,0,0.4);
+  transition: border-color 0.3s, box-shadow 0.3s;
   position: relative;
 }
 .detalle-card::before {
@@ -704,8 +682,10 @@ body.no-gyro #nombre-hero {
   padding: 0 6px;
   transform: scaleX(-1);
 }
+/* QUITAMOS EL HOVER BRILLANTE */
 .detalle-card:hover {
-  /* sin efecto */
+  border-color: #b8860b;  /* mismo color que sin hover */
+  box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.03), 0 4px 20px rgba(0,0,0,0.4);
 }
 .detalle-card .icono {
   width: 34px;
@@ -779,6 +759,9 @@ body.no-gyro #nombre-hero {
 #modal-detalles .detalle-info .lugar { font-size: clamp(0.7rem, 2vw, 0.9rem); margin: 0.1rem 0; }
 #modal-detalles .btn-mapa { font-size: clamp(0.6rem, 1.6vw, 0.7rem); padding: 0.3rem 1rem; }
 
+/* ============================================================
+   FAMILIA
+   ============================================================ */
 .familia-grupo {
   background: rgba(10, 18, 34, 0.5);
   border: 2px solid #b8860b;
