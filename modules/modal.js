@@ -2,8 +2,6 @@ console.log('📦 modal.js (sin partículas)');
 
 import { soundOpen, soundClose, soundTap } from './sonidos.js';
 
-// No usamos partículas, así que eliminamos import y funciones relacionadas
-
 export function initModal() {
   document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
