@@ -85,12 +85,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.resetMusic = resetMusic;
   } catch (e) { console.error('❌ Música:', e); }
 
-  // Parallax 3D (solo celular, si el navegador lo permite)
-  try {
-    const { initParallax } = await import('./modules/parallax.js');
-    initParallax();
-  } catch (e) { console.error('❌ Parallax:', e); }
-
   let appIniciada = false;
   async function iniciarApp() {
     if (appIniciada) return;
@@ -137,6 +131,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     portal.classList.add('hide');
     app.classList.add('show');
     gateWrapper.classList.add('active');
+    gateWrapper.classList.add('open'); // Marcar como "abierto" para que la animación de cierre funcione
     caption.classList.add('show');
     iniciarApp();
     if (window.playMusic) window.playMusic();

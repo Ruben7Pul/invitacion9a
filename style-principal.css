@@ -121,14 +121,9 @@ body {
   perspective: 1000px;
   cursor: pointer;
   pointer-events: none;
-  animation: gateFloat 6s ease-in-out infinite;
 }
 .gate-wrapper.active {
   pointer-events: auto;
-}
-@keyframes gateFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
 }
 .gate-leaf {
   position: absolute;
@@ -262,15 +257,10 @@ html.sin-reja #app {
 }
 
 #oval-wrap {
-  width: clamp(148px, 26cqw, 148px);
-  height: clamp(232px, 41cqw, 232px);
+  width: clamp(170px, 30cqw, 170px);
+  height: clamp(221px, 39cqw, 221px);
   margin-bottom: 0.2rem;
   position: relative;
-  animation: ovalFloat 4.5s ease-in-out infinite;
-}
-@keyframes ovalFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
 }
 .oval-mask {
   width: 100%;
@@ -291,7 +281,7 @@ html.sin-reja #app {
 h1#nombre-hero {
   font-family: var(--script);
   font-weight: 400;
-  font-size: clamp(5.29rem, 14.95cqw, 5.29rem);
+  font-size: clamp(4.6rem, 13cqw, 4.6rem);
   line-height: 1.1;
   margin: 0;
   cursor: pointer;
@@ -300,17 +290,12 @@ h1#nombre-hero {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: rainbowMove 4s linear infinite, nameWave 5s ease-in-out infinite;
+  animation: rainbowMove 4s linear infinite;
   user-select: none;
 }
 @keyframes rainbowMove {
   0% { background-position: 0% 50%; }
   100% { background-position: 300% 50%; }
-}
-@keyframes nameWave {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  25% { transform: translateY(-5px) rotate(-1.2deg); }
-  75% { transform: translateY(5px) rotate(1.2deg); }
 }
 
 .frase-inline {
@@ -320,7 +305,7 @@ h1#nombre-hero {
   line-height: 1.5;
   margin: 0.1rem 0;
   max-width: 34ch;
-  color: var(--gold-light);
+  color: #f5e6c8;
   border-bottom: 1px solid rgba(201,162,77,0.25);
   padding-bottom: 0.2rem;
   text-shadow: 0 0 12px rgba(201,162,77,0.2);
@@ -339,15 +324,14 @@ h1#nombre-hero {
 }
 
 .hint {
-  font-size: clamp(0.85rem, 2.6vw, 0.85rem);
-  opacity: 0.95;
-  margin: 0.4rem 0 0.15rem;
-  font-family: var(--serif-display);
-  font-style: normal;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--gold-light);
-  text-shadow: 0 0 14px rgba(201,162,77,0.35);
+  font-size: clamp(1.2rem, 3.3cqw, 1.2rem);
+  opacity: 0.9;
+  margin: 0.2rem 0;
+  font-family: var(--serif-body);
+  font-style: italic;
+  letter-spacing: 0.04em;
+  color: #f5a0b0;
+  text-shadow: 0 0 18px rgba(245,160,176,0.3);
 }
 
 #nav {
@@ -666,6 +650,10 @@ h1#nombre-hero {
   padding: 0 6px;
   transform: scaleX(-1);
 }
+.detalle-card:hover {
+  border-color: #fae3a0;
+  box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.08), 0 4px 30px rgba(0,0,0,0.6);
+}
 .detalle-card .icono {
   width: 34px;
   height: 34px;
@@ -820,6 +808,11 @@ h1#nombre-hero {
   padding-top: 0.3rem;
 }
 
+  margin: 0.2rem 0 0;
+  border-top: 1px solid rgba(212, 175, 55, 0.08);
+  padding-top: 0.3rem;
+}
+
 /* ============================================================
    RESPONSIVE
    ============================================================ */
@@ -845,25 +838,3 @@ h1#nombre-hero {
 }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: rgba(201, 162, 77, 0.3); border-radius: 3px; }
-
-/* ============================================================
-   MODO PARALLAX (celular con giroscopio disponible)
-   Se activa por JS agregando .parallax-activo en <html>.
-   Se desactivan las animaciones "de reposo" (reja, óvalo, nombre)
-   y en su lugar .portal-inner y #app se mueven en conjunto
-   siguiendo la inclinación del dispositivo.
-   ============================================================ */
-html.parallax-activo #oval-wrap { animation: none !important; }
-html.parallax-activo .gate-wrapper { animation: none !important; }
-html.parallax-activo h1#nombre-hero { animation: rainbowMove 4s linear infinite !important; }
-html.parallax-activo .portal-inner,
-html.parallax-activo #app {
-  will-change: transform;
-  transform-style: preserve-3d;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  #oval-wrap, .gate-wrapper, h1#nombre-hero {
-    animation: none !important;
-  }
-}
