@@ -185,69 +185,104 @@ document.addEventListener('DOMContentLoaded', async () => {
   backBtn.addEventListener('click', cerrarReja);
 
   // ============================================================
-  // 🌀 PARALLAX EN LA REJA (CORREGIDO PARA MÓVIL)
+  // 🌀 PARALLAX DE CAPAS (con inversión de dirección)
   // ============================================================
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
 
-  // Función que aplica la traslación suave
-  function applyParallax(x, y) {
-    // Rango más amplio: ±20px para que se note bien en móvil
-    const maxOffset = 20;
-    const offsetX = Math.min(Math.max(x, -maxOffset), maxOffset);
-    const offsetY = Math.min(Math.max(y, -maxOffset), maxOffset);
-    gateWrapper.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+  // Elementos a los que aplicaremos parallax con distintas intensidades
+  const layers = [
+    { el: gateWrapper, factor: 1.2, invert: true },    // Reja: se mueve en dirección opuesta (invertida)
+    { el: document.getElementById('app-mid'), factor: 0.6, invert: false }, // Contenido central (nombre, imagen, etc.) se mueve en la misma dirección
+    { el: document.getElementById('nombre-hero'), factor: 0.8, invert: true }, // Nombre: movimiento opuesto y más pronunciado
+    { el: document.querySelector('.frase-inline'), factor: 0.4, invert: false },
+    { el: document.querySelector('.fecha-fija'), factor: 0.4, invert: false },
+    { el: document.querySelector('.hint'), factor: 0.3, invert: false },
+    { el: document.querySelector('#oval-wrap'), factor: 0.5, invert: true } // Imagen central: movimiento opuesto
+  ];
+
+  // Limpiar elementos nulos
+  const validLayers = layers.filter(l => l.el);
+
+  // Estado de cada capa
+  const layerStates = validLayers.map(() => ({ currentX: 0, currentY: 0, targetX: 0, targetY: 0 }));
+
+  // Función para actualizar una capa con suavizado
+  function updateLayer(index, x, y) {
+    const state = layerStates[index];
+    const layer = validLayers[index];
+    if (!layer) return;
+    const maxOffset = 20; // máximo desplazamiento en px (se ajusta con factor)
+    const offsetX = x * layer.factor * (layer.invert ? -1 : 1);
+    const offsetY = y * layer.factor * (layer.invert ? -1 : 1);
+    const clampedX = Math.min(Math.max(offsetX, -maxOffset), maxOffset);
+    const clampedY = Math.min(Math.max(offsetY, -maxOffset), maxOffset);
+    state.targetX = clampedX;
+    state.targetY = clampedY;
   }
 
-  let currentX = 0, currentY = 0;
-  let targetX = 0, targetY = 0;
-
-  function smoothParallax() {
-    currentX += (targetX - currentX) * 0.12;
-    currentY += (targetY - currentY) * 0.12;
-    if (Math.abs(currentX - targetX) > 0.01 || Math.abs(currentY - targetY) > 0.01) {
-      applyParallax(currentX, currentY);
-      requestAnimationFrame(smoothParallax);
-    } else {
-      applyParallax(targetX, targetY);
+  // Bucle de suavizado para todas las capas
+  function smoothAllLayers() {
+    let anyMoving = false;
+    for (let i = 0; i < validLayers.length; i++) {
+      const state = layerStates[i];
+      const layer = validLayers[i];
+      if (!layer) continue;
+      state.currentX += (state.targetX - state.currentX) * 0.12;
+      state.currentY += (state.targetY - state.currentY) * 0.12;
+      if (Math.abs(state.currentX - state.targetX) > 0.01 || Math.abs(state.currentY - state.targetY) > 0.01) {
+        anyMoving = true;
+      }
+      layer.el.style.transform = `translate(${state.currentX}px, ${state.currentY}px)`;
+    }
+    if (anyMoving) {
+      requestAnimationFrame(smoothAllLayers);
     }
   }
 
-  // --- Movimiento con mouse (escritorio) ---
+  // Variable para controlar que el bucle no se ejecute innecesariamente
+  let parallaxRunning = false;
+
+  function triggerParallax() {
+    if (!parallaxRunning) {
+      parallaxRunning = true;
+      requestAnimationFrame(smoothAllLayers);
+    }
+  }
+
+  // --- Movimiento con mouse ---
   document.addEventListener('mousemove', (e) => {
-    if (portal.classList.contains('hide')) return;
-    const x = (e.clientX / window.innerWidth - 0.5) * 30; // rango ±15px
-    const y = (e.clientY / window.innerHeight - 0.5) * 30;
-    targetX = x;
-    targetY = y;
-    if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
-      requestAnimationFrame(smoothParallax);
+    if (portal.classList.contains('hide') && !app.classList.contains('show')) {
+      // Si la reja está oculta y la app no está visible, no mover
+      return;
     }
+    const x = (e.clientX / window.innerWidth - 0.5) * 2; // valor entre -1 y 1
+    const y = (e.clientY / window.innerHeight - 0.5) * 2;
+    for (let i = 0; i < validLayers.length; i++) {
+      updateLayer(i, x, y);
+    }
+    triggerParallax();
   });
 
-  // --- Movimiento con giroscopio (móvil) ---
+  // --- Movimiento con giroscopio ---
   if (isMobile && hasGyro) {
-    // Sin pedir permisos: solo escuchamos el evento si ya está disponible.
-    // En Android funciona sin requestPermission; en iOS 13+ podría no funcionar
-    // si no se pide permiso, pero lo dejamos así para evitar alertas.
     window.addEventListener('deviceorientation', handleOrientation);
   }
 
   function handleOrientation(e) {
-    if (portal.classList.contains('hide')) return;
+    if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
     const gamma = e.gamma || 0; // -90..90
     const beta = e.beta || 0;   // -180..180
-    // Ajuste de sensibilidad: multiplicamos por 0.5 para que el rango sea ~±22px
-    // (gamma/90 * 40 = ±40, pero lo reducimos a ±20 con factor 0.5)
-    const x = (gamma / 90) * 30;  // ±30px máximo
-    const y = ((beta - 45) / 90) * 30; // ±30px máximo
-    targetX = x;
-    targetY = y;
-    if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
-      requestAnimationFrame(smoothParallax);
+    // Normalizar a -1..1 (gamma/90, beta/90)
+    const x = gamma / 90;
+    const y = (beta - 45) / 90;
+    for (let i = 0; i < validLayers.length; i++) {
+      updateLayer(i, x, y);
     }
+    triggerParallax();
   }
 
-  // Fallback: si no hay mouse ni giroscopio, no hacemos nada.
-  // Pero en móvil con giroscopio, ya debería funcionar.
+  // Iniciar el bucle de suavizado una vez para que esté listo
+  // (se ejecutará cuando haya cambios)
+  // No es necesario iniciarlo ahora, se iniciará con triggerParallax.
 });
