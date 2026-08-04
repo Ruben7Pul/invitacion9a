@@ -1,4 +1,4 @@
-console.log('🚀 script-principal www.js');
+console.log('🚀 script-principal.js');
 
 async function cargarConfig() {
   try {
@@ -177,56 +177,113 @@ document.addEventListener('DOMContentLoaded', async () => {
   backBtn.addEventListener('click', cerrarReja);
 
   // ============================================================
-  // 🌀 PARALLAX GLOBAL CON DETECCIÓN INTELIGENTE
+  // 🌀 PARALLAX POR CONTENEDORES + PAUSA EN MODALES
   // ============================================================
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
   let gyroWorking = false;
 
-  // Elementos a mover
-  const portalInner = document.querySelector('.portal-inner');
-  const appMid = document.getElementById('app-mid');
-  const nav = document.getElementById('nav');
-  const backLink = document.getElementById('back-link');
-  const musicToggle = document.getElementById('music-toggle');
-  const eyebrow = document.querySelector('#app-top .eyebrow');
+  // === Crear wrapper para la app (si no existe) ===
+  let appInner = document.getElementById('app-inner');
+  if (!appInner) {
+    appInner = document.createElement('div');
+    appInner.id = 'app-inner';
+    appInner.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      height: 100%;
+      max-width: 560px;
+      will-change: transform;
+    `;
+    while (app.firstChild) {
+      appInner.appendChild(app.firstChild);
+    }
+    app.appendChild(appInner);
+  }
 
+  const portalInner = document.querySelector('.portal-inner');
+  const videoApp = document.getElementById('video-app');
+  const videoPortal = document.getElementById('video-portal');
+
+  // Función para pausar/reanudar videos
+  function pausarVideos() {
+    if (videoApp && !videoApp.paused) videoApp.pause();
+    if (videoPortal && !videoPortal.paused) videoPortal.pause();
+    console.log('⏸️ Videos pausados por modal');
+  }
+
+  function reanudarVideos() {
+    if (videoApp && videoApp.paused) videoApp.play().catch(() => {});
+    if (videoPortal && videoPortal.paused) videoPortal.play().catch(() => {});
+    console.log('▶️ Videos reanudados');
+  }
+
+  // Observer para detectar apertura/cierre de modales
+  const modalObserver = new MutationObserver((mutations) => {
+    let modalAbierto = false;
+    for (const mutation of mutations) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+        const target = mutation.target;
+        if (target.classList.contains('modal-overlay')) {
+          if (target.classList.contains('open')) {
+            modalAbierto = true;
+            break;
+          }
+        }
+      }
+    }
+    // Verificar si algún modal está abierto
+    const hayModalAbierto = document.querySelector('.modal-overlay.open') !== null;
+    if (hayModalAbierto) {
+      pausarVideos();
+    } else {
+      reanudarVideos();
+    }
+  });
+
+  // Observar todos los modales existentes y futuros
+  document.querySelectorAll('.modal-overlay').forEach(el => {
+    modalObserver.observe(el, { attributes: true, attributeFilter: ['class'] });
+  });
+
+  // También observar nuevos modales que se añadan dinámicamente
+  const bodyObserver = new MutationObserver(() => {
+    document.querySelectorAll('.modal-overlay:not([data-observed])').forEach(el => {
+      el.setAttribute('data-observed', 'true');
+      modalObserver.observe(el, { attributes: true, attributeFilter: ['class'] });
+    });
+  });
+  bodyObserver.observe(document.body, { childList: true, subtree: true });
+
+  // === Parallax ===
   function applyParallax(x, y) {
+    // Si hay un modal abierto, NO aplicar parallax
+    if (document.querySelector('.modal-overlay.open')) return;
+
     const invertX = -x;
     const invertY = -y;
     const maxOffset = 18;
     const offsetX = Math.min(Math.max(invertX, -maxOffset), maxOffset);
     const offsetY = Math.min(Math.max(invertY, -maxOffset), maxOffset);
 
-    // --- REJA ---
+    // 1. Reja
     if (!portal.classList.contains('hide') && portalInner) {
       portalInner.style.transform = `translate(${offsetX * 0.6}px, ${offsetY * 0.6}px)`;
     }
 
-    // --- APP PRINCIPAL ---
-    if (app.classList.contains('show')) {
-      if (appMid) {
-        appMid.style.transform = `translate(${offsetX * 0.8}px, ${offsetY * 0.8}px)`;
-      }
-      if (nav) {
-        nav.style.transform = `translate(${offsetX * 0.4}px, ${offsetY * 0.4}px)`;
-      }
-      const nombre = document.getElementById('nombre-hero');
-      const frase = document.getElementById('frase-texto');
-      if (nombre) nombre.style.transform = `translate(${offsetX * 0.3}px, ${offsetY * 0.3}px)`;
-      if (frase) frase.style.transform = `translate(${offsetX * 0.2}px, ${offsetY * 0.2}px)`;
-
-      if (backLink) backLink.style.transform = `translate(${offsetX * 0.5}px, ${offsetY * 0.5}px)`;
-      if (musicToggle) musicToggle.style.transform = `translate(${offsetX * 0.5}px, ${offsetY * 0.5}px)`;
-      if (eyebrow) eyebrow.style.transform = `translate(${offsetX * 0.3}px, ${offsetY * 0.3}px)`;
+    // 2. App
+    if (app.classList.contains('show') && appInner) {
+      appInner.style.transform = `translate(${offsetX * 0.6}px, ${offsetY * 0.6}px)`;
     }
 
-    // ===== MODALES: mover .modal-card usando left/top para no interferir con scale =====
-    document.querySelectorAll('.modal-overlay.open .modal-card').forEach(card => {
-      // Usamos left y top (position: relative) en lugar de transform
-      card.style.left = `${offsetX * 0.8}px`;
-      card.style.top = `${offsetY * 0.8}px`;
-    });
+    // 3. Modales (solo se mueven si están abiertos, pero como ya salimos si hay modal, no se mueven)
+    // Dejamos esta parte comentada: los modales no se mueven mientras están abiertos
+    // document.querySelectorAll('.modal-overlay.open').forEach(overlay => {
+    //   overlay.style.transform = `translate(${offsetX * 0.5}px, ${offsetY * 0.5}px)`;
+    // });
   }
 
   let currentX = 0, currentY = 0;
@@ -258,24 +315,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // --- Giroscopio (móvil) ---
   if (isMobile && hasGyro) {
-    // Listener de prueba para detectar si funciona
     const gyroTest = (e) => {
       if (e.gamma !== null || e.beta !== null) {
         gyroWorking = true;
         console.log('✅ Giroscopio detectado y funcionando');
         window.removeEventListener('deviceorientation', gyroTest);
-        // Ahora el listener principal
         window.addEventListener('deviceorientation', handleOrientation);
       }
     };
     window.addEventListener('deviceorientation', gyroTest);
 
-    // Timeout: si en 3 segundos no se recibe evento, asumimos que no funciona
     setTimeout(() => {
       if (!gyroWorking) {
         console.log('⚠️ Giroscopio no responde, se usará mouse como respaldo');
         window.removeEventListener('deviceorientation', gyroTest);
-        // No añadimos handleOrientation, el mouse seguirá activo
       }
     }, 3000);
   }
@@ -292,5 +345,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       requestAnimationFrame(smoothParallax);
     }
   }
-});
 
+  // Al inicio, si hay algún modal abierto (por ejemplo, al volver del juego), pausar videos
+  if (document.querySelector('.modal-overlay.open')) {
+    pausarVideos();
+  }
+});
