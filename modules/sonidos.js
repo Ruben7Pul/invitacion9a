@@ -1,98 +1,104 @@
-console.log('📦 sonidos optimizados (buffers)');
+console.log('📦 contador.js (con sonido de tick)');
 
-let audioCtx = null;
-let soundBuffers = {};
-let soundEnabled = true;
+let tickAudioCtx = null;
+let tickInterval = null;
+let lastTick = 0;
 
-export function ensureAudioCtx() {
+function createTickSound() {
   try {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    // Generar un "tick" metálico con dos tonos cortos
+    const duration = 0.04;
+    const buffer = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      const t = i / ctx.sampleRate;
+      // Frecuencia principal 1200 Hz con decaimiento rápido
+      const freq1 = 1200 + Math.sin(t * 200) * 200;
+      const amp = Math.exp(-t * 80) * 0.15;
+      data[i] = Math.sin(2 * Math.PI * freq1 * t) * amp;
+      // Añadir un pequeño armónico para darle "metal"
+      data[i] += Math.sin(2 * Math.PI * (freq1 * 1.7) * t) * amp * 0.3;
     }
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    return audioCtx;
+    return { ctx, buffer };
   } catch (e) {
-    soundEnabled = false;
+    console.warn('⚠️ No se pudo crear el sonido de tick:', e);
     return null;
   }
 }
 
-function createSoundBuffer(ctx, freqs, dur) {
-  const sampleRate = ctx.sampleRate;
-  const length = Math.floor(sampleRate * dur * 1.5);
-  const buffer = ctx.createBuffer(1, length, sampleRate);
-  const data = buffer.getChannelData(0);
-  const totalFreqs = freqs.length;
-  for (let i = 0; i < length; i++) {
-    let t = i / sampleRate;
-    let value = 0;
-    for (let f = 0; f < totalFreqs; f++) {
-      const freq = freqs[f];
-      const startDelay = f * 0.04;
-      if (t >= startDelay) {
-        const envelope = Math.exp(-6 * (t - startDelay) / dur) * 0.3;
-        value += Math.sin(2 * Math.PI * freq * (t - startDelay)) * envelope;
-      }
-    }
-    data[i] = value / totalFreqs;
+function playTick() {
+  if (!tickAudioCtx) {
+    const sound = createTickSound();
+    if (!sound) return;
+    tickAudioCtx = sound.ctx;
+    tickAudioCtx.buffer = sound.buffer;
   }
-  return buffer;
-}
-
-function preloadSounds() {
-  const ctx = ensureAudioCtx();
-  if (!ctx) return;
-  const soundDefs = {
-    tap: { freqs: [1046, 1568], dur: 0.25 },
-    brick: { freqs: [1200 + Math.random()*400], dur: 0.15 },
-    lose: { freqs: [392, 330], dur: 0.4 },
-    open: { freqs: [880, 1318, 1760], dur: 0.4 },
-    close: { freqs: [1318, 880], dur: 0.3 },
-    win: { freqs: [784, 988, 1175, 1568], dur: 0.6 },
-    clay: { freqs: [600, 800], dur: 0.15 },
-    wood: { freqs: [400, 500, 300], dur: 0.25 },
-    iron: { freqs: [200, 250, 300, 350], dur: 0.3 },
-    tick: { freqs: [800, 1200], dur: 0.08 } // Sonido tick del contador
-  };
-  for (const [name, def] of Object.entries(soundDefs)) {
-    soundBuffers[name] = createSoundBuffer(ctx, def.freqs, def.dur);
-  }
-}
-
-function playSound(name) {
-  if (!soundEnabled) return;
   try {
-    const ctx = ensureAudioCtx();
-    if (!ctx) return;
-    const buffer = soundBuffers[name];
-    if (!buffer) return;
-    const source = ctx.createBufferSource();
-    source.buffer = buffer;
-    const gain = ctx.createGain();
-    gain.gain.value = 0.5;
-    source.connect(gain).connect(ctx.destination);
+    const source = tickAudioCtx.createBufferSource();
+    source.buffer = tickAudioCtx.buffer;
+    const gain = tickAudioCtx.createGain();
+    gain.gain.value = 0.4;
+    source.connect(gain).connect(tickAudioCtx.destination);
     source.start();
   } catch (e) {
-    soundEnabled = false;
+    // silencio
   }
 }
 
-export const soundTap = () => playSound('tap');
-export const soundBrick = () => playSound('brick');
-export const soundLose = () => playSound('lose');
-export const soundOpen = () => playSound('open');
-export const soundClose = () => playSound('close');
-export const soundWin = () => playSound('win');
-export const soundClay = () => playSound('clay');
-export const soundWood = () => playSound('wood');
-export const soundIron = () => playSound('iron');
-export const soundTick = () => playSound('tick'); // Exportar tick
+export function initContador(config) {
+  console.log('🕒 Iniciando contador con fecha:', config.fechaISO);
+  const target = new Date(config.fechaISO).getTime();
+  if (isNaN(target)) {
+    console.error('❌ Fecha inválida');
+    document.getElementById('clock').innerHTML = '<p style="color:#ff9999;">Error: fecha inválida.</p>';
+    return;
+  }
 
-export function initSonidos() {
-  document.addEventListener('click', () => {
-    const ctx = ensureAudioCtx();
-    if (ctx && Object.keys(soundBuffers).length === 0) {
-      preloadSounds();
+  const els = {
+    d: document.getElementById('d'),
+    h: document.getElementById('h'),
+    m: document.getElementById('m'),
+    s: document.getElementById('s')
+  };
+  const clockEl = document.getElementById('clock');
+  const modalContador = document.getElementById('modal-contador');
+
+  function tick() {
+    const diff = target - Date.now();
+    if (diff <= 0) {
+      clockEl.style.display = 'none';
+      if (document.getElementById('contador-terminado')) {
+        document.getElementById('contador-terminado').style.display = 'block';
+      }
+      clearInterval(tickInterval);
+      return;
     }
-  }, { once: true });
+    els.d.textContent = String(Math.floor(diff / 86400000)).padStart(2, '0');
+    els.h.textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
+    els.m.textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+    els.s.textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+
+    // Reproducir tick solo si el modal de contador está abierto
+    if (modalContador && modalContador.classList.contains('open')) {
+      playTick();
+    }
+  }
+
+  tick();
+  tickInterval = setInterval(tick, 1000);
+
+  // Detener el sonido al cerrar el modal (opcional)
+  // No es necesario porque playTick solo se ejecuta si está abierto.
+  // Pero podemos liberar el contexto cuando se cierra para ahorrar recursos.
+  // Usamos un observer para detectar cuando se cierra.
+  if (modalContador) {
+    const observer = new MutationObserver(() => {
+      if (!modalContador.classList.contains('open')) {
+        // Si se cierra, no hacemos nada, el tick no se reproducirá.
+        // Podríamos suspender el contexto, pero mejor dejarlo.
+      }
+    });
+    observer.observe(modalContador, { attributes: true, attributeFilter: ['class'] });
+  }
 }
