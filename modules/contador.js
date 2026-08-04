@@ -1,38 +1,45 @@
-console.log('📦 contador.js (con sonido de reloj)');
+console.log('📦 contador.js (con sonido de tick)');
 
-let audioCtx = null;
+let tickAudioCtx = null;
 let tickInterval = null;
+let lastTick = 0;
 
 function createTickSound() {
   try {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const duration = 0.04;
+    const buffer = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      const t = i / ctx.sampleRate;
+      const freq1 = 1200 + Math.sin(t * 200) * 200;
+      const amp = Math.exp(-t * 80) * 0.15;
+      data[i] = Math.sin(2 * Math.PI * freq1 * t) * amp;
+      data[i] += Math.sin(2 * Math.PI * (freq1 * 1.7) * t) * amp * 0.3;
     }
-    const now = audioCtx.currentTime;
-    // Tic
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(1200, now);
-    gain.gain.setValueAtTime(0.15, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start(now);
-    osc.stop(now + 0.08);
-    // Tac
-    const osc2 = audioCtx.createOscillator();
-    const gain2 = audioCtx.createGain();
-    osc2.type = 'sine';
-    osc2.frequency.setValueAtTime(900, now + 0.05);
-    gain2.gain.setValueAtTime(0.12, now + 0.05);
-    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
-    osc2.connect(gain2);
-    gain2.connect(audioCtx.destination);
-    osc2.start(now + 0.05);
-    osc2.stop(now + 0.13);
+    return { ctx, buffer };
   } catch (e) {
-    // Silenciar
+    console.warn('⚠️ No se pudo crear el sonido de tick:', e);
+    return null;
+  }
+}
+
+function playTick() {
+  if (!tickAudioCtx) {
+    const sound = createTickSound();
+    if (!sound) return;
+    tickAudioCtx = sound.ctx;
+    tickAudioCtx.buffer = sound.buffer;
+  }
+  try {
+    const source = tickAudioCtx.createBufferSource();
+    source.buffer = tickAudioCtx.buffer;
+    const gain = tickAudioCtx.createGain();
+    gain.gain.value = 0.4;
+    source.connect(gain).connect(tickAudioCtx.destination);
+    source.start();
+  } catch (e) {
+    // silencio
   }
 }
 
@@ -52,13 +59,15 @@ export function initContador(config) {
     s: document.getElementById('s')
   };
   const clockEl = document.getElementById('clock');
-  const doneEl = document.getElementById('contador-terminado');
+  const modalContador = document.getElementById('modal-contador');
 
   function tick() {
     const diff = target - Date.now();
     if (diff <= 0) {
       clockEl.style.display = 'none';
-      if (doneEl) doneEl.style.display = 'block';
+      if (document.getElementById('contador-terminado')) {
+        document.getElementById('contador-terminado').style.display = 'block';
+      }
       clearInterval(tickInterval);
       return;
     }
@@ -66,23 +75,21 @@ export function initContador(config) {
     els.h.textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
     els.m.textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
     els.s.textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
-    
-    // Sonido solo si el modal está abierto
-    const modal = document.getElementById('modal-contador');
-    if (modal && modal.classList.contains('open')) {
-      createTickSound();
+
+    if (modalContador && modalContador.classList.contains('open')) {
+      playTick();
     }
   }
 
-  function startTicking() {
-    if (tickInterval) clearInterval(tickInterval);
-    tick();
-    tickInterval = setInterval(tick, 1000);
+  tick();
+  tickInterval = setInterval(tick, 1000);
+
+  if (modalContador) {
+    const observer = new MutationObserver(() => {
+      if (!modalContador.classList.contains('open')) {
+        // silencio
+      }
+    });
+    observer.observe(modalContador, { attributes: true, attributeFilter: ['class'] });
   }
-
-  startTicking();
-
-  window.addEventListener('beforeunload', () => {
-    if (tickInterval) clearInterval(tickInterval);
-  });
 }
