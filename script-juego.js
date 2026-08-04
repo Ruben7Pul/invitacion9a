@@ -41,7 +41,6 @@ async function cargarConfig() {
     console.log('✅ Juego iniciado correctamente');
   } catch (e) {
     console.error('❌ Error al iniciar el juego:', e);
-    // Mostrar error en pantalla
     const body = document.body;
     body.innerHTML = `
       <div style="display:flex; align-items:center; justify-content:center; height:100vh; background:#0e0a18; color:#ff6b6b; font-family:'Cinzel',serif; text-align:center; padding:2rem;">
