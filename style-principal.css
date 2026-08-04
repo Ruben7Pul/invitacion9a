@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS COMPLETOS
+   🌹 INVITACIÓN XV – ESTILOS COMPLETOS (CON IMAGEN OPTIMIZADA)
    ============================================================ */
 
 :root {
@@ -27,6 +27,9 @@ body {
   font-size: clamp(16px, 2.2vw, 20px);
 }
 
+/* ============================================================
+   FONDO CON IMAGEN OPTIMIZADA (bella.jpg)
+   ============================================================ */
 #bg {
   position: fixed;
   inset: 0;
@@ -34,8 +37,11 @@ body {
   background: var(--bg-deep);
   background-image: url('archivos/bella.jpg');
   background-size: cover;
-  background-position: center;
   background-repeat: no-repeat;
+  background-position: 50% 35%; /* punto focal: centrado horizontal, 35% vertical (rostro) */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  will-change: transform;
 }
 #bg::after {
   content: '';
@@ -44,6 +50,17 @@ body {
   background: rgba(0, 0, 0, 0.35);
 }
 
+/* Ajuste para móviles verticales */
+@media (max-width: 768px) and (orientation: portrait) {
+  #bg {
+    background-position: 50% 30%;
+    background-size: auto 120%;
+  }
+}
+
+/* ============================================================
+   VIDEOS
+   ============================================================ */
 #video-app, #video-portal {
   position: fixed;
   top: 0;
@@ -490,11 +507,7 @@ h1#nombre-hero {
   transform: scale(0.95);
   opacity: 0;
   transition: transform 0.2s ease, opacity 0.2s ease;
-  box-shadow: 
-    0 0 0 2px rgba(184, 134, 11, 0.2),
-    0 0 0 6px rgba(26, 42, 70, 0.5),
-    0 0 50px rgba(184, 134, 11, 0.12),
-    inset 0 0 60px rgba(25, 50, 100, 0.15);
+  box-shadow: 0 0 0 2px rgba(184, 134, 11, 0.2), 0 0 0 6px rgba(26, 42, 70, 0.5), 0 0 50px rgba(184, 134, 11, 0.12), inset 0 0 60px rgba(25, 50, 100, 0.15);
   z-index: 1;
   -webkit-overflow-scrolling: touch;
 }
