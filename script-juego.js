@@ -3,10 +3,6 @@
 // ============================================================
 console.log('🎮 script-juego.js cargado');
 
-const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-// script-juego.js se ejecuta ahora desde /juego1/index.html, por lo que
-// config.json y los archivos de audio viven un nivel arriba ("../").
 async function cargarConfig() {
   try {
     const res = await fetch(`../config.json?t=${Date.now()}`);
@@ -40,7 +36,8 @@ async function cargarConfig() {
   try {
     const config = await cargarConfig();
     const { initJuego } = await import('./modules/juego.js');
-    initJuego(config, isMobile);
+    // Forzar mobile = false para que siempre use configuraciones estándar
+    initJuego(config, false);
     console.log('✅ Juego iniciado correctamente');
   } catch (e) {
     console.error('❌ Error al iniciar el juego:', e);
