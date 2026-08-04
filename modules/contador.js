@@ -1,6 +1,4 @@
-console.log('📦 contador.js con sonido tick');
-
-import { soundTap } from './sonidos.js';
+console.log('📦 contador.js');
 
 export function initContador(config) {
   console.log('🕒 Iniciando contador con fecha:', config.fechaISO);
@@ -20,7 +18,17 @@ export function initContador(config) {
   const clockEl = document.getElementById('clock');
   const doneEl = document.getElementById('contador-terminado');
 
-  let lastSecond = -1;
+  // Cargar sonido tick
+  let soundTick = null;
+  async function loadTickSound() {
+    try {
+      const { soundTap } = await import('./sonidos.js');
+      soundTick = soundTap;
+    } catch (e) {
+      console.warn('Sonido tick no disponible:', e);
+    }
+  }
+  loadTickSound();
 
   function tick() {
     const diff = target - Date.now();
@@ -30,15 +38,15 @@ export function initContador(config) {
       clearInterval(timer);
       return;
     }
-    const seconds = Math.floor(diff / 1000);
-    if (seconds !== lastSecond) {
-      lastSecond = seconds;
-      soundTap(); // Sonido cada segundo
-    }
     els.d.textContent = String(Math.floor(diff / 86400000)).padStart(2, '0');
     els.h.textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
     els.m.textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
     els.s.textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+
+    // Reproducir sonido cada segundo
+    if (soundTick) {
+      try { soundTick(); } catch (e) {}
+    }
   }
   tick();
   const timer = setInterval(tick, 1000);
