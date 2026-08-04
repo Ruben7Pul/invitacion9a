@@ -136,6 +136,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (window.playMusic) window.playMusic();
     // Deja la URL limpia: https://.../invitacion9a/
     history.replaceState(null, '', window.location.pathname);
+    // Ya cumplió su función (evitar el parpadeo de la reja). La quitamos
+    // para que el botón de "volver a la reja" funcione con normalidad.
+    document.documentElement.classList.remove('sin-reja');
   } else {
     gateWrapper.classList.remove('active');
     caption.classList.remove('show');
