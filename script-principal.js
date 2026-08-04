@@ -159,22 +159,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (window.playMusic) window.playMusic();
   }
 
+  // ===== CORRECCIÓN DE LA FUNCIÓN cerrarReja =====
   function cerrarReja(e) {
     if (e) e.stopPropagation();
+
+    // 1. Oculta la aplicación principal
     app.classList.remove('show');
+
+    // 2. Muestra el portal (quitamos 'hide') y añadimos la clase 'closing' para iniciar la animación de cierre
     portal.classList.remove('hide');
     portal.classList.add('closing');
-    gateWrapper.classList.remove('open');
+
+    // 3. NO quitamos 'open' ahora; las puertas deben permanecer abiertas mientras se ejecuta la animación
+
+    // 4. Detener música si estaba sonando
     if (window.resetMusic) window.resetMusic();
-    setTimeout(() => {
-      portal.classList.remove('closing');
-    }, 700);
+
+    // 5. Ocultar el caption temporalmente
     caption.classList.remove('show');
     gateWrapper.classList.remove('active');
+
+    // 6. Esperar a que termine la animación (0.7s) para quitar 'open' y 'closing'
     setTimeout(() => {
-      caption.classList.add('show');
-      gateWrapper.classList.add('active');
-    }, 2000);
+      gateWrapper.classList.remove('open');
+      portal.classList.remove('closing');
+
+      // 7. Reactivar la reja y mostrar el caption después de un breve retraso
+      setTimeout(() => {
+        caption.classList.add('show');
+        gateWrapper.classList.add('active');
+      }, 2000);
+    }, 700);
   }
 
   gateWrapper.addEventListener('click', abrirReja);
