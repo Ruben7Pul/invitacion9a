@@ -1,6 +1,4 @@
-console.log('🚀 script-principal.js (carga perezosa del juego en iframe)');
-
-const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
+console.log('🚀 script-principal.js');
 
 async function cargarConfig() {
   try {
@@ -87,12 +85,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.resetMusic = resetMusic;
   } catch (e) { console.error('❌ Música:', e); }
 
-  // Cargar pétalos (optimizados)
-  try {
-    const { initParticulas } = await import('./modules/particulas.js');
-    initParticulas(isMobile);
-  } catch (e) { console.error('❌ Partículas:', e); }
-
   let appIniciada = false;
   async function iniciarApp() {
     if (appIniciada) return;
@@ -117,31 +109,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // ========== CARGA PEREZOSA DEL JUEGO EN IFRAME ==========
-  let juegoCargado = false;
+  // ========== IR AL JUEGO (navegación real, cambia la URL) ==========
   const nombreEl = document.getElementById('nombre-hero');
-  nombreEl.addEventListener('click', async () => {
-    if (juegoCargado) return;
-    juegoCargado = true;
-    
-    // Crear y mostrar iframe con el juego
-    let gameIframe = document.getElementById('game-iframe');
-    if (!gameIframe) {
-      gameIframe = document.createElement('iframe');
-      gameIframe.id = 'game-iframe';
-      gameIframe.src = 'juegos1.html';
-      gameIframe.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 1000;
-        border: none;
-        background: #0a0a0a;
-      `;
-      document.body.appendChild(gameIframe);
-    }
+  nombreEl.addEventListener('click', () => {
+    window.location.href = 'juego1/';
   });
 
   // ========== REJA ==========
@@ -151,13 +122,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   const backBtn = document.getElementById('back-link');
   const caption = document.querySelector('.portal-caption');
 
-  gateWrapper.classList.remove('active');
-  caption.classList.remove('show');
+  // ¿Venimos de "Salir" en el juego? Si es así, mostramos directamente
+  // la parte principal (sin la reja) y limpiamos la URL.
+  const params = new URLSearchParams(window.location.search);
+  const volviendoDelJuego = params.get('volver') === '1';
 
-  setTimeout(() => {
-    caption.classList.add('show');
+  if (volviendoDelJuego) {
+    portal.classList.add('hide');
+    app.classList.add('show');
     gateWrapper.classList.add('active');
-  }, 2000);
+    gateWrapper.classList.add('open'); // Marcar como "abierto" para que la animación de cierre funcione
+    caption.classList.add('show');
+    iniciarApp();
+    if (window.playMusic) window.playMusic();
+    // Deja la URL limpia: https://.../invitacion9a/
+    history.replaceState(null, '', window.location.pathname);
+    // Ya cumplió su función (evitar el parpadeo de la reja). La quitamos
+    // para que el botón de "volver a la reja" funcione con normalidad.
+    document.documentElement.classList.remove('sin-reja');
+  } else {
+    gateWrapper.classList.remove('active');
+    caption.classList.remove('show');
+
+    setTimeout(() => {
+      caption.classList.add('show');
+      gateWrapper.classList.add('active');
+    }, 2000);
+  }
 
   function abrirReja(e) {
     if (e) e.stopPropagation();
