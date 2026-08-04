@@ -9,9 +9,12 @@ export function ensureAudioCtx() {
     if (!audioCtx) {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
-    if (audioCtx.state === 'suspended') audioCtx.resume();
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {});
+    }
     return audioCtx;
   } catch (e) {
+    console.warn('⚠️ No se pudo crear AudioContext:', e);
     soundEnabled = false;
     return null;
   }
@@ -42,9 +45,10 @@ function createSoundBuffer(ctx, freqs, dur) {
 function preloadSounds() {
   const ctx = ensureAudioCtx();
   if (!ctx) return;
+  
   const soundDefs = {
     tap: { freqs: [1046, 1568], dur: 0.25 },
-    brick: { freqs: [1200 + Math.random()*400], dur: 0.15 },
+    brick: { freqs: [1200], dur: 0.15 },
     lose: { freqs: [392, 330], dur: 0.4 },
     open: { freqs: [880, 1318, 1760], dur: 0.4 },
     close: { freqs: [1318, 880], dur: 0.3 },
@@ -60,9 +64,11 @@ function preloadSounds() {
     game_over: { freqs: [440, 370, 330, 294], dur: 0.6 },
     paddle_hit: { freqs: [1200, 900], dur: 0.08 }
   };
+  
   for (const [name, def] of Object.entries(soundDefs)) {
     soundBuffers[name] = createSoundBuffer(ctx, def.freqs, def.dur);
   }
+  console.log('✅ Sonidos precargados:', Object.keys(soundBuffers).length);
 }
 
 function playSound(name) {
@@ -71,7 +77,39 @@ function playSound(name) {
     const ctx = ensureAudioCtx();
     if (!ctx) return;
     const buffer = soundBuffers[name];
-    if (!buffer) return;
+    if (!buffer) {
+      // Si el sonido no está precargado, lo creamos sobre la marcha
+      const defs = {
+        tap: { freqs: [1046, 1568], dur: 0.25 },
+        brick: { freqs: [1200], dur: 0.15 },
+        lose: { freqs: [392, 330], dur: 0.4 },
+        open: { freqs: [880, 1318, 1760], dur: 0.4 },
+        close: { freqs: [1318, 880], dur: 0.3 },
+        win: { freqs: [784, 988, 1175, 1568], dur: 0.6 },
+        clay: { freqs: [600, 800], dur: 0.15 },
+        wood: { freqs: [400, 500, 300], dur: 0.25 },
+        iron: { freqs: [200, 250, 300, 350], dur: 0.3 },
+        powerup_good: { freqs: [988, 1318, 1760], dur: 0.3 },
+        powerup_bad: { freqs: [440, 370, 330], dur: 0.4 },
+        extra_life: { freqs: [880, 1175, 1568, 2093], dur: 0.5 },
+        blue_ball: { freqs: [523, 659, 784, 988, 1175], dur: 0.6 },
+        wall_hit: { freqs: [880, 660], dur: 0.1 },
+        game_over: { freqs: [440, 370, 330, 294], dur: 0.6 },
+        paddle_hit: { freqs: [1200, 900], dur: 0.08 }
+      };
+      const def = defs[name];
+      if (!def) return;
+      soundBuffers[name] = createSoundBuffer(ctx, def.freqs, def.dur);
+      const newBuffer = soundBuffers[name];
+      if (!newBuffer) return;
+      const source = ctx.createBufferSource();
+      source.buffer = newBuffer;
+      const gain = ctx.createGain();
+      gain.gain.value = 0.5;
+      source.connect(gain).connect(ctx.destination);
+      source.start();
+      return;
+    }
     const source = ctx.createBufferSource();
     source.buffer = buffer;
     const gain = ctx.createGain();
@@ -79,6 +117,7 @@ function playSound(name) {
     source.connect(gain).connect(ctx.destination);
     source.start();
   } catch (e) {
+    console.warn('⚠️ Error reproduciendo sonido:', e);
     soundEnabled = false;
   }
 }
@@ -101,9 +140,18 @@ export const soundGameOver = () => playSound('game_over');
 export const soundPaddleHit = () => playSound('paddle_hit');
 
 export function initSonidos() {
+  // Precargar sonidos inmediatamente
+  setTimeout(() => {
+    preloadSounds();
+  }, 100);
+  
+  // También al hacer clic (por si el contexto está suspendido)
   document.addEventListener('click', () => {
     const ctx = ensureAudioCtx();
-    if (ctx && Object.keys(soundBuffers).length === 0) {
+    if (ctx && ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
+    }
+    if (Object.keys(soundBuffers).length === 0) {
       preloadSounds();
     }
   }, { once: true });
