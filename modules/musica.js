@@ -3,7 +3,6 @@ console.log('📦 música (corregido)');
 let audio = null;
 let config = null;
 
-// Iconos SVG
 const iconSound = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
   <path d="M4 9 L4 15 L8 15 L13 20 L13 4 L8 9 Z"/>
   <path d="M16.5 8.5 a6 6 0 0 1 0 7"/>
