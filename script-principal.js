@@ -177,11 +177,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   backBtn.addEventListener('click', cerrarReja);
 
   // ============================================================
-  // 🌀 PARALLAX GLOBAL CON DETECCIÓN INTELIGENTE
+  // 🌀 PARALLAX GLOBAL CON DETECCIÓN MEJORADA
   // ============================================================
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
-  let gyroWorking = false; // se activará al recibir el primer evento
+  let gyroWorking = false;
+  let gyroTestCount = 0;
+  let gyroTestTimeout = null;
 
   // Elementos a mover
   const portalInner = document.querySelector('.portal-inner');
@@ -221,9 +223,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (eyebrow) eyebrow.style.transform = `translate(${offsetX * 0.3}px, ${offsetY * 0.3}px)`;
     }
 
-    // ===== MODALES: mover .modal-card cuando el overlay esté abierto =====
+    // ===== MODALES: factor aumentado a 1.2 para que se note más =====
     document.querySelectorAll('.modal-overlay.open .modal-card').forEach(card => {
-      card.style.transform = `translate(${offsetX * 0.5}px, ${offsetY * 0.5}px)`;
+      card.style.transform = `translate(${offsetX * 1.2}px, ${offsetY * 1.2}px)`;
     });
   }
 
@@ -243,7 +245,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // --- Mouse (solo si NO es móvil con giro activo) ---
   document.addEventListener('mousemove', (e) => {
-    // Si es móvil y el giroscopio funciona, ignoramos el mouse
     if (isMobile && gyroWorking) return;
     if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
     const x = (e.clientX / window.innerWidth - 0.5) * 30;
@@ -255,28 +256,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // --- Giroscopio (móvil) ---
+  // --- Giroscopio (móvil) con detección mejorada ---
   if (isMobile && hasGyro) {
-    // Listener para detectar si realmente funciona
+    // Listener de prueba para detectar si el giroscopio realmente envía datos
     const gyroTest = (e) => {
-      if (e.gamma !== null || e.beta !== null) {
-        gyroWorking = true;
-        console.log('✅ Giroscopio detectado y funcionando');
-        window.removeEventListener('deviceorientation', gyroTest);
-        // Ahora el listener principal
-        window.addEventListener('deviceorientation', handleOrientation);
+      if (e.gamma !== null && e.beta !== null && !isNaN(e.gamma) && !isNaN(e.beta)) {
+        gyroTestCount++;
+        if (gyroTestCount >= 3) {
+          // Después de 3 eventos válidos, asumimos que funciona
+          gyroWorking = true;
+          console.log('✅ Giroscopio detectado y funcionando');
+          window.removeEventListener('deviceorientation', gyroTest);
+          if (gyroTestTimeout) clearTimeout(gyroTestTimeout);
+          // Ahora el listener principal
+          window.addEventListener('deviceorientation', handleOrientation);
+        }
       }
     };
+
     window.addEventListener('deviceorientation', gyroTest);
 
-    // Timeout: si en 2 segundos no se recibe evento, asumimos que no funciona
-    setTimeout(() => {
+    // Timeout: si en 1.5 segundos no llegan 3 eventos, asumimos que no funciona
+    gyroTestTimeout = setTimeout(() => {
       if (!gyroWorking) {
         console.log('⚠️ Giroscopio no responde, se usará mouse como respaldo');
         window.removeEventListener('deviceorientation', gyroTest);
-        // No añadimos handleOrientation, el mouse seguirá activo
       }
-    }, 2000);
+    }, 1500);
   }
 
   function handleOrientation(e) {
@@ -291,4 +297,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       requestAnimationFrame(smoothParallax);
     }
   }
+
+  console.log('📱 isMobile:', isMobile, 'hasGyro:', hasGyro);
 });
