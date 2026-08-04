@@ -187,7 +187,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 0.6rem 0.8rem;
   opacity: 0;
   transition: opacity 0.4s ease;
@@ -209,9 +209,19 @@ html.sin-reja #app {
   transition: none !important;
 }
 
+#app-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  max-width: 560px;
+  will-change: transform;
+}
+
 #app-top {
   width: 100%;
-  max-width: 560px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -225,7 +235,6 @@ html.sin-reja #app {
   letter-spacing: 0.32em;
   text-transform: uppercase;
   font-size: 0.8rem;
-  will-change: transform;
 }
 .top-btn {
   background: none;
@@ -243,7 +252,6 @@ html.sin-reja #app {
   transition: all 0.3s ease;
   min-width: 40px;
   height: 40px;
-  will-change: transform;
 }
 .top-btn:hover {
   background: rgba(201, 162, 77, 0.25);
@@ -258,12 +266,10 @@ html.sin-reja #app {
   align-items: center;
   justify-content: center;
   width: 100%;
-  max-width: 560px;
   gap: 0.2rem;
   padding: 0.2rem 0;
   container-type: inline-size;
   container-name: tarjeta;
-  will-change: transform;
 }
 
 #oval-wrap {
@@ -302,7 +308,6 @@ h1#nombre-hero {
   color: transparent;
   animation: rainbowMove 4s linear infinite;
   user-select: none;
-  will-change: transform;
 }
 @keyframes rainbowMove {
   0% { background-position: 0% 50%; }
@@ -320,7 +325,6 @@ h1#nombre-hero {
   border-bottom: 1px solid rgba(201,162,77,0.25);
   padding-bottom: 0.2rem;
   text-shadow: 0 0 12px rgba(201,162,77,0.2);
-  will-change: transform;
 }
 .frase-inline::before { content: "\201C"; color: #d4af37; }
 .frase-inline::after { content: "\201D"; color: #d4af37; }
@@ -357,7 +361,6 @@ h1#nombre-hero {
   border-radius: 20px;
   padding: 0.5rem;
   margin-top: 0.2rem;
-  will-change: transform;
 }
 .nav-btn {
   background: rgba(201, 162, 77, 0.12);
@@ -442,7 +445,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   MODALES (con soporte para parallax via left/top)
+   MODALES
    ============================================================ */
 .modal-overlay {
   position: fixed;
@@ -483,10 +486,10 @@ h1#nombre-hero {
   border: 3px solid #b8860b;
   border-radius: 30px;
   padding: 2rem 1.6rem;
-  position: relative; /* Necesario para left/top */
+  position: relative;
   transform: scale(0.95);
   opacity: 0;
-  transition: transform 0.2s ease, opacity 0.2s ease, left 0.2s ease, top 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease;
   box-shadow: 
     0 0 0 2px rgba(184, 134, 11, 0.2),
     0 0 0 6px rgba(26, 42, 70, 0.5),
@@ -494,7 +497,6 @@ h1#nombre-hero {
     inset 0 0 60px rgba(25, 50, 100, 0.15);
   z-index: 1;
   -webkit-overflow-scrolling: touch;
-  will-change: transform, left, top;
 }
 .modal-overlay.open .modal-card {
   transform: scale(1);
@@ -847,5 +849,3 @@ h1#nombre-hero {
 }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: rgba(201, 162, 77, 0.3); border-radius: 3px; }
-
-//
