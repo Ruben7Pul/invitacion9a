@@ -339,14 +339,14 @@ function initContadorCircular(config) {
 }
 
 // ===== COLLAGE DE GUSTOS (VERSIÓN MEJORADA) =====
-let collageTimer = null;
+var collageTimer = null;
 var imagenesCollage = [];
+var collageInicializado = false; // <--- AGREGADO
 
 function iniciarCollage() {
   var container = document.getElementById('collage-container');
   if (!container) return;
 
-  // Asegurar que el contenedor no tenga scroll
   container.style.overflow = 'visible';
   container.style.position = 'relative';
   container.style.aspectRatio = '1 / 1';
@@ -388,14 +388,13 @@ function renderCollage(container) {
   var total = imagenesCollage.length;
   if (total === 0) return;
 
-  // Generar posiciones aleatorias para todas las imágenes
   var items = [];
   for (var i = 0; i < total; i++) {
-    var w = 12 + Math.random() * 35; // 12% - 47%
+    var w = 12 + Math.random() * 35;
     var h = 12 + Math.random() * 35;
     var x = Math.random() * (100 - w);
     var y = Math.random() * (100 - h);
-    var rot = (Math.random() - 0.5) * 40; // -20° a 20°
+    var rot = (Math.random() - 0.5) * 40;
     items.push({
       src: imagenesCollage[i],
       w: w,
@@ -408,7 +407,6 @@ function renderCollage(container) {
     });
   }
 
-  // Crear elementos DOM
   items.forEach(function(item) {
     var div = document.createElement('div');
     div.className = 'collage-item';
@@ -429,7 +427,6 @@ function renderCollage(container) {
     item.el = div;
   });
 
-  // Funciones para mostrar/ocultar
   function mostrarImagen(item) {
     if (!item.el) return;
     item.el.style.transition = 'opacity 1.5s ease, transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
@@ -459,7 +456,6 @@ function renderCollage(container) {
     return visibles[Math.floor(Math.random() * visibles.length)];
   }
 
-  // Mostrar primeras 4 imágenes de forma escalonada
   var primerLote = items.slice(0, Math.min(4, items.length));
   primerLote.forEach(function(item, idx) {
     setTimeout(function() {
@@ -467,7 +463,6 @@ function renderCollage(container) {
     }, 300 + idx * 800);
   });
 
-  // Ciclo de aparición/desaparición
   if (collageTimer) clearInterval(collageTimer);
   collageTimer = setInterval(function() {
     var visibles = items.filter(function(item) { return item.visible; });
