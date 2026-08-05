@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – VERSIÓN COMPLETA CON MÚSICA, NUEVA PARTIDA Y MUTE
+// juego.js – VERSIÓN FINAL CON TOP 3, NUEVA PARTIDA Y CORRECCIONES
 // ============================================================
-console.log('📦 juego.js (completo)');
+console.log('📦 juego.js (final)');
 
 import { 
   soundTap, 
@@ -44,7 +44,7 @@ const NIEBLA_HEIGHTS = [0, Math.round(170 * 1.15), Math.round(STAGE_H * 0.60), M
 const NIEBLA_FEATHER = 26;
 const MAX_LIVES = 3;
 const SCORE_PER_LIFE = 10000;
-const TOP_SCORES_COUNT = 5;
+const TOP_SCORES_COUNT = 3; // CAMBIADO: top 3 en lugar de top 5
 
 // ========== TIPOS DE LADRILLOS ==========
 const BRICK_TYPES = {
@@ -112,11 +112,11 @@ const POWERUP_SYMBOLS = {
   PALA_GRANDE: '<>',
   DUREZA: '↑',
   BOLA_NIEBLA: '🌫️',
-  PALA_MINI: '-<',
+  PALA_MINI: '><', // CAMBIADO: de '-<' a '><'
   FLAQUESA: '↓'
 };
 
-// ========== PUNTUACIONES ==========
+// ========== PUNTUACIONES (TOP 3) ==========
 function getHighScores() {
   try {
     const data = localStorage.getItem('highscores');
@@ -136,6 +136,7 @@ function addHighScore(name, score) {
 function isHighScore(score) {
   const scores = getHighScores();
   if (scores.length < TOP_SCORES_COUNT) return true;
+  // Solo si es estrictamente mayor que el último (sin empates)
   return score > scores[scores.length - 1].score;
 }
 
@@ -306,7 +307,6 @@ export function initJuego(config, mobile = false) {
     document.getElementById('pause-resume-btn').addEventListener('click', closePauseModal);
     document.getElementById('pause-mute-btn').addEventListener('click', () => {
       if (window.toggleMusic) window.toggleMusic();
-      // Actualizar texto del botón
       const btn = document.getElementById('pause-mute-btn');
       if (btn) {
         if (window.isMusicMuted && window.isMusicMuted()) {
@@ -328,7 +328,6 @@ export function initJuego(config, mobile = false) {
   function openPauseModal() {
     if (!pauseModalOverlay) createPauseModal();
     updatePauseModal();
-    // Actualizar estado del botón de mute
     const muteBtn = document.getElementById('pause-mute-btn');
     if (muteBtn) {
       if (window.isMusicMuted && window.isMusicMuted()) {
@@ -1050,6 +1049,9 @@ export function initJuego(config, mobile = false) {
       if (isTop) {
         pendingHighScore = true;
         gameoverInputContainer.style.display = 'block';
+        // Cambiar mensaje a "¡Top 3!"
+        const label = gameoverInputContainer.querySelector('p');
+        if (label) label.textContent = '¡Top 3!';
         playerNameInput.value = '';
         playerNameInput.focus();
         gameoverMenuBtn.style.display = 'none';
@@ -1576,7 +1578,30 @@ export function initJuego(config, mobile = false) {
     }
   });
 
-  // ========== GAME OVER: GUARDAR PUNTAJE (si es top) ==========
+  // ========== TECLA ESPACIO PARA PAUSA (NUEVO) ==========
+  function handleSpacePause(e) {
+    if (e.key === ' ' || e.key === 'Space') {
+      e.preventDefault();
+      if (!running || gameOver) return;
+      // Si la pelota no ha sido lanzada, lanzarla (igual que antes)
+      if (!launched) {
+        launchBall();
+        return;
+      }
+      // Si está en pausa, reanudar; si no, pausar
+      if (paused) {
+        closePauseModal();
+      } else {
+        openPauseModal();
+      }
+    }
+  }
+  document.addEventListener('keydown', handleSpacePause);
+
+  // ========== ELIMINADO: visibilitychange (no pausar al cambiar de pestaña) ==========
+  // Ya no se usa.
+
+  // ========== GAME OVER: GUARDAR PUNTAJE (si es top 3) ==========
   gameoverSave.addEventListener('click', (e) => {
     e.stopPropagation();
     const name = playerNameInput.value.trim();
