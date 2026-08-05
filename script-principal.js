@@ -338,7 +338,7 @@ function initContadorCircular(config) {
   setInterval(actualizarContador, 200);
 }
 
-// ===== COLLAGE DE GUSTOS (VERSIÓN REPARADA - MEJOR DISTRIBUCIÓN Y PROFUNDIDAD) =====
+// ===== COLLAGE DE GUSTOS (VERSIÓN MEJORADA) =====
 var collageTimer = null;
 var imagenesCollage = [];
 var collageInicializado = false;
@@ -352,7 +352,7 @@ function iniciarCollage() {
   container.style.aspectRatio = '1 / 1';
   container.style.width = '100%';
 
-  var maxImages = 9;
+  var maxImages = 12;
   var imagenes = [];
   var cargadas = 0;
   var totalIntentos = maxImages;
@@ -383,96 +383,41 @@ function iniciarCollage() {
   }
 }
 
-// Algoritmo de distribución mejorado que evita solapamientos
-function calcularGridPositiones(total) {
-  var posiciones = [];
-  var cols = Math.ceil(Math.sqrt(total));
-  var rows = Math.ceil(total / cols);
-  var cellWidth = 100 / cols;
-  var cellHeight = 100 / rows;
-  var idx = 0;
-
-  for (var r = 0; r < rows && idx < total; r++) {
-    for (var c = 0; c < cols && idx < total; c++) {
-      var baseX = c * cellWidth;
-      var baseY = r * cellHeight;
-      // Agregar variación dentro de cada celda pero sin solapar
-      var offsetX = (Math.random() - 0.5) * (cellWidth * 0.4);
-      var offsetY = (Math.random() - 0.5) * (cellHeight * 0.4);
-      
-      posiciones.push({
-        x: baseX + offsetX,
-        y: baseY + offsetY,
-        cellX: c,
-        cellY: r
-      });
-      idx++;
-    }
-  }
-  return posiciones;
-}
-
 function renderCollage(container) {
   container.innerHTML = '';
   var total = imagenesCollage.length;
   if (total === 0) return;
 
-  var posiciones = calcularGridPositiones(total);
   var items = [];
-  
-  // Tamaños más variados pero balanceados
-  var sizeRanges = [
-    { w: 16, h: 18 },  // Pequeños
-    { w: 20, h: 22 },
-    { w: 24, h: 26 },  // Medianos
-    { w: 28, h: 30 },
-    { w: 32, h: 34 },  // Grandes
-    { w: 22, h: 24 }
-  ];
-
   for (var i = 0; i < total; i++) {
-    var sizeIdx = i % sizeRanges.length;
-    var sizeRange = sizeRanges[sizeIdx];
-    var w = sizeRange.w + (Math.random() - 0.5) * 3;
-    var h = sizeRange.h + (Math.random() - 0.5) * 3;
-    var pos = posiciones[i];
-    
-    // Rotación más sutil pero con variación
-    var rot = (Math.random() - 0.5) * 15;
-    
-    // Profundidad basada en posición en grid
-    var depth = (pos.cellX + pos.cellY) * 5 + i;
-    var skewZ = 5 + Math.random() * 8;
-    
+    var w = 10 + Math.random() * 40;  // 10-50%
+    var h = 10 + Math.random() * 40;
+    var x = Math.random() * (100 - w);
+    var y = Math.random() * (100 - h);
+    var rot = (Math.random() - 0.5) * 50;  // -25 a +25 grados
     items.push({
       src: imagenesCollage[i],
       w: w,
       h: h,
-      x: Math.max(0, Math.min(100 - w, pos.x)),
-      y: Math.max(0, Math.min(100 - h, pos.y)),
+      x: x,
+      y: y,
       rot: rot,
-      depth: depth,
-      skewZ: skewZ,
       visible: false,
       el: null
     });
   }
 
-  items.forEach(function(item, idx) {
+  items.forEach(function(item) {
     var div = document.createElement('div');
     div.className = 'collage-item';
-    
-    // Estilos con profundidad 3D
     div.style.cssText =
       'width:' + item.w + '%;' +
       'height:' + item.h + '%;' +
       'left:' + item.x + '%;' +
       'top:' + item.y + '%;' +
-      'z-index:' + item.depth + ';' +
-      'transform: perspective(1200px) rotateX(' + (Math.random() - 0.5) * 5 + 'deg) rotateY(' + (Math.random() - 0.5) * 8 + 'deg) rotate(' + item.rot + 'deg) scale(0.15);' +
+      'transform: rotate(' + item.rot + 'deg) scale(0.2);' +
       'opacity: 0;' +
-      'box-shadow: 0 8px 32px rgba(0,0,0,0.8), 0 2px 8px rgba(212, 175, 55, 0.2);';
-    
+      'z-index:' + Math.floor(Math.random() * 10) + ';';
     var img = document.createElement('img');
     img.src = item.src;
     img.loading = 'lazy';
@@ -482,57 +427,63 @@ function renderCollage(container) {
     item.el = div;
   });
 
-  function mostrarImagen(item, conAnimacion) {
+  function mostrarImagen(item) {
     if (!item.el) return;
-    
-    var duracion = conAnimacion ? '1.2s' : '0.4s';
-    var easing = conAnimacion ? 'cubic-bezier(0.34, 1.56, 0.64, 1)' : 'ease-out';
-    
-    item.el.style.transition = 'opacity ' + duracion + ' ' + easing + ', transform ' + duracion + ' ' + easing;
+    item.el.style.transition = 'opacity 1.5s ease, transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
     item.el.style.opacity = '1';
-    item.el.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg) rotate(' + item.rot + 'deg) scale(1) translateZ(' + item.skewZ + 'px)';
+    item.el.style.transform = 'rotate(' + item.rot + 'deg) scale(1)';
     item.visible = true;
   }
 
   function ocultarImagen(item) {
     if (!item.el) return;
-    item.el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+    item.el.style.transition = 'opacity 1.2s ease, transform 1.2s ease';
     item.el.style.opacity = '0';
-    var newRot = item.rot + (Math.random() - 0.5) * 12;
-    item.el.style.transform = 'perspective(1200px) rotateX(' + (Math.random() - 0.5) * 10 + 'deg) rotateY(' + (Math.random() - 0.5) * 15 + 'deg) rotate(' + newRot + 'deg) scale(0.2)';
+    var newRot = item.rot + (Math.random() - 0.5) * 30;
+    item.el.style.transform = 'rotate(' + newRot + 'deg) scale(0.1)';
     item.visible = false;
   }
 
-  // Mostrar todas las imágenes staggered inicialmente
-  items.forEach(function(item, idx) {
+  function elegirSiguiente() {
+    var noVisibles = items.filter(function(item) { return !item.visible; });
+    if (noVisibles.length === 0) return null;
+    return noVisibles[Math.floor(Math.random() * noVisibles.length)];
+  }
+
+  function elegirParaOcultar() {
+    var visibles = items.filter(function(item) { return item.visible; });
+    if (visibles.length === 0) return null;
+    return visibles[Math.floor(Math.random() * visibles.length)];
+  }
+
+  var primerLote = items.slice(0, Math.min(4, items.length));
+  primerLote.forEach(function(item, idx) {
     setTimeout(function() {
-      mostrarImagen(item, true);
-    }, 150 + idx * 120);
+      mostrarImagen(item);
+    }, 300 + idx * 800);
   });
 
-  // Rotación continua con cambios sutiles
-  var ciclo = 0;
   if (collageTimer) clearInterval(collageTimer);
   collageTimer = setInterval(function() {
-    ciclo++;
     var visibles = items.filter(function(item) { return item.visible; });
-    
-    if (ciclo % 3 === 0 && visibles.length > 0) {
-      var random = Math.random();
-      if (random < 0.6) {
-        // Mostrar más imágenes
-        var noVisibles = items.filter(function(item) { return !item.visible; });
-        if (noVisibles.length > 0) {
-          var siguiente = noVisibles[Math.floor(Math.random() * noVisibles.length)];
-          mostrarImagen(siguiente, true);
-        }
-      } else if (random < 0.9 && visibles.length > 4) {
-        // Quitar una imagen
-        var ocultar = visibles[Math.floor(Math.random() * visibles.length)];
+    if (visibles.length < 4) {
+      var siguiente = elegirSiguiente();
+      if (siguiente) {
+        mostrarImagen(siguiente);
+      }
+    } else if (visibles.length >= 4) {
+      var ocultar = elegirParaOcultar();
+      if (ocultar) {
         ocultarImagen(ocultar);
+        setTimeout(function() {
+          var siguiente = elegirSiguiente();
+          if (siguiente) {
+            mostrarImagen(siguiente);
+          }
+        }, 600);
       }
     }
-  }, 3000 + Math.random() * 2000);
+  }, 2500 + Math.random() * 1500);
 }
 
 function limpiarCollage() {
