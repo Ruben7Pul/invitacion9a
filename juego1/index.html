@@ -29,7 +29,32 @@
       pointer-events:none;
       opacity:1;
       mix-blend-mode:normal;
+      transition: opacity 0.9s ease;
     }
+
+    /* Fondo de respaldo: degradado dorado suave, se activa solo si se detecta lag */
+    #game-bg-fallback {
+      position:fixed;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+      background: radial-gradient(ellipse at 50% 15%, #f6e7ba 0%, #d9b96a 28%, #a3792a 58%, #4a3410 100%);
+      opacity:0;
+      transition: opacity 0.9s ease;
+    }
+    #game-bg-fallback::after {
+      content:'';
+      position:absolute;
+      inset:0;
+      background: radial-gradient(circle at 50% 35%, rgba(255,235,180,0.28), transparent 60%);
+      animation: fallbackGlow 6s ease-in-out infinite;
+    }
+    @keyframes fallbackGlow {
+      0%, 100% { opacity:0.35; }
+      50% { opacity:0.75; }
+    }
+    body.bg-lag #game-bg-video { opacity:0; }
+    body.bg-lag #game-bg-fallback { opacity:1; }
 
     @keyframes rainbowScore {
       0% { background-position:0% 50%; }
@@ -491,6 +516,61 @@
     <source src="../archivos/juegvideo.webm" type="video/webm">
     <source src="../archivos/juegvideo.mp4" type="video/mp4">
   </video>
+  <div id="game-bg-fallback" aria-hidden="true"></div>
+
+  <script>
+    // Vigilante de rendimiento: si el video de fondo traba/pierde cuadros
+    // (típico en celulares de gama media/baja), lo apaga y usa un degradado
+    // dorado suave en su lugar, sin recargar la página ni cortar el juego.
+    (function () {
+      var video = document.getElementById('game-bg-video');
+      if (!video) return;
+      var body = document.body;
+      var swapped = false;
+      var lastTime = null;
+      var deltaLog = [];
+      var CHECK_WINDOW_MS = 1200; // ventana de análisis para el promedio de FPS
+      var MIN_SAMPLES = 12;       // muestras mínimas antes de decidir
+      var MIN_FPS = 34;           // por debajo de esto, se considera "lag"
+      var STALL_MS = 280;         // un solo cuadro más lento que esto = congelamiento
+
+      function swapToFallback() {
+        if (swapped) return;
+        swapped = true;
+        body.classList.add('bg-lag');
+        try { video.pause(); } catch (e) {}
+      }
+
+      function frame(now) {
+        if (swapped) return;
+        if (lastTime !== null) {
+          var delta = now - lastTime;
+          if (delta > STALL_MS) { swapToFallback(); return; }
+          deltaLog.push({ t: now, d: delta });
+          while (deltaLog.length && deltaLog[0].t < now - CHECK_WINDOW_MS) deltaLog.shift();
+          if (deltaLog.length >= MIN_SAMPLES) {
+            var avg = deltaLog.reduce(function (a, b) { return a + b.d; }, 0) / deltaLog.length;
+            if (1000 / avg < MIN_FPS) { swapToFallback(); return; }
+          }
+        }
+        lastTime = now;
+        requestAnimationFrame(frame);
+      }
+
+      video.addEventListener('error', swapToFallback);
+      video.addEventListener('stalled', swapToFallback);
+
+      // Se vigila en toda la partida, pero solo tiene sentido activarlo donde
+      // se reportó el problema: pantallas táctiles/celular.
+      var esMovilAprox = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768;
+      if (esMovilAprox) {
+        requestAnimationFrame(function (t) {
+          lastTime = t;
+          requestAnimationFrame(frame);
+        });
+      }
+    })();
+  </script>
 
   <!-- Música de fondo (cancion1) -->
   <audio id="bg-music" src="../archivos/cancion1.mp3" loop preload="auto"></audio>
