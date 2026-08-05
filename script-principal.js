@@ -1,4 +1,4 @@
-console.log('🚀 script-principal rr.js');
+console.log('🚀 script-principal jj.js');
 
 // Detección de hora del día
 function detectarPeriodoDia() {
@@ -408,34 +408,24 @@ function renderCollage(container) {
   collageIndiceActual = 0;
   collageZIndex = 1;
   collageElementos = [];
-  // Crear orden aleatorio de índices
   collageIndices = shuffleArray(Array.from({length: total}, (_, i) => i));
   var indiceActualEnShuffled = 0;
 
   function mostrarSiguienteImagen() {
-    // Obtener imagen aleatoria (del array shuffled)
     var indiceEnImagen = collageIndices[indiceActualEnShuffled % collageIndices.length];
     var src = imagenesCollage[indiceEnImagen];
     indiceActualEnShuffled++;
     
-    // Si llegamos al final del shuffle, barajar de nuevo
     if (indiceActualEnShuffled >= collageIndices.length) {
       collageIndices = shuffleArray(Array.from({length: total}, (_, i) => i));
       indiceActualEnShuffled = 0;
     }
     
-    // Tamaño fijo: 75% sin sobrepasar
     var w = 75;
     var h = 75;
-    
-    // Posición aleatoria pero sin sobrepasar
     var x = Math.random() * (100 - w);
     var y = Math.random() * (100 - h);
-    
-    // Rotación entre -25 y +25 grados
     var rot = (Math.random() - 0.5) * 50;
-    
-    // Volteo aleatorio (espejo)
     var scaleX = Math.random() > 0.5 ? 1 : -1;
     
     var div = document.createElement('div');
@@ -446,44 +436,31 @@ function renderCollage(container) {
       'left:' + x + '%;' +
       'top:' + y + '%;' +
       'z-index:' + collageZIndex + ';' +
-      'transform: rotate(' + rot + 'deg) scaleX(' + scaleX + ') scale(0.5);' +
-      'opacity: 0;';
+      'transform: rotate(' + rot + 'deg) scaleX(' + scaleX + ') scale(1);' +
+      'opacity: 1;';
     
     var img = document.createElement('img');
     img.src = src;
     img.alt = 'Gusto';
     img.loading = 'lazy';
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
     div.appendChild(img);
     container.appendChild(div);
     
     collageElementos.push(div);
     
-    // Si hay más de 4 imágenes, remover la más antigua
     if (collageElementos.length > 4) {
       var antiguoDiv = collageElementos.shift();
-      antiguoDiv.style.transition = 'opacity 0.3s ease';
-      antiguoDiv.style.opacity = '0';
-      setTimeout(function() {
-        if (antiguoDiv.parentNode) {
-          antiguoDiv.remove();
-        }
-      }, 300);
+      if (antiguoDiv.parentNode) {
+        antiguoDiv.parentNode.removeChild(antiguoDiv);
+      }
     }
-    
-    // Animar entrada (más rápido: 0.6s en lugar de 1s)
-    setTimeout(function() {
-      div.style.transition = 'opacity 0.6s ease, transform 0.6s ease-out';
-      div.style.opacity = '1';
-      div.style.transform = 'rotate(' + rot + 'deg) scaleX(' + scaleX + ') scale(1)';
-    }, 50);
     
     collageZIndex++;
   }
 
-  // Mostrar primera imagen
   mostrarSiguienteImagen();
 
-  // Mostrar siguiente cada 3 segundos
   if (collageTimer) clearInterval(collageTimer);
   collageTimer = setInterval(function() {
     mostrarSiguienteImagen();
