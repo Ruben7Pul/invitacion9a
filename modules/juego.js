@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – COMPLETO CON NUEVOS ICONOS, SONIDOS Y MENSAJES
+// juego.js – VERSIÓN SIN MENÚ DE INICIO, CON PAUSA MODAL Y TOP 3
 // ============================================================
-console.log('📦 juego.js (con sonidos y mejoras visuales)');
+console.log('📦 juego.js (sin menú de inicio, con pausa modal)');
 
 import { 
   soundTap, 
@@ -104,7 +104,9 @@ const GREEN_PROB_TABLE = [
   37.500, 32.8125, 28.125, 23.4375, 18.750, 14.0625, 9.375, 4.6875, 0.000
 ];
 
-// ========== NUEVOS ICONOS ==========
+const GREEN_WEIGHTS = { MULTIBOLA: 15, PALA_GRANDE: 35, DUREZA: 50 };
+const RED_WEIGHTS   = { BOLA_NIEBLA: 10, PALA_MINI: 35, FLAQUESA: 55 };
+
 const POWERUP_SYMBOLS = {
   MULTIBOLA: 'x3',
   PALA_GRANDE: '<>',
@@ -114,7 +116,7 @@ const POWERUP_SYMBOLS = {
   FLAQUESA: '↓'
 };
 
-// ========== PUNTUACIONES ==========
+// ========== PUNTUACIONES CON TIEMPO ==========
 function getHighScores() {
   try {
     const data = localStorage.getItem('highscores');
@@ -124,9 +126,9 @@ function getHighScores() {
 function saveHighScores(scores) {
   localStorage.setItem('highscores', JSON.stringify(scores));
 }
-function addHighScore(name, score) {
+function addHighScore(name, score, time) {
   let scores = getHighScores();
-  scores.push({ name: name || 'Jugador', score });
+  scores.push({ name: name || 'Jugador', score, time });
   scores.sort((a, b) => b.score - a.score);
   if (scores.length > TOP_SCORES_COUNT) scores = scores.slice(0, TOP_SCORES_COUNT);
   saveHighScores(scores);
@@ -139,19 +141,10 @@ function isHighScore(score) {
 
 // ========== FUNCIÓN PRINCIPAL ==========
 export function initJuego(config, mobile = false) {
-  console.log('🎮 Iniciando juego (con sonidos y mejoras)');
+  console.log('🎮 Iniciando juego (sin menú de inicio)');
   ensureAudioCtx();
 
-  if (!document.querySelector('#pixel-font')) {
-    const link = document.createElement('link');
-    link.id = 'pixel-font';
-    link.rel = 'stylesheet';
-    link.href = 'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap';
-    document.head.appendChild(link);
-  }
-
-  // ========== OBTENER ELEMENTOS ==========
-  const nombreEl = document.getElementById('nombre-hero');
+  // ========== ELEMENTOS ==========
   const overlay = document.getElementById('game-overlay');
   const stage = document.getElementById('game-stage');
   const inner = document.getElementById('game-inner');
@@ -161,15 +154,10 @@ export function initJuego(config, mobile = false) {
   const livesEl = document.getElementById('lives');
   const scoreEl = document.getElementById('game-score');
   const pauseBtn = document.getElementById('pause-btn');
-  const menuBtn = document.getElementById('menu-btn');
+  const menuBtn = document.getElementById('menu-btn'); // ya no se usa
 
+  // Menú (ya no visible)
   const menuEl = document.getElementById('game-menu');
-  const menuContent = document.getElementById('menu-content');
-  const menuPlay = document.getElementById('menu-play');
-  const menuScores = document.getElementById('menu-scores');
-  const menuScoresList = document.getElementById('menu-scores-list');
-  const scoresList = document.getElementById('scores-list');
-  const menuScoresBack = document.getElementById('menu-scores-back');
   const menuGameover = document.getElementById('menu-gameover');
   const gameoverScore = document.getElementById('gameover-score');
   const gameoverThemeMsg = document.getElementById('gameover-theme-msg');
@@ -178,24 +166,9 @@ export function initJuego(config, mobile = false) {
   const gameoverSave = document.getElementById('gameover-save');
   const gameoverMenuBtn = document.getElementById('gameover-menu-btn');
   const nameError = document.getElementById('name-error');
-  const menuResetTops = document.getElementById('menu-reset-tops');
-  const menuExit = document.getElementById('menu-exit');
-  const menuRules = document.getElementById('menu-rules');
-  const modalRules = document.getElementById('modal-rules');
-  const rulesClose = document.getElementById('rules-close');
+  // Ya no usamos menuScores, menuPlay, menuExit, menuResetTops, etc.
 
-  if (nombreEl) {
-    nombreEl.addEventListener('click', () => {
-      soundTap();
-      openGame();
-    });
-  } else {
-    setTimeout(openGame, 300);
-  }
-
-  const menuTitle = menuEl?.querySelector('h2');
-  if (menuTitle) menuTitle.style.display = 'none';
-
+  // ========== ESTILOS BÁSICOS ==========
   paddleEl.style.background = '#111';
   paddleEl.style.border = '2px solid #d4af37';
   paddleEl.style.boxShadow = '0 0 25px rgba(212,175,55,0.3)';
@@ -208,7 +181,6 @@ export function initJuego(config, mobile = false) {
   livesEl.style.fontFamily = "'Press Start 2P', monospace";
   livesEl.style.fontSize = '1.2rem';
   livesEl.style.letterSpacing = '0.1em';
-  livesEl.style.display = 'none';
 
   scoreEl.style.fontFamily = "'Press Start 2P', monospace";
   scoreEl.style.fontSize = '0.9rem';
@@ -218,22 +190,6 @@ export function initJuego(config, mobile = false) {
   scoreEl.style.webkitBackgroundClip = 'text';
   scoreEl.style.backgroundClip = 'text';
   scoreEl.style.color = 'transparent';
-  scoreEl.style.display = 'none';
-
-  pauseBtn.style.display = 'none';
-  menuBtn.style.display = 'none';
-
-  if (!document.querySelector('#rainbow-score')) {
-    const style2 = document.createElement('style');
-    style2.id = 'rainbow-score';
-    style2.textContent = `
-      @keyframes rainbowScore {
-        0% { background-position: 0% 50%; }
-        100% { background-position: 300% 50%; }
-      }
-    `;
-    document.head.appendChild(style2);
-  }
 
   // ========== NIEBLA ==========
   const nieblaEl = document.createElement('div');
@@ -291,14 +247,15 @@ export function initJuego(config, mobile = false) {
   let goldenBrickRef = null;
   let lastScoreMilestone = 0;
   let blueBallActive = false;
-
   let ballDurability = 1;
   let paddleSizeMultiplier = 1;
   let paddleWidth = PADDLE_W_BASE;
   let nieblaLevel = 0;
   let prevNieblaLevel = 0;
 
+  // TIEMPO DE JUEGO (para mostrar en pausa y guardar)
   let gameStartTime = 0;
+  let elapsedTimeSeconds = 0;
   let pausedTime = 0;
   let pauseStartTime = 0;
   let gameTimeActive = false;
@@ -316,282 +273,138 @@ export function initJuego(config, mobile = false) {
   let pendingHighScore = false;
   let gameIsOpen = false;
 
-  // ========== MENSAJES TEMÁTICOS ==========
-  const THEME_MESSAGES = [
-    'La rosa apenas empieza a florecer... ¡vuelve a intentarlo!',
-    'Como Bella cruzando el portón por primera vez: buen comienzo, sigue así.',
-    'El hechizo comienza a ceder ante ti. ¡Vas por buen camino!',
-    'Los candelabros del salón se encienden para acompañarte. ¡Bien hecho!',
-    'Bailas con la gracia de una quinceañera en su vals. ¡Sigue brillando!',
-    'La Bestia sonríe al ver tu talento. ¡Vas a medio camino!',
-    'Todo el castillo murmura tu nombre. ¡Vas impresionando!',
-    'Tu corona de XV brilla un poco más con cada punto. ¡Adelante!',
-    'Como en el cuento, la magia está de tu lado. ¡Vas muy arriba!',
-    'Los pétalos de la rosa encantada aún no caen: tu magia sigue viva.',
-    '¡Cien mil puntos! Dignos de una noche de gala en el gran salón.',
-    'Bailas como la propia Bella con su vestido dorado. ¡Espectacular!',
-    'El hechizo se rompe gracias a ti: puntaje digno de leyenda.',
-    'Toda la corte del castillo aplaude de pie. ¡Ya casi al tope!',
-    'A un paso de la perfección... una quinceañera legendaria.',
-    '🌹 ¡Puntaje máximo! Un final de cuento de hadas — fuiste el alma de esta fiesta encantada. ¡Feliz XV!'
-  ];
-  function getThemeMessage(score) {
-    const tier = Math.min(Math.floor(Math.max(score, 0) / 10000), THEME_MESSAGES.length - 1);
-    return THEME_MESSAGES[tier];
-  }
+  // ========== MODAL DE PAUSA (creado dinámicamente) ==========
+  let pauseModal = null;
+  let pauseModalOverlay = null;
+  let pauseTimerInterval = null;
 
-  // ========== MENSAJES FLOTANTES ==========
-  function showFloatingMessage(text, color = '#fff', duration = 1500) {
-    const el = document.createElement('div');
-    el.style.cssText = `
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-family: 'Press Start 2P', monospace;
-      font-size: 1.1rem;
-      color: ${color};
-      text-shadow: 0 0 20px rgba(0,0,0,0.9), 0 0 10px ${color}40;
-      pointer-events: none;
-      z-index: 30;
-      animation: floatMsg 1.8s ease forwards;
-      text-align: center;
-      white-space: nowrap;
-      background: rgba(0,0,0,0.4);
-      padding: 0.3rem 1.2rem;
-      border-radius: 30px;
-      backdrop-filter: blur(2px);
-      border: 1px solid ${color}60;
+  function createPauseModal() {
+    // Si ya existe, no volver a crear
+    if (document.querySelector('.pause-modal-overlay')) return;
+
+    const overlayEl = document.createElement('div');
+    overlayEl.className = 'pause-modal-overlay';
+    overlayEl.id = 'pause-modal-overlay';
+
+    const card = document.createElement('div');
+    card.className = 'pause-modal-card';
+
+    card.innerHTML = `
+      <button class="close-btn" id="pause-close-btn">&times;</button>
+      <h2>⏸ Pausa</h2>
+      <div class="pause-time" id="pause-time-display">00:00</div>
+      <div class="pause-ranking" id="pause-ranking">
+        <div style="text-align:center; margin-bottom:0.5rem; font-size:0.8rem; color:#d4af37;">🏆 MEJORES PUNTUACIONES</div>
+        <div id="pause-rank-list"></div>
+      </div>
+      <div class="pause-buttons">
+        <button class="game-btn" id="pause-resume-btn">▶ Reanudar</button>
+        <button class="game-btn exit-btn" id="pause-exit-btn">🚪 Salir</button>
+      </div>
     `;
-    el.textContent = text;
-    inner.appendChild(el);
-    setTimeout(() => el.remove(), duration + 200);
-  }
 
-  // ========== FUNCIONES DEL MENÚ ==========
-  function showMenu(showGameOver = false, score = 0) {
-    paddleEl.style.visibility = 'hidden';
-    document.querySelectorAll('.ball-dynamic').forEach(el => el.style.visibility = 'hidden');
-    document.getElementById('ball').style.visibility = 'hidden';
+    overlayEl.appendChild(card);
+    // Insertar dentro de #game-stage (para que esté dentro del área del juego)
+    const stageEl = document.getElementById('game-stage');
+    if (stageEl) stageEl.appendChild(overlayEl);
 
-    if (!menuEl) return;
-    menuEl.style.display = 'flex';
-    if (showGameOver) {
-      menuGameover.style.display = 'block';
-      menuContent.style.display = 'none';
-      gameoverScore.textContent = `Puntuación: ${score}`;
-      if (gameoverThemeMsg) gameoverThemeMsg.textContent = getThemeMessage(score);
-      const statsEl = document.getElementById('gameover-stats');
-      if (statsEl) statsEl.style.display = 'none';
+    pauseModalOverlay = overlayEl;
+    pauseModal = card;
 
-      const isTop = isHighScore(score) && score > 0;
-      if (isTop) {
-        pendingHighScore = true;
-        gameoverInputContainer.style.display = 'block';
-        playerNameInput.value = '';
-        playerNameInput.focus();
-        gameoverMenuBtn.style.display = 'none';
-        nameError.style.display = 'none';
-      } else {
-        pendingHighScore = false;
-        gameoverInputContainer.style.display = 'none';
-        gameoverMenuBtn.style.display = 'block';
-        gameoverMenuBtn.textContent = '🏠 Volver al menú';
-      }
-    } else {
-      menuGameover.style.display = 'none';
-      menuContent.style.display = 'flex';
-      gameoverInputContainer.style.display = 'none';
-      gameoverMenuBtn.style.display = 'none';
-      pendingHighScore = false;
-    }
-    menuScoresList.style.display = 'none';
-  }
-
-  function hideMenu() {
-    if (!menuEl) return;
-    menuEl.style.display = 'none';
-    menuScoresList.style.display = 'none';
-    menuContent.style.display = 'flex';
-    menuGameover.style.display = 'none';
-    gameoverInputContainer.style.display = 'none';
-    gameoverMenuBtn.style.display = 'none';
-  }
-
-  function updateScoresList() {
-    const scores = getHighScores();
-    scoresList.innerHTML = '';
-    if (scores.length === 0) {
-      const li = document.createElement('li');
-      li.textContent = 'No hay puntuaciones aún';
-      li.style.color = '#888';
-      scoresList.appendChild(li);
-    } else {
-      scores.forEach((s, i) => {
-        const li = document.createElement('li');
-        li.textContent = `#${i+1} ${s.name} — ${s.score}`;
-        scoresList.appendChild(li);
-      });
-    }
-  }
-
-  // ========== EVENTOS DEL MENÚ ==========
-  menuPlay.addEventListener('click', (e) => {
-    e.stopPropagation();
-    soundTap();
-    hideMenu();
-    startGame();
-  });
-
-  menuScores.addEventListener('click', (e) => {
-    e.stopPropagation();
-    soundTap();
-    updateScoresList();
-    menuContent.style.display = 'none';
-    menuScoresList.style.display = 'block';
-  });
-
-  menuScoresBack.addEventListener('click', (e) => {
-    e.stopPropagation();
-    soundTap();
-    menuScoresList.style.display = 'none';
-    menuContent.style.display = 'flex';
-  });
-
-  menuExit.addEventListener('click', (e) => {
-    e.stopPropagation();
-    soundTap();
-    const veil = document.getElementById('loading-veil');
-    if (veil) {
-      veil.style.transition = 'none';
-      veil.style.display = 'block';
-      veil.classList.remove('hide');
-      void veil.offsetHeight;
-    }
-    setTimeout(() => {
+    // Eventos
+    document.getElementById('pause-close-btn').addEventListener('click', () => {
+      closePauseModal();
+    });
+    document.getElementById('pause-resume-btn').addEventListener('click', () => {
+      closePauseModal();
+    });
+    document.getElementById('pause-exit-btn').addEventListener('click', () => {
+      // Salir a la invitación principal
+      closePauseModal();
+      // Detener el juego
+      if (animFrameId) cancelAnimationFrame(animFrameId);
+      running = false;
+      gameOver = true;
+      // Redirigir
       window.location.href = '../index.html?volver=1';
-    }, 220);
-  });
-
-  menuRules.addEventListener('click', (e) => {
-    e.stopPropagation();
-    soundTap();
-    if (modalRules) modalRules.classList.add('open');
-  });
-
-  rulesClose.addEventListener('click', () => {
-    if (modalRules) modalRules.classList.remove('open');
-  });
-
-  if (menuResetTops) {
-    menuResetTops.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (confirm('¿Seguro que quieres reiniciar las mejores puntuaciones?')) {
-        saveHighScores([]);
-        updateScoresList();
-        soundTap();
-      }
     });
   }
 
-  function isValidName(name) {
-    return /^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/.test(name);
-  }
-
-  gameoverSave.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const name = playerNameInput.value.trim();
-    if (!isValidName(name) || name === '') {
-      nameError.style.display = 'block';
-      return;
-    }
-    nameError.style.display = 'none';
-    addHighScore(name, playerScore);
-    pendingHighScore = false;
-    gameoverInputContainer.style.display = 'none';
-    cleanGameState();
-    showMenu(false);
-    livesEl.style.display = 'none';
-    scoreEl.style.display = 'none';
-    pauseBtn.style.display = 'none';
-    menuBtn.style.display = 'none';
-    running = false;
-    gameOver = false;
-    if (animFrameId) cancelAnimationFrame(animFrameId);
-    soundTap();
-  });
-
-  playerNameInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') gameoverSave.click();
-  });
-
-  gameoverMenuBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    soundTap();
-    cleanGameState();
-    hideMenu();
-    showMenu(false);
-    livesEl.style.display = 'none';
-    scoreEl.style.display = 'none';
-    pauseBtn.style.display = 'none';
-    menuBtn.style.display = 'none';
-    running = false;
-    gameOver = false;
-    if (animFrameId) cancelAnimationFrame(animFrameId);
-  });
-
-  menuBtn.addEventListener('click', () => {
-    if (!running && !gameOver) return;
-    soundTap();
-    cleanGameState();
-    hideMenu();
-    showMenu(false);
-    livesEl.style.display = 'none';
-    scoreEl.style.display = 'none';
-    pauseBtn.style.display = 'none';
-    menuBtn.style.display = 'none';
-    running = false;
-    gameOver = false;
-    if (animFrameId) cancelAnimationFrame(animFrameId);
-  });
-
-  // ========== PAUSA ==========
-  function togglePause() {
-    if (!running || gameOver) return;
-    const now = performance.now();
+  function openPauseModal() {
+    if (!pauseModalOverlay) createPauseModal();
+    // Actualizar ranking y tiempo
+    updatePauseModal();
+    pauseModalOverlay.classList.add('open');
+    // Pausar el juego
     if (!paused) {
       paused = true;
       pauseBtn.textContent = '▶️';
-      pauseStartTime = now;
+      pauseStartTime = performance.now();
       if (gameTimeActive) gameTimeActive = false;
-    } else {
+    }
+    // Iniciar actualización del tiempo cada segundo
+    if (pauseTimerInterval) clearInterval(pauseTimerInterval);
+    pauseTimerInterval = setInterval(() => {
+      updatePauseTimeDisplay();
+    }, 1000);
+    updatePauseTimeDisplay();
+  }
+
+  function closePauseModal() {
+    if (pauseModalOverlay) pauseModalOverlay.classList.remove('open');
+    if (pauseTimerInterval) {
+      clearInterval(pauseTimerInterval);
+      pauseTimerInterval = null;
+    }
+    // Reanudar
+    if (paused) {
       paused = false;
       pauseBtn.textContent = '⏸️';
-      pausedTime += (now - pauseStartTime);
+      pausedTime += (performance.now() - pauseStartTime);
       if (launched) gameTimeActive = true;
       lastTime = 0;
     }
   }
 
-  function handleSpace() {
-    if (!running || gameOver) return;
-    if (paused) { togglePause(); return; }
-    if (!launched) launchBall();
-    else togglePause();
+  function updatePauseTimeDisplay() {
+    const display = document.getElementById('pause-time-display');
+    if (display) {
+      const totalSeconds = Math.floor((gameStartTime > 0 ? (performance.now() - gameStartTime - pausedTime) / 1000 : 0));
+      const mins = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+      const secs = String(totalSeconds % 60).padStart(2, '0');
+      display.textContent = `${mins}:${secs}`;
+    }
   }
 
-  pauseBtn.addEventListener('click', togglePause);
-  document.addEventListener('keydown', (e) => {
-    if (e.key === ' ' || e.key === 'Space') {
-      e.preventDefault();
-      handleSpace();
+  function updatePauseModal() {
+    // Actualizar ranking
+    const rankList = document.getElementById('pause-rank-list');
+    if (rankList) {
+      const scores = getHighScores();
+      rankList.innerHTML = '';
+      if (scores.length === 0) {
+        rankList.innerHTML = '<div style="text-align:center; color:#888; font-size:0.7rem;">Sin puntuaciones aún</div>';
+      } else {
+        const top3 = scores.slice(0, 3);
+        top3.forEach((s, i) => {
+          const div = document.createElement('div');
+          div.className = 'rank-item';
+          const timeStr = s.time ? `${String(Math.floor(s.time / 60)).padStart(2, '0')}:${String(s.time % 60).padStart(2, '0')}` : '--:--';
+          div.innerHTML = `
+            <span><span class="pos">#${i+1}</span> ${s.name}</span>
+            <span>${s.score} pts · ${timeStr}</span>
+          `;
+          rankList.appendChild(div);
+        });
+      }
     }
-  });
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden && running && !paused && !gameOver) togglePause();
-  });
+    updatePauseTimeDisplay();
+  }
 
   // ========== FUNCIONES DEL JUEGO ==========
+  // (las funciones de ladrillos, power-ups, etc. se mantienen igual que antes,
+  // solo se añaden los cambios necesarios para el tiempo y el modal de pausa)
+
   function getBrickTypeFromValue(val) {
     if (val === 1) return BRICK_TYPES.CLAY;
     if (val === 2) return BRICK_TYPES.WOOD;
@@ -638,34 +451,6 @@ export function initJuego(config, mobile = false) {
     } else {
       brick.crackImg.style.display = 'none';
     }
-  }
-
-  function upgradeBrickType(brick) {
-    if (brick.type === BRICK_TYPES.CLAY) {
-      brick.type = BRICK_TYPES.WOOD;
-    } else if (brick.type === BRICK_TYPES.WOOD) {
-      brick.type = BRICK_TYPES.IRON;
-    } else return false;
-    brick.hits = brick.type.hits;
-    brick.maxHits = brick.type.hits;
-    brick.value = brick.type.value;
-    brick.playerPoints = brick.type.playerPoints;
-    updateBrickVisual(brick);
-    return true;
-  }
-
-  function downgradeBrickType(brick) {
-    if (brick.type === BRICK_TYPES.IRON) {
-      brick.type = BRICK_TYPES.WOOD;
-    } else if (brick.type === BRICK_TYPES.WOOD) {
-      brick.type = BRICK_TYPES.CLAY;
-    } else return false;
-    brick.hits = brick.type.hits;
-    brick.maxHits = brick.type.hits;
-    brick.value = brick.type.value;
-    brick.playerPoints = brick.type.playerPoints;
-    updateBrickVisual(brick);
-    return true;
   }
 
   function generateBrickValues() {
@@ -954,8 +739,6 @@ export function initJuego(config, mobile = false) {
     powerupsInAir++;
     lastPowerupTime = now;
 
-    // NO sonido al aparecer (solo al recoger)
-
     const isGreen = color === 'verde';
     const size = isGreen ? 24 : 36;
     const speed = isGreen ? 120 : 40;
@@ -1013,7 +796,6 @@ export function initJuego(config, mobile = false) {
     el.textContent = '★';
     inner.appendChild(el);
 
-    // Añadir keyframe si no existe
     if (!document.querySelector('#golden-glow')) {
       const style = document.createElement('style');
       style.id = 'golden-glow';
@@ -1031,7 +813,6 @@ export function initJuego(config, mobile = false) {
       type: 'BOLA_AZUL', el: el, alive: true, isBlue: true
     });
     powerupsInAir++;
-    // No sonido al aparecer, solo al recoger
   }
 
   function applyBlueBall() {
@@ -1076,6 +857,33 @@ export function initJuego(config, mobile = false) {
     updateUI();
     blueBallActive = false;
     draw();
+  }
+
+  function showFloatingMessage(text, color = '#fff', duration = 1500) {
+    const el = document.createElement('div');
+    el.style.cssText = `
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1.1rem;
+      color: ${color};
+      text-shadow: 0 0 20px rgba(0,0,0,0.9), 0 0 10px ${color}40;
+      pointer-events: none;
+      z-index: 30;
+      animation: floatMsg 1.8s ease forwards;
+      text-align: center;
+      white-space: nowrap;
+      background: rgba(0,0,0,0.4);
+      padding: 0.3rem 1.2rem;
+      border-radius: 30px;
+      backdrop-filter: blur(2px);
+      border: 1px solid ${color}60;
+    `;
+    el.textContent = text;
+    inner.appendChild(el);
+    setTimeout(() => el.remove(), duration + 200);
   }
 
   function launchBall() {
@@ -1129,10 +937,8 @@ export function initJuego(config, mobile = false) {
     gameOver = false;
     paused = false;
     pauseBtn.textContent = '⏸️';
-    livesEl.style.display = 'none';
-    scoreEl.style.display = 'none';
-    pauseBtn.style.display = 'none';
-    menuBtn.style.display = 'none';
+    livesEl.style.display = 'block';
+    scoreEl.style.display = 'block';
     msgEl.classList.remove('show');
     updateUI();
     draw();
@@ -1147,6 +953,8 @@ export function initJuego(config, mobile = false) {
     pauseBtn.textContent = '⏸️';
     pausedTime = 0;
     pauseStartTime = 0;
+    gameStartTime = 0;
+    elapsedTimeSeconds = 0;
     bricks = [];
     powerups = [];
     activePowerupTypes.clear();
@@ -1175,7 +983,6 @@ export function initJuego(config, mobile = false) {
     touchX = 0;
     mouseActive = false;
     mouseX = 0;
-    gameStartTime = 0;
     lastTime = 0;
     gameTimeActive = false;
 
@@ -1263,16 +1070,42 @@ export function initJuego(config, mobile = false) {
     gameTimeActive = false;
     if (animFrameId) cancelAnimationFrame(animFrameId);
     soundGameOver();
-    showMenu(true, playerScore);
+    // Mostrar game over (similar a antes)
+    const totalSeconds = Math.floor((gameStartTime > 0 ? (performance.now() - gameStartTime - pausedTime) / 1000 : 0));
+    if (menuGameover) {
+      gameoverScore.textContent = `Puntuación: ${playerScore}  ·  Tiempo: ${String(Math.floor(totalSeconds / 60)).padStart(2, '0')}:${String(totalSeconds % 60).padStart(2, '0')}`;
+      if (gameoverThemeMsg) gameoverThemeMsg.textContent = getThemeMessage(playerScore);
+      const isTop = isHighScore(playerScore) && playerScore > 0;
+      if (isTop) {
+        pendingHighScore = true;
+        gameoverInputContainer.style.display = 'block';
+        playerNameInput.value = '';
+        playerNameInput.focus();
+        gameoverMenuBtn.style.display = 'none';
+        nameError.style.display = 'none';
+      } else {
+        pendingHighScore = false;
+        gameoverInputContainer.style.display = 'none';
+        gameoverMenuBtn.style.display = 'block';
+        gameoverMenuBtn.textContent = '🏠 Salir';
+      }
+      // Mostrar menú game over
+      menuEl.style.display = 'flex';
+      menuGameover.style.display = 'block';
+      menuContent.style.display = 'none';
+    }
     livesEl.style.display = 'none';
     scoreEl.style.display = 'none';
     pauseBtn.style.display = 'none';
-    menuBtn.style.display = 'none';
-    soundLose();
   }
 
   function startGame() {
     resetGameState();
+    // Iniciar tiempo
+    gameStartTime = performance.now();
+    pausedTime = 0;
+    gameTimeActive = false;
+
     const clayValues = new Array(BRICK_ROWS * BRICK_COLS).fill(1);
     inner.querySelectorAll('.brick').forEach(b => b.remove());
     bricks = [];
@@ -1287,15 +1120,10 @@ export function initJuego(config, mobile = false) {
     msgEl.classList.remove('show');
     running = true;
     gameOver = false;
-    gameStartTime = performance.now();
-    pausedTime = 0;
-    pauseStartTime = 0;
-    gameTimeActive = false;
     layoutStage();
     livesEl.style.display = 'block';
     scoreEl.style.display = 'block';
     pauseBtn.style.display = 'block';
-    menuBtn.style.display = 'block';
     updateUI();
     updateDurabilityVisual();
     draw();
@@ -1368,7 +1196,6 @@ export function initJuego(config, mobile = false) {
     nieblaEl.style.height = totalHeight + 'px';
     nieblaEl.style.opacity = boundary > 0 ? 1 : 0;
     
-    // Sonidos de niebla
     if (nieblaLevel > prevNieblaLevel) {
       soundFogAppear();
     } else if (nieblaLevel < prevNieblaLevel && nieblaLevel === 0) {
@@ -1527,7 +1354,7 @@ export function initJuego(config, mobile = false) {
 
           const damage = ballDurability;
           br.hits -= damage;
-          soundBrick(); // sonido de impacto general
+          soundBrick();
           if (br.hits <= 0) {
             br.alive = false;
             br.el.classList.add('gone');
@@ -1539,7 +1366,6 @@ export function initJuego(config, mobile = false) {
             gamePoints -= br.value;
             ladrillosRotos++;
             
-            // Sonido de destrucción según material
             switch (br.type) {
               case BRICK_TYPES.CLAY: soundClay(); break;
               case BRICK_TYPES.WOOD: soundWood(); break;
@@ -1583,7 +1409,6 @@ export function initJuego(config, mobile = false) {
         if (pu.isBlue) {
           applyBlueBall();
         } else {
-          // Sonido al recoger power-up (solo aquí)
           if (pu.color === 'verde') {
             soundPowerupGood();
           } else {
@@ -1664,36 +1489,27 @@ export function initJuego(config, mobile = false) {
     draw();
   }
 
-  function openGame() {
-    cleanGameState();
-    overlay.classList.add('open');
-    gameIsOpen = true;
-    showMenu(false);
-    layoutStage();
-    updateUI();
-    updateDurabilityVisual();
-    livesEl.style.display = 'none';
-    scoreEl.style.display = 'none';
-    pauseBtn.style.display = 'none';
-    menuBtn.style.display = 'none';
-    running = false;
-    gameOver = false;
-    if (animFrameId) cancelAnimationFrame(animFrameId);
-    draw();
-  }
-
-  function closeGame() {
-    if (animFrameId) cancelAnimationFrame(animFrameId);
-    running = false;
-    paused = false;
-    gameOver = false;
-    gameTimeActive = false;
-    pauseBtn.textContent = '⏸️';
-    overlay.classList.remove('open');
-    cleanGameState();
-    gameIsOpen = false;
-    soundClose();
-    console.log('🧹 Juego cerrado y limpiado');
+  function getThemeMessage(score) {
+    const THEME_MESSAGES = [
+      'La rosa apenas empieza a florecer... ¡vuelve a intentarlo!',
+      'Como Bella cruzando el portón por primera vez: buen comienzo, sigue así.',
+      'El hechizo comienza a ceder ante ti. ¡Vas por buen camino!',
+      'Los candelabros del salón se encienden para acompañarte. ¡Bien hecho!',
+      'Bailas con la gracia de una quinceañera en su vals. ¡Sigue brillando!',
+      'La Bestia sonríe al ver tu talento. ¡Vas a medio camino!',
+      'Todo el castillo murmura tu nombre. ¡Vas impresionando!',
+      'Tu corona de XV brilla un poco más con cada punto. ¡Adelante!',
+      'Como en el cuento, la magia está de tu lado. ¡Vas muy arriba!',
+      'Los pétalos de la rosa encantada aún no caen: tu magia sigue viva.',
+      '¡Cien mil puntos! Dignos de una noche de gala en el gran salón.',
+      'Bailas como la propia Bella con su vestido dorado. ¡Espectacular!',
+      'El hechizo se rompe gracias a ti: puntaje digno de leyenda.',
+      'Toda la corte del castillo aplaude de pie. ¡Ya casi al tope!',
+      'A un paso de la perfección... una quinceañera legendaria.',
+      '🌹 ¡Puntaje máximo! Un final de cuento de hadas — fuiste el alma de esta fiesta encantada. ¡Feliz XV!'
+    ];
+    const tier = Math.min(Math.floor(Math.max(score, 0) / 10000), THEME_MESSAGES.length - 1);
+    return THEME_MESSAGES[tier];
   }
 
   function layoutStage() {
@@ -1768,7 +1584,55 @@ export function initJuego(config, mobile = false) {
   stage.addEventListener('touchend', () => { touchActive = false; }, { passive: true });
   stage.addEventListener('touchcancel', () => { touchActive = false; }, { passive: true });
 
-  window.addEventListener('resize', () => { layoutStage(); draw(); });
+  // ========== BOTÓN DE PAUSA ==========
+  pauseBtn.addEventListener('click', () => {
+    if (!running || gameOver) return;
+    if (paused) {
+      // Si ya está pausado, cerrar el modal (reanudar)
+      closePauseModal();
+    } else {
+      // Abrir modal de pausa
+      openPauseModal();
+    }
+  });
+
+  // ========== GAME OVER: GUARDAR PUNTAJE ==========
+  gameoverSave.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const name = playerNameInput.value.trim();
+    if (!isValidName(name) || name === '') {
+      nameError.style.display = 'block';
+      return;
+    }
+    nameError.style.display = 'none';
+    const totalSeconds = Math.floor((gameStartTime > 0 ? (performance.now() - gameStartTime - pausedTime) / 1000 : 0));
+    addHighScore(name, playerScore, totalSeconds);
+    pendingHighScore = false;
+    gameoverInputContainer.style.display = 'none';
+    cleanGameState();
+    // Volver al menú de inicio (ya no existe, así que volvemos a la invitación)
+    window.location.href = '../index.html?volver=1';
+  });
+
+  gameoverMenuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    // Salir a invitación
+    window.location.href = '../index.html?volver=1';
+  });
+
+  function isValidName(name) {
+    return /^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/.test(name);
+  }
+
+  playerNameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') gameoverSave.click();
+  });
+
+  // ========== INICIO DEL JUEGO ==========
+  // Crear modal de pausa
+  createPauseModal();
+  // Iniciar partida directamente
+  startGame();
   layoutStage();
-  console.log('✅ Juego inicializado con sonidos y mejoras');
+  console.log('✅ Juego iniciado (sin menú de inicio)');
 }
