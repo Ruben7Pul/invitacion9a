@@ -82,22 +82,19 @@ function rellenarDatos(config) {
   if (hint) hint.style.display = 'none';
 }
 
-// Generar calendario de octubre 2026 con rosa en día 10
+// ===== GENERAR CALENDARIO =====
 function generarCalendario() {
   const container = document.getElementById('calendario-container');
   if (!container) return;
   const year = 2026;
-  const month = 9; // octubre (0-index)
-  const fechaEspecial = 10; // día 10
+  const month = 9; // octubre
+  const fechaEspecial = 10;
 
   const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-  const primerDia = new Date(year, month, 1).getDay(); // 0=domingo
+  const primerDia = new Date(year, month, 1).getDay();
   const diasEnMes = new Date(year, month + 1, 0).getDate();
 
-  // Limpiar el contenedor (por si se llama varias veces)
   container.innerHTML = '';
-
-  // Encabezados
   diasSemana.forEach(nombre => {
     const div = document.createElement('div');
     div.className = 'dia-nombre';
@@ -105,7 +102,6 @@ function generarCalendario() {
     container.appendChild(div);
   });
 
-  // Días vacíos antes del primer día
   for (let i = 0; i < primerDia; i++) {
     const div = document.createElement('div');
     div.className = 'dia';
@@ -113,7 +109,6 @@ function generarCalendario() {
     container.appendChild(div);
   }
 
-  // Días del mes
   for (let d = 1; d <= diasEnMes; d++) {
     const div = document.createElement('div');
     div.className = 'dia';
@@ -127,10 +122,147 @@ function generarCalendario() {
   }
 }
 
+// ===== GENERAR EVENTOS DEL CALENDARIO CON BOTONES =====
+function generarEventosCalendario(config) {
+  const container = document.getElementById('calendario-eventos');
+  if (!container) return;
+
+  const eventos = [
+    { fecha: '8 de octubre', hora: '9:00 AM', desc: '🎂 Cumpleaños', fechaISO: '2026-10-08T09:00:00', duracion: 2 },
+    { fecha: '10 de octubre', hora: '1:00 PM', desc: '🌹 XV años', fechaISO: '2026-10-10T13:00:00', duracion: 8 },
+    { fecha: '11 de octubre', hora: '9:00 AM', desc: '☀️ Desayuno', fechaISO: '2026-10-11T09:00:00', duracion: 3 },
+  ];
+
+  container.innerHTML = '';
+  eventos.forEach(ev => {
+    const div = document.createElement('div');
+    div.className = 'calendario-evento';
+
+    const info = document.createElement('div');
+    info.className = 'evento-info';
+    info.innerHTML = `
+      <span class="fecha">${ev.fecha}</span>
+      <span class="hora">${ev.hora}</span>
+      <span class="desc">${ev.desc}</span>
+    `;
+
+    const btn = document.createElement('button');
+    btn.className = 'btn-agregar';
+    btn.textContent = '📅 Añadir';
+    btn.addEventListener('click', () => {
+      agregarACalendario(ev, config);
+    });
+
+    div.appendChild(info);
+    div.appendChild(btn);
+    container.appendChild(div);
+  });
+}
+
+function agregarACalendario(evento, config) {
+  const fecha = new Date(evento.fechaISO);
+  const inicio = fecha.toISOString().replace(/-|:|\.\d+/g, '');
+  const fin = new Date(fecha.getTime() + evento.duracion * 60 * 60 * 1000).toISOString().replace(/-|:|\.\d+/g, '');
+
+  const titulo = encodeURIComponent(`${evento.desc} · ${config.nombre}`);
+  const descripcion = encodeURIComponent(`Invitación a los XV años de ${config.nombre}. ${evento.desc}`);
+  const ubicacion = encodeURIComponent('Iglesia de Tianguistenco de Galeana / Auditorio');
+
+  const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${titulo}&dates=${inicio}/${fin}&details=${descripcion}&location=${ubicacion}&sf=true&output=xml`;
+  window.open(url, '_blank');
+}
+
+// ===== CONTADOR CON ANILLO CIRCULAR =====
+function initContadorCircular(config) {
+  const target = new Date(config.fechaISO).getTime();
+  if (isNaN(target)) return;
+
+  const units = document.querySelectorAll('.clock .unit');
+  if (!units.length) return;
+
+  function actualizarContador() {
+    const now = Date.now();
+    const diff = target - now;
+
+    if (diff <= 0) {
+      document.querySelector('.clock').style.display = 'none';
+      document.getElementById('contador-mensaje').textContent = '¡El gran día ha llegado! 🎉';
+      return;
+    }
+
+    const days = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+
+    const maxValues = [365, 24, 60, 60];
+    const values = [days, hours, minutes, seconds];
+    const ids = ['d', 'h', 'm', 's'];
+
+    units.forEach((unit, index) => {
+      const numEl = unit.querySelector('.num');
+      const circle = unit.querySelector('.progress-circle');
+      if (numEl) numEl.textContent = String(values[index]).padStart(2, '0');
+
+      if (circle) {
+        const max = maxValues[index];
+        const val = values[index];
+        const circumference = 2 * Math.PI * 26;
+        const progress = max > 0 ? (max - val) / max : 0;
+        const offset = progress * circumference;
+        circle.style.strokeDasharray = circumference;
+        circle.style.strokeDashoffset = offset;
+      }
+    });
+
+    // Mensaje dinámico
+    const msgEl = document.getElementById('contador-mensaje');
+    if (msgEl) {
+      let mensaje = '';
+      if (days > 30) mensaje = 'Falta un poco más de un mes...';
+      else if (days > 7) mensaje = 'La espera se hace corta.';
+      else if (days > 1) mensaje = '¡Ya casi llega!';
+      else if (days === 1) mensaje = '¡Mañana es el gran día!';
+      else if (days === 0 && hours > 6) mensaje = '¡Hoy es el día!';
+      else if (days === 0 && hours > 1) mensaje = '¡En unas horas comienza!';
+      else if (days === 0 && hours >= 0) mensaje = '¡El momento está aquí!';
+      msgEl.textContent = mensaje;
+    }
+  }
+
+  // Crear los SVG dentro de cada unidad si no existen
+  units.forEach((unit) => {
+    let circleWrap = unit.querySelector('.circle-wrap');
+    if (!circleWrap) {
+      const wrap = document.createElement('div');
+      wrap.className = 'circle-wrap';
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 60 60');
+      svg.innerHTML = `
+        <circle class="bg-circle" cx="30" cy="30" r="26" />
+        <circle class="progress-circle" cx="30" cy="30" r="26" stroke-dasharray="163.36" stroke-dashoffset="0" />
+      `;
+      wrap.appendChild(svg);
+      const num = unit.querySelector('.num');
+      unit.insertBefore(wrap, num);
+      wrap.appendChild(num);
+      num.style.position = 'absolute';
+      num.style.top = '50%';
+      num.style.left = '50%';
+      num.style.transform = 'translate(-50%, -50%)';
+    }
+  });
+
+  actualizarContador();
+  setInterval(actualizarContador, 200);
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const config = await cargarConfig();
   rellenarDatos(config);
   generarCalendario();
+  generarEventosCalendario(config);
+  initContadorCircular(config);
 
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
@@ -149,10 +281,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function cargarContador() {
     if (appIniciada) return;
     appIniciada = true;
-    try {
-      const { initContador } = await import('./modules/contador.js');
-      initContador(config);
-    } catch (e) { console.error('❌ Contador:', e); }
+    // El contador ya está inicializado arriba, pero lo dejamos por compatibilidad
   }
 
   const nombreEl = document.getElementById('nombre-hero');
@@ -227,7 +356,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   backBtn.addEventListener('click', cerrarReja);
 
-  // Parallax (sin cambios)
+  // Parallax
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
   let gyroWorking = false;
@@ -333,7 +462,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // ===== OBSERVADOR PARA ANIMACIONES DE SECCIONES (con repetición) =====
+  // Observador para animaciones de secciones
   if ('IntersectionObserver' in window) {
     const secciones = document.querySelectorAll('.seccion');
     const observer = new IntersectionObserver((entries) => {
