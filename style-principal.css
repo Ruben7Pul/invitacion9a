@@ -1,5 +1,184 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS OPTIMIZADOS (DESAPARICIÓN INSTANTÁNEA)
+   🎨 OPTIMIZACIONES CSS PARA RENDIMIENTO
+   ============================================================ */
+
+/* ---- 1. GPU ACCELERATION ---- */
+html,
+body {
+  transform: translate3d(0, 0, 0);
+  will-change: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Videos y elementos de fondo */
+#video-app,
+#video-portal,
+.centro-animacion {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  perspective: 1000px;
+  transform: translate3d(0, 0, 0);
+  will-change: auto;
+}
+
+/* Parallax elements */
+.portal-inner,
+#app-inner {
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
+/* Animaciones de secciones */
+.seccion {
+  will-change: opacity, transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
+/* SVG optimizado */
+svg {
+  paint-order: stroke fill markers;
+}
+
+/* Filtros blur solo cuando sea necesario */
+#glow,
+#glow2 {
+  filter: url(#glow) drop-shadow(0 0 2px rgba(0, 0, 0, 0.1));
+}
+
+/* Puertas de la reja */
+.gate-leaf {
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
+/* ---- 2. VIDEOS CON DIMENSIONES FIJAS ---- */
+video {
+  display: block;
+  width: 100%;
+  height: auto;
+  transform: translate3d(0, 0, 0);
+  will-change: auto;
+  object-fit: cover;
+}
+
+#video-app,
+#video-portal {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  object-fit: cover;
+}
+
+/* ---- 3. CONTENEDOR PRINCIPAL (PORTAL / APP) ---- */
+#portal,
+#app {
+  width: 100vw;
+  height: 100vh;
+  will-change: auto;
+  transform: translate3d(0, 0, 0);
+  contain: layout style paint;
+  position: fixed;
+  inset: 0;
+}
+
+#portal {
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+/* ---- 4. SCROLLING OPTIMIZADO ---- */
+body {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+}
+
+.seccion {
+  contain: layout style paint;
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
+/* ---- 5. TRANSICIONES EFICIENTES (SOLO TRANSFORM Y OPACITY) ---- */
+.gate-leaf {
+  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+
+.seccion {
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+/* ---- 6. IMÁGENES RESPONSIVAS (LAZY LOAD) ---- */
+img[loading="lazy"] {
+  height: auto;
+  aspect-ratio: attr(width) / attr(height);
+}
+
+/* ---- 7. OPTIMIZACIÓN PARA MÓVILES ---- */
+@media (hover: none) and (pointer: coarse) {
+  /* Desactivar parallax y efectos pesados en móviles */
+  .portal-inner,
+  #app-inner {
+    will-change: auto;
+    transform: none !important;
+  }
+
+  /* Simplificar animaciones en móvil */
+  * {
+    animation-duration: 0.6s !important;
+    transition-duration: 0.3s !important;
+  }
+
+  /* Reducir blur / filtros */
+  #glow,
+  #glow2 {
+    filter: none;
+  }
+
+  /* Videos: reduce percepción de bitrate */
+  video {
+    opacity: 0.95;
+  }
+
+  /* Menos scroll en landscape */
+  @media (orientation: landscape) {
+    .seccion {
+      padding: 1.5rem 1rem;
+    }
+  }
+}
+
+/* ---- 8. PREVENIR LAYOUT SHIFT ---- */
+.video-container {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+.countdown-unit {
+  width: 60px;
+  height: 60px;
+  contain: layout style paint;
+}
+
+/* ---- 9. FUENTES OPTIMIZADAS ---- */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&display=swap');
+
+body {
+  font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+}
+
+/* ============================================================
+   🌹 INVITACIÓN XV – ESTILOS BASE (CON BRILLOS Y ANIMACIONES)
    ============================================================ */
 
 :root {
@@ -67,28 +246,6 @@ body {
     background-position: 50% 30%;
     background-size: auto 120%;
   }
-}
-
-/* ===== VIDEOS - OCUPAN TODO EL ANCHO ===== */
-#video-app, #video-portal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  pointer-events: none;
-  will-change: transform;
-}
-#video-app {
-  z-index: 1;
-  opacity: 0.7;
-  mix-blend-mode: screen;
-}
-#video-portal {
-  z-index: 0;
-  opacity: 0.6;
-  mix-blend-mode: screen;
 }
 
 .gold-text {
