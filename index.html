@@ -218,6 +218,14 @@
     </div>
   </div>
 
+  <!-- TRANSICIÓN MÁGICA (puerta/castillo) -->
+  <div id="transition-overlay" aria-hidden="true">
+    <video id="transition-video" muted playsinline preload="auto">
+      <source src="archivos/transicion.mp4" type="video/mp4">
+    </video>
+    <div class="transition-text">✨ Abriendo el castillo... ✨</div>
+  </div>
+
   <!-- APP PRINCIPAL (scrollable) -->
   <div id="app" role="main">
     <div id="app-inner">
@@ -305,16 +313,7 @@
         <p id="contador-mensaje" class="gold-text" style="font-family:var(--script); font-size:clamp(1.2rem,3vw,1.6rem); margin-top:0.6rem;">Cargando...</p>
       </section>
 
-      <!-- SECCIÓN 4: GUSTOS (NUEVA) -->
-      <section id="seccion-gustos" class="seccion">
-        <h2 class="gold-text">🎨 Gustos 🎨</h2>
-        <button id="btn-abrir-gustos" class="btn-mapa gold-text" style="margin-top: 0.5rem; border: 2px solid #d4af37; background: rgba(212, 175, 55, 0.15); width: 100%; font-size: clamp(1rem, 2.5vw, 1.3rem); padding: 0.6rem 1rem;">
-          🖼️ Conoce mis gustos
-        </button>
-        <p class="seccion-subtitulo gold-text" style="margin-top: 0.4rem; font-size: clamp(0.8rem, 1.5vw, 0.95rem); opacity:0.7;">Algunas de mis inspiraciones</p>
-      </section>
-
-      <!-- SECCIÓN 5: DÓNDE (LUGARES) -->
+      <!-- SECCIÓN 4: DÓNDE (LUGARES) -->
       <section id="seccion-lugares" class="seccion">
         <h2 class="gold-text">🏰 Donde 🏰</h2>
         <div class="detalle-card">
@@ -346,7 +345,7 @@
         </div>
       </section>
 
-      <!-- SECCIÓN 6: ITINERARIO -->
+      <!-- SECCIÓN 5: ITINERARIO (solo 10 de octubre) -->
       <section id="seccion-itinerario" class="seccion">
         <h2 class="gold-text">📋 Itinerario 📋</h2>
         <div class="itinerario-dia">
@@ -360,16 +359,10 @@
             <div class="itinerario-item" data-hora="1200"><span class="itinerario-hora">8:00 PM</span><span class="itinerario-evento">Pastel</span></div>
           </div>
         </div>
-        <div class="itinerario-dia">
-          <h3 class="itinerario-dia-titulo gold-text">11 de octubre</h3>
-          <div class="itinerario-lista">
-            <div class="itinerario-item" data-hora="540"><span class="itinerario-hora">9:00 AM</span><span class="itinerario-evento">Desayuno</span></div>
-          </div>
-        </div>
         <p class="itinerario-nota gold-text">📌 Los horarios pueden variar.</p>
       </section>
 
-      <!-- SECCIÓN 7: DEDICATORIAS -->
+      <!-- SECCIÓN 6: DEDICATORIAS -->
       <section id="seccion-libro-firmas" class="seccion">
         <h2 class="gold-text">📖 Dedicatorias 📖</h2>
         <div class="libro-firmas-contenido">
@@ -383,6 +376,15 @@
             📌 El día del evento se tendrá también un libro de firmas físico.
           </p>
         </div>
+      </section>
+
+      <!-- SECCIÓN 7: GUSTOS (movida después de Dedicatorias) -->
+      <section id="seccion-gustos" class="seccion">
+        <h2 class="gold-text">🎨 Gustos 🎨</h2>
+        <button id="btn-abrir-gustos" class="btn-mapa gold-text" style="margin-top: 0.5rem; border: 2px solid #d4af37; background: rgba(212, 175, 55, 0.15); width: 100%; font-size: clamp(1rem, 2.5vw, 1.3rem); padding: 0.6rem 1rem;">
+          🖼️ Conoce mis gustos
+        </button>
+        <p class="seccion-subtitulo gold-text" style="margin-top: 0.4rem; font-size: clamp(0.8rem, 1.5vw, 0.95rem); opacity:0.7;">Algunas de mis inspiraciones</p>
       </section>
 
       <!-- SECCIÓN 8: AGRADECIMIENTOS -->
