@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – VERSIÓN CANVAS CORREGIDA (visual y funcional)
+// juego.js – VERSIÓN CANVAS CORREGIDA (todas las mejoras)
 // ============================================================
-console.log('📦 juego.js (canvas corregido)');
+console.log('📦 juego.js (canvas corregido final)');
 
 import { 
   soundBrick, 
@@ -22,8 +22,8 @@ const STAGE_H = 420;
 const TOP_OFFSET = 30;
 const BALL_SPEED = 264;
 const PADDLE_SPEED = 300;
-const BRICK_ROWS = 4;   // ← 4 filas
-const BRICK_COLS = 6;   // ← 6 columnas → total 24 ladrillos
+const BRICK_ROWS = 4;
+const BRICK_COLS = 6;
 const TARGET_GAME_POINTS = 18;
 const REGEN_THRESHOLD = 9;
 const BALL_LOW_Y = STAGE_H - 60;
@@ -129,14 +129,13 @@ function isHighScore(score) {
 
 // ========== FUNCIÓN PRINCIPAL ==========
 export function initJuego(config, mobile = false) {
-  console.log('🎮 Iniciando juego (Canvas corregido)');
+  console.log('🎮 Iniciando juego (Canvas corregido final)');
 
   // ========== ELEMENTOS ==========
   const overlay = document.getElementById('game-overlay');
   const stage = document.getElementById('game-stage');
   const inner = document.getElementById('game-inner');
   
-  // Crear el canvas y reemplazar el contenido de game-inner
   const canvas = document.createElement('canvas');
   canvas.width = STAGE_W;
   canvas.height = STAGE_H;
@@ -167,7 +166,6 @@ export function initJuego(config, mobile = false) {
   const gameoverMenuBtn = document.getElementById('gameover-menu-btn');
   const nameError = document.getElementById('name-error');
 
-  // Estilos para la interfaz
   livesEl.style.fontFamily = "'Press Start 2P', monospace";
   livesEl.style.fontSize = '1.2rem';
   livesEl.style.letterSpacing = '0.1em';
@@ -246,7 +244,7 @@ export function initJuego(config, mobile = false) {
     });
   }
 
-  // ========== MODAL DE PAUSA (sin cambios) ==========
+  // ========== MODAL DE PAUSA ==========
   let pauseModal = null;
   let pauseModalOverlay = null;
 
@@ -325,6 +323,7 @@ export function initJuego(config, mobile = false) {
         lastDifficultyUpdate = performance.now();
       }
       lastTime = 0;
+      // No lanzar la bola automáticamente
     }
   }
 
@@ -594,7 +593,8 @@ export function initJuego(config, mobile = false) {
   }
 
   function spawnPowerup(brick) {
-    if (ladrillosRotos <= 36) return;
+    // Quitamos el límite de 36 ladrillos rotos
+    // if (ladrillosRotos <= 36) return;  // ELIMINADO
     if (powerupsInAir >= 2) return;
 
     const now = performance.now();
@@ -724,7 +724,6 @@ export function initJuego(config, mobile = false) {
       ctx2.shadowColor = 'rgba(0,0,0,0.8)';
       ctx2.shadowBlur = 15;
       ctx2.fillStyle = 'rgba(0,0,0,0.5)';
-      // roundRect polyfill
       if (ctx2.roundRect) {
         ctx2.beginPath();
         ctx2.roundRect(x - w/2, y - h/2, w, h, 20);
@@ -1011,7 +1010,7 @@ export function initJuego(config, mobile = false) {
   function draw() {
     ctx.clearRect(0, 0, STAGE_W, STAGE_H);
 
-    // Fondo: imagen en modo cover (sin deformar)
+    // Fondo
     if (!draw.bgImage) {
       draw.bgImage = new Image();
       draw.bgImage.src = '../archivos/jueg1.png';
@@ -1022,7 +1021,6 @@ export function initJuego(config, mobile = false) {
       const canvasAspect = STAGE_W / STAGE_H;
       let drawW, drawH, dx, dy;
       if (imgAspect > canvasAspect) {
-        // imagen más ancha que el canvas
         drawH = STAGE_H;
         drawW = STAGE_H * imgAspect;
         dx = (STAGE_W - drawW) / 2;
@@ -1039,7 +1037,7 @@ export function initJuego(config, mobile = false) {
       ctx.fillRect(0, 0, STAGE_W, STAGE_H);
     }
 
-    // Ladrillos con bordes redondeados
+    // Ladrillos con brillo
     for (const br of bricks) {
       if (!br.alive) continue;
       const x = br.x, y = br.y, w = br.w, h = br.h;
@@ -1048,9 +1046,11 @@ export function initJuego(config, mobile = false) {
       if (br.isGolden) color = '#ffd700';
       const grad = ctx.createLinearGradient(x, y, x + w, y + h);
       const darker = adjustColor(color, -20);
-      grad.addColorStop(0, color);
-      grad.addColorStop(0.5, darker);
-      grad.addColorStop(1, color);
+      const lighter = adjustColor(color, 30);
+      grad.addColorStop(0, lighter);
+      grad.addColorStop(0.4, color);
+      grad.addColorStop(0.8, darker);
+      grad.addColorStop(1, adjustColor(color, -10));
       ctx.shadowColor = 'rgba(0,0,0,0.3)';
       ctx.shadowBlur = 6;
       ctx.beginPath();
@@ -1058,6 +1058,13 @@ export function initJuego(config, mobile = false) {
       ctx.fillStyle = grad;
       ctx.fill();
       ctx.shadowBlur = 0;
+      // Borde brillante
+      ctx.strokeStyle = br.isGolden ? '#ffd700' : 'rgba(255,255,255,0.15)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(x + 2, y + 2, w - 4, h - 4, radius - 1);
+      ctx.stroke();
+
       if (br.isGolden) {
         ctx.strokeStyle = '#ffd700';
         ctx.lineWidth = 2;
@@ -1074,7 +1081,7 @@ export function initJuego(config, mobile = false) {
         ctx.roundRect(x, y, w, h, radius);
         ctx.stroke();
       }
-      // Grietas (sin números)
+      // Grietas
       const crackSrc = getCrackImageSrc(br);
       if (crackSrc) {
         const img = crackImages[crackSrc.split('/').pop()];
@@ -1082,10 +1089,9 @@ export function initJuego(config, mobile = false) {
           ctx.drawImage(img, x + w*0.1, y + h*0.1, w*0.8, h*0.8);
         }
       }
-      // Ya no dibujamos números
     }
 
-    // Power-ups (sin cambios)
+    // Power-ups
     for (const pu of powerups) {
       const x = pu.x, y = pu.y, size = pu.size;
       const isGreen = pu.color === 'verde';
@@ -1114,18 +1120,18 @@ export function initJuego(config, mobile = false) {
       ctx.shadowBlur = 0;
     }
 
-    // Bolas con estilos mejorados
+    // Bolas
     for (const b of balls) {
       const x = b.x, y = b.y;
       let grad;
       switch (ballDurability) {
-        case 1: // gris metálico
+        case 1:
           grad = ctx.createRadialGradient(x-2, y-2, 2, x, y, BALL_R);
           grad.addColorStop(0, '#e0e0e0');
           grad.addColorStop(0.5, '#909090');
           grad.addColorStop(1, '#404040');
           break;
-        case 2: // rojo fuego
+        case 2:
           grad = ctx.createRadialGradient(x-3, y-3, 2, x, y, BALL_R+2);
           grad.addColorStop(0, '#fff5b0');
           grad.addColorStop(0.3, '#ff8800');
@@ -1134,7 +1140,7 @@ export function initJuego(config, mobile = false) {
           ctx.shadowColor = '#ff4400';
           ctx.shadowBlur = 20;
           break;
-        case 3: // azul plasma
+        case 3:
           grad = ctx.createRadialGradient(x-3, y-3, 2, x, y, BALL_R+2);
           grad.addColorStop(0, '#c8ffff');
           grad.addColorStop(0.3, '#00aaff');
@@ -1149,7 +1155,6 @@ export function initJuego(config, mobile = false) {
       ctx.fillStyle = grad;
       ctx.fill();
       ctx.shadowBlur = 0;
-      // Brillo adicional para las versiones 2 y 3
       if (ballDurability >= 2) {
         ctx.beginPath();
         ctx.arc(x-2, y-3, 2, 0, Math.PI*2);
@@ -1158,7 +1163,7 @@ export function initJuego(config, mobile = false) {
       }
     }
 
-    // Paleta con bordes redondeados
+    // Paleta redondeada
     const px = paddle.x, py = STAGE_H - 14;
     const pw = paddleWidth, ph = PADDLE_H;
     const radiusP = 8;
@@ -1175,27 +1180,24 @@ export function initJuego(config, mobile = false) {
     ctx.roundRect(px, py, pw, ph, radiusP);
     ctx.stroke();
 
-    // Niebla opaca (gradiente que oculta completamente lo de abajo)
+    // Niebla opaca
     const boundary = NIEBLA_HEIGHTS[nieblaLevel] || 0;
     if (boundary > 0) {
       const gradNiebla = ctx.createLinearGradient(0, 0, 0, boundary);
-      gradNiebla.addColorStop(0, 'rgba(240, 245, 255, 0.95)');
-      gradNiebla.addColorStop(0.6, 'rgba(220, 230, 250, 0.9)');
-      gradNiebla.addColorStop(1, 'rgba(200, 210, 230, 0.85)');
+      gradNiebla.addColorStop(0, 'rgba(240, 245, 255, 0.98)');
+      gradNiebla.addColorStop(0.6, 'rgba(220, 230, 250, 0.95)');
+      gradNiebla.addColorStop(1, 'rgba(200, 210, 230, 0.92)');
       ctx.fillStyle = gradNiebla;
       ctx.fillRect(0, 0, STAGE_W, boundary);
-      // Efecto de plumas en la parte inferior para difuminar
       const feather = NIEBLA_FEATHER;
       const gradFeather = ctx.createLinearGradient(0, boundary - feather, 0, boundary);
       gradFeather.addColorStop(0, 'rgba(255,255,255,0)');
-      gradFeather.addColorStop(1, 'rgba(255,255,255,0.3)');
+      gradFeather.addColorStop(1, 'rgba(255,255,255,0.2)');
       ctx.fillStyle = gradFeather;
       ctx.fillRect(0, boundary - feather, STAGE_W, feather);
     }
 
     drawFloatingMessages(ctx);
-
-    // Mensaje "Toca / Click" eliminado
   }
 
   // ========== BUCLE PRINCIPAL ==========
@@ -1250,13 +1252,14 @@ export function initJuego(config, mobile = false) {
         b.x = paddle.x + paddleWidth / 2;
         b.y = STAGE_H - 14 - BALL_R;
       }
-      if (paddleMoved) launchBall();
+      // No lanzar automáticamente al mover la paleta si no se ha lanzado antes
+      // Solo lanzar si se hace clic/touch, eso se maneja en los eventos
       draw();
       animFrameId = requestAnimationFrame(gameLoop);
       return;
     }
 
-    // Actualizar bolas (sin cambios en lógica)
+    // Actualizar bolas (sin cambios)
     for (let i = balls.length - 1; i >= 0; i--) {
       const b = balls[i];
       b.x += b.vx * delta;
@@ -1349,7 +1352,6 @@ export function initJuego(config, mobile = false) {
         }
         powerups.splice(i, 1);
         powerupsInAir--;
-        // Asegurar que el ancho de la paleta se actualice
         paddleWidth = PADDLE_W_BASE * paddleSizeMultiplier;
         continue;
       }
@@ -1374,12 +1376,21 @@ export function initJuego(config, mobile = false) {
     const type = pu.type;
     switch (type) {
       case 'PALA_GRANDE':
-        if (paddleSizeMultiplier < 1) paddleSizeMultiplier = 1;
-        paddleSizeMultiplier = 1.35;
+        // Si ya es grande, no cambia; si es mini, vuelve a normal; si es normal, se vuelve grande
+        if (paddleSizeMultiplier === 0.65) {
+          paddleSizeMultiplier = 1; // mini + grande = normal
+        } else if (paddleSizeMultiplier === 1) {
+          paddleSizeMultiplier = 1.35; // normal + grande = grande
+        }
+        // si ya es 1.35, se queda igual
         break;
       case 'PALA_MINI':
-        if (paddleSizeMultiplier > 1) paddleSizeMultiplier = 1;
-        paddleSizeMultiplier = 0.65;
+        if (paddleSizeMultiplier === 1.35) {
+          paddleSizeMultiplier = 1; // grande + mini = normal
+        } else if (paddleSizeMultiplier === 1) {
+          paddleSizeMultiplier = 0.65; // normal + mini = mini
+        }
+        // si ya es 0.65, se queda igual
         break;
       case 'MULTIBOLA': {
         const count = balls.length;
@@ -1408,7 +1419,6 @@ export function initJuego(config, mobile = false) {
         break;
     }
     activePowerupTypes.delete(type);
-    // Actualizar paddleWidth inmediatamente
     paddleWidth = PADDLE_W_BASE * paddleSizeMultiplier;
   }
 
@@ -1563,6 +1573,6 @@ export function initJuego(config, mobile = false) {
     createPauseModal();
     startGame();
     layoutStage();
-    console.log('✅ Juego canvas corregido iniciado correctamente');
+    console.log('✅ Juego canvas corregido final iniciado correctamente');
   });
 }
