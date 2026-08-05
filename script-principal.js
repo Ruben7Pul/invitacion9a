@@ -346,32 +346,29 @@ function iniciarCollage() {
   const container = document.getElementById('collage-container');
   if (!container) return;
 
-  // Detectar cuántas imágenes hay (imgcoll1.jpg, imgcoll2.jpg, ... hasta 12)
   const maxImages = 12;
   const imagenes = [];
+  let cargadas = 0;
+  const totalIntentos = maxImages;
+
+  function verificarYRenderizar() {
+    cargadas++;
+    if (cargadas === totalIntentos) {
+      renderCollage(imagenes, container);
+    }
+  }
+
   for (let i = 1; i <= maxImages; i++) {
     const src = `archivos/imgcoll${i}.jpg`;
-    // Verificar si existe (usando fetch)
-    try {
-      const img = new Image();
-      img.onload = () => {
-        imagenes.push(src);
-        if (imagenes.length === maxImages || i === maxImages) {
-          // Todas las imágenes intentadas, ahora renderizar
-          renderCollage(imagenes, container);
-        }
-      };
-      img.onerror = () => {
-        if (i === maxImages) {
-          renderCollage(imagenes, container);
-        }
-      };
-      img.src = src;
-    } catch(e) {
-      if (i === maxImages) {
-        renderCollage(imagenes, container);
-      }
-    }
+    const img = new Image();
+    img.onload = function() {
+      imagenes.push(src);
+      verificarYRenderizar();
+    };
+    img.onerror = function() {
+      verificarYRenderizar();
+    };
+    img.src = src;
   }
 }
 
@@ -381,37 +378,31 @@ function renderCollage(imagenes, container) {
     return;
   }
 
-  // Mezclar aleatoriamente
   const shuffled = [...imagenes].sort(() => Math.random() - 0.5);
   const total = shuffled.length;
 
-  // Limpiar contenedor
   container.innerHTML = '';
 
-  // Definir disposición aleatoria (tamaños y posiciones)
   const grid = [];
-  // Generar posiciones aleatorias (en porcentaje)
   for (let i = 0; i < total; i++) {
-    const w = 20 + Math.random() * 30; // 20% - 50%
+    const w = 20 + Math.random() * 30;
     const h = 20 + Math.random() * 30;
     const x = Math.random() * (100 - w);
     const y = Math.random() * (100 - h);
-    const rot = (Math.random() - 0.5) * 8; // -4deg a 4deg
+    const rot = (Math.random() - 0.5) * 8;
     grid.push({ w, h, x, y, rot, src: shuffled[i] });
   }
 
-  // Crear elementos
   grid.forEach((item, index) => {
     const div = document.createElement('div');
     div.className = 'collage-item hidden';
-    div.style.cssText = `
-      width: ${item.w}%;
-      height: ${item.h}%;
-      left: ${item.x}%;
-      top: ${item.y}%;
-      transform: rotate(${item.rot}deg) scale(0.8);
-      z-index: ${Math.floor(Math.random() * 10)};
-    `;
+    div.style.cssText =
+      'width:' + item.w + '%;' +
+      'height:' + item.h + '%;' +
+      'left:' + item.x + '%;' +
+      'top:' + item.y + '%;' +
+      'transform: rotate(' + item.rot + 'deg) scale(0.8);' +
+      'z-index:' + Math.floor(Math.random() * 10) + ';';
     const img = document.createElement('img');
     img.src = item.src;
     img.loading = 'lazy';
@@ -420,36 +411,30 @@ function renderCollage(imagenes, container) {
     container.appendChild(div);
   });
 
-  // Animar aparición escalonada
   const items = container.querySelectorAll('.collage-item');
   items.forEach((el, idx) => {
-    setTimeout(() => {
+    setTimeout(function() {
       el.classList.remove('hidden');
       el.classList.add('visible');
-      // Resetear transform con la rotación original (ya aplicada en style)
-      el.style.transform = `rotate(${grid[idx].rot}deg) scale(1)`;
+      el.style.transform = 'rotate(' + grid[idx].rot + 'deg) scale(1)';
     }, 100 + idx * 80);
   });
 
-  // Después de que todas aparezcan, iniciar ciclo de desvanecimiento aleatorio
   if (collageTimer) clearInterval(collageTimer);
-  collageTimer = setInterval(() => {
-    // Elegir 1-2 imágenes al azar para ocultar
+  collageTimer = setInterval(function() {
     const visibles = container.querySelectorAll('.collage-item.visible');
     if (visibles.length === 0) {
-      // Si todas están ocultas, reaparecen todas
       const all = container.querySelectorAll('.collage-item');
-      all.forEach((el, idx) => {
-        setTimeout(() => {
+      all.forEach(function(el, idx) {
+        setTimeout(function() {
           el.classList.remove('hidden');
           el.classList.add('visible');
-          el.style.transform = `rotate(${grid[idx].rot}deg) scale(1)`;
+          el.style.transform = 'rotate(' + grid[idx].rot + 'deg) scale(1)';
         }, 100 + idx * 60);
       });
       return;
     }
     const toHide = Math.min(1 + Math.floor(Math.random() * 2), visibles.length);
-    const indices = [];
     const disponibles = Array.from(visibles);
     for (let i = 0; i < toHide; i++) {
       const rand = Math.floor(Math.random() * disponibles.length);
@@ -457,7 +442,11 @@ function renderCollage(imagenes, container) {
       if (el) {
         el.classList.remove('visible');
         el.classList.add('hidden');
-        el.style.transform = `rotate(${parseFloat(el.style.transform.match(/rotate\(([^)]+)\)/)?.[1] || 0}deg) scale(0.8)`;
+        // Extraer rotación actual de manera segura
+        const currentTransform = el.style.transform;
+        const rotMatch = currentTransform.match(/rotate\(([^)]+)\)/);
+        const currentRot = rotMatch ? rotMatch[1] : '0';
+        el.style.transform = 'rotate(' + currentRot + 'deg) scale(0.8)';
       }
     }
   }, 2000 + Math.random() * 2000);
@@ -474,7 +463,7 @@ function limpiarCollage() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', async function() {
   const config = await cargarConfig();
   rellenarDatos(config);
   generarCalendario();
@@ -487,31 +476,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnAbrir = document.getElementById('btn-abrir-gustos');
   const modal = document.getElementById('modal-gustos');
   const closeBtns = modal.querySelectorAll('[data-close-gustos]');
-  const container = document.getElementById('collage-container');
 
   if (btnAbrir && modal) {
-    btnAbrir.addEventListener('click', () => {
+    btnAbrir.addEventListener('click', function() {
       modal.classList.add('open');
-      // Iniciar collage (si no está iniciado o se requiere reinicio)
       if (!collageInicializado) {
         iniciarCollage();
         collageInicializado = true;
       } else {
-        // Si ya está inicializado, limpiar y reiniciar para nueva aleatoriedad
         limpiarCollage();
         iniciarCollage();
       }
     });
 
-    closeBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
+    closeBtns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
         modal.classList.remove('open');
         limpiarCollage();
         collageInicializado = false;
       });
     });
 
-    modal.addEventListener('click', (e) => {
+    modal.addEventListener('click', function(e) {
       if (e.target === modal) {
         modal.classList.remove('open');
         limpiarCollage();
@@ -519,7 +505,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
 
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && modal.classList.contains('open')) {
         modal.classList.remove('open');
         limpiarCollage();
@@ -549,7 +535,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   const nombreEl = document.getElementById('nombre-hero');
-  nombreEl.addEventListener('click', () => {
+  nombreEl.addEventListener('click', function() {
     window.location.href = 'juego1/';
   });
 
@@ -578,7 +564,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     history.replaceState(null, '', window.location.pathname);
     document.documentElement.classList.remove('sin-reja');
   } else {
-    setTimeout(() => {
+    setTimeout(function() {
       caption.classList.add('show');
       gateWrapper.classList.add('active');
     }, 2000);
@@ -602,12 +588,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     caption.classList.remove('show');
     gateWrapper.classList.remove('active');
     void portal.offsetHeight;
-    requestAnimationFrame(() => {
+    requestAnimationFrame(function() {
       portal.classList.add('closing');
     });
-    setTimeout(() => {
+    setTimeout(function() {
       portal.classList.remove('closing');
-      setTimeout(() => {
+      setTimeout(function() {
         caption.classList.add('show');
         gateWrapper.classList.add('active');
       }, 2000);
@@ -615,7 +601,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   gateWrapper.addEventListener('click', abrirReja);
-  gateWrapper.addEventListener('keydown', (e) => {
+  gateWrapper.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirReja(e); }
   });
   backBtn.addEventListener('click', cerrarReja);
@@ -629,17 +615,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!appInner) {
     appInner = document.createElement('div');
     appInner.id = 'app-inner';
-    appInner.style.cssText = `
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      width: 100%;
-      max-width: 560px;
-      will-change: transform;
-      gap: 0.5rem;
-      padding: 0 0.5rem 2rem;
-    `;
+    appInner.style.cssText =
+      'display: flex;' +
+      'flex-direction: column;' +
+      'align-items: center;' +
+      'justify-content: flex-start;' +
+      'width: 100%;' +
+      'max-width: 560px;' +
+      'will-change: transform;' +
+      'gap: 0.5rem;' +
+      'padding: 0 0.5rem 2rem;';
     while (app.firstChild) {
       appInner.appendChild(app.firstChild);
     }
@@ -656,10 +641,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const offsetY = Math.min(Math.max(invertY, -maxOffset), maxOffset);
 
     if (!portal.classList.contains('hide') && portalInner) {
-      portalInner.style.transform = `translate(${offsetX * 0.6}px, ${offsetY * 0.6}px)`;
+      portalInner.style.transform = 'translate(' + (offsetX * 0.6) + 'px, ' + (offsetY * 0.6) + 'px)';
     }
     if (app.classList.contains('show') && appInner) {
-      appInner.style.transform = `translate(${offsetX * 0.45}px, ${offsetY * 0.45}px)`;
+      appInner.style.transform = 'translate(' + (offsetX * 0.45) + 'px, ' + (offsetY * 0.45) + 'px)';
     }
   }
 
@@ -677,7 +662,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  document.addEventListener('mousemove', (e) => {
+  document.addEventListener('mousemove', function(e) {
     if (isMobile) return;
     if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
     const x = (e.clientX / window.innerWidth - 0.5) * 30;
@@ -690,7 +675,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   if (isMobile && hasGyro) {
-    const gyroTest = (e) => {
+    const gyroTest = function(e) {
       if (e.gamma !== null || e.beta !== null) {
         gyroWorking = true;
         window.removeEventListener('deviceorientation', gyroTest);
@@ -698,7 +683,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     };
     window.addEventListener('deviceorientation', gyroTest);
-    setTimeout(() => {
+    setTimeout(function() {
       if (!gyroWorking) {
         window.removeEventListener('deviceorientation', gyroTest);
       }
@@ -721,7 +706,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Música
   const muteBtn = document.getElementById('music-toggle');
   if (muteBtn) {
-    muteBtn.addEventListener('click', () => {
+    muteBtn.addEventListener('click', function() {
       if (window.toggleMusic) window.toggleMusic();
     });
   }
@@ -729,8 +714,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Observador para animaciones de secciones
   if ('IntersectionObserver' in window) {
     const secciones = document.querySelectorAll('.seccion');
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
+    const observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
         if (entry.isIntersecting) {
           entry.target.classList.add('visible');
         } else {
@@ -738,8 +723,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       });
     }, { threshold: 0.15 });
-    secciones.forEach(sec => observer.observe(sec));
+    secciones.forEach(function(sec) { observer.observe(sec); });
   } else {
-    document.querySelectorAll('.seccion').forEach(sec => sec.classList.add('visible'));
+    document.querySelectorAll('.seccion').forEach(function(sec) { sec.classList.add('visible'); });
   }
 });
