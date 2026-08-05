@@ -81,6 +81,7 @@ function rellenarDatos(config) {
   const hint = document.getElementById('hint-juego');
   if (hint) hint.style.display = 'none';
 
+  // Rellenar firma en agradecimientos
   const firmaNombre = document.getElementById('firma-nombre');
   if (firmaNombre) {
     firmaNombre.textContent = config.nombre;
@@ -219,6 +220,7 @@ function initContadorCircular(config) {
       }
     });
 
+    // Mensaje dinámico
     const msgEl = document.getElementById('contador-mensaje');
     if (msgEl) {
       let mensaje = '';
@@ -233,6 +235,7 @@ function initContadorCircular(config) {
     }
   }
 
+  // Crear los SVG dentro de cada unidad si no existen
   units.forEach((unit) => {
     let circleWrap = unit.querySelector('.circle-wrap');
     if (!circleWrap) {
@@ -455,6 +458,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  // Música
   const muteBtn = document.getElementById('music-toggle');
   if (muteBtn) {
     muteBtn.addEventListener('click', () => {
