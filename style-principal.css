@@ -914,3 +914,5 @@ html[data-time-period="night"] .fecha-fija { color: #1E3C78; }
 html[data-time-period="night"] .nav-btn { background: rgba(30, 60, 120, 0.12); border-color: #1E3C78; color: #6699DD; }
 html[data-time-period="night"] .nav-btn:hover { background: rgba(30, 60, 120, 0.25); box-shadow: 0 0 20px rgba(30, 60, 120, 0.3); }
 html[data-time-period="night"] h1#nombre-hero { filter: blur(1px); }
+
+//
