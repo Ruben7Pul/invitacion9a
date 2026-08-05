@@ -344,12 +344,14 @@ var imagenesCollage = [];
 var collageInicializado = false;
 var collageIndiceActual = 0;
 var collageZIndex = 1;
+var collageElementos = [];
+var collageIndices = [];
 
 function iniciarCollage() {
   var container = document.getElementById('collage-container');
   if (!container) return;
 
-  container.style.overflow = 'visible';
+  container.style.overflow = 'hidden';
   container.style.position = 'relative';
   container.style.aspectRatio = '1 / 1';
   container.style.width = '100%';
@@ -385,6 +387,17 @@ function iniciarCollage() {
   }
 }
 
+function shuffleArray(arr) {
+  var copied = arr.slice();
+  for (var i = copied.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var temp = copied[i];
+    copied[i] = copied[j];
+    copied[j] = temp;
+  }
+  return copied;
+}
+
 function renderCollage(container) {
   container.innerHTML = '';
   var total = imagenesCollage.length;
@@ -392,15 +405,28 @@ function renderCollage(container) {
 
   collageIndiceActual = 0;
   collageZIndex = 1;
+  collageElementos = [];
+  // Crear orden aleatorio de índices
+  collageIndices = shuffleArray(Array.from({length: total}, (_, i) => i));
+  var indiceActualEnShuffled = 0;
 
   function mostrarSiguienteImagen() {
-    var src = imagenesCollage[collageIndiceActual % imagenesCollage.length];
+    // Obtener imagen aleatoria (del array shuffled)
+    var indiceEnImagen = collageIndices[indiceActualEnShuffled % collageIndices.length];
+    var src = imagenesCollage[indiceEnImagen];
+    indiceActualEnShuffled++;
     
-    // Tamaño grande: 60-90% del contenedor
-    var w = 60 + Math.random() * 30;
-    var h = 60 + Math.random() * 30;
+    // Si llegamos al final del shuffle, barajar de nuevo
+    if (indiceActualEnShuffled >= collageIndices.length) {
+      collageIndices = shuffleArray(Array.from({length: total}, (_, i) => i));
+      indiceActualEnShuffled = 0;
+    }
     
-    // Posición aleatoria
+    // Tamaño fijo: 75% sin sobrepasar
+    var w = 75;
+    var h = 75;
+    
+    // Posición aleatoria pero sin sobrepasar
     var x = Math.random() * (100 - w);
     var y = Math.random() * (100 - h);
     
@@ -427,6 +453,18 @@ function renderCollage(container) {
     div.appendChild(img);
     container.appendChild(div);
     
+    collageElementos.push(div);
+    
+    // Si hay más de 4 imágenes, remover la más antigua
+    if (collageElementos.length > 4) {
+      var antiguoDiv = collageElementos.shift();
+      antiguoDiv.style.transition = 'opacity 0.5s ease';
+      antiguoDiv.style.opacity = '0';
+      setTimeout(function() {
+        antiguoDiv.remove();
+      }, 500);
+    }
+    
     // Animar entrada
     setTimeout(function() {
       div.style.transition = 'opacity 1s ease, transform 1s ease-out';
@@ -434,7 +472,6 @@ function renderCollage(container) {
       div.style.transform = 'rotate(' + rot + 'deg) scaleX(' + scaleX + ') scale(1)';
     }, 50);
     
-    collageIndiceActual++;
     collageZIndex++;
   }
 
