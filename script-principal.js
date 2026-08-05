@@ -338,29 +338,40 @@ function initContadorCircular(config) {
   setInterval(actualizarContador, 200);
 }
 
-// ===== COLLAGE DE GUSTOS =====
-let collageInicializado = false;
+// ===== COLLAGE DE GUSTOS (VERSIÓN MEJORADA) =====
 let collageTimer = null;
+var imagenesCollage = [];
 
 function iniciarCollage() {
-  const container = document.getElementById('collage-container');
+  var container = document.getElementById('collage-container');
   if (!container) return;
 
-  const maxImages = 12;
-  const imagenes = [];
-  let cargadas = 0;
-  const totalIntentos = maxImages;
+  // Asegurar que el contenedor no tenga scroll
+  container.style.overflow = 'visible';
+  container.style.position = 'relative';
+  container.style.aspectRatio = '1 / 1';
+  container.style.width = '100%';
+
+  var maxImages = 12;
+  var imagenes = [];
+  var cargadas = 0;
+  var totalIntentos = maxImages;
 
   function verificarYRenderizar() {
     cargadas++;
     if (cargadas === totalIntentos) {
-      renderCollage(imagenes, container);
+      imagenesCollage = imagenes;
+      if (imagenes.length > 0) {
+        renderCollage(container);
+      } else {
+        container.innerHTML = '<div style="text-align:center; padding:2rem; color:#fae3a0; font-family:var(--script); font-size:1.2rem;">No se encontraron imágenes.</div>';
+      }
     }
   }
 
-  for (let i = 1; i <= maxImages; i++) {
-    const src = `archivos/imgcoll${i}.jpg`;
-    const img = new Image();
+  for (var i = 1; i <= maxImages; i++) {
+    var src = 'archivos/imgcoll' + i + '.jpg';
+    var img = new Image();
     img.onload = function() {
       imagenes.push(src);
       verificarYRenderizar();
@@ -372,84 +383,112 @@ function iniciarCollage() {
   }
 }
 
-function renderCollage(imagenes, container) {
-  if (imagenes.length === 0) {
-    container.innerHTML = '<div style="text-align:center; padding:2rem; color:#fae3a0; font-family:var(--script); font-size:1.2rem;">No se encontraron imágenes.</div>';
-    return;
-  }
-
-  const shuffled = [...imagenes].sort(() => Math.random() - 0.5);
-  const total = shuffled.length;
-
+function renderCollage(container) {
   container.innerHTML = '';
+  var total = imagenesCollage.length;
+  if (total === 0) return;
 
-  const grid = [];
-  for (let i = 0; i < total; i++) {
-    const w = 20 + Math.random() * 30;
-    const h = 20 + Math.random() * 30;
-    const x = Math.random() * (100 - w);
-    const y = Math.random() * (100 - h);
-    const rot = (Math.random() - 0.5) * 8;
-    grid.push({ w, h, x, y, rot, src: shuffled[i] });
+  // Generar posiciones aleatorias para todas las imágenes
+  var items = [];
+  for (var i = 0; i < total; i++) {
+    var w = 12 + Math.random() * 35; // 12% - 47%
+    var h = 12 + Math.random() * 35;
+    var x = Math.random() * (100 - w);
+    var y = Math.random() * (100 - h);
+    var rot = (Math.random() - 0.5) * 40; // -20° a 20°
+    items.push({
+      src: imagenesCollage[i],
+      w: w,
+      h: h,
+      x: x,
+      y: y,
+      rot: rot,
+      visible: false,
+      el: null
+    });
   }
 
-  grid.forEach((item, index) => {
-    const div = document.createElement('div');
-    div.className = 'collage-item hidden';
+  // Crear elementos DOM
+  items.forEach(function(item) {
+    var div = document.createElement('div');
+    div.className = 'collage-item';
     div.style.cssText =
       'width:' + item.w + '%;' +
       'height:' + item.h + '%;' +
       'left:' + item.x + '%;' +
       'top:' + item.y + '%;' +
-      'transform: rotate(' + item.rot + 'deg) scale(0.8);' +
+      'transform: rotate(' + item.rot + 'deg) scale(0.2);' +
+      'opacity: 0;' +
       'z-index:' + Math.floor(Math.random() * 10) + ';';
-    const img = document.createElement('img');
+    var img = document.createElement('img');
     img.src = item.src;
     img.loading = 'lazy';
     img.alt = 'Gusto';
     div.appendChild(img);
     container.appendChild(div);
+    item.el = div;
   });
 
-  const items = container.querySelectorAll('.collage-item');
-  items.forEach((el, idx) => {
+  // Funciones para mostrar/ocultar
+  function mostrarImagen(item) {
+    if (!item.el) return;
+    item.el.style.transition = 'opacity 1.5s ease, transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+    item.el.style.opacity = '1';
+    item.el.style.transform = 'rotate(' + item.rot + 'deg) scale(1)';
+    item.visible = true;
+  }
+
+  function ocultarImagen(item) {
+    if (!item.el) return;
+    item.el.style.transition = 'opacity 1.2s ease, transform 1.2s ease';
+    item.el.style.opacity = '0';
+    var newRot = item.rot + (Math.random() - 0.5) * 20;
+    item.el.style.transform = 'rotate(' + newRot + 'deg) scale(0.3)';
+    item.visible = false;
+  }
+
+  function elegirSiguiente() {
+    var noVisibles = items.filter(function(item) { return !item.visible; });
+    if (noVisibles.length === 0) return null;
+    return noVisibles[Math.floor(Math.random() * noVisibles.length)];
+  }
+
+  function elegirParaOcultar() {
+    var visibles = items.filter(function(item) { return item.visible; });
+    if (visibles.length === 0) return null;
+    return visibles[Math.floor(Math.random() * visibles.length)];
+  }
+
+  // Mostrar primeras 4 imágenes de forma escalonada
+  var primerLote = items.slice(0, Math.min(4, items.length));
+  primerLote.forEach(function(item, idx) {
     setTimeout(function() {
-      el.classList.remove('hidden');
-      el.classList.add('visible');
-      el.style.transform = 'rotate(' + grid[idx].rot + 'deg) scale(1)';
-    }, 100 + idx * 80);
+      mostrarImagen(item);
+    }, 300 + idx * 800);
   });
 
+  // Ciclo de aparición/desaparición
   if (collageTimer) clearInterval(collageTimer);
   collageTimer = setInterval(function() {
-    const visibles = container.querySelectorAll('.collage-item.visible');
-    if (visibles.length === 0) {
-      const all = container.querySelectorAll('.collage-item');
-      all.forEach(function(el, idx) {
+    var visibles = items.filter(function(item) { return item.visible; });
+    if (visibles.length < 4) {
+      var siguiente = elegirSiguiente();
+      if (siguiente) {
+        mostrarImagen(siguiente);
+      }
+    } else {
+      var ocultar = elegirParaOcultar();
+      if (ocultar) {
+        ocultarImagen(ocultar);
         setTimeout(function() {
-          el.classList.remove('hidden');
-          el.classList.add('visible');
-          el.style.transform = 'rotate(' + grid[idx].rot + 'deg) scale(1)';
-        }, 100 + idx * 60);
-      });
-      return;
-    }
-    const toHide = Math.min(1 + Math.floor(Math.random() * 2), visibles.length);
-    const disponibles = Array.from(visibles);
-    for (let i = 0; i < toHide; i++) {
-      const rand = Math.floor(Math.random() * disponibles.length);
-      const el = disponibles.splice(rand, 1)[0];
-      if (el) {
-        el.classList.remove('visible');
-        el.classList.add('hidden');
-        // Extraer rotación actual de manera segura
-        const currentTransform = el.style.transform;
-        const rotMatch = currentTransform.match(/rotate\(([^)]+)\)/);
-        const currentRot = rotMatch ? rotMatch[1] : '0';
-        el.style.transform = 'rotate(' + currentRot + 'deg) scale(0.8)';
+          var siguiente = elegirSiguiente();
+          if (siguiente) {
+            mostrarImagen(siguiente);
+          }
+        }, 400);
       }
     }
-  }, 2000 + Math.random() * 2000);
+  }, 2500 + Math.random() * 1500);
 }
 
 function limpiarCollage() {
@@ -457,14 +496,15 @@ function limpiarCollage() {
     clearInterval(collageTimer);
     collageTimer = null;
   }
-  const container = document.getElementById('collage-container');
+  var container = document.getElementById('collage-container');
   if (container) {
     container.innerHTML = '<div id="collage-loading" style="text-align:center; padding:2rem; color:#fae3a0; font-family:var(--script); font-size:1.2rem;">Cargando collage...</div>';
+    container.style.overflow = 'hidden';
   }
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
-  const config = await cargarConfig();
+  var config = await cargarConfig();
   rellenarDatos(config);
   generarCalendario();
   generarEventosCalendario(config);
@@ -473,9 +513,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   iniciarBrilloItinerario();
 
   // ---- COLLAGE ----
-  const btnAbrir = document.getElementById('btn-abrir-gustos');
-  const modal = document.getElementById('modal-gustos');
-  const closeBtns = modal.querySelectorAll('[data-close-gustos]');
+  var btnAbrir = document.getElementById('btn-abrir-gustos');
+  var modal = document.getElementById('modal-gustos');
+  var closeBtns = modal.querySelectorAll('[data-close-gustos]');
 
   if (btnAbrir && modal) {
     btnAbrir.addEventListener('click', function() {
@@ -516,42 +556,42 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // ---- MÚSICA Y RESTO ----
   try {
-    const { initSonidos } = await import('./modules/sonidos.js');
+    var { initSonidos } = await import('./modules/sonidos.js');
     initSonidos();
   } catch (e) { console.error('❌ Sonidos:', e); }
 
   try {
-    const { initMusica, playMusic, toggleMusic, resetMusic } = await import('./modules/musica.js');
+    var { initMusica, playMusic, toggleMusic, resetMusic } = await import('./modules/musica.js');
     initMusica(config);
     window.playMusic = playMusic;
     window.toggleMusic = toggleMusic;
     window.resetMusic = resetMusic;
   } catch (e) { console.error('❌ Música:', e); }
 
-  let appIniciada = false;
+  var appIniciada = false;
   async function cargarContador() {
     if (appIniciada) return;
     appIniciada = true;
   }
 
-  const nombreEl = document.getElementById('nombre-hero');
+  var nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', function() {
     window.location.href = 'juego1/';
   });
 
-  const portal = document.getElementById('portal');
-  const gateWrapper = document.getElementById('gate-wrapper');
-  const app = document.getElementById('app');
-  const backBtn = document.getElementById('back-link');
-  const caption = document.querySelector('.portal-caption');
+  var portal = document.getElementById('portal');
+  var gateWrapper = document.getElementById('gate-wrapper');
+  var app = document.getElementById('app');
+  var backBtn = document.getElementById('back-link');
+  var caption = document.querySelector('.portal-caption');
 
   portal.classList.remove('hide');
   gateWrapper.classList.remove('open');
   caption.classList.remove('show');
   gateWrapper.classList.remove('active');
 
-  const params = new URLSearchParams(window.location.search);
-  const volviendoDelJuego = params.get('volver') === '1';
+  var params = new URLSearchParams(window.location.search);
+  var volviendoDelJuego = params.get('volver') === '1';
 
   if (volviendoDelJuego) {
     portal.classList.add('hide');
@@ -607,11 +647,11 @@ document.addEventListener('DOMContentLoaded', async function() {
   backBtn.addEventListener('click', cerrarReja);
 
   // ===== PARALLAX =====
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
-  let gyroWorking = false;
+  var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  var hasGyro = typeof DeviceOrientationEvent !== 'undefined';
+  var gyroWorking = false;
 
-  let appInner = document.getElementById('app-inner');
+  var appInner = document.getElementById('app-inner');
   if (!appInner) {
     appInner = document.createElement('div');
     appInner.id = 'app-inner';
@@ -631,14 +671,14 @@ document.addEventListener('DOMContentLoaded', async function() {
     app.appendChild(appInner);
   }
 
-  const portalInner = document.querySelector('.portal-inner');
+  var portalInner = document.querySelector('.portal-inner');
 
   function applyParallax(x, y) {
-    const invertX = -x;
-    const invertY = -y;
-    const maxOffset = 18;
-    const offsetX = Math.min(Math.max(invertX, -maxOffset), maxOffset);
-    const offsetY = Math.min(Math.max(invertY, -maxOffset), maxOffset);
+    var invertX = -x;
+    var invertY = -y;
+    var maxOffset = 18;
+    var offsetX = Math.min(Math.max(invertX, -maxOffset), maxOffset);
+    var offsetY = Math.min(Math.max(invertY, -maxOffset), maxOffset);
 
     if (!portal.classList.contains('hide') && portalInner) {
       portalInner.style.transform = 'translate(' + (offsetX * 0.6) + 'px, ' + (offsetY * 0.6) + 'px)';
@@ -648,8 +688,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   }
 
-  let currentX = 0, currentY = 0;
-  let targetX = 0, targetY = 0;
+  var currentX = 0, currentY = 0;
+  var targetX = 0, targetY = 0;
 
   function smoothParallax() {
     currentX += (targetX - currentX) * 0.1;
@@ -665,8 +705,8 @@ document.addEventListener('DOMContentLoaded', async function() {
   document.addEventListener('mousemove', function(e) {
     if (isMobile) return;
     if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
-    const x = (e.clientX / window.innerWidth - 0.5) * 30;
-    const y = (e.clientY / window.innerHeight - 0.5) * 30;
+    var x = (e.clientX / window.innerWidth - 0.5) * 30;
+    var y = (e.clientY / window.innerHeight - 0.5) * 30;
     targetX = x;
     targetY = y;
     if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
@@ -675,7 +715,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   });
 
   if (isMobile && hasGyro) {
-    const gyroTest = function(e) {
+    var gyroTest = function(e) {
       if (e.gamma !== null || e.beta !== null) {
         gyroWorking = true;
         window.removeEventListener('deviceorientation', gyroTest);
@@ -692,10 +732,10 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   function handleOrientation(e) {
     if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
-    const gamma = e.gamma || 0;
-    const beta = e.beta || 0;
-    const x = (gamma / 90) * 30;
-    const y = ((beta - 45) / 90) * 30;
+    var gamma = e.gamma || 0;
+    var beta = e.beta || 0;
+    var x = (gamma / 90) * 30;
+    var y = ((beta - 45) / 90) * 30;
     targetX = x;
     targetY = y;
     if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
@@ -704,7 +744,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
   // Música
-  const muteBtn = document.getElementById('music-toggle');
+  var muteBtn = document.getElementById('music-toggle');
   if (muteBtn) {
     muteBtn.addEventListener('click', function() {
       if (window.toggleMusic) window.toggleMusic();
@@ -713,8 +753,8 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // Observador para animaciones de secciones
   if ('IntersectionObserver' in window) {
-    const secciones = document.querySelectorAll('.seccion');
-    const observer = new IntersectionObserver(function(entries) {
+    var secciones = document.querySelectorAll('.seccion');
+    var observer = new IntersectionObserver(function(entries) {
       entries.forEach(function(entry) {
         if (entry.isIntersecting) {
           entry.target.classList.add('visible');
