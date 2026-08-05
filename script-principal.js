@@ -1,6 +1,6 @@
-console.log('🚀 script-principal ww.js');
+console.log('🚀 script-principal ss.js');
 
-// Detección de hora del día (se mantiene)
+// Detección de hora del día
 function detectarPeriodoDia() {
   const ahora = new Date();
   const hora = ahora.getHours();
@@ -80,6 +80,12 @@ function rellenarDatos(config) {
 
   const hint = document.getElementById('hint-juego');
   if (hint) hint.style.display = 'none';
+
+  // Rellenar firma en agradecimientos
+  const firmaNombre = document.getElementById('firma-nombre');
+  if (firmaNombre) {
+    firmaNombre.textContent = config.nombre;
+  }
 }
 
 // ===== GENERAR CALENDARIO =====
@@ -257,12 +263,39 @@ function initContadorCircular(config) {
   setInterval(actualizarContador, 200);
 }
 
+// ===== CONTROLES DEL MAPA INTERACTIVO =====
+function initMapaControles() {
+  const iframe = document.getElementById('mapa-iframe');
+  const botones = document.querySelectorAll('[data-ubicacion]');
+
+  if (!iframe || !botones.length) return;
+
+  // Coordenadas de las ubicaciones
+  const ubicaciones = {
+    misa: { center: '19.1830909,-99.4612969', zoom: 17, label: 'Capilla del Puente' },
+    recepcion: { center: '19.1839892,-99.4559442', zoom: 17, label: 'Auditorio Gualupita' }
+  };
+
+  botones.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.ubicacion;
+      const ubic = ubicaciones[key];
+      if (!ubic) return;
+      // Cambiar el src del iframe para centrar en la ubicación seleccionada
+      const baseUrl = iframe.src.split('&center=')[0];
+      const newUrl = `${baseUrl}&center=${ubic.center}&zoom=${ubic.zoom}&maptype=roadmap&markers=color:0xd4af37%7C19.1830909,-99.4612969&markers=color:0xb8860b%7C19.1839892,-99.4559442`;
+      iframe.src = newUrl;
+    });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const config = await cargarConfig();
   rellenarDatos(config);
   generarCalendario();
   generarEventosCalendario(config);
   initContadorCircular(config);
+  initMapaControles();
 
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
@@ -281,7 +314,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function cargarContador() {
     if (appIniciada) return;
     appIniciada = true;
-    // El contador ya está inicializado arriba, pero lo dejamos por compatibilidad
   }
 
   const nombreEl = document.getElementById('nombre-hero');
@@ -355,69 +387,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirReja(e); }
   });
   backBtn.addEventListener('click', cerrarReja);
-
-  // ===== MODAL MAPA INTERACTIVO =====
-  const btnMapa = document.getElementById('btn-abrir-mapa');
-  const modalMapa = document.getElementById('modal-mapa');
-  const closeMapa = modalMapa?.querySelector('[data-close-mapa]');
-
-  if (btnMapa && modalMapa && closeMapa) {
-    btnMapa.addEventListener('click', () => {
-      modalMapa.classList.add('open');
-    });
-
-    closeMapa.addEventListener('click', () => {
-      modalMapa.classList.remove('open');
-    });
-
-    modalMapa.addEventListener('click', (e) => {
-      if (e.target === modalMapa) {
-        modalMapa.classList.remove('open');
-      }
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && modalMapa.classList.contains('open')) {
-        modalMapa.classList.remove('open');
-      }
-    });
-  }
-
-  // ===== MODAL AGRADECIMIENTOS =====
-  const btnAgradecimientos = document.getElementById('btn-abrir-agradecimientos');
-  const modalAgradecimientos = document.getElementById('modal-agradecimientos');
-  const closeAgradecimientos = modalAgradecimientos?.querySelector('[data-close-agradecimientos]');
-
-  // Rellenar el nombre en la firma
-  const firmaNombre = document.getElementById('firma-nombre');
-  if (firmaNombre) {
-    const nombreHero = document.getElementById('nombre-hero');
-    if (nombreHero) {
-      firmaNombre.textContent = nombreHero.textContent;
-    }
-  }
-
-  if (btnAgradecimientos && modalAgradecimientos && closeAgradecimientos) {
-    btnAgradecimientos.addEventListener('click', () => {
-      modalAgradecimientos.classList.add('open');
-    });
-
-    closeAgradecimientos.addEventListener('click', () => {
-      modalAgradecimientos.classList.remove('open');
-    });
-
-    modalAgradecimientos.addEventListener('click', (e) => {
-      if (e.target === modalAgradecimientos) {
-        modalAgradecimientos.classList.remove('open');
-      }
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && modalAgradecimientos.classList.contains('open')) {
-        modalAgradecimientos.classList.remove('open');
-      }
-    });
-  }
 
   // ===== PARALLAX =====
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -542,5 +511,3 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelectorAll('.seccion').forEach(sec => sec.classList.add('visible'));
   }
 });
-
-
