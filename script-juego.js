@@ -27,7 +27,7 @@ async function cargarConfig() {
       madre: 'Mamá',
       padrino: 'Padrino',
       madrina: 'Madrina',
-      audioFile: '../archivos/cancion.mp3'
+      audioFile: '../archivos/cancion1.mp3'
     };
   }
 }
