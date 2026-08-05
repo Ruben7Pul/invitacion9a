@@ -1,18 +1,14 @@
-console.log('🚀 script-principal 99.js');
+console.log('🚀 script-principal 77.js');
 
-// ============================================================
-// Detección de hora del día y aplicación de colores
-// ============================================================
+// Detección de hora del día
 function detectarPeriodoDia() {
   const ahora = new Date();
   const hora = ahora.getHours();
-  
   let periodo = 'day';
   if (hora >= 6 && hora < 8) periodo = 'sunrise';
   else if (hora >= 8 && hora < 17) periodo = 'day';
   else if (hora >= 17 && hora < 19) periodo = 'sunset';
   else if (hora >= 19 || hora < 6) periodo = 'night';
-  
   document.documentElement.setAttribute('data-time-period', periodo);
   return periodo;
 }
@@ -187,7 +183,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   backBtn.addEventListener('click', cerrarReja);
 
-  // ===== PARALLAX =====
+  // Parallax
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
   let gyroWorking = false;
@@ -214,8 +210,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   const portalInner = document.querySelector('.portal-inner');
-  const videoApp = document.getElementById('video-app');
-  const videoPortal = document.getElementById('video-portal');
 
   function applyParallax(x, y) {
     const invertX = -x;
@@ -287,7 +281,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // MÚSICA
+  // Música
   const muteBtn = document.getElementById('music-toggle');
   if (muteBtn) {
     muteBtn.addEventListener('click', () => {
@@ -295,7 +289,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // ===== OBSERVADOR PARA ANIMACIONES DE SECCIONES =====
+  // Observador para animaciones de secciones
   if ('IntersectionObserver' in window) {
     const secciones = document.querySelectorAll('.seccion');
     const observer = new IntersectionObserver((entries) => {
