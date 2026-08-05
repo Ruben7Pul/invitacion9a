@@ -151,14 +151,15 @@ function marcarDiaActualEnCalendario() {
   }
 }
 
-// ===== GENERAR EVENTOS DEL CALENDARIO (sin horas) =====
+// ===== GENERAR EVENTOS DEL CALENDARIO =====
 function generarEventosCalendario(config) {
   const container = document.getElementById('calendario-eventos');
   if (!container) return;
 
   const eventos = [
     { fecha: '8 de octubre', desc: '🎂 Cumpleaños', fechaISO: '2026-10-08T09:00:00', duracion: 2 },
-    { fecha: '10 de octubre', desc: '🌹 XV años', fechaISO: '2026-10-10T13:00:00', duracion: 8 },
+    { fecha: '10 de octubre', desc: '⛪ Misa', fechaISO: '2026-10-10T13:00:00', duracion: 2 },
+    { fecha: '10 de octubre', desc: '🎉 Recepción', fechaISO: '2026-10-10T15:00:00', duracion: 5 },
     { fecha: '11 de octubre', desc: '☀️ Desayuno', fechaISO: '2026-10-11T09:00:00', duracion: 3 },
   ];
 
