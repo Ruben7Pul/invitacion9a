@@ -1,4 +1,4 @@
-console.log('🚀 script-principal mm.js');
+console.log('🚀 script-principal rr.js');
 
 // Detección de hora del día
 function detectarPeriodoDia() {
@@ -452,6 +452,7 @@ function renderCollage(container) {
     var img = document.createElement('img');
     img.src = src;
     img.alt = 'Gusto';
+    img.loading = 'lazy';
     div.appendChild(img);
     container.appendChild(div);
     
@@ -460,16 +461,18 @@ function renderCollage(container) {
     // Si hay más de 4 imágenes, remover la más antigua
     if (collageElementos.length > 4) {
       var antiguoDiv = collageElementos.shift();
-      antiguoDiv.style.transition = 'opacity 0.5s ease';
+      antiguoDiv.style.transition = 'opacity 0.3s ease';
       antiguoDiv.style.opacity = '0';
       setTimeout(function() {
-        antiguoDiv.remove();
-      }, 500);
+        if (antiguoDiv.parentNode) {
+          antiguoDiv.remove();
+        }
+      }, 300);
     }
     
-    // Animar entrada
+    // Animar entrada (más rápido: 0.6s en lugar de 1s)
     setTimeout(function() {
-      div.style.transition = 'opacity 1s ease, transform 1s ease-out';
+      div.style.transition = 'opacity 0.6s ease, transform 0.6s ease-out';
       div.style.opacity = '1';
       div.style.transform = 'rotate(' + rot + 'deg) scaleX(' + scaleX + ') scale(1)';
     }, 50);
