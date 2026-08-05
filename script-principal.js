@@ -1,4 +1,4 @@
-console.log('🚀 script-principal oo.js');
+console.log('🚀 script-principal mm.js');
 
 // Detección de hora del día
 function detectarPeriodoDia() {
@@ -374,16 +374,18 @@ function iniciarCollage() {
   }
 
   for (var i = 1; i <= maxImages; i++) {
-    var src = 'archivos/imgcoll' + i + '.jpg';
-    var img = new Image();
-    img.onload = function() {
-      imagenes.push(src);
-      verificarYRenderizar();
-    };
-    img.onerror = function() {
-      verificarYRenderizar();
-    };
-    img.src = src;
+    (function(indice) {
+      var src = 'archivos/imgcoll' + indice + '.jpg';
+      var img = new Image();
+      img.onload = function() {
+        imagenes.push(src);
+        verificarYRenderizar();
+      };
+      img.onerror = function() {
+        verificarYRenderizar();
+      };
+      img.src = src;
+    })(i);
   }
 }
 
