@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS OPTIMIZADOS (CON GPU ACCELERATION)
+   🌹 INVITACIÓN XV – ESTILOS OPTIMIZADOS (CON COLLAGE)
    ============================================================ */
 
 :root {
@@ -276,7 +276,7 @@ body {
   pointer-events: auto;
 }
 
-/* ===== DESAPARICIÓN INSTANTÁNEA DE SECCIONES ===== */
+/* ===== SECCIONES ===== */
 .seccion {
   width: 100%;
   background: rgba(10, 18, 34, 0.55);
@@ -311,12 +311,13 @@ body {
 #seccion-familia.visible { transition-delay: 0.1s; }
 #seccion-calendario.visible { transition-delay: 0.2s; }
 #seccion-contador.visible { transition-delay: 0.3s; }
+#seccion-gustos.visible { transition-delay: 0.35s; }
 #seccion-lugares.visible { transition-delay: 0.4s; }
 #seccion-itinerario.visible { transition-delay: 0.5s; }
 #seccion-libro-firmas.visible { transition-delay: 0.6s; }
 #seccion-agradecimientos.visible { transition-delay: 0.7s; }
 
-/* ===== ELEMENTOS INTERNOS CON ANIMACIONES ESCALONADAS ===== */
+/* ===== ELEMENTOS INTERNOS ===== */
 .seccion .animar {
   opacity: 0;
   transform: translate3d(0, 15px, 0);
@@ -337,7 +338,6 @@ body {
 .seccion.visible .animar-7 { transition-delay: 0.7s; }
 .seccion.visible .animar-8 { transition-delay: 0.8s; }
 
-/* Aplicar a elementos comunes */
 .seccion h2,
 .seccion .seccion-subtitulo,
 .seccion .detalle-card,
@@ -367,7 +367,7 @@ body {
 .seccion.visible .libro-firmas-contenido { transition-delay: 0.2s; opacity: 1; transform: translate3d(0, 0, 0); }
 .seccion.visible .agradecimientos-contenido { transition-delay: 0.2s; opacity: 1; transform: translate3d(0, 0, 0); }
 
-/* Para la sección de inicio, elementos específicos */
+/* Sección inicio */
 #seccion-inicio.visible #app-top,
 #seccion-inicio.visible #app-mid {
   opacity: 1;
@@ -799,7 +799,7 @@ h1#nombre-hero {
   opacity: 0.8;
 }
 
-/* ===== CONTADOR CON ANILLO CON RELIEVE ===== */
+/* ===== CONTADOR CON ANILLO ===== */
 .clock {
   display: flex;
   flex-wrap: nowrap;
@@ -986,6 +986,13 @@ h1#nombre-hero {
   color: #f0e0c0;
   margin: 0.6rem 0;
 }
+.libro-firmas-nota {
+  font-size: clamp(0.8rem, 1.8vw, 1rem);
+  color: #e0cfa0;
+  margin-top: 0.6rem;
+  opacity: 0.8;
+  font-style: italic;
+}
 .libro-firmas-contenido .btn-mapa {
   display: inline-block;
 }
@@ -1116,6 +1123,163 @@ h1#nombre-hero {
 }
 
 /* ============================================================
+   MODAL COLLAGE (GUSTOS)
+   ============================================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(6, 10, 25, 0.85);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+.modal-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-gustos-card {
+  max-width: 650px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal-card {
+  width: 100%;
+  background: radial-gradient(ellipse at 50% 30%, #1c2a44, #0d1424 80%);
+  border: 3px solid #b8860b;
+  border-radius: 30px;
+  padding: 2rem 1.6rem;
+  position: relative;
+  transform: scale(0.95) translateY(20px);
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  box-shadow: 0 0 0 2px rgba(184, 134, 11, 0.2), 0 0 0 6px rgba(26, 42, 70, 0.5), 0 0 50px rgba(184, 134, 11, 0.12), inset 0 0 60px rgba(25, 50, 100, 0.15);
+}
+.modal-overlay.open .modal-card {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+.modal-close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(212, 175, 55, 0.08);
+  border: 1.5px solid #b8860b;
+  color: #fae3a0;
+  cursor: pointer;
+  font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10;
+  line-height: 1;
+  opacity: 0.8;
+}
+.modal-close:hover {
+  background: rgba(212, 175, 55, 0.2);
+  color: #ffffff;
+  opacity: 1;
+  transform: rotate(90deg);
+}
+
+.modal-card h2 {
+  font-family: var(--serif-display);
+  text-align: center;
+  font-size: clamp(1.3rem, 3.5vw, 1.9rem);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #fae3a0;
+  text-shadow: 0 0 25px rgba(212, 175, 55, 0.3);
+  margin: 0 0 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid rgba(212, 175, 55, 0.2);
+  position: relative;
+}
+.modal-card h2::after {
+  content: '🌹';
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.2rem;
+  background: #0d1424;
+  padding: 0 6px;
+  color: #d4af37;
+}
+.modal-subtitle {
+  font-family: var(--script);
+  font-size: clamp(1rem, 2.8vw, 1.3rem);
+  text-align: center;
+  color: #e0cfa0;
+  margin: -0.2rem 0 1rem;
+  opacity: 0.9;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
+}
+
+/* ===== COLLAGE ===== */
+.collage-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background-image: url('archivos/imgcollfondo.jpg');
+  background-size: cover;
+  background-position: center;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 2px solid #b8860b;
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.15);
+  margin: 0.5rem 0;
+}
+.collage-container .collage-item {
+  position: absolute;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  border: 2px solid rgba(212, 175, 55, 0.3);
+  overflow: hidden;
+  opacity: 0;
+  transform: scale(0.8) rotate(0deg);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+.collage-container .collage-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+.collage-container .collage-item:hover img {
+  transform: scale(1.05);
+}
+.collage-container .collage-item.visible {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+.collage-container .collage-item.hidden {
+  opacity: 0;
+  transform: scale(0.8) rotate(-5deg);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.btn-cerrar-collage {
+  margin: 1rem auto 0;
+  display: block;
+}
+
+/* ============================================================
    RESPONSIVE
    ============================================================ */
 @media (max-width: 400px) {
@@ -1138,6 +1302,8 @@ h1#nombre-hero {
   .calendario-evento { flex-wrap: wrap; gap: 0.2rem; justify-content: center; }
   .itinerario-item { font-size: 0.8rem; }
   .detalle-botones { flex-direction: column; align-items: center; }
+  .modal-gustos-card { padding: 1.2rem 0.8rem; }
+  .collage-container { aspect-ratio: 4/3; }
 }
 @media (min-width: 768px) {
   #app { padding: 0.6rem 2rem 0; }
