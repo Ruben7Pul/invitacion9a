@@ -1,6 +1,6 @@
-console.log('🚀 script-principal 77.js');
+console.log('🚀 script-principal.js');
 
-// Detección de hora del día
+// Detección de hora del día (se mantiene para otros usos)
 function detectarPeriodoDia() {
   const ahora = new Date();
   const hora = ahora.getHours();
@@ -50,8 +50,7 @@ function rellenarDatos(config) {
     nombreEl.textContent = config.nombre;
     nombreEl.setAttribute('data-text', config.nombre);
   }
-  const fechaEl = document.getElementById('fecha-fija');
-  if (fechaEl) fechaEl.textContent = config.fechaTexto;
+  // Ya no se usa fecha-fija, eliminada
   const fraseEl = document.getElementById('frase-texto');
   if (fraseEl) fraseEl.textContent = config.frase;
   const horaMisa = document.getElementById('hora-misa');
@@ -84,9 +83,54 @@ function rellenarDatos(config) {
   if (hint) hint.style.display = 'none';
 }
 
+// Generar calendario de octubre 2026
+function generarCalendario() {
+  const container = document.getElementById('calendario-container');
+  if (!container) return;
+  const year = 2026;
+  const month = 9; // octubre (0-index)
+  const fechaEspecial = 8; // día 8
+
+  const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  const primerDia = new Date(year, month, 1).getDay(); // 0=domingo
+  const diasEnMes = new Date(year, month + 1, 0).getDate();
+
+  // Encabezados
+  diasSemana.forEach(nombre => {
+    const div = document.createElement('div');
+    div.className = 'dia-nombre';
+    div.textContent = nombre;
+    container.appendChild(div);
+  });
+
+  // Días vacíos antes del primer día
+  for (let i = 0; i < primerDia; i++) {
+    const div = document.createElement('div');
+    div.className = 'dia';
+    div.style.visibility = 'hidden';
+    container.appendChild(div);
+  }
+
+  // Días del mes
+  for (let d = 1; d <= diasEnMes; d++) {
+    const div = document.createElement('div');
+    div.className = 'dia';
+    if (d === fechaEspecial) {
+      div.classList.add('especial');
+      div.innerHTML = `${d}<span class="rosa">🌹</span>`;
+    } else {
+      div.textContent = d;
+    }
+    container.appendChild(div);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const config = await cargarConfig();
   rellenarDatos(config);
+
+  // Generar calendario
+  generarCalendario();
 
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
@@ -183,7 +227,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   backBtn.addEventListener('click', cerrarReja);
 
-  // Parallax
+  // Parallax (sin cambios)
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
   let gyroWorking = false;
@@ -289,7 +333,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Observador para animaciones de secciones
+  // Observador para animaciones de secciones (con retrasos)
   if ('IntersectionObserver' in window) {
     const secciones = document.querySelectorAll('.seccion');
     const observer = new IntersectionObserver((entries) => {
