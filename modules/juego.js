@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – VERSIÓN CON PAUSA MODAL, TOP 3 SIEMPRE COMPLETO, SIN TIEMPO
+// juego.js – COMPLETO CON CORRECCIONES
 // ============================================================
-console.log('📦 juego.js (sin menú inicio, con top 3 completo)');
+console.log('📦 juego.js (corregido, sin errores)');
 
 import { 
   soundTap, 
@@ -43,7 +43,7 @@ const MAX_NIEBLA = 3;
 const NIEBLA_HEIGHTS = [0, Math.round(170 * 1.15), Math.round(STAGE_H * 0.60), Math.round(STAGE_H * 0.90)];
 const NIEBLA_FEATHER = 26;
 const MAX_LIVES = 3;
-const SCORE_PER_LIFE = 10000; // cambiado de 8500 a 10000
+const SCORE_PER_LIFE = 10000;
 const TOP_SCORES_COUNT = 5;
 
 // ========== TIPOS DE LADRILLOS ==========
@@ -266,6 +266,10 @@ export function initJuego(config, mobile = false) {
   let pendingHighScore = false;
   let gameIsOpen = false;
 
+  // Variables para el gameLoop
+  let lastTime = 0;
+  let uiCounter = 0;
+
   // ========== MODAL DE PAUSA ==========
   let pauseModal = null;
   let pauseModalOverlay = null;
@@ -313,7 +317,6 @@ export function initJuego(config, mobile = false) {
     if (!paused) {
       paused = true;
       pauseBtn.textContent = '▶️';
-      // El tiempo de dificultad se pausa en el gameLoop (gameTimeActive = false)
       gameTimeActive = false;
     }
   }
@@ -323,12 +326,10 @@ export function initJuego(config, mobile = false) {
     if (paused) {
       paused = false;
       pauseBtn.textContent = '⏸️';
-      // Reanudar tiempo de dificultad solo si la pelota ya fue lanzada
       if (launched) {
         gameTimeActive = true;
         lastDifficultyUpdate = performance.now();
       }
-      // Si NO ha sido lanzada, NO se activa gameTimeActive (la pelota no se lanza automáticamente)
       lastTime = 0;
     }
   }
@@ -337,7 +338,6 @@ export function initJuego(config, mobile = false) {
     const rankList = document.getElementById('pause-rank-list');
     if (rankList) {
       const scores = getHighScores();
-      // Asegurar que siempre haya 3 filas
       const displayScores = [];
       for (let i = 0; i < 3; i++) {
         if (i < scores.length) {
@@ -359,9 +359,8 @@ export function initJuego(config, mobile = false) {
     }
   }
 
-  // ========== FUNCIONES DEL JUEGO (sin cambios estructurales) ==========
-  // ... (las funciones de ladrillos, power-ups, etc. son las mismas que antes,
-  // pero se han ajustado las referencias a SCORE_PER_LIFE y el manejo de tiempo)
+  // ========== FUNCIONES DEL JUEGO ==========
+  // (las funciones de ladrillos, power-ups, etc. son las mismas que antes, pero se incluyen completas)
 
   function getBrickTypeFromValue(val) {
     if (val === 1) return BRICK_TYPES.CLAY;
@@ -384,8 +383,32 @@ export function initJuego(config, mobile = false) {
     return `rgb(${r},${g},${b})`;
   }
 
-  function updateBrickVisual(brick) { /* ... */ }
-  function updateBrickCrack(brick) { /* ... */ }
+  function updateBrickVisual(brick) {
+    const el = brick.el;
+    const type = brick.type;
+    el.style.background = `
+      linear-gradient(135deg, ${type.color} 0%, ${adjustColor(type.color, -20)} 50%, ${type.color} 100%)
+    `;
+    el.style.backgroundSize = '200% 200%';
+    if (brick.isGolden) {
+      el.style.boxShadow = 'inset 0 -3px 0 rgba(0,0,0,0.3), inset 0 3px 0 rgba(255,255,255,0.2), 0 0 10px 2px rgba(255,215,0,0.85)';
+      el.style.border = '2px solid #ffd700';
+    } else {
+      el.style.boxShadow = 'inset 0 -3px 0 rgba(0,0,0,0.3), inset 0 3px 0 rgba(255,255,255,0.2)';
+      el.style.border = '1px solid rgba(0,0,0,0.3)';
+    }
+    updateBrickCrack(brick);
+  }
+
+  function updateBrickCrack(brick) {
+    const src = getCrackImageSrc(brick);
+    if (src) {
+      if (brick.crackImg.getAttribute('src') !== src) brick.crackImg.setAttribute('src', src);
+      brick.crackImg.style.display = 'block';
+    } else {
+      brick.crackImg.style.display = 'none';
+    }
+  }
 
   function generateBrickValues() {
     const total = TARGET_GAME_POINTS;
@@ -409,8 +432,42 @@ export function initJuego(config, mobile = false) {
     return values;
   }
 
-  function getFreeCells(excludeCells = new Set()) { /* ... */ }
-  function getCellsWithBalls() { /* ... */ }
+  function getFreeCells(excludeCells = new Set()) {
+    const cols = BRICK_COLS, rows = BRICK_ROWS;
+    const used = new Set();
+    bricks.forEach(b => { if (b.alive) used.add(b.cell); });
+    for (const cell of excludeCells) used.add(cell);
+    const free = [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const idx = r * cols + c;
+        if (!used.has(idx)) free.push(idx);
+      }
+    }
+    return free;
+  }
+
+  function getCellsWithBalls() {
+    const cols = BRICK_COLS, rows = BRICK_ROWS;
+    const brickW = 38, brickH = 16, gap = 3;
+    const totalWidth = cols * (brickW + gap) - gap;
+    const startX = (STAGE_W - totalWidth) / 2;
+    const startY = TOP_OFFSET;
+    const cells = new Set();
+    for (const b of balls) {
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const x = startX + c * (brickW + gap);
+          const y = startY + r * (brickH + gap);
+          if (b.x > x - 10 && b.x < x + brickW + 10 &&
+              b.y > y - 10 && b.y < y + brickH + 10) {
+            cells.add(r * cols + c);
+          }
+        }
+      }
+    }
+    return cells;
+  }
 
   function placeBricks(values, excludeCells = new Set(), preferredCells = null) {
     const cols = BRICK_COLS, rows = BRICK_ROWS;
@@ -491,12 +548,57 @@ export function initJuego(config, mobile = false) {
     }
   }
 
-  function requestRegeneration() { /* ... */ }
-  function maybeMakeGolden(fromIndex) { /* ... */ }
-  function checkGoldenExpiry() { /* ... */ }
-  function checkAndRegenerate() { /* ... */ }
+  function requestRegeneration() {
+    if (pendingRegeneration) return;
+    if (getFreeCells().size === 0) return;
+    pendingRegeneration = true;
+  }
 
-  // ========== DIFICULTAD (basada en tiempo real, solo cuando launched = true) ==========
+  function maybeMakeGolden(fromIndex) {
+    if (goldenBrickRef && goldenBrickRef.alive) return;
+    if (Math.random() >= GOLDEN_BRICK_CHANCE) return;
+    const recent = bricks.slice(fromIndex);
+    if (recent.length === 0) return;
+    const chosen = recent[Math.floor(Math.random() * recent.length)];
+    chosen.isGolden = true;
+    chosen.goldenExpiresAt = performance.now() + GOLDEN_BRICK_DURATION_MS;
+    goldenBrickRef = chosen;
+    updateBrickVisual(chosen);
+  }
+
+  function checkGoldenExpiry() {
+    if (!goldenBrickRef) return;
+    if (!goldenBrickRef.alive) { goldenBrickRef = null; return; }
+    if (performance.now() >= goldenBrickRef.goldenExpiresAt) {
+      goldenBrickRef.isGolden = false;
+      updateBrickVisual(goldenBrickRef);
+      goldenBrickRef = null;
+    }
+  }
+
+  function checkAndRegenerate() {
+    if (!pendingRegeneration || !running) return;
+    const pattern = BRICK_PATTERNS[Math.floor(Math.random() * BRICK_PATTERNS.length)];
+    const preferredCells = buildPatternCells(pattern);
+    if (balls.length > 1) {
+      const exclude = getCellsWithBalls();
+      const values = generateBrickValues();
+      const before = bricks.length;
+      placeBricks(values, exclude, preferredCells);
+      maybeMakeGolden(before);
+      pendingRegeneration = false;
+      return;
+    }
+    if (launched && balls.some(b => b.y < BALL_LOW_Y)) {
+      const values = generateBrickValues();
+      const before = bricks.length;
+      placeBricks(values, undefined, preferredCells);
+      maybeMakeGolden(before);
+      pendingRegeneration = false;
+    }
+  }
+
+  // ========== DIFICULTAD ==========
   function getElapsedMinutes() {
     if (!gameTimeActive || !launched) return 0;
     return difficultyTime / 60;
@@ -746,7 +848,6 @@ export function initJuego(config, mobile = false) {
       }
     }
     launched = true;
-    // Activar tiempo de dificultad ahora que la pelota ha sido lanzada
     if (!gameTimeActive) {
       gameTimeActive = true;
       lastDifficultyUpdate = performance.now();
@@ -832,6 +933,7 @@ export function initJuego(config, mobile = false) {
     mouseActive = false;
     mouseX = 0;
     lastTime = 0;
+    uiCounter = 0;
 
     inner.querySelectorAll('.brick').forEach(b => b.remove());
     powerups.forEach(p => p.el.remove());
@@ -872,7 +974,6 @@ export function initJuego(config, mobile = false) {
     lives--;
     soundLose();
     animateHeartLoss();
-    // Al perder vida, se pausa el tiempo de dificultad
     gameTimeActive = false;
     comboCount = 0;
 
@@ -903,7 +1004,6 @@ export function initJuego(config, mobile = false) {
       const newY = STAGE_H - 14 - BALL_R;
       balls = [{ x: newX, y: newY, vx: 0, vy: 0 }];
       launched = false;
-      // El tiempo de dificultad se reanudará al lanzar la pelota
       gameTimeActive = false;
       powerups.forEach(p => p.el.remove());
       powerups = [];
@@ -920,7 +1020,6 @@ export function initJuego(config, mobile = false) {
     gameTimeActive = false;
     if (animFrameId) cancelAnimationFrame(animFrameId);
     soundGameOver();
-    // Mostrar game over
     if (menuGameover) {
       gameoverScore.textContent = `Puntuación: ${playerScore}`;
       if (gameoverThemeMsg) gameoverThemeMsg.textContent = getThemeMessage(playerScore);
@@ -948,7 +1047,6 @@ export function initJuego(config, mobile = false) {
 
   function startGame() {
     resetGameState();
-    // El tiempo de dificultad comienza en 0 y se activa al lanzar
     gameTimeActive = false;
     difficultyTime = 0;
     lastDifficultyUpdate = performance.now();
@@ -980,7 +1078,6 @@ export function initJuego(config, mobile = false) {
     animFrameId = requestAnimationFrame(gameLoop);
   }
 
-  let uiCounter = 0;
   function updateUI() {
     updateLivesUI();
     scoreEl.textContent = `${playerScore}`;
@@ -1115,7 +1212,7 @@ export function initJuego(config, mobile = false) {
       difficultyTime += (now - lastDifficultyUpdate) / 1000;
       lastDifficultyUpdate = now;
     } else {
-      lastDifficultyUpdate = performance.now(); // para no acumular retrasos
+      lastDifficultyUpdate = performance.now();
     }
 
     const delta = lastTime ? Math.min((timestamp - lastTime) / 1000, MAX_DELTA) : 0.016;
@@ -1162,7 +1259,6 @@ export function initJuego(config, mobile = false) {
       b.x += b.vx * delta;
       b.y += b.vy * delta;
 
-      // Rebotes paredes
       if (b.x - BALL_R < 0) { 
         b.x = BALL_R; 
         b.vx = Math.abs(b.vx); 
@@ -1179,7 +1275,6 @@ export function initJuego(config, mobile = false) {
         soundWallHit();
       }
 
-      // Rebote paleta
       const py = STAGE_H - 14;
       if (b.vy > 0 && b.y + BALL_R >= py && b.y + BALL_R <= py + 10 &&
           b.x >= paddle.x - BALL_R && b.x <= paddle.x + paddleWidth + BALL_R) {
@@ -1194,7 +1289,6 @@ export function initJuego(config, mobile = false) {
         comboCount = 0;
       }
 
-      // Colisiones con ladrillos
       for (const br of bricks) {
         if (!br.alive) continue;
         if (b.x + BALL_R > br.x && b.x - BALL_R < br.x + br.w &&
