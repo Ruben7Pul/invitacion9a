@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – COMPLETO CON CORRECCIONES
+// juego.js – VERSIÓN CON PAUSA MODAL, TOP 3 COMPLETO, SIN TIEMPO
 // ============================================================
-console.log('📦 juego.js (corregido, sin errores)');
+console.log('📦 juego.js (sin menú inicio, con top 3 completo)');
 
 import { 
   soundTap, 
@@ -116,7 +116,7 @@ const POWERUP_SYMBOLS = {
   FLAQUESA: '↓'
 };
 
-// ========== PUNTUACIONES (SIN TIEMPO) ==========
+// ========== PUNTUACIONES ==========
 function getHighScores() {
   try {
     const data = localStorage.getItem('highscores');
@@ -142,7 +142,7 @@ function isHighScore(score) {
 // ========== FUNCIÓN PRINCIPAL ==========
 export function initJuego(config, mobile = false) {
   console.log('🎮 Iniciando juego (sin menú de inicio)');
-  ensureAudioCtx();
+  // No llamar a ensureAudioCtx aquí; se activará con el primer sonido.
 
   // ========== ELEMENTOS ==========
   const overlay = document.getElementById('game-overlay');
@@ -250,11 +250,12 @@ export function initJuego(config, mobile = false) {
   let nieblaLevel = 0;
   let prevNieblaLevel = 0;
 
-  // TIEMPO DE DIFICULTAD (solo se actualiza cuando launched = true)
-  let difficultyTime = 0; // en segundos
+  // TIEMPO DE DIFICULTAD
+  let difficultyTime = 0;
   let lastDifficultyUpdate = 0;
   let gameTimeActive = false;
 
+  // Variables de entrada
   let mouseActive = false;
   let mouseX = 0;
   const keys = { left: false, right: false };
@@ -266,8 +267,8 @@ export function initJuego(config, mobile = false) {
   let pendingHighScore = false;
   let gameIsOpen = false;
 
-  // Variables para el gameLoop
-  let lastTime = 0;
+  // ========== VARIABLES DEL GAME LOOP (corregido) ==========
+  let lastTime = 0;   // <--- DECLARADA AQUÍ
   let uiCounter = 0;
 
   // ========== MODAL DE PAUSA ==========
@@ -360,8 +361,6 @@ export function initJuego(config, mobile = false) {
   }
 
   // ========== FUNCIONES DEL JUEGO ==========
-  // (las funciones de ladrillos, power-ups, etc. son las mismas que antes, pero se incluyen completas)
-
   function getBrickTypeFromValue(val) {
     if (val === 1) return BRICK_TYPES.CLAY;
     if (val === 2) return BRICK_TYPES.WOOD;
@@ -598,7 +597,6 @@ export function initJuego(config, mobile = false) {
     }
   }
 
-  // ========== DIFICULTAD ==========
   function getElapsedMinutes() {
     if (!gameTimeActive || !launched) return 0;
     return difficultyTime / 60;
@@ -891,6 +889,8 @@ export function initJuego(config, mobile = false) {
     livesEl.style.display = 'block';
     scoreEl.style.display = 'block';
     msgEl.classList.remove('show');
+    lastTime = 0;
+    uiCounter = 0;
     updateUI();
     draw();
   }
@@ -1212,7 +1212,7 @@ export function initJuego(config, mobile = false) {
       difficultyTime += (now - lastDifficultyUpdate) / 1000;
       lastDifficultyUpdate = now;
     } else {
-      lastDifficultyUpdate = performance.now();
+      lastDifficultyUpdate = performance.now(); // mantener sincronizado
     }
 
     const delta = lastTime ? Math.min((timestamp - lastTime) / 1000, MAX_DELTA) : 0.016;
@@ -1546,7 +1546,7 @@ export function initJuego(config, mobile = false) {
     }
   });
 
-  // ========== GAME OVER: GUARDAR PUNTAJE ==========
+  // ========== GAME OVER ==========
   gameoverSave.addEventListener('click', (e) => {
     e.stopPropagation();
     const name = playerNameInput.value.trim();
@@ -1579,5 +1579,5 @@ export function initJuego(config, mobile = false) {
   createPauseModal();
   startGame();
   layoutStage();
-  console.log('✅ Juego iniciado (sin menú de inicio, top 3 completo, sin tiempo)');
+  console.log('✅ Juego iniciado (sin menú de inicio, top 3 completo)');
 }
