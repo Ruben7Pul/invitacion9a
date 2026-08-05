@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – VERSIÓN OPTIMIZADA CON SONIDOS SIMPLIFICADOS
+// juego.js – VERSIÓN CANVAS (renderizado con Canvas 2D)
 // ============================================================
-console.log('📦 juego.js (optimizado)');
+console.log('📦 juego.js (canvas)');
 
 import { 
   soundBrick, 
@@ -9,8 +9,7 @@ import {
   soundGameOver,
   soundExtraLife,
   soundPowerupGood,
-  soundPowerupBad,
-  ensureAudioCtx
+  soundPowerupBad
 } from './sonidos.js';
 
 // ========== CONSTANTES ==========
@@ -130,19 +129,26 @@ function isHighScore(score) {
 
 // ========== FUNCIÓN PRINCIPAL ==========
 export function initJuego(config, mobile = false) {
-  console.log('🎮 Iniciando juego');
+  console.log('🎮 Iniciando juego (Canvas)');
 
   // ========== ELEMENTOS ==========
   const overlay = document.getElementById('game-overlay');
   const stage = document.getElementById('game-stage');
-  const inner = document.getElementById('game-inner');
-  const paddleEl = document.getElementById('paddle');
-  const msgEl = document.getElementById('game-msg');
-  const msgText = document.getElementById('game-msg-text');
+  const canvas = document.createElement('canvas');
+  canvas.width = STAGE_W;
+  canvas.height = STAGE_H;
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+  canvas.style.display = 'block';
+  canvas.style.imageRendering = 'pixelated';
+  // Reemplazar el contenido de game-stage por el canvas
+  stage.innerHTML = '';
+  stage.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+
   const livesEl = document.getElementById('lives');
   const scoreEl = document.getElementById('game-score');
   const pauseBtn = document.getElementById('pause-btn');
-
   const menuEl = document.getElementById('game-menu');
   const menuGameover = document.getElementById('menu-gameover');
   const gameoverScore = document.getElementById('gameover-score');
@@ -153,26 +159,10 @@ export function initJuego(config, mobile = false) {
   const gameoverMenuBtn = document.getElementById('gameover-menu-btn');
   const nameError = document.getElementById('name-error');
 
-  if (inner) {
-    inner.style.backgroundImage = "url('../archivos/jueg1.png')";
-    inner.style.backgroundSize = 'cover';
-    inner.style.backgroundPosition = 'center';
-    inner.style.backgroundRepeat = 'no-repeat';
-  }
-
-  paddleEl.style.background = '#111';
-  paddleEl.style.border = '2px solid #d4af37';
-  paddleEl.style.boxShadow = '0 0 25px rgba(212,175,55,0.3)';
-  paddleEl.style.borderRadius = '8px';
-  paddleEl.style.height = PADDLE_H + 'px';
-  paddleEl.style.willChange = 'transform';
-  paddleEl.style.zIndex = '100';
-  paddleEl.style.pointerEvents = 'none';
-
+  // Estilos para la interfaz (no cambian)
   livesEl.style.fontFamily = "'Press Start 2P', monospace";
   livesEl.style.fontSize = '1.2rem';
   livesEl.style.letterSpacing = '0.1em';
-
   scoreEl.style.fontFamily = "'Press Start 2P', monospace";
   scoreEl.style.fontSize = '0.9rem';
   scoreEl.style.background = 'linear-gradient(90deg, #ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #8800ff)';
@@ -181,40 +171,6 @@ export function initJuego(config, mobile = false) {
   scoreEl.style.webkitBackgroundClip = 'text';
   scoreEl.style.backgroundClip = 'text';
   scoreEl.style.color = 'transparent';
-
-  // ========== NIEBLA ==========
-  const nieblaEl = document.createElement('div');
-  nieblaEl.id = 'niebla-overlay';
-  nieblaEl.style.cssText = `
-    position: absolute; left: 0; top: 0; width: 100%; height: 0px;
-    pointer-events: none;
-    background:
-      radial-gradient(circle at 12% 20%, #ffffff 0%, #e9edf5 65%),
-      radial-gradient(circle at 60% 10%, #ffffff 0%, #eef1f8 60%),
-      radial-gradient(circle at 85% 35%, #ffffff 0%, #e9edf5 65%),
-      radial-gradient(circle at 25% 55%, #ffffff 0%, #eef1f8 60%),
-      radial-gradient(circle at 70% 60%, #ffffff 0%, #e9edf5 65%),
-      radial-gradient(circle at 40% 85%, #ffffff 0%, #eef1f8 60%),
-      linear-gradient(180deg, #ffffff 0%, #eef1f8 100%);
-    background-size: 140% 140%, 130% 130%, 150% 150%, 130% 130%, 140% 140%, 130% 130%, 100% 100%;
-    -webkit-mask-image:
-      radial-gradient(ellipse 44px 30px at 8% 100%, #000 55%, transparent 100%),
-      radial-gradient(ellipse 52px 34px at 28% 100%, #000 55%, transparent 100%),
-      radial-gradient(ellipse 48px 32px at 48% 100%, #000 55%, transparent 100%),
-      radial-gradient(ellipse 54px 34px at 68% 100%, #000 55%, transparent 100%),
-      radial-gradient(ellipse 50px 30px at 88% 100%, #000 55%, transparent 100%),
-      linear-gradient(to bottom, #000 0, #000 calc(100% - ${NIEBLA_FEATHER}px), transparent 100%);
-    mask-image:
-      radial-gradient(ellipse 44px 30px at 8% 100%, #000 55%, transparent 100%),
-      radial-gradient(ellipse 52px 34px at 28% 100%, #000 55%, transparent 100%),
-      radial-gradient(ellipse 48px 32px at 48% 100%, #000 55%, transparent 100%),
-      radial-gradient(ellipse 54px 34px at 68% 100%, #000 55%, transparent 100%),
-      radial-gradient(ellipse 50px 30px at 88% 100%, #000 55%, transparent 100%),
-      linear-gradient(to bottom, #000 0, #000 calc(100% - ${NIEBLA_FEATHER}px), transparent 100%);
-    transition: height 0.6s ease, opacity 0.6s ease;
-    opacity: 0; z-index: 20;
-  `;
-  inner.appendChild(nieblaEl);
 
   // ========== VARIABLES DE ESTADO ==========
   let scale = 1;
@@ -260,11 +216,29 @@ export function initJuego(config, mobile = false) {
   let gameOver = false;
   let pendingHighScore = false;
 
-  // ===== REFERENCIAS A ELEMENTOS DOM PARA BOLAS Y POWER-UPS =====
-  let ballElements = [];
-  let powerupElements = [];
+  // Imágenes para grietas (se cargan una sola vez)
+  const crackImages = {};
+  let imagesLoaded = 0;
+  const totalImages = 2; // griet1.png y griet2.png
 
-  // ========== MODAL DE PAUSA ==========
+  function loadCrackImages(callback) {
+    const names = ['griet1.png', 'griet2.png'];
+    names.forEach(name => {
+      const img = new Image();
+      img.onload = () => {
+        imagesLoaded++;
+        if (imagesLoaded === totalImages) callback();
+      };
+      img.onerror = () => {
+        imagesLoaded++;
+        if (imagesLoaded === totalImages) callback();
+      };
+      img.src = `../archivos/${name}`;
+      crackImages[name] = img;
+    });
+  }
+
+  // ========== MODAL DE PAUSA (sin cambios) ==========
   let pauseModal = null;
   let pauseModalOverlay = null;
 
@@ -393,33 +367,6 @@ export function initJuego(config, mobile = false) {
     return `rgb(${r},${g},${b})`;
   }
 
-  function updateBrickVisual(brick) {
-    const el = brick.el;
-    const type = brick.type;
-    el.style.background = `
-      linear-gradient(135deg, ${type.color} 0%, ${adjustColor(type.color, -20)} 50%, ${type.color} 100%)
-    `;
-    el.style.backgroundSize = '200% 200%';
-    if (brick.isGolden) {
-      el.style.boxShadow = 'inset 0 -3px 0 rgba(0,0,0,0.3), inset 0 3px 0 rgba(255,255,255,0.2), 0 0 10px 2px rgba(255,215,0,0.85)';
-      el.style.border = '2px solid #ffd700';
-    } else {
-      el.style.boxShadow = 'inset 0 -3px 0 rgba(0,0,0,0.3), inset 0 3px 0 rgba(255,255,255,0.2)';
-      el.style.border = '1px solid rgba(0,0,0,0.3)';
-    }
-    updateBrickCrack(brick);
-  }
-
-  function updateBrickCrack(brick) {
-    const src = getCrackImageSrc(brick);
-    if (src) {
-      if (brick.crackImg.getAttribute('src') !== src) brick.crackImg.setAttribute('src', src);
-      brick.crackImg.style.display = 'block';
-    } else {
-      brick.crackImg.style.display = 'none';
-    }
-  }
-
   function generateBrickValues() {
     const total = TARGET_GAME_POINTS;
     const values = [];
@@ -508,37 +455,8 @@ export function initJuego(config, mobile = false) {
       const value = values[i];
       const type = getBrickTypeFromValue(value);
 
-      const el = document.createElement('div');
-      el.className = 'brick';
-      el.style.left = x + 'px';
-      el.style.top = y + 'px';
-      el.style.width = brickW + 'px';
-      el.style.height = brickH + 'px';
-      el.style.borderRadius = '4px';
-      el.style.border = '1px solid rgba(0,0,0,0.3)';
-      el.style.display = 'flex';
-      el.style.alignItems = 'center';
-      el.style.justifyContent = 'center';
-      el.style.color = '#fff';
-      el.style.fontWeight = 'bold';
-      el.style.fontSize = '11px';
-      el.style.textShadow = '0 1px 2px rgba(0,0,0,0.5)';
-
-      const crackImg = document.createElement('img');
-      crackImg.style.cssText = `
-        max-width: 78%; max-height: 62%;
-        width: auto; height: auto;
-        object-fit: contain;
-        pointer-events: none;
-        display: none;
-      `;
-      el.appendChild(crackImg);
-
-      inner.appendChild(el);
-
       const brick = {
         x, y, w: brickW, h: brickH,
-        el,
         alive: true,
         hits: type.hits,
         maxHits: type.hits,
@@ -550,11 +468,11 @@ export function initJuego(config, mobile = false) {
         originalHits: type.hits,
         isGolden: false,
         goldenExpiresAt: 0,
-        crackImg
+        // para grietas guardamos el nivel de daño (0 = sin grieta)
+        crackLevel: 0
       };
       bricks.push(brick);
       gamePoints += type.value;
-      updateBrickVisual(brick);
     }
   }
 
@@ -573,7 +491,6 @@ export function initJuego(config, mobile = false) {
     chosen.isGolden = true;
     chosen.goldenExpiresAt = performance.now() + GOLDEN_BRICK_DURATION_MS;
     goldenBrickRef = chosen;
-    updateBrickVisual(chosen);
   }
 
   function checkGoldenExpiry() {
@@ -581,7 +498,6 @@ export function initJuego(config, mobile = false) {
     if (!goldenBrickRef.alive) { goldenBrickRef = null; return; }
     if (performance.now() >= goldenBrickRef.goldenExpiresAt) {
       goldenBrickRef.isGolden = false;
-      updateBrickVisual(goldenBrickRef);
       goldenBrickRef = null;
     }
   }
@@ -706,28 +622,10 @@ export function initJuego(config, mobile = false) {
     const cx = brick.x + brick.w / 2;
     const cy = brick.y + brick.h / 2;
 
-    const el = document.createElement('div');
-    el.style.cssText = `
-      position: absolute;
-      width: ${size}px; height: ${size}px;
-      border-radius: 50%;
-      background: ${isGreen ? 'rgba(46, 204, 113, 0.7)' : 'rgba(231, 76, 60, 0.7)'};
-      border: 3px solid ${isGreen ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,0,0.8)'};
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-      display: flex; align-items: center; justify-content: center;
-      color: #fff; font-weight: bold; font-size: ${size * 0.5}px;
-      pointer-events: none; z-index: 15;
-      transform: translate(-50%, -50%);
-      text-shadow: 0 0 6px rgba(0,0,0,0.8);
-    `;
-    el.textContent = POWERUP_SYMBOLS[typeKey] || '?';
-    inner.appendChild(el);
-    powerupElements.push(el);
-
     powerups.push({
       x: cx, y: cy, vx: 0, vy: speed,
       size: size, color: color, type: typeKey,
-      el: el, alive: true
+      alive: true, isBlue: false
     });
   }
 
@@ -739,50 +637,18 @@ export function initJuego(config, mobile = false) {
     const x = Math.random() * (STAGE_W - size) + size/2;
     const y = 10;
 
-    const el = document.createElement('div');
-    el.style.cssText = `
-      position: absolute;
-      width: ${size}px; height: ${size}px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, #fff4a0, #ffd700 50%, #b8860b);
-      border: 3px solid #fff8dc;
-      box-shadow: 0 0 40px rgba(255,215,0,0.9), 0 0 80px rgba(255,215,0,0.4);
-      display: flex; align-items: center; justify-content: center;
-      color: #fff; font-weight: bold; font-size: 16px;
-      pointer-events: none; z-index: 26;
-      transform: translate(-50%, -50%);
-      text-shadow: 0 0 10px rgba(0,0,0,0.8);
-      animation: goldenGlow 1s ease-in-out infinite alternate;
-    `;
-    el.textContent = '★';
-    inner.appendChild(el);
-    powerupElements.push(el);
-
-    if (!document.querySelector('#golden-glow')) {
-      const style = document.createElement('style');
-      style.id = 'golden-glow';
-      style.textContent = `
-        @keyframes goldenGlow {
-          0% { box-shadow: 0 0 30px rgba(255,215,0,0.6), 0 0 60px rgba(255,215,0,0.3); transform: translate(-50%, -50%) scale(1); }
-          100% { box-shadow: 0 0 60px rgba(255,215,0,1), 0 0 120px rgba(255,215,0,0.5); transform: translate(-50%, -50%) scale(1.1); }
-        }
-      `;
-      document.head.appendChild(style);
-    }
-
     powerups.push({
       x: x, y: y, vy: speed, size: size,
-      type: 'BOLA_AZUL', el: el, alive: true, isBlue: true
+      type: 'BOLA_AZUL', alive: true, isBlue: true
     });
     powerupsInAir++;
   }
 
   function applyBlueBall() {
     playerScore += 2000;
-    soundPowerupGood(); // mismo sonido que power-up bueno
+    soundPowerupGood();
     showFloatingMessage('+2000', '#ffd700', 1500);
     nieblaLevel = 0;
-    updateNiebla();
     if (paddleSizeMultiplier < 1) paddleSizeMultiplier = 1;
     if (ballDurability < 1) ballDurability = 1;
     const positiveTypes = ['MULTIBOLA', 'PALA_GRANDE', 'DUREZA'];
@@ -801,21 +667,7 @@ export function initJuego(config, mobile = false) {
               const speed = Math.sqrt(src.vx * src.vx + src.vy * src.vy) || BALL_SPEED;
               const vx = Math.sin(angle) * speed;
               const vy = -Math.cos(angle) * speed;
-              const newBall = { x: src.x + (Math.random() - 0.5) * 10, y: src.y + (Math.random() - 0.5) * 10, vx: vx, vy: vy };
-              balls.push(newBall);
-              // Crear elemento DOM para la nueva bola
-              const el = document.createElement('div');
-              el.className = 'ball-dynamic';
-              el.style.cssText = `
-                position: absolute; width: ${BALL_R * 2}px; height: ${BALL_R * 2}px;
-                border-radius: 50%;
-                pointer-events: none;
-                transform: translate(-50%, -50%);
-                z-index: 25;
-              `;
-              updateBallStyle(el);
-              inner.appendChild(el);
-              ballElements.push(el);
+              balls.push({ x: src.x + (Math.random() - 0.5) * 10, y: src.y + (Math.random() - 0.5) * 10, vx: vx, vy: vy });
             }
           }
           break;
@@ -826,40 +678,54 @@ export function initJuego(config, mobile = false) {
           break;
         case 'DUREZA':
           if (ballDurability < 3) ballDurability++;
-          updateDurabilityVisual();
           break;
       }
     }
     updateUI();
     blueBallActive = false;
-    draw();
   }
 
+  // Mensajes flotantes con canvas (se dibujan en el canvas)
+  let floatingMessages = [];
+
   function showFloatingMessage(text, color = '#fff', duration = 1500) {
-    const el = document.createElement('div');
-    el.style.cssText = `
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-family: 'Press Start 2P', monospace;
-      font-size: 1.1rem;
-      color: ${color};
-      text-shadow: 0 0 20px rgba(0,0,0,0.9), 0 0 10px ${color}40;
-      pointer-events: none;
-      z-index: 30;
-      animation: floatMsg 1.8s ease forwards;
-      text-align: center;
-      white-space: nowrap;
-      background: rgba(0,0,0,0.4);
-      padding: 0.3rem 1.2rem;
-      border-radius: 30px;
-      backdrop-filter: blur(2px);
-      border: 1px solid ${color}60;
-    `;
-    el.textContent = text;
-    inner.appendChild(el);
-    setTimeout(() => el.remove(), duration + 200);
+    const start = performance.now();
+    floatingMessages.push({ text, color, start, duration });
+  }
+
+  function drawFloatingMessages(ctx2) {
+    const now = performance.now();
+    for (let i = floatingMessages.length - 1; i >= 0; i--) {
+      const msg = floatingMessages[i];
+      const elapsed = now - msg.start;
+      if (elapsed > msg.duration) {
+        floatingMessages.splice(i, 1);
+        continue;
+      }
+      const progress = elapsed / msg.duration;
+      const alpha = progress < 0.2 ? progress / 0.2 : (progress > 0.8 ? 1 - (progress - 0.8) / 0.2 : 1);
+      const yOffset = -progress * 40;
+      ctx2.save();
+      ctx2.globalAlpha = alpha;
+      ctx2.textAlign = 'center';
+      ctx2.textBaseline = 'middle';
+      ctx2.font = 'bold 20px "Press Start 2P", monospace';
+      const w = ctx2.measureText(msg.text).width + 40;
+      const h = 40;
+      const x = STAGE_W/2;
+      const y = STAGE_H/2 + yOffset;
+      ctx2.shadowColor = 'rgba(0,0,0,0.8)';
+      ctx2.shadowBlur = 15;
+      ctx2.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx2.roundRect ? ctx2.roundRect(x - w/2, y - h/2, w, h, 20) : null;
+      ctx2.fill();
+      ctx2.shadowBlur = 0;
+      ctx2.fillStyle = msg.color;
+      ctx2.shadowColor = msg.color;
+      ctx2.shadowBlur = 10;
+      ctx2.fillText(msg.text, x, y);
+      ctx2.restore();
+    }
   }
 
   function launchBall() {
@@ -881,23 +747,18 @@ export function initJuego(config, mobile = false) {
   }
 
   function cleanGameState() {
-    inner.querySelectorAll('.brick').forEach(b => b.remove());
-    powerups.forEach(p => p.el.remove());
-    powerups = [];
-    powerupElements = [];
-    activePowerupTypes.clear();
-    powerupsInAir = 0;
-    inner.querySelectorAll('[style*="floatMsg"]').forEach(el => el.remove());
     bricks = [];
     balls = [];
-    ballElements = [];
+    powerups = [];
+    activePowerupTypes.clear();
+    powerupsInAir = 0;
+    floatingMessages = [];
     paddle.x = (STAGE_W - PADDLE_W_BASE) / 2;
     paddleSizeMultiplier = 1;
     paddleWidth = PADDLE_W_BASE;
     ballDurability = 1;
     nieblaLevel = 0;
     prevNieblaLevel = 0;
-    updateNiebla();
     lives = 3;
     playerScore = 0;
     gamePoints = 0;
@@ -918,10 +779,8 @@ export function initJuego(config, mobile = false) {
     difficultyTime = 0;
     livesEl.style.display = 'block';
     scoreEl.style.display = 'block';
-    msgEl.classList.remove('show');
     lastTime = 0;
     updateUI();
-    draw();
   }
 
   function resetGameState() {
@@ -935,18 +794,15 @@ export function initJuego(config, mobile = false) {
     difficultyTime = 0;
     bricks = [];
     powerups = [];
-    powerupElements = [];
     activePowerupTypes.clear();
     powerupsInAir = 0;
     balls = [];
-    ballElements = [];
     paddle.x = (STAGE_W - PADDLE_W_BASE) / 2;
     paddleSizeMultiplier = 1;
     paddleWidth = PADDLE_W_BASE;
     ballDurability = 1;
     nieblaLevel = 0;
     prevNieblaLevel = 0;
-    updateNiebla();
     lives = 3;
     playerScore = 0;
     gamePoints = 0;
@@ -964,36 +820,14 @@ export function initJuego(config, mobile = false) {
     mouseActive = false;
     mouseX = 0;
     lastTime = 0;
-
-    inner.querySelectorAll('.brick').forEach(b => b.remove());
-    powerups.forEach(p => p.el.remove());
-    powerups = [];
-    powerupElements = [];
-    inner.querySelectorAll('[style*="floatMsg"]').forEach(el => el.remove());
+    floatingMessages = [];
 
     const initialX = paddle.x + paddleWidth / 2;
     const initialY = STAGE_H - 14 - BALL_R;
-    const newBall = { x: initialX, y: initialY, vx: 0, vy: 0 };
-    balls.push(newBall);
-    // Crear elemento para la bola inicial
-    const el = document.createElement('div');
-    el.className = 'ball-dynamic';
-    el.style.cssText = `
-      position: absolute; width: ${BALL_R * 2}px; height: ${BALL_R * 2}px;
-      border-radius: 50%;
-      pointer-events: none;
-      transform: translate(-50%, -50%);
-      z-index: 25;
-    `;
-    updateBallStyle(el);
-    inner.appendChild(el);
-    ballElements = [el];
+    balls.push({ x: initialX, y: initialY, vx: 0, vy: 0 });
 
     launched = false;
-    msgEl.classList.remove('show');
     updateUI();
-    updateDurabilityVisual();
-    draw();
   }
 
   // Variables para UI optimizada
@@ -1031,13 +865,8 @@ export function initJuego(config, mobile = false) {
     comboCount = 0;
 
     launched = false;
-    // Limpiar bolas y power-ups
     balls = [];
-    ballElements.forEach(el => el.remove());
-    ballElements = [];
-    powerups.forEach(p => p.el.remove());
     powerups = [];
-    powerupElements = [];
     activePowerupTypes.clear();
     powerupsInAir = 0;
     paddleSizeMultiplier = 1;
@@ -1045,10 +874,7 @@ export function initJuego(config, mobile = false) {
     ballDurability = 1;
     nieblaLevel = 0;
     prevNieblaLevel = 0;
-    updateNiebla();
-    updateDurabilityVisual();
     updateUI();
-    draw();
 
     if (lives <= 0) {
       soundGameOver();
@@ -1059,29 +885,13 @@ export function initJuego(config, mobile = false) {
     setTimeout(() => {
       const newX = paddle.x + paddleWidth / 2;
       const newY = STAGE_H - 14 - BALL_R;
-      const newBall = { x: newX, y: newY, vx: 0, vy: 0 };
-      balls = [newBall];
-      const el = document.createElement('div');
-      el.className = 'ball-dynamic';
-      el.style.cssText = `
-        position: absolute; width: ${BALL_R * 2}px; height: ${BALL_R * 2}px;
-        border-radius: 50%;
-        pointer-events: none;
-        transform: translate(-50%, -50%);
-        z-index: 25;
-      `;
-      updateBallStyle(el);
-      inner.appendChild(el);
-      ballElements = [el];
+      balls = [{ x: newX, y: newY, vx: 0, vy: 0 }];
       launched = false;
       gameTimeActive = false;
-      powerups.forEach(p => p.el.remove());
       powerups = [];
-      powerupElements = [];
       activePowerupTypes.clear();
       powerupsInAir = 0;
       updateUI();
-      draw();
     }, 300);
   }
 
@@ -1135,7 +945,6 @@ export function initJuego(config, mobile = false) {
     lastDifficultyUpdate = performance.now();
 
     const clayValues = new Array(BRICK_ROWS * BRICK_COLS).fill(1);
-    inner.querySelectorAll('.brick').forEach(b => b.remove());
     bricks = [];
     gamePoints = 0;
     placeBricks(clayValues);
@@ -1144,22 +953,8 @@ export function initJuego(config, mobile = false) {
     launched = false;
     const newX = paddle.x + paddleWidth / 2;
     const newY = STAGE_H - 14 - BALL_R;
-    const newBall = { x: newX, y: newY, vx: 0, vy: 0 };
-    balls = [newBall];
-    const el = document.createElement('div');
-    el.className = 'ball-dynamic';
-    el.style.cssText = `
-      position: absolute; width: ${BALL_R * 2}px; height: ${BALL_R * 2}px;
-      border-radius: 50%;
-      pointer-events: none;
-      transform: translate(-50%, -50%);
-      z-index: 25;
-    `;
-    updateBallStyle(el);
-    inner.appendChild(el);
-    ballElements = [el];
+    balls = [{ x: newX, y: newY, vx: 0, vy: 0 }];
 
-    msgEl.classList.remove('show');
     running = true;
     gameOver = false;
     layoutStage();
@@ -1167,8 +962,6 @@ export function initJuego(config, mobile = false) {
     scoreEl.style.display = 'block';
     pauseBtn.style.display = 'block';
     updateUI();
-    updateDurabilityVisual();
-    draw();
     lastTime = 0;
     uiCounter = 0;
     if (animFrameId) cancelAnimationFrame(animFrameId);
@@ -1201,91 +994,200 @@ export function initJuego(config, mobile = false) {
     }
   }
 
-  // ========== RENDERIZADO Y ACTUALIZACIÓN VISUAL ==========
-  function updateDurabilityVisual() {
-    for (const el of ballElements) {
-      updateBallStyle(el);
-    }
-  }
-
-  function updateBallStyle(el) {
-    let bg, border, shadow;
-    switch (ballDurability) {
-      case 1:
-        bg = 'radial-gradient(circle at 35% 30%, #b0b0b0, #606060 60%, #303030)';
-        border = '2px solid #888';
-        shadow = '0 0 10px rgba(100,100,100,0.5)';
-        break;
-      case 2:
-        bg = 'radial-gradient(circle at 35% 30%, #ffaa00, #ff3300 60%, #990000)';
-        border = '2px solid #ff6600';
-        shadow = '0 0 20px rgba(255,100,0,0.8)';
-        break;
-      case 3:
-        bg = 'radial-gradient(circle at 35% 30%, #88ddff, #0066ff 60%, #0000aa)';
-        border = '2px solid #00ccff';
-        shadow = '0 0 25px rgba(0,150,255,0.9)';
-        break;
-    }
-    el.style.background = bg;
-    el.style.border = border;
-    el.style.boxShadow = shadow;
-  }
-
-  function getNieblaBoundary() {
-    return NIEBLA_HEIGHTS[nieblaLevel] || 0;
-  }
-
-  function updateNiebla() {
-    const boundary = getNieblaBoundary();
-    const totalHeight = boundary > 0 ? boundary + NIEBLA_FEATHER : 0;
-    nieblaEl.style.height = totalHeight + 'px';
-    nieblaEl.style.opacity = boundary > 0 ? 1 : 0;
-    // Se eliminaron los sonidos de niebla
-    prevNieblaLevel = nieblaLevel;
-  }
-
+  // ========== RENDERIZADO CON CANVAS ==========
   function draw() {
-    paddleWidth = PADDLE_W_BASE * paddleSizeMultiplier;
-    paddleEl.style.visibility = 'visible';
-    paddleEl.style.display = 'block';
-    paddleEl.style.opacity = '1';
-    paddleEl.style.width = paddleWidth + 'px';
-    paddleEl.style.transform = 'translateX(' + paddle.x + 'px)';
-    paddleEl.style.top = (STAGE_H - 14) + 'px';
-    paddleEl.style.left = '0';
-    paddleEl.style.background = '#111';
-    paddleEl.style.border = '2px solid #d4af37';
-    paddleEl.style.boxShadow = '0 0 25px rgba(212,175,55,0.3)';
-    paddleEl.style.borderRadius = '8px';
-    paddleEl.style.height = PADDLE_H + 'px';
-    paddleEl.style.zIndex = '100';
+    ctx.clearRect(0, 0, STAGE_W, STAGE_H);
 
-    // Actualizar bolas con transform
-    for (let i = 0; i < balls.length; i++) {
-      const el = ballElements[i];
-      if (el) {
-        const x = balls[i].x - BALL_R;
-        const y = balls[i].y - BALL_R;
-        el.style.transform = `translate(${x}px, ${y}px)`;
-      }
+    // Fondo (jueg1.png) – lo dibujamos con una imagen
+    const bg = new Image();
+    bg.src = '../archivos/jueg1.png';
+    // Usamos un patrón: dibujamos el fondo solo si la imagen está cargada, si no, un color sólido
+    // Para evitar recargar la imagen cada frame, la guardamos en una variable estática
+    if (!draw.bgImage) {
+      draw.bgImage = new Image();
+      draw.bgImage.src = '../archivos/jueg1.png';
+    }
+    if (draw.bgImage.complete && draw.bgImage.naturalWidth > 0) {
+      ctx.drawImage(draw.bgImage, 0, 0, STAGE_W, STAGE_H);
+    } else {
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fillRect(0, 0, STAGE_W, STAGE_H);
     }
 
-    // Actualizar power-ups con transform
-    for (let i = 0; i < powerups.length; i++) {
-      const pu = powerups[i];
-      const el = pu.el;
-      if (el) {
-        const x = pu.x - pu.size / 2;
-        const y = pu.y - pu.size / 2;
-        el.style.transform = `translate(${x}px, ${y}px)`;
+    // Dibujar ladrillos
+    for (const br of bricks) {
+      if (!br.alive) continue;
+      const x = br.x, y = br.y, w = br.w, h = br.h;
+      const type = br.type;
+      let color = type.color;
+      if (br.isGolden) {
+        color = '#ffd700';
       }
+      // Degradado
+      const grad = ctx.createLinearGradient(x, y, x + w, y + h);
+      const base = color;
+      const darker = adjustColor(color, -20);
+      grad.addColorStop(0, base);
+      grad.addColorStop(0.5, darker);
+      grad.addColorStop(1, base);
+      ctx.fillStyle = grad;
+      ctx.shadowColor = 'rgba(0,0,0,0.3)';
+      ctx.shadowBlur = 6;
+      ctx.fillRect(x, y, w, h);
+      ctx.shadowBlur = 0;
+
+      if (br.isGolden) {
+        ctx.strokeStyle = '#ffd700';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = 'rgba(255,215,0,0.8)';
+        ctx.shadowBlur = 15;
+        ctx.strokeRect(x, y, w, h);
+        ctx.shadowBlur = 0;
+      } else {
+        ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, w, h);
+      }
+
+      // Dibujar grietas si corresponde
+      const crackSrc = getCrackImageSrc(br);
+      if (crackSrc) {
+        const img = crackImages[crackSrc.split('/').pop()];
+        if (img && img.complete && img.naturalWidth > 0) {
+          ctx.drawImage(img, x + w*0.1, y + h*0.1, w*0.8, h*0.8);
+        }
+      }
+
+      // Etiqueta del valor (1,2,3)
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 12px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      ctx.shadowBlur = 4;
+      ctx.fillText(br.value, x + w/2, y + h/2);
+      ctx.shadowBlur = 0;
+    }
+
+    // Dibujar power-ups
+    for (const pu of powerups) {
+      const x = pu.x, y = pu.y, size = pu.size;
+      const isGreen = pu.color === 'verde';
+      const isBlue = pu.isBlue;
+      let color;
+      if (isBlue) {
+        color = '#ffd700';
+      } else {
+        color = isGreen ? 'rgba(46, 204, 113, 0.7)' : 'rgba(231, 76, 60, 0.7)';
+      }
+      ctx.beginPath();
+      ctx.arc(x, y, size/2, 0, Math.PI*2);
+      ctx.fillStyle = color;
+      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      ctx.shadowBlur = 10;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = isBlue ? '#fff8dc' : (isGreen ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,0,0.8)');
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      // Símbolo
+      ctx.fillStyle = '#fff';
+      ctx.font = `${size * 0.5}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(0,0,0,0.8)';
+      ctx.shadowBlur = 6;
+      let symbol = isBlue ? '★' : POWERUP_SYMBOLS[pu.type] || '?';
+      ctx.fillText(symbol, x, y);
+      ctx.shadowBlur = 0;
+    }
+
+    // Dibujar bolas
+    for (const b of balls) {
+      const x = b.x, y = b.y;
+      let grad;
+      switch (ballDurability) {
+        case 1:
+          grad = ctx.createRadialGradient(x-2, y-2, 2, x, y, BALL_R);
+          grad.addColorStop(0, '#b0b0b0');
+          grad.addColorStop(0.6, '#606060');
+          grad.addColorStop(1, '#303030');
+          break;
+        case 2:
+          grad = ctx.createRadialGradient(x-2, y-2, 2, x, y, BALL_R);
+          grad.addColorStop(0, '#ffaa00');
+          grad.addColorStop(0.6, '#ff3300');
+          grad.addColorStop(1, '#990000');
+          break;
+        case 3:
+          grad = ctx.createRadialGradient(x-2, y-2, 2, x, y, BALL_R);
+          grad.addColorStop(0, '#88ddff');
+          grad.addColorStop(0.6, '#0066ff');
+          grad.addColorStop(1, '#0000aa');
+          break;
+      }
+      ctx.beginPath();
+      ctx.arc(x, y, BALL_R, 0, Math.PI*2);
+      ctx.fillStyle = grad;
+      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      ctx.shadowBlur = 8;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    // Dibujar paleta
+    const px = paddle.x, py = STAGE_H - 14;
+    const pw = paddleWidth, ph = PADDLE_H;
+    ctx.shadowColor = 'rgba(212,175,55,0.3)';
+    ctx.shadowBlur = 20;
+    ctx.fillStyle = '#111';
+    ctx.fillRect(px, py, pw, ph);
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = '#d4af37';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(px, py, pw, ph);
+
+    // Niebla (máscara de niebla)
+    const boundary = NIEBLA_HEIGHTS[nieblaLevel] || 0;
+    if (boundary > 0) {
+      const gradNiebla = ctx.createRadialGradient(
+        STAGE_W/2, boundary, 10,
+        STAGE_W/2, boundary, boundary * 0.8
+      );
+      gradNiebla.addColorStop(0, 'rgba(255,255,255,0)');
+      gradNiebla.addColorStop(0.5, 'rgba(200,210,230,0.3)');
+      gradNiebla.addColorStop(1, 'rgba(180,190,210,0.6)');
+      ctx.fillStyle = gradNiebla;
+      ctx.fillRect(0, 0, STAGE_W, boundary);
+      // Efecto de plumas
+      const feather = NIEBLA_FEATHER;
+      const gradFeather = ctx.createLinearGradient(0, boundary - feather, 0, boundary);
+      gradFeather.addColorStop(0, 'rgba(255,255,255,0)');
+      gradFeather.addColorStop(1, 'rgba(255,255,255,0.8)');
+      ctx.fillStyle = gradFeather;
+      ctx.fillRect(0, boundary - feather, STAGE_W, feather);
+    }
+
+    // Mensajes flotantes
+    drawFloatingMessages(ctx);
+
+    // Si no está lanzada, mostrar "Toca para lanzar"
+    if (!launched && running && !gameOver) {
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.font = '12px "Press Start 2P", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText('Toca / Click', STAGE_W/2, STAGE_H - 30);
     }
   }
 
   // ========== BUCLE PRINCIPAL ==========
   function gameLoop(timestamp) {
     if (!running) {
+      draw();
       animFrameId = requestAnimationFrame(gameLoop);
       return;
     }
@@ -1348,27 +1250,14 @@ export function initJuego(config, mobile = false) {
       b.x += b.vx * delta;
       b.y += b.vy * delta;
 
-      if (b.x - BALL_R < 0) { 
-        b.x = BALL_R; 
-        b.vx = Math.abs(b.vx); 
-        // sin sonido
-      }
-      if (b.x + BALL_R > STAGE_W) { 
-        b.x = STAGE_W - BALL_R; 
-        b.vx = -Math.abs(b.vx); 
-        // sin sonido
-      }
-      if (b.y - BALL_R < 0) { 
-        b.y = BALL_R; 
-        b.vy = Math.abs(b.vy); 
-        // sin sonido
-      }
+      if (b.x - BALL_R < 0) { b.x = BALL_R; b.vx = Math.abs(b.vx); }
+      if (b.x + BALL_R > STAGE_W) { b.x = STAGE_W - BALL_R; b.vx = -Math.abs(b.vx); }
+      if (b.y - BALL_R < 0) { b.y = BALL_R; b.vy = Math.abs(b.vy); }
 
       const py = STAGE_H - 14;
       if (b.vy > 0 && b.y + BALL_R >= py && b.y + BALL_R <= py + 10 &&
           b.x >= paddle.x - BALL_R && b.x <= paddle.x + paddleWidth + BALL_R) {
         b.y = py - BALL_R;
-        // sin sonido de paleta
         let hit = (b.x - (paddle.x + paddleWidth / 2)) / (paddleWidth / 2);
         hit = Math.max(-0.85, Math.min(0.85, hit));
         const angle = hit * 0.7;
@@ -1397,11 +1286,9 @@ export function initJuego(config, mobile = false) {
 
           const damage = ballDurability;
           br.hits -= damage;
-          // Sonido solo si se destruye
           if (br.hits <= 0) {
-            soundBrick(); // un solo sonido para cualquier bloque
+            soundBrick();
             br.alive = false;
-            br.el.remove(); // eliminar del DOM
             if (br.isGolden && goldenBrickRef === br) goldenBrickRef = null;
             comboCount++;
             const comboMult = 1 + Math.min(comboCount * COMBO_BONUS_PER_HIT, COMBO_BONUS_CAP);
@@ -1409,12 +1296,11 @@ export function initJuego(config, mobile = false) {
             playerScore += Math.round(basePoints * comboMult);
             gamePoints -= br.value;
             ladrillosRotos++;
-            
             if (uiCounter % 2 === 0) updateUI();
             spawnPowerup(br);
             if (gamePoints <= REGEN_THRESHOLD) requestRegeneration();
           } else {
-            updateBrickCrack(br);
+            // Solo actualizamos la grieta visual, pero no hay elemento DOM
           }
           break;
         }
@@ -1422,8 +1308,6 @@ export function initJuego(config, mobile = false) {
 
       if (b.y - BALL_R > STAGE_H) {
         balls.splice(i, 1);
-        const removedEl = ballElements.splice(i, 1)[0];
-        if (removedEl) removedEl.remove();
         if (balls.length === 0) {
           loseLife();
           if (lives <= 0) {
@@ -1453,28 +1337,18 @@ export function initJuego(config, mobile = false) {
           else soundPowerupBad();
           applyPowerup(pu);
         }
-        pu.el.remove();
-        const idx = powerupElements.indexOf(pu.el);
-        if (idx !== -1) powerupElements.splice(idx, 1);
         powerups.splice(i, 1);
         powerupsInAir--;
-        updateDurabilityVisual();
-        draw();
         continue;
       }
 
       if (pu.y - pu.size / 2 > STAGE_H) {
-        pu.el.remove();
-        const idx = powerupElements.indexOf(pu.el);
-        if (idx !== -1) powerupElements.splice(idx, 1);
         powerups.splice(i, 1);
         powerupsInAir--;
         if (pu.isBlue) blueBallActive = false;
         else activePowerupTypes.delete(pu.type);
         continue;
       }
-
-      // Actualizar posición con transform se hará en draw()
     }
 
     checkGoldenExpiry();
@@ -1506,39 +1380,22 @@ export function initJuego(config, mobile = false) {
             const speed = Math.sqrt(src.vx * src.vx + src.vy * src.vy) || BALL_SPEED;
             const vx = Math.sin(angle) * speed;
             const vy = -Math.cos(angle) * speed;
-            const newBall = { x: src.x + (Math.random() - 0.5) * 10, y: src.y + (Math.random() - 0.5) * 10, vx: vx, vy: vy };
-            balls.push(newBall);
-            const el = document.createElement('div');
-            el.className = 'ball-dynamic';
-            el.style.cssText = `
-              position: absolute; width: ${BALL_R * 2}px; height: ${BALL_R * 2}px;
-              border-radius: 50%;
-              pointer-events: none;
-              transform: translate(-50%, -50%);
-              z-index: 25;
-            `;
-            updateBallStyle(el);
-            inner.appendChild(el);
-            ballElements.push(el);
+            balls.push({ x: src.x + (Math.random() - 0.5) * 10, y: src.y + (Math.random() - 0.5) * 10, vx: vx, vy: vy });
           }
         }
         break;
       }
       case 'DUREZA':
         if (ballDurability < 3) ballDurability++;
-        updateDurabilityVisual();
         break;
       case 'FLAQUESA':
         if (ballDurability > 1) ballDurability--;
-        updateDurabilityVisual();
         break;
       case 'BOLA_NIEBLA':
         if (nieblaLevel < MAX_NIEBLA) nieblaLevel++;
-        updateNiebla();
         break;
     }
     activePowerupTypes.delete(type);
-    draw();
   }
 
   function getThemeMessage(score) {
@@ -1570,10 +1427,7 @@ export function initJuego(config, mobile = false) {
     scale = Math.min(availW / STAGE_W, availH / STAGE_H);
     stage.style.width = (STAGE_W * scale) + 'px';
     stage.style.height = (STAGE_H * scale) + 'px';
-    inner.style.width = STAGE_W + 'px';
-    inner.style.height = STAGE_H + 'px';
-    inner.style.transform = 'scale(' + scale + ')';
-    inner.style.transformOrigin = 'top left';
+    // El canvas ya se escala con CSS
   }
 
   // ========== EVENTOS DEL JUGADOR ==========
@@ -1695,8 +1549,11 @@ export function initJuego(config, mobile = false) {
   }
 
   // ========== INICIO ==========
-  createPauseModal();
-  startGame();
-  layoutStage();
-  console.log('✅ Juego iniciado correctamente');
+  // Cargar imágenes de grietas antes de empezar
+  loadCrackImages(() => {
+    createPauseModal();
+    startGame();
+    layoutStage();
+    console.log('✅ Juego canvas iniciado correctamente');
+  });
 }
