@@ -1,40 +1,18 @@
 console.log('🚀 script-principal.js');
 
-// ============================================================
-// Detección de hora del día y aplicación de colores
-// ============================================================
+// Detección de hora del día
 function detectarPeriodoDia() {
   const ahora = new Date();
   const hora = ahora.getHours();
-  
-  let periodo = 'day'; // default
-  
-  // 6:00-8:00 AM: Amanecer
-  if (hora >= 6 && hora < 8) {
-    periodo = 'sunrise';
-  }
-  // 8:00 AM - 5:00 PM (17:00): Día
-  else if (hora >= 8 && hora < 17) {
-    periodo = 'day';
-  }
-  // 5:00 PM - 7:00 PM (19:00): Ocaso
-  else if (hora >= 17 && hora < 19) {
-    periodo = 'sunset';
-  }
-  // 7:00 PM - 6:00 AM: Noche
-  else if (hora >= 19 || hora < 6) {
-    periodo = 'night';
-  }
-  
+  let periodo = 'day';
+  if (hora >= 6 && hora < 8) periodo = 'sunrise';
+  else if (hora >= 8 && hora < 17) periodo = 'day';
+  else if (hora >= 17 && hora < 19) periodo = 'sunset';
+  else if (hora >= 19 || hora < 6) periodo = 'night';
   document.documentElement.setAttribute('data-time-period', periodo);
-  console.log('🌍 Período del día detectado:', periodo);
   return periodo;
 }
-
-// Detectar período al cargar
 detectarPeriodoDia();
-
-// Re-detectar cada minuto
 setInterval(detectarPeriodoDia, 60000);
 
 async function cargarConfig() {
@@ -72,8 +50,6 @@ function rellenarDatos(config) {
     nombreEl.textContent = config.nombre;
     nombreEl.setAttribute('data-text', config.nombre);
   }
-  const fechaEl = document.getElementById('fecha-fija');
-  if (fechaEl) fechaEl.textContent = config.fechaTexto;
   const fraseEl = document.getElementById('frase-texto');
   if (fraseEl) fraseEl.textContent = config.frase;
   const horaMisa = document.getElementById('hora-misa');
@@ -102,16 +78,280 @@ function rellenarDatos(config) {
   const ogDesc = document.querySelector('meta[property="og:description"]');
   if (ogDesc) ogDesc.content = `Te invitamos a celebrar los 15 años de ${config.nombre}. ¡No faltes!`;
 
-  // Ocultar el hint del juego
-  const hint = document.getElementById('hint-juego');
-  if (hint) hint.style.display = 'none';
+  // Rellenar firma en agradecimientos
+  const firmaNombre = document.getElementById('firma-nombre');
+  if (firmaNombre) {
+    firmaNombre.textContent = config.nombre;
+  }
+
+  // Establecer enlace del libro de firmas (genérico)
+  const linkLibro = document.getElementById('link-libro-firmas');
+  if (linkLibro) {
+    linkLibro.href = '#';
+    linkLibro.setAttribute('data-link', 'https://forms.gle/ejemplo');
+  }
+}
+
+// ===== GENERAR CALENDARIO =====
+function generarCalendario() {
+  const container = document.getElementById('calendario-container');
+  if (!container) return;
+  const year = 2026;
+  const month = 9;
+  const fechaEspecial = 10;
+  const diasEspeciales = [8, 10, 11];
+
+  const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  const primerDia = new Date(year, month, 1).getDay();
+  const diasEnMes = new Date(year, month + 1, 0).getDate();
+
+  container.innerHTML = '';
+  diasSemana.forEach(nombre => {
+    const div = document.createElement('div');
+    div.className = 'dia-nombre';
+    div.textContent = nombre;
+    container.appendChild(div);
+  });
+
+  for (let i = 0; i < primerDia; i++) {
+    const div = document.createElement('div');
+    div.className = 'dia';
+    div.style.visibility = 'hidden';
+    container.appendChild(div);
+  }
+
+  for (let d = 1; d <= diasEnMes; d++) {
+    const div = document.createElement('div');
+    div.className = 'dia';
+    if (d === fechaEspecial) {
+      div.classList.add('especial', 'dia-10');
+      div.innerHTML = `${d}<span class="rosa">🌹</span>`;
+    } else if (diasEspeciales.includes(d)) {
+      div.classList.add('especial');
+      div.textContent = d;
+    } else {
+      div.textContent = d;
+    }
+    container.appendChild(div);
+  }
+}
+
+// ===== MARCAR DÍA ACTUAL EN CALENDARIO =====
+function marcarDiaActualEnCalendario() {
+  const ahora = new Date();
+  const año = ahora.getFullYear();
+  const mes = ahora.getMonth();
+  const dia = ahora.getDate();
+
+  if (año === 2026 && mes === 9) {
+    const celdas = document.querySelectorAll('.calendario-container .dia');
+    celdas.forEach(celda => {
+      const num = parseInt(celda.textContent);
+      if (num === dia) {
+        celda.classList.add('hoy');
+      }
+    });
+  }
+}
+
+// ===== RESALTAR ACTIVIDAD ACTUAL EN ITINERARIO =====
+function iniciarBrilloItinerario() {
+  const ahora = new Date();
+  const año = ahora.getFullYear();
+  const mes = ahora.getMonth();
+  const dia = ahora.getDate();
+  const hora = ahora.getHours();
+  const minutos = ahora.getMinutes();
+  const totalMinutos = hora * 60 + minutos;
+
+  if (año === 2026 && mes === 9 && (dia === 10 || dia === 11)) {
+    const items = document.querySelectorAll('.itinerario-item');
+    let activo = null;
+    let anterior = null;
+
+    items.forEach(item => {
+      const horaMin = parseInt(item.dataset.hora);
+      if (totalMinutos >= horaMin) {
+        anterior = item;
+      }
+    });
+
+    if (anterior) {
+      activo = anterior;
+    }
+
+    if (activo) {
+      activo.classList.add('activo');
+    }
+
+    setInterval(() => {
+      const ahora2 = new Date();
+      const hora2 = ahora2.getHours();
+      const min2 = ahora2.getMinutes();
+      const totalMin2 = hora2 * 60 + min2;
+
+      if (ahora2.getDate() === dia && ahora2.getMonth() === mes && ahora2.getFullYear() === año) {
+        const items2 = document.querySelectorAll('.itinerario-item');
+        let nuevoActivo = null;
+        items2.forEach(item => {
+          const horaMin2 = parseInt(item.dataset.hora);
+          if (totalMin2 >= horaMin2) {
+            nuevoActivo = item;
+          }
+        });
+
+        items2.forEach(item => item.classList.remove('activo'));
+        if (nuevoActivo) {
+          nuevoActivo.classList.add('activo');
+        }
+      }
+    }, 60000);
+  }
+}
+
+// ===== GENERAR EVENTOS DEL CALENDARIO CON BOTONES =====
+function generarEventosCalendario(config) {
+  const container = document.getElementById('calendario-eventos');
+  if (!container) return;
+
+  const eventos = [
+    { fecha: '8 de octubre', hora: '9:00 AM', desc: '🎂 Cumpleaños', fechaISO: '2026-10-08T09:00:00', duracion: 2 },
+    { fecha: '10 de octubre', hora: '1:00 PM', desc: '🌹 XV años', fechaISO: '2026-10-10T13:00:00', duracion: 8 },
+    { fecha: '11 de octubre', hora: '9:00 AM', desc: '☀️ Desayuno', fechaISO: '2026-10-11T09:00:00', duracion: 3 },
+  ];
+
+  container.innerHTML = '';
+  eventos.forEach(ev => {
+    const div = document.createElement('div');
+    div.className = 'calendario-evento';
+
+    const info = document.createElement('div');
+    info.className = 'evento-info';
+    info.innerHTML = `
+      <span class="fecha">${ev.fecha}</span>
+      <span class="hora">${ev.hora}</span>
+      <span class="desc">${ev.desc}</span>
+    `;
+
+    const btn = document.createElement('button');
+    btn.className = 'btn-agregar';
+    btn.textContent = '📅 Añadir';
+    btn.addEventListener('click', () => {
+      agregarACalendario(ev, config);
+    });
+
+    div.appendChild(info);
+    div.appendChild(btn);
+    container.appendChild(div);
+  });
+}
+
+function agregarACalendario(evento, config) {
+  const fecha = new Date(evento.fechaISO);
+  const inicio = fecha.toISOString().replace(/-|:|\.\d+/g, '');
+  const fin = new Date(fecha.getTime() + evento.duracion * 60 * 60 * 1000).toISOString().replace(/-|:|\.\d+/g, '');
+
+  const titulo = encodeURIComponent(`${evento.desc} · ${config.nombre}`);
+  const descripcion = encodeURIComponent(`Invitación a los XV años de ${config.nombre}. ${evento.desc}`);
+  const ubicacion = encodeURIComponent('Iglesia de Tianguistenco de Galeana / Auditorio');
+
+  const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${titulo}&dates=${inicio}/${fin}&details=${descripcion}&location=${ubicacion}&sf=true&output=xml`;
+  window.open(url, '_blank');
+}
+
+// ===== CONTADOR CON ANILLO CIRCULAR =====
+function initContadorCircular(config) {
+  const target = new Date(config.fechaISO).getTime();
+  if (isNaN(target)) return;
+
+  const units = document.querySelectorAll('.clock .unit');
+  if (!units.length) return;
+
+  function actualizarContador() {
+    const now = Date.now();
+    const diff = target - now;
+
+    if (diff <= 0) {
+      document.querySelector('.clock').style.display = 'none';
+      document.getElementById('contador-mensaje').textContent = '¡El gran día ha llegado! 🎉';
+      return;
+    }
+
+    const days = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+
+    const maxValues = [365, 24, 60, 60];
+    const values = [days, hours, minutes, seconds];
+
+    units.forEach((unit, index) => {
+      const numEl = unit.querySelector('.num');
+      const circle = unit.querySelector('.progress-circle');
+      if (numEl) numEl.textContent = String(values[index]).padStart(2, '0');
+
+      if (circle) {
+        const max = maxValues[index];
+        const val = values[index];
+        const circumference = 2 * Math.PI * 26;
+        const progress = max > 0 ? (max - val) / max : 0;
+        const offset = progress * circumference;
+        circle.style.strokeDasharray = circumference;
+        circle.style.strokeDashoffset = offset;
+      }
+    });
+
+    // Mensaje dinámico
+    const msgEl = document.getElementById('contador-mensaje');
+    if (msgEl) {
+      let mensaje = '';
+      if (days > 30) mensaje = 'Falta un poco más de un mes...';
+      else if (days > 7) mensaje = 'La espera se hace corta.';
+      else if (days > 1) mensaje = '¡Ya casi llega!';
+      else if (days === 1) mensaje = '¡Mañana es el gran día!';
+      else if (days === 0 && hours > 6) mensaje = '¡Hoy es el día!';
+      else if (days === 0 && hours > 1) mensaje = '¡En unas horas comienza!';
+      else if (days === 0 && hours >= 0) mensaje = '¡El momento está aquí!';
+      msgEl.textContent = mensaje;
+    }
+  }
+
+  // Crear los SVG dentro de cada unidad si no existen
+  units.forEach((unit) => {
+    let circleWrap = unit.querySelector('.circle-wrap');
+    if (!circleWrap) {
+      const wrap = document.createElement('div');
+      wrap.className = 'circle-wrap';
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 60 60');
+      svg.innerHTML = `
+        <circle class="bg-circle" cx="30" cy="30" r="26" />
+        <circle class="progress-circle" cx="30" cy="30" r="26" stroke-dasharray="163.36" stroke-dashoffset="0" />
+      `;
+      wrap.appendChild(svg);
+      const num = unit.querySelector('.num');
+      unit.insertBefore(wrap, num);
+      wrap.appendChild(num);
+      num.style.position = 'absolute';
+      num.style.top = '50%';
+      num.style.left = '50%';
+      num.style.transform = 'translate(-50%, -50%)';
+    }
+  });
+
+  actualizarContador();
+  setInterval(actualizarContador, 200);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
   const config = await cargarConfig();
   rellenarDatos(config);
+  generarCalendario();
+  generarEventosCalendario(config);
+  initContadorCircular(config);
+  marcarDiaActualEnCalendario();
+  iniciarBrilloItinerario();
 
-  // ===== CARGAR MÓDULOS AL INICIO =====
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
     initSonidos();
@@ -125,30 +365,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.resetMusic = resetMusic;
   } catch (e) { console.error('❌ Música:', e); }
 
-  try {
-    const { initModal } = await import('./modules/modal.js');
-    initModal();
-    console.log('✅ Modales inicializados');
-  } catch (e) { console.error('❌ Modal:', e); }
-
-  // ===== CONTADOR (bajo demanda) =====
   let appIniciada = false;
   async function cargarContador() {
     if (appIniciada) return;
     appIniciada = true;
-    try {
-      const { initContador } = await import('./modules/contador.js');
-      initContador(config);
-    } catch (e) { console.error('❌ Contador:', e); }
   }
 
-  // ========== IR AL JUEGO ==========
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => {
     window.location.href = 'juego1/';
   });
 
-  // ========== REJA ==========
   const portal = document.getElementById('portal');
   const gateWrapper = document.getElementById('gate-wrapper');
   const app = document.getElementById('app');
@@ -177,7 +404,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     setTimeout(() => {
       caption.classList.add('show');
       gateWrapper.classList.add('active');
-      console.log('🔄 Reja activada');
     }, 2000);
   }
 
@@ -192,7 +418,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function cerrarReja(e) {
     if (e) e.stopPropagation();
-    console.log('🔒 Cerrando reja...');
     app.classList.remove('show');
     portal.classList.remove('hide');
     gateWrapper.classList.remove('open');
@@ -202,15 +427,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     void portal.offsetHeight;
     requestAnimationFrame(() => {
       portal.classList.add('closing');
-      console.log('⏳ Animación de cierre iniciada');
     });
     setTimeout(() => {
       portal.classList.remove('closing');
-      console.log('✅ Animación de cierre completada');
       setTimeout(() => {
         caption.classList.add('show');
         gateWrapper.classList.add('active');
-        console.log('🔄 Reja reactivada');
       }, 2000);
     }, 700);
   }
@@ -221,14 +443,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   backBtn.addEventListener('click', cerrarReja);
 
-  // ============================================================
-  // 🌀 PARALLAX POR CONTENEDORES + PAUSA EN MODALES
-  // ============================================================
+  // ===== PARALLAX =====
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
   let gyroWorking = false;
 
-  // === Crear wrapper para la app (si no existe) ===
   let appInner = document.getElementById('app-inner');
   if (!appInner) {
     appInner = document.createElement('div');
@@ -237,12 +456,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       width: 100%;
-      height: 100%;
       max-width: 560px;
       will-change: transform;
-      gap: 0.1rem;
+      gap: 0.5rem;
+      padding: 0 0.5rem 2rem;
     `;
     while (app.firstChild) {
       appInner.appendChild(app.firstChild);
@@ -251,47 +470,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   const portalInner = document.querySelector('.portal-inner');
-  const videoApp = document.getElementById('video-app');
-  const videoPortal = document.getElementById('video-portal');
 
-  // === Pausa de videos al abrir modales ===
-  function pausarVideos() {
-    if (videoApp && !videoApp.paused) videoApp.pause();
-    if (videoPortal && !videoPortal.paused) videoPortal.pause();
-    console.log('⏸️ Videos pausados por modal');
-  }
-
-  function reanudarVideos() {
-    if (videoApp && videoApp.paused) videoApp.play().catch(() => {});
-    if (videoPortal && videoPortal.paused) videoPortal.play().catch(() => {});
-    console.log('▶️ Videos reanudados');
-  }
-
-  const modalObserver = new MutationObserver(() => {
-    const hayModalAbierto = document.querySelector('.modal-overlay.open') !== null;
-    if (hayModalAbierto) {
-      pausarVideos();
-    } else {
-      reanudarVideos();
-    }
-  });
-
-  document.querySelectorAll('.modal-overlay').forEach(el => {
-    modalObserver.observe(el, { attributes: true, attributeFilter: ['class'] });
-  });
-
-  const bodyObserver = new MutationObserver(() => {
-    document.querySelectorAll('.modal-overlay:not([data-observed])').forEach(el => {
-      el.setAttribute('data-observed', 'true');
-      modalObserver.observe(el, { attributes: true, attributeFilter: ['class'] });
-    });
-  });
-  bodyObserver.observe(document.body, { childList: true, subtree: true });
-
-  // === Parallax ===
   function applyParallax(x, y) {
-    if (document.querySelector('.modal-overlay.open')) return;
-
     const invertX = -x;
     const invertY = -y;
     const maxOffset = 18;
@@ -320,7 +500,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // --- Mouse (solo en escritorio) ---
   document.addEventListener('mousemove', (e) => {
     if (isMobile) return;
     if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
@@ -333,21 +512,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // --- Giroscopio (móvil) ---
   if (isMobile && hasGyro) {
     const gyroTest = (e) => {
       if (e.gamma !== null || e.beta !== null) {
         gyroWorking = true;
-        console.log('✅ Giroscopio detectado y funcionando');
         window.removeEventListener('deviceorientation', gyroTest);
         window.addEventListener('deviceorientation', handleOrientation);
       }
     };
     window.addEventListener('deviceorientation', gyroTest);
-
     setTimeout(() => {
       if (!gyroWorking) {
-        console.log('⚠️ Giroscopio no responde, no se usará parallax en móvil');
         window.removeEventListener('deviceorientation', gyroTest);
       }
     }, 3000);
@@ -366,18 +541,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Si hay modal abierto al inicio, pausar
-  if (document.querySelector('.modal-overlay.open')) {
-    pausarVideos();
-  }
-
-  // ============================================================
-  // 🔇 BOTÓN DE MÚSICA
-  // ============================================================
+  // Música
   const muteBtn = document.getElementById('music-toggle');
   if (muteBtn) {
     muteBtn.addEventListener('click', () => {
       if (window.toggleMusic) window.toggleMusic();
     });
+  }
+
+  // Observador para animaciones de secciones
+  if ('IntersectionObserver' in window) {
+    const secciones = document.querySelectorAll('.seccion');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        } else {
+          entry.target.classList.remove('visible');
+        }
+      });
+    }, { threshold: 0.15 });
+    secciones.forEach(sec => observer.observe(sec));
+  } else {
+    document.querySelectorAll('.seccion').forEach(sec => sec.classList.add('visible'));
   }
 });
