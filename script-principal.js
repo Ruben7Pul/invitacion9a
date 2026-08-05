@@ -1,4 +1,4 @@
-console.log('🚀 script-principal 23.js');
+console.log('🚀 script-principal.js');
 
 // Detección de hora del día
 function detectarPeriodoDia() {
@@ -78,13 +78,11 @@ function rellenarDatos(config) {
   const ogDesc = document.querySelector('meta[property="og:description"]');
   if (ogDesc) ogDesc.content = `Te invitamos a celebrar los 15 años de ${config.nombre}. ¡No faltes!`;
 
-  // Rellenar firma en agradecimientos
   const firmaNombre = document.getElementById('firma-nombre');
   if (firmaNombre) {
     firmaNombre.textContent = config.nombre;
   }
 
-  // Establecer enlace del libro de firmas (genérico)
   const linkLibro = document.getElementById('link-libro-firmas');
   if (linkLibro) {
     linkLibro.href = '#';
@@ -92,7 +90,7 @@ function rellenarDatos(config) {
   }
 }
 
-// ===== GENERAR CALENDARIO =====
+// ===== GENERAR CALENDARIO (solo días) =====
 function generarCalendario() {
   const container = document.getElementById('calendario-container');
   if (!container) return;
@@ -209,56 +207,6 @@ function iniciarBrilloItinerario() {
   }
 }
 
-// ===== GENERAR EVENTOS DEL CALENDARIO CON BOTONES =====
-function generarEventosCalendario(config) {
-  const container = document.getElementById('calendario-eventos');
-  if (!container) return;
-
-  const eventos = [
-    { fecha: '8 de octubre', hora: '9:00 AM', desc: '🎂 Cumpleaños', fechaISO: '2026-10-08T09:00:00', duracion: 2 },
-    { fecha: '10 de octubre', hora: '1:00 PM', desc: '🌹 XV años', fechaISO: '2026-10-10T13:00:00', duracion: 8 },
-    { fecha: '11 de octubre', hora: '9:00 AM', desc: '☀️ Desayuno', fechaISO: '2026-10-11T09:00:00', duracion: 3 },
-  ];
-
-  container.innerHTML = '';
-  eventos.forEach(ev => {
-    const div = document.createElement('div');
-    div.className = 'calendario-evento';
-
-    const info = document.createElement('div');
-    info.className = 'evento-info';
-    info.innerHTML = `
-      <span class="fecha">${ev.fecha}</span>
-      <span class="hora">${ev.hora}</span>
-      <span class="desc">${ev.desc}</span>
-    `;
-
-    const btn = document.createElement('button');
-    btn.className = 'btn-agregar';
-    btn.textContent = '📅 Añadir';
-    btn.addEventListener('click', () => {
-      agregarACalendario(ev, config);
-    });
-
-    div.appendChild(info);
-    div.appendChild(btn);
-    container.appendChild(div);
-  });
-}
-
-function agregarACalendario(evento, config) {
-  const fecha = new Date(evento.fechaISO);
-  const inicio = fecha.toISOString().replace(/-|:|\.\d+/g, '');
-  const fin = new Date(fecha.getTime() + evento.duracion * 60 * 60 * 1000).toISOString().replace(/-|:|\.\d+/g, '');
-
-  const titulo = encodeURIComponent(`${evento.desc} · ${config.nombre}`);
-  const descripcion = encodeURIComponent(`Invitación a los XV años de ${config.nombre}. ${evento.desc}`);
-  const ubicacion = encodeURIComponent('Iglesia de Tianguistenco de Galeana / Auditorio');
-
-  const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${titulo}&dates=${inicio}/${fin}&details=${descripcion}&location=${ubicacion}&sf=true&output=xml`;
-  window.open(url, '_blank');
-}
-
 // ===== CONTADOR CON ANILLO CIRCULAR =====
 function initContadorCircular(config) {
   const target = new Date(config.fechaISO).getTime();
@@ -301,7 +249,6 @@ function initContadorCircular(config) {
       }
     });
 
-    // Mensaje dinámico
     const msgEl = document.getElementById('contador-mensaje');
     if (msgEl) {
       let mensaje = '';
@@ -316,7 +263,6 @@ function initContadorCircular(config) {
     }
   }
 
-  // Crear los SVG dentro de cada unidad si no existen
   units.forEach((unit) => {
     let circleWrap = unit.querySelector('.circle-wrap');
     if (!circleWrap) {
@@ -347,7 +293,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const config = await cargarConfig();
   rellenarDatos(config);
   generarCalendario();
-  generarEventosCalendario(config);
   initContadorCircular(config);
   marcarDiaActualEnCalendario();
   iniciarBrilloItinerario();
@@ -443,7 +388,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   backBtn.addEventListener('click', cerrarReja);
 
-  // ===== PARALLAX =====
+  // Parallax
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
   let gyroWorking = false;
@@ -541,7 +486,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Música
   const muteBtn = document.getElementById('music-toggle');
   if (muteBtn) {
     muteBtn.addEventListener('click', () => {
@@ -549,7 +493,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Observador para animaciones de secciones
   if ('IntersectionObserver' in window) {
     const secciones = document.querySelectorAll('.seccion');
     const observer = new IntersectionObserver((entries) => {
