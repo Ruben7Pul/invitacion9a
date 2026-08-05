@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS COMPLETOS (SIN MAPA INTERACTIVO)
+   🌹 INVITACIÓN XV – ESTILOS COMPLETOS (CON LIBRO DE FIRMAS)
    ============================================================ */
 
 :root {
@@ -327,6 +327,9 @@ body {
 #app:not(.show) .seccion .itinerario-lista {
   transition-delay: 0.15s;
 }
+#app:not(.show) .seccion .libro-firmas-contenido {
+  transition-delay: 0.2s;
+}
 #app:not(.show) .seccion .btn-mapa {
   transition-delay: 0.2s;
 }
@@ -509,13 +512,14 @@ h1#nombre-hero {
   opacity: 1;
   transform: translateY(0);
 }
-/* Retrasos de sección */
+/* Retrasos de sección (nuevo orden) */
 #seccion-familia.visible { transition-delay: 0.1s; }
-#seccion-calendario.visible { transition-delay: 0.3s; }
-#seccion-itinerario.visible { transition-delay: 0.4s; }
-#seccion-contador.visible { transition-delay: 0.5s; }
-#seccion-lugares.visible { transition-delay: 0.7s; }
-#seccion-agradecimientos.visible { transition-delay: 0.8s; }
+#seccion-calendario.visible { transition-delay: 0.2s; }
+#seccion-contador.visible { transition-delay: 0.3s; }
+#seccion-lugares.visible { transition-delay: 0.4s; }
+#seccion-itinerario.visible { transition-delay: 0.5s; }
+#seccion-libro-firmas.visible { transition-delay: 0.6s; }
+#seccion-agradecimientos.visible { transition-delay: 0.7s; }
 
 /* ===== ELEMENTOS INTERNOS CON ANIMACIONES ESCALONADAS ===== */
 .seccion .animar {
@@ -547,6 +551,7 @@ h1#nombre-hero {
 .seccion .calendario-eventos,
 .seccion .itinerario-lista,
 .seccion .btn-mapa,
+.seccion .libro-firmas-contenido,
 .seccion .agradecimientos-contenido {
   opacity: 0;
   transform: translateY(15px);
@@ -561,6 +566,7 @@ h1#nombre-hero {
 .seccion.visible .calendario-eventos { transition-delay: 0.25s; opacity: 1; transform: translateY(0); }
 .seccion.visible .itinerario-lista { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
 .seccion.visible .btn-mapa { transition-delay: 0.3s; opacity: 1; transform: translateY(0); }
+.seccion.visible .libro-firmas-contenido { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
 .seccion.visible .agradecimientos-contenido { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
 
 /* Para las unidades del contador, retrasos individuales */
@@ -887,7 +893,6 @@ h1#nombre-hero {
   color: #e0d0b0;
   word-wrap: break-word;
 }
-
 .detalle-botones {
   display: flex;
   flex-wrap: wrap;
@@ -922,6 +927,22 @@ h1#nombre-hero {
   background: rgba(201, 162, 77, 0.2);
   border-color: rgba(201, 162, 77, 0.6);
   box-shadow: 0 0 25px rgba(212, 175, 55, 0.2);
+}
+
+/* ===== LIBRO DE FIRMAS ===== */
+.libro-firmas-contenido {
+  text-align: center;
+  padding: 0.5rem 0;
+}
+.libro-firmas-texto {
+  font-family: var(--serif-body);
+  font-size: clamp(1rem, 2.4vw, 1.2rem);
+  line-height: 1.8;
+  color: #f0e0c0;
+  margin: 0.6rem 0;
+}
+.libro-firmas-contenido .btn-mapa {
+  display: inline-block;
 }
 
 /* ===== FAMILIA ===== */
