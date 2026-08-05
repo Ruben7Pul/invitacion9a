@@ -1,4 +1,4 @@
-console.log('🚀 script 123-principal.js');
+console.log('🚀 script-principal 99.js');
 
 // ============================================================
 // Detección de hora del día y aplicación de colores
@@ -7,30 +7,15 @@ function detectarPeriodoDia() {
   const ahora = new Date();
   const hora = ahora.getHours();
   
-  let periodo = 'day'; // default
-  
-  // 6:00-8:00 AM: Amanecer
-  if (hora >= 6 && hora < 8) {
-    periodo = 'sunrise';
-  }
-  // 8:00 AM - 5:00 PM (17:00): Día
-  else if (hora >= 8 && hora < 17) {
-    periodo = 'day';
-  }
-  // 5:00 PM - 7:00 PM (19:00): Ocaso
-  else if (hora >= 17 && hora < 19) {
-    periodo = 'sunset';
-  }
-  // 7:00 PM - 6:00 AM: Noche
-  else if (hora >= 19 || hora < 6) {
-    periodo = 'night';
-  }
+  let periodo = 'day';
+  if (hora >= 6 && hora < 8) periodo = 'sunrise';
+  else if (hora >= 8 && hora < 17) periodo = 'day';
+  else if (hora >= 17 && hora < 19) periodo = 'sunset';
+  else if (hora >= 19 || hora < 6) periodo = 'night';
   
   document.documentElement.setAttribute('data-time-period', periodo);
-  console.log('🌍 Período del día detectado:', periodo);
   return periodo;
 }
-
 detectarPeriodoDia();
 setInterval(detectarPeriodoDia, 60000);
 
@@ -99,7 +84,6 @@ function rellenarDatos(config) {
   const ogDesc = document.querySelector('meta[property="og:description"]');
   if (ogDesc) ogDesc.content = `Te invitamos a celebrar los 15 años de ${config.nombre}. ¡No faltes!`;
 
-  // Ocultar el hint del juego
   const hint = document.getElementById('hint-juego');
   if (hint) hint.style.display = 'none';
 }
@@ -108,7 +92,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const config = await cargarConfig();
   rellenarDatos(config);
 
-  // ===== CARGAR MÓDULOS AL INICIO =====
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
     initSonidos();
@@ -122,7 +105,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.resetMusic = resetMusic;
   } catch (e) { console.error('❌ Música:', e); }
 
-  // ===== CONTADOR (bajo demanda) =====
   let appIniciada = false;
   async function cargarContador() {
     if (appIniciada) return;
@@ -133,13 +115,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (e) { console.error('❌ Contador:', e); }
   }
 
-  // ========== IR AL JUEGO ==========
   const nombreEl = document.getElementById('nombre-hero');
   nombreEl.addEventListener('click', () => {
     window.location.href = 'juego1/';
   });
 
-  // ========== REJA ==========
   const portal = document.getElementById('portal');
   const gateWrapper = document.getElementById('gate-wrapper');
   const app = document.getElementById('app');
@@ -168,7 +148,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     setTimeout(() => {
       caption.classList.add('show');
       gateWrapper.classList.add('active');
-      console.log('🔄 Reja activada');
     }, 2000);
   }
 
@@ -183,7 +162,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function cerrarReja(e) {
     if (e) e.stopPropagation();
-    console.log('🔒 Cerrando reja...');
     app.classList.remove('show');
     portal.classList.remove('hide');
     gateWrapper.classList.remove('open');
@@ -193,15 +171,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     void portal.offsetHeight;
     requestAnimationFrame(() => {
       portal.classList.add('closing');
-      console.log('⏳ Animación de cierre iniciada');
     });
     setTimeout(() => {
       portal.classList.remove('closing');
-      console.log('✅ Animación de cierre completada');
       setTimeout(() => {
         caption.classList.add('show');
         gateWrapper.classList.add('active');
-        console.log('🔄 Reja reactivada');
       }, 2000);
     }, 700);
   }
@@ -212,14 +187,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   backBtn.addEventListener('click', cerrarReja);
 
-  // ============================================================
-  // 🌀 PARALLAX POR CONTENEDORES + PAUSA EN MODALES (ya no hay modales, pero mantenemos por si acaso)
-  // ============================================================
+  // ===== PARALLAX =====
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
   let gyroWorking = false;
 
-  // === Crear wrapper para la app (si no existe) ===
   let appInner = document.getElementById('app-inner');
   if (!appInner) {
     appInner = document.createElement('div');
@@ -233,7 +205,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       max-width: 560px;
       will-change: transform;
       gap: 0.5rem;
-      padding: 0 0.5rem 5rem;
+      padding: 0 0.5rem 2rem;
     `;
     while (app.firstChild) {
       appInner.appendChild(app.firstChild);
@@ -245,10 +217,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const videoApp = document.getElementById('video-app');
   const videoPortal = document.getElementById('video-portal');
 
-  // === Parallax ===
   function applyParallax(x, y) {
-    if (document.querySelector('.modal-overlay.open')) return;
-
     const invertX = -x;
     const invertY = -y;
     const maxOffset = 18;
@@ -277,7 +246,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // --- Mouse (solo en escritorio) ---
   document.addEventListener('mousemove', (e) => {
     if (isMobile) return;
     if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
@@ -290,21 +258,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // --- Giroscopio (móvil) ---
   if (isMobile && hasGyro) {
     const gyroTest = (e) => {
       if (e.gamma !== null || e.beta !== null) {
         gyroWorking = true;
-        console.log('✅ Giroscopio detectado y funcionando');
         window.removeEventListener('deviceorientation', gyroTest);
         window.addEventListener('deviceorientation', handleOrientation);
       }
     };
     window.addEventListener('deviceorientation', gyroTest);
-
     setTimeout(() => {
       if (!gyroWorking) {
-        console.log('⚠️ Giroscopio no responde, no se usará parallax en móvil');
         window.removeEventListener('deviceorientation', gyroTest);
       }
     }, 3000);
@@ -323,9 +287,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // ============================================================
-  // 🔇 BOTÓN DE MÚSICA
-  // ============================================================
+  // MÚSICA
   const muteBtn = document.getElementById('music-toggle');
   if (muteBtn) {
     muteBtn.addEventListener('click', () => {
@@ -333,24 +295,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // ============================================================
-  // NAVEGACIÓN POR SECCIONES (sin modales)
-  // ============================================================
-  document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const targetId = btn.dataset.target;
-      if (targetId) {
-        const target = document.getElementById(targetId);
-        if (target) {
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }
-    });
-  });
-
-  // ============================================================
-  // OBSERVADOR PARA ANIMACIONES DE APERTURA DE SECCIONES
-  // ============================================================
+  // ===== OBSERVADOR PARA ANIMACIONES DE SECCIONES =====
   if ('IntersectionObserver' in window) {
     const secciones = document.querySelectorAll('.seccion');
     const observer = new IntersectionObserver((entries) => {
@@ -362,7 +307,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, { threshold: 0.15 });
     secciones.forEach(sec => observer.observe(sec));
   } else {
-    // Fallback: mostrar todas
     document.querySelectorAll('.seccion').forEach(sec => sec.classList.add('visible'));
   }
 });
