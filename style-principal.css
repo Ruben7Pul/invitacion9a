@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS OPTIMIZADOS (CON GPU ACCELERATION)
+   🌹 INVITACIÓN XV – ESTILOS OPTIMIZADOS (CON CORRECCIONES)
    ============================================================ */
 
 :root {
@@ -111,7 +111,7 @@ body {
   text-shadow: 0 2px 8px rgba(0,0,0,0.8);
 }
 
-/* ===== PORTAL ===== */
+/* ===== PORTAL (sin burbujas) ===== */
 #portal {
   position: fixed;
   inset: 0;
@@ -194,41 +194,6 @@ body {
   100% { opacity: 0; transform: scale(1.35); }
 }
 
-.portal-water-top {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-  opacity: 1;
-  mix-blend-mode: lighten;
-}
-.portal-water-top::before,
-.portal-water-top::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-  background: radial-gradient(ellipse 150px 100px at 15% 20%, rgba(150, 200, 255, 0.16), transparent 60%),
-              radial-gradient(ellipse 180px 120px at 85% 35%, rgba(150, 200, 255, 0.14), transparent 65%),
-              radial-gradient(ellipse 140px 90px at 50% 60%, rgba(180, 220, 255, 0.12), transparent 70%),
-              radial-gradient(ellipse 160px 110px at 25% 75%, rgba(150, 200, 255, 0.15), transparent 68%),
-              radial-gradient(ellipse 170px 115px at 75% 80%, rgba(160, 210, 255, 0.14), transparent 70%);
-  animation: underwaterGlow 8s ease-in-out infinite;
-}
-.portal-water-top::after {
-  animation-duration: 11s;
-  animation-direction: reverse;
-  opacity: 0.8;
-}
-@keyframes underwaterGlow {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
-}
 .gate-leaf {
   position: absolute;
   top: 0;
@@ -330,7 +295,6 @@ body {
   opacity: 1;
   transform: translate3d(0, 0, 0);
 }
-/* Cuando no está visible, se oculta instantáneamente sin transición */
 .seccion:not(.visible) {
   transition: none !important;
   opacity: 0 !important;
@@ -358,7 +322,6 @@ body {
   opacity: 1;
   transform: translate3d(0, 0, 0);
 }
-/* Retrasos para cada elemento */
 .seccion.visible .animar-1 { transition-delay: 0.1s; }
 .seccion.visible .animar-2 { transition-delay: 0.2s; }
 .seccion.visible .animar-3 { transition-delay: 0.3s; }
@@ -368,14 +331,12 @@ body {
 .seccion.visible .animar-7 { transition-delay: 0.7s; }
 .seccion.visible .animar-8 { transition-delay: 0.8s; }
 
-/* Aplicar a elementos comunes */
 .seccion h2,
 .seccion .seccion-subtitulo,
 .seccion .detalle-card,
 .seccion .familia-grupo,
 .seccion .clock .unit,
 .seccion .calendario-container,
-.seccion .calendario-eventos,
 .seccion .itinerario-lista,
 .seccion .btn-mapa,
 .seccion .libro-firmas-contenido,
@@ -392,23 +353,19 @@ body {
 .seccion.visible .familia-grupo { transition-delay: 0.25s; opacity: 1; transform: translate3d(0, 0, 0); }
 .seccion.visible .clock .unit { transition-delay: 0.2s; opacity: 1; transform: translate3d(0, 0, 0); }
 .seccion.visible .calendario-container { transition-delay: 0.2s; opacity: 1; transform: translate3d(0, 0, 0); }
-.seccion.visible .calendario-eventos { transition-delay: 0.25s; opacity: 1; transform: translate3d(0, 0, 0); }
 .seccion.visible .itinerario-lista { transition-delay: 0.2s; opacity: 1; transform: translate3d(0, 0, 0); }
 .seccion.visible .btn-mapa { transition-delay: 0.3s; opacity: 1; transform: translate3d(0, 0, 0); }
 .seccion.visible .libro-firmas-contenido { transition-delay: 0.2s; opacity: 1; transform: translate3d(0, 0, 0); }
 .seccion.visible .agradecimientos-contenido { transition-delay: 0.2s; opacity: 1; transform: translate3d(0, 0, 0); }
 
-/* Para las unidades del contador, retrasos individuales */
 .seccion.visible .clock .unit:nth-child(1) { transition-delay: 0.2s; }
 .seccion.visible .clock .unit:nth-child(2) { transition-delay: 0.3s; }
 .seccion.visible .clock .unit:nth-child(3) { transition-delay: 0.4s; }
 .seccion.visible .clock .unit:nth-child(4) { transition-delay: 0.5s; }
 
-/* Para las tarjetas de lugares, retrasos */
 .seccion.visible .detalle-card:nth-child(2) { transition-delay: 0.25s; }
 .seccion.visible .detalle-card:nth-child(4) { transition-delay: 0.35s; }
 
-/* Efecto de brillo en los títulos al aparecer */
 .seccion.visible h2 {
   animation: goldShine 1.2s ease forwards;
 }
@@ -453,6 +410,15 @@ body {
   opacity: 0.9;
   letter-spacing: 0.05em;
   text-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
+}
+
+/* Subtítulo del calendario más grande y legible */
+.calendario-subtitulo {
+  font-family: var(--serif-display) !important;
+  font-size: clamp(1.4rem, 4vw, 2.2rem) !important;
+  letter-spacing: 0.2em;
+  color: #fae3a0 !important;
+  text-shadow: 0 0 20px rgba(212, 175, 55, 0.3) !important;
 }
 
 /* ===== DESAPARICIÓN DE LA APP AL CERRAR ===== */
@@ -639,7 +605,7 @@ h1#nombre-hero {
   grid-template-columns: repeat(7, 1fr);
   gap: 4px;
   max-width: 400px;
-  margin: 0 auto 0.6rem;
+  margin: 0 auto;
   font-family: var(--serif-body);
   font-size: clamp(0.8rem, 1.8vw, 1rem);
 }
@@ -667,7 +633,6 @@ h1#nombre-hero {
   flex-direction: column;
   font-size: clamp(0.9rem, 2vw, 1.1rem);
 }
-/* Días 8, 10, 11 especiales */
 .calendario-container .dia.especial {
   border-color: #d4af37;
   background: rgba(212, 175, 55, 0.15);
@@ -676,7 +641,6 @@ h1#nombre-hero {
   font-weight: 700;
   color: #ffd700;
 }
-/* Día 10: más brillo y rosa animada */
 .calendario-container .dia.dia-10 {
   border-color: #ff69b4;
   background: rgba(255, 105, 180, 0.2);
@@ -696,7 +660,6 @@ h1#nombre-hero {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50% { transform: translateY(-5px) rotate(15deg); }
 }
-/* Día actual (si es octubre 2026) */
 .calendario-container .dia.hoy {
   border-color: #ff1493;
   background: rgba(255, 20, 147, 0.15);
@@ -708,58 +671,7 @@ h1#nombre-hero {
   100% { box-shadow: 0 0 60px rgba(255, 20, 147, 0.9), 0 0 100px rgba(255, 20, 147, 0.4); }
 }
 
-.calendario-eventos {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  max-width: 400px;
-  margin: 0 auto;
-}
-.calendario-evento {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(10, 18, 34, 0.4);
-  border: 1px solid rgba(212, 175, 55, 0.2);
-  border-radius: 12px;
-  padding: 0.3rem 0.8rem;
-  font-size: clamp(0.8rem, 1.5vw, 0.95rem);
-  color: #f0e0c0;
-}
-.calendario-evento .evento-info {
-  display: flex;
-  gap: 0.6rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
-.calendario-evento .evento-info .fecha {
-  color: #d4af37;
-  font-weight: 600;
-}
-.calendario-evento .evento-info .desc {
-  color: #fae3a0;
-}
-.calendario-evento .btn-agregar {
-  font-family: var(--serif-display);
-  font-size: clamp(0.55rem, 1.2vw, 0.7rem);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #f0d9a3;
-  background: rgba(201, 162, 77, 0.1);
-  padding: 0.2rem 0.8rem;
-  border-radius: 30px;
-  text-decoration: none;
-  border: 1.5px solid rgba(201, 162, 77, 0.35);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-.calendario-evento .btn-agregar:hover {
-  background: rgba(201, 162, 77, 0.2);
-  border-color: rgba(201, 162, 77, 0.6);
-  box-shadow: 0 0 15px rgba(212,175,55,0.2);
-}
-
-/* ===== ITINERARIO CON DOS DÍAS Y BRILLO ===== */
+/* ===== ITINERARIO ===== */
 .itinerario-dia {
   margin-bottom: 1rem;
 }
@@ -816,7 +728,7 @@ h1#nombre-hero {
   color: #fae3a0;
 }
 
-/* ===== CONTADOR CON ANILLO CON RELIEVE ===== */
+/* ===== CONTADOR ===== */
 .clock {
   display: flex;
   flex-wrap: nowrap;
@@ -1152,7 +1064,6 @@ h1#nombre-hero {
   .familia-nombres { margin: 0.5rem 0 0.35rem; }
   .divider-thin { margin: 1.1rem 0 1.3rem; }
   .calendario-container { gap: 2px; font-size: 0.7rem; }
-  .calendario-evento { flex-wrap: wrap; gap: 0.2rem; justify-content: center; }
   .itinerario-item { font-size: 0.8rem; }
   .detalle-botones { flex-direction: column; align-items: center; }
 }
@@ -1175,34 +1086,29 @@ h1#nombre-hero {
 ::-webkit-scrollbar-thumb { background: rgba(201, 162, 77, 0.3); border-radius: 3px; }
 
 /* ============================================================
-   OPTIMIZACIONES PARA MÓVILES (reducir efectos pesados)
+   OPTIMIZACIONES PARA MÓVILES
    ============================================================ */
 @media (hover: none) and (pointer: coarse) {
-  /* Dispositivo táctil */
   * {
     animation-duration: 0.6s !important;
   }
-  
   #glow, #glow2 {
     filter: none !important;
   }
-  
   .portal-inner,
   #app-inner {
     will-change: auto;
   }
-  
   .seccion {
     contain: none;
   }
-  
   video {
     opacity: 0.95;
   }
 }
 
 /* ============================================================
-   TEMAS DINÁMICOS – solo afectan al fondo y detalles menores (no bordes)
+   TEMAS DINÁMICOS
    ============================================================ */
 html[data-time-period="sunrise"] #bg::after { opacity: 0.25; }
 html[data-time-period="sunrise"] .seccion { border-color: var(--border-gold); }
