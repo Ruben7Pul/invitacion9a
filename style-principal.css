@@ -283,7 +283,7 @@ body {
   pointer-events: auto;
 }
 
-/* ===== DESAPARICIÓN ESCALONADA DE ELEMENTOS ===== */
+/* ===== DESAPARICIÓN ESCALONADA DE ELEMENTOS (al cerrar la app) ===== */
 #app:not(.show) .seccion,
 #app:not(.show) #app-mid,
 #app:not(.show) #app-top {
@@ -301,7 +301,7 @@ body {
   transition-delay: 0s, 0s;
 }
 
-/* Retrasos específicos para elementos hijos al desaparecer */
+/* Retrasos específicos para elementos hijos al desaparecer (cuando la app se oculta) */
 #app:not(.show) .seccion h2 {
   transition-delay: 0s;
 }
