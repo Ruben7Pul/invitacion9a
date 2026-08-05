@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – VERSIÓN CANVAS (renderizado con Canvas 2D)
+// juego.js – VERSIÓN CANVAS CON DISEÑO VISUAL RESTAURADO
 // ============================================================
-console.log('📦 juego.js (canvas)');
+console.log('📦 juego.js (canvas con estilo)');
 
 import { 
   soundBrick, 
@@ -34,11 +34,11 @@ const MAX_LIVES = 3;
 const SCORE_PER_LIFE = 10000;
 const TOP_SCORES_COUNT = 3;
 
-// ========== TIPOS DE LADRILLOS ==========
+// ========== TIPOS DE LADRILLOS (con colores mejorados) ==========
 const BRICK_TYPES = {
-  CLAY:   { value: 1, playerPoints: 100, hits: 1, color: '#d9534f', label: 'CLAY' },
-  WOOD:   { value: 2, playerPoints: 200, hits: 2, color: '#8b5a2b', label: 'WOOD' },
-  IRON:   { value: 3, playerPoints: 300, hits: 3, color: '#7a8a9a', label: 'IRON' }
+  CLAY:   { value: 1, playerPoints: 100, hits: 1, color: '#d9534f', light: '#e57373', dark: '#c62828', label: 'CLAY' },
+  WOOD:   { value: 2, playerPoints: 200, hits: 2, color: '#8b5a2b', light: '#a67c52', dark: '#6d4c2a', label: 'WOOD' },
+  IRON:   { value: 3, playerPoints: 300, hits: 3, color: '#7a8a9a', light: '#9aa9b9', dark: '#5a6a7a', label: 'IRON' }
 };
 
 function getCrackImageSrc(brick) {
@@ -129,14 +129,14 @@ function isHighScore(score) {
 
 // ========== FUNCIÓN PRINCIPAL ==========
 export function initJuego(config, mobile = false) {
-  console.log('🎮 Iniciando juego (Canvas)');
+  console.log('🎮 Iniciando juego (Canvas con estilo)');
 
   // ========== ELEMENTOS ==========
   const overlay = document.getElementById('game-overlay');
   const stage = document.getElementById('game-stage');
   const inner = document.getElementById('game-inner');
   
-  // Crear el canvas y reemplazar el contenido de game-inner
+  // Crear el canvas
   const canvas = document.createElement('canvas');
   canvas.width = STAGE_W;
   canvas.height = STAGE_H;
@@ -145,17 +145,16 @@ export function initJuego(config, mobile = false) {
   canvas.style.display = 'block';
   canvas.style.imageRendering = 'pixelated';
   
-  // Limpiar SOLO el contenedor interior (para no borrar el menú)
   if (inner) {
     inner.innerHTML = '';
     inner.appendChild(canvas);
   } else {
-    // Fallback por si acaso
     stage.innerHTML = '';
     stage.appendChild(canvas);
   }
   const ctx = canvas.getContext('2d');
 
+  // Elementos UI
   const livesEl = document.getElementById('lives');
   const scoreEl = document.getElementById('game-score');
   const pauseBtn = document.getElementById('pause-btn');
@@ -169,7 +168,7 @@ export function initJuego(config, mobile = false) {
   const gameoverMenuBtn = document.getElementById('gameover-menu-btn');
   const nameError = document.getElementById('name-error');
 
-  // Estilos para la interfaz
+  // Estilos de UI
   livesEl.style.fontFamily = "'Press Start 2P', monospace";
   livesEl.style.fontSize = '1.2rem';
   livesEl.style.letterSpacing = '0.1em';
@@ -248,7 +247,7 @@ export function initJuego(config, mobile = false) {
     });
   }
 
-  // ========== MODAL DE PAUSA ==========
+  // ========== MODAL DE PAUSA (sin cambios) ==========
   let pauseModal = null;
   let pauseModalOverlay = null;
 
@@ -840,7 +839,6 @@ export function initJuego(config, mobile = false) {
     updateUI();
   }
 
-  // UI optimizada
   let lastLivesString = '';
   let lastScoreValue = -1;
 
@@ -1004,11 +1002,11 @@ export function initJuego(config, mobile = false) {
     }
   }
 
-  // ========== RENDERIZADO CON CANVAS ==========
+  // ========== RENDERIZADO CON ESTILO MEJORADO ==========
   function draw() {
     ctx.clearRect(0, 0, STAGE_W, STAGE_H);
 
-    // Fondo
+    // Fondo (imagen)
     if (!draw.bgImage) {
       draw.bgImage = new Image();
       draw.bgImage.src = '../archivos/jueg1.png';
@@ -1020,34 +1018,59 @@ export function initJuego(config, mobile = false) {
       ctx.fillRect(0, 0, STAGE_W, STAGE_H);
     }
 
-    // Ladrillos
+    // ---------- LADRILLOS (con estilo mejorado) ----------
     for (const br of bricks) {
       if (!br.alive) continue;
-      const x = br.x, y = br.y, w = br.w, h = br.h;
-      let color = br.type.color;
-      if (br.isGolden) color = '#ffd700';
-      const grad = ctx.createLinearGradient(x, y, x + w, y + h);
-      const darker = adjustColor(color, -20);
-      grad.addColorStop(0, color);
-      grad.addColorStop(0.5, darker);
-      grad.addColorStop(1, color);
-      ctx.fillStyle = grad;
-      ctx.shadowColor = 'rgba(0,0,0,0.3)';
+      const { x, y, w, h, type, isGolden } = br;
+      
+      // Colores base
+      let baseColor = type.color;
+      let lightColor = type.light || adjustColor(baseColor, 30);
+      let darkColor = type.dark || adjustColor(baseColor, -30);
+      
+      if (isGolden) {
+        baseColor = '#ffd700';
+        lightColor = '#fff4a0';
+        darkColor = '#b8860b';
+      }
+
+      // Sombra exterior
+      ctx.shadowColor = 'rgba(0,0,0,0.4)';
       ctx.shadowBlur = 6;
+      ctx.shadowOffsetY = 2;
+
+      // Degradado principal
+      const grad = ctx.createLinearGradient(x, y, x + w, y + h);
+      grad.addColorStop(0, lightColor);
+      grad.addColorStop(0.3, baseColor);
+      grad.addColorStop(0.7, baseColor);
+      grad.addColorStop(1, darkColor);
+      ctx.fillStyle = grad;
       ctx.fillRect(x, y, w, h);
+
+      // Borde con brillo
       ctx.shadowBlur = 0;
-      if (br.isGolden) {
-        ctx.strokeStyle = '#ffd700';
-        ctx.lineWidth = 2;
+      ctx.shadowOffsetY = 0;
+      ctx.strokeStyle = isGolden ? '#ffd700' : 'rgba(255,255,255,0.15)';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(x, y, w, h);
+
+      // Borde interior (efecto de relieve)
+      ctx.strokeStyle = isGolden ? 'rgba(255,215,0,0.4)' : 'rgba(0,0,0,0.2)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x + 2, y + 2, w - 4, h - 4);
+
+      // Si es dorado, añadir resplandor
+      if (isGolden) {
         ctx.shadowColor = 'rgba(255,215,0,0.8)';
-        ctx.shadowBlur = 15;
+        ctx.shadowBlur = 20;
+        ctx.strokeStyle = 'rgba(255,215,0,0.6)';
+        ctx.lineWidth = 2;
         ctx.strokeRect(x, y, w, h);
         ctx.shadowBlur = 0;
-      } else {
-        ctx.strokeStyle = 'rgba(0,0,0,0.25)';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(x, y, w, h);
       }
+
+      // Grietas
       const crackSrc = getCrackImageSrc(br);
       if (crackSrc) {
         const img = crackImages[crackSrc.split('/').pop()];
@@ -1055,121 +1078,173 @@ export function initJuego(config, mobile = false) {
           ctx.drawImage(img, x + w*0.1, y + h*0.1, w*0.8, h*0.8);
         }
       }
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 12px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.shadowColor = 'rgba(0,0,0,0.5)';
-      ctx.shadowBlur = 4;
-      ctx.fillText(br.value, x + w/2, y + h/2);
-      ctx.shadowBlur = 0;
-    }
 
-    // Power-ups
-    for (const pu of powerups) {
-      const x = pu.x, y = pu.y, size = pu.size;
-      const isGreen = pu.color === 'verde';
-      const isBlue = pu.isBlue;
-      let color;
-      if (isBlue) color = '#ffd700';
-      else color = isGreen ? 'rgba(46, 204, 113, 0.7)' : 'rgba(231, 76, 60, 0.7)';
-      ctx.beginPath();
-      ctx.arc(x, y, size/2, 0, Math.PI*2);
-      ctx.fillStyle = color;
-      ctx.shadowColor = 'rgba(0,0,0,0.5)';
-      ctx.shadowBlur = 10;
-      ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.strokeStyle = isBlue ? '#fff8dc' : (isGreen ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,0,0.8)');
-      ctx.lineWidth = 2;
-      ctx.stroke();
+      // Texto del valor
       ctx.fillStyle = '#fff';
-      ctx.font = `${size * 0.5}px Arial`;
+      ctx.font = 'bold 14px Arial';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.shadowColor = 'rgba(0,0,0,0.8)';
       ctx.shadowBlur = 6;
-      let symbol = isBlue ? '★' : POWERUP_SYMBOLS[pu.type] || '?';
-      ctx.fillText(symbol, x, y);
+      ctx.fillText(br.value, x + w/2, y + h/2 + 1);
       ctx.shadowBlur = 0;
     }
 
-    // Bolas
+    // ---------- POWER-UPS (con estilo) ----------
+    for (const pu of powerups) {
+      const x = pu.x, y = pu.y, size = pu.size;
+      const isGreen = pu.color === 'verde';
+      const isBlue = pu.isBlue;
+      let color, glowColor;
+      if (isBlue) {
+        color = '#ffd700';
+        glowColor = 'rgba(255,215,0,0.6)';
+      } else if (isGreen) {
+        color = '#2ecc71';
+        glowColor = 'rgba(46,204,113,0.4)';
+      } else {
+        color = '#e74c3c';
+        glowColor = 'rgba(231,76,60,0.4)';
+      }
+
+      // Sombra exterior
+      ctx.shadowColor = glowColor;
+      ctx.shadowBlur = 20;
+      ctx.beginPath();
+      ctx.arc(x, y, size/2, 0, Math.PI*2);
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Borde brillante
+      ctx.strokeStyle = isBlue ? '#fff8dc' : (isGreen ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,0,0.9)');
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      // Reflejo interno (efecto de brillo)
+      const grad2 = ctx.createRadialGradient(x - size*0.25, y - size*0.25, 1, x, y, size/2);
+      grad2.addColorStop(0, 'rgba(255,255,255,0.6)');
+      grad2.addColorStop(0.5, 'rgba(255,255,255,0)');
+      ctx.fillStyle = grad2;
+      ctx.beginPath();
+      ctx.arc(x, y, size/2, 0, Math.PI*2);
+      ctx.fill();
+
+      // Símbolo con sombra
+      ctx.fillStyle = '#fff';
+      ctx.font = `bold ${size * 0.5}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(0,0,0,0.9)';
+      ctx.shadowBlur = 8;
+      let symbol = isBlue ? '★' : POWERUP_SYMBOLS[pu.type] || '?';
+      ctx.fillText(symbol, x, y + 1);
+      ctx.shadowBlur = 0;
+    }
+
+    // ---------- BOLAS (con reflejos) ----------
     for (const b of balls) {
       const x = b.x, y = b.y;
-      let grad;
+      let color1, color2, color3;
       switch (ballDurability) {
         case 1:
-          grad = ctx.createRadialGradient(x-2, y-2, 2, x, y, BALL_R);
-          grad.addColorStop(0, '#b0b0b0');
-          grad.addColorStop(0.6, '#606060');
-          grad.addColorStop(1, '#303030');
+          color1 = '#b0b0b0'; color2 = '#606060'; color3 = '#303030';
           break;
         case 2:
-          grad = ctx.createRadialGradient(x-2, y-2, 2, x, y, BALL_R);
-          grad.addColorStop(0, '#ffaa00');
-          grad.addColorStop(0.6, '#ff3300');
-          grad.addColorStop(1, '#990000');
+          color1 = '#ffaa00'; color2 = '#ff3300'; color3 = '#990000';
           break;
         case 3:
-          grad = ctx.createRadialGradient(x-2, y-2, 2, x, y, BALL_R);
-          grad.addColorStop(0, '#88ddff');
-          grad.addColorStop(0.6, '#0066ff');
-          grad.addColorStop(1, '#0000aa');
+          color1 = '#88ddff'; color2 = '#0066ff'; color3 = '#0000aa';
           break;
       }
+      // Sombra
+      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      ctx.shadowBlur = 10;
+      // Gradiente radial
+      const grad = ctx.createRadialGradient(x-3, y-3, 2, x, y, BALL_R);
+      grad.addColorStop(0, color1);
+      grad.addColorStop(0.5, color2);
+      grad.addColorStop(1, color3);
       ctx.beginPath();
       ctx.arc(x, y, BALL_R, 0, Math.PI*2);
       ctx.fillStyle = grad;
-      ctx.shadowColor = 'rgba(0,0,0,0.5)';
-      ctx.shadowBlur = 8;
       ctx.fill();
       ctx.shadowBlur = 0;
-      ctx.strokeStyle = '#fff';
+      // Borde
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
       ctx.lineWidth = 1;
       ctx.stroke();
+      // Reflejo
+      ctx.beginPath();
+      ctx.arc(x-2, y-3, 2, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.fill();
     }
 
-    // Paleta
+    // ---------- PALETA (con estilo metálico) ----------
     const px = paddle.x, py = STAGE_H - 14;
     const pw = paddleWidth, ph = PADDLE_H;
-    ctx.shadowColor = 'rgba(212,175,55,0.3)';
-    ctx.shadowBlur = 20;
-    ctx.fillStyle = '#111';
+    // Sombra exterior
+    ctx.shadowColor = 'rgba(212,175,55,0.4)';
+    ctx.shadowBlur = 25;
+    ctx.shadowOffsetY = 2;
+    // Degradado metálico
+    const gradPaddle = ctx.createLinearGradient(px, py, px, py + ph);
+    gradPaddle.addColorStop(0, '#444');
+    gradPaddle.addColorStop(0.3, '#222');
+    gradPaddle.addColorStop(0.7, '#111');
+    gradPaddle.addColorStop(1, '#333');
+    ctx.fillStyle = gradPaddle;
     ctx.fillRect(px, py, pw, ph);
     ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
+    // Borde dorado
     ctx.strokeStyle = '#d4af37';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2.5;
     ctx.strokeRect(px, py, pw, ph);
+    // Reflejo superior
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    ctx.fillRect(px + 4, py + 2, pw - 8, ph / 3);
+    // Línea de brillo central
+    ctx.fillStyle = 'rgba(212,175,55,0.15)';
+    ctx.fillRect(px + 4, py + ph/2 - 1, pw - 8, 2);
 
-    // Niebla
+    // ---------- NIEBLA (con difuminado) ----------
     const boundary = NIEBLA_HEIGHTS[nieblaLevel] || 0;
     if (boundary > 0) {
       const gradNiebla = ctx.createRadialGradient(
         STAGE_W/2, boundary, 10,
-        STAGE_W/2, boundary, boundary * 0.8
+        STAGE_W/2, boundary, boundary * 0.9
       );
       gradNiebla.addColorStop(0, 'rgba(255,255,255,0)');
-      gradNiebla.addColorStop(0.5, 'rgba(200,210,230,0.3)');
-      gradNiebla.addColorStop(1, 'rgba(180,190,210,0.6)');
+      gradNiebla.addColorStop(0.4, 'rgba(200,210,230,0.2)');
+      gradNiebla.addColorStop(0.8, 'rgba(180,190,210,0.5)');
+      gradNiebla.addColorStop(1, 'rgba(160,170,190,0.7)');
       ctx.fillStyle = gradNiebla;
       ctx.fillRect(0, 0, STAGE_W, boundary);
+      // Plumas suaves
       const feather = NIEBLA_FEATHER;
       const gradFeather = ctx.createLinearGradient(0, boundary - feather, 0, boundary);
       gradFeather.addColorStop(0, 'rgba(255,255,255,0)');
-      gradFeather.addColorStop(1, 'rgba(255,255,255,0.8)');
+      gradFeather.addColorStop(0.5, 'rgba(255,255,255,0.5)');
+      gradFeather.addColorStop(1, 'rgba(255,255,255,0.9)');
       ctx.fillStyle = gradFeather;
       ctx.fillRect(0, boundary - feather, STAGE_W, feather);
     }
 
+    // Mensajes flotantes
     drawFloatingMessages(ctx);
 
+    // Texto "Toca / Click" si no lanzado
     if (!launched && running && !gameOver) {
       ctx.fillStyle = 'rgba(255,255,255,0.7)';
       ctx.font = '12px "Press Start 2P", monospace';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'bottom';
+      ctx.shadowColor = 'rgba(0,0,0,0.8)';
+      ctx.shadowBlur = 8;
       ctx.fillText('Toca / Click', STAGE_W/2, STAGE_H - 30);
+      ctx.shadowBlur = 0;
     }
   }
 
@@ -1534,6 +1609,6 @@ export function initJuego(config, mobile = false) {
     createPauseModal();
     startGame();
     layoutStage();
-    console.log('✅ Juego canvas iniciado correctamente');
+    console.log('✅ Juego canvas con estilo iniciado correctamente');
   });
 }
