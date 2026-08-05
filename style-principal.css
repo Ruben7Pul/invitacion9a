@@ -1,8 +1,8 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS OPTIMIZADOS (GPU, REPAINT, SCROLL)
+   🌹 INVITACIÓN XV – ESTILOS CORREGIDOS (GPU LIMITADA)
    ============================================================ */
 
-/* ===== GPU ACCELERATION ===== */
+/* ===== GPU ACCELERATION (CON LÍMITE) ===== */
 html, body {
   transform: translate3d(0, 0, 0);
   -webkit-overflow-scrolling: touch;
@@ -10,17 +10,22 @@ html, body {
   scrollbar-gutter: stable;
 }
 
+/* Solo acelerar lo que realmente se mueve */
 #video-app,
 #video-portal,
-.centro-animacion,
 .portal-inner,
 #app-inner,
-.seccion,
 .gate-leaf {
   will-change: transform;
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+}
+
+/* Las secciones NO necesitan will-change constante */
+.seccion {
+  /* will-change: opacity; -- eliminado para evitar sobrecarga */
+  contain: layout style paint;
 }
 
 /* ===== VARIABLES ===== */
@@ -93,7 +98,7 @@ body {
   }
 }
 
-/* ===== VIDEOS OPTIMIZADOS ===== */
+/* ===== VIDEOS ===== */
 #video-app, #video-portal {
   position: fixed;
   top: 0;
@@ -119,8 +124,6 @@ video {
   display: block;
   width: 100%;
   height: auto;
-  transform: translate3d(0, 0, 0);
-  will-change: auto;
   object-fit: cover;
 }
 
@@ -189,19 +192,20 @@ video {
 .gate-wrapper.active {
   pointer-events: auto;
 }
+/* Eliminamos el brillo blanco y el blur de la reja */
 .gate-wrapper.active .gate-leaf svg {
   animation: gateGlowPulse 2.6s ease-in-out infinite;
 }
 @keyframes gateGlowPulse {
-  0%, 100% { filter: drop-shadow(0 0 20px rgba(201, 162, 77, 0.3)); }
-  50% { filter: drop-shadow(0 0 38px rgba(212, 175, 55, 0.5)); }
+  0%, 100% { filter: drop-shadow(0 0 15px rgba(201, 162, 77, 0.25)); }
+  50% { filter: drop-shadow(0 0 28px rgba(212, 175, 55, 0.4)); }
 }
 .gate-wrapper::after {
   content: '';
   position: absolute;
   inset: -12%;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 224, 150, 0.5) 0%, rgba(212, 175, 55, 0.22) 40%, transparent 72%);
+  background: radial-gradient(circle, rgba(255, 224, 150, 0.3) 0%, rgba(212, 175, 55, 0.12) 40%, transparent 72%);
   opacity: 0;
   pointer-events: none;
   z-index: 2;
@@ -211,7 +215,7 @@ video {
 }
 @keyframes gateOpenFlash {
   0% { opacity: 0; transform: scale(0.85); }
-  30% { opacity: 0.85; transform: scale(1.05); }
+  30% { opacity: 0.6; transform: scale(1.05); }
   100% { opacity: 0; transform: scale(1.35); }
 }
 
@@ -234,11 +238,11 @@ video {
   inset: 0;
   pointer-events: none;
   z-index: -1;
-  background: radial-gradient(ellipse 150px 100px at 15% 20%, rgba(150, 200, 255, 0.16), transparent 60%),
-              radial-gradient(ellipse 180px 120px at 85% 35%, rgba(150, 200, 255, 0.14), transparent 65%),
-              radial-gradient(ellipse 140px 90px at 50% 60%, rgba(180, 220, 255, 0.12), transparent 70%),
-              radial-gradient(ellipse 160px 110px at 25% 75%, rgba(150, 200, 255, 0.15), transparent 68%),
-              radial-gradient(ellipse 170px 115px at 75% 80%, rgba(160, 210, 255, 0.14), transparent 70%);
+  background: radial-gradient(ellipse 150px 100px at 15% 20%, rgba(150, 200, 255, 0.12), transparent 60%),
+              radial-gradient(ellipse 180px 120px at 85% 35%, rgba(150, 200, 255, 0.10), transparent 65%),
+              radial-gradient(ellipse 140px 90px at 50% 60%, rgba(180, 220, 255, 0.08), transparent 70%),
+              radial-gradient(ellipse 160px 110px at 25% 75%, rgba(150, 200, 255, 0.10), transparent 68%),
+              radial-gradient(ellipse 170px 115px at 75% 80%, rgba(160, 210, 255, 0.09), transparent 70%);
   animation: underwaterGlow 8s ease-in-out infinite;
 }
 .portal-water-top::after {
@@ -264,24 +268,25 @@ video {
   width: 100%;
   height: 100%;
   display: block;
-  filter: drop-shadow(0 0 20px rgba(201, 162, 77, 0.3));
+  filter: drop-shadow(0 0 15px rgba(201, 162, 77, 0.2));
   paint-order: stroke fill markers;
 }
 .gate-left { left: 0; transform-origin: left center; }
 .gate-right { right: 0; transform-origin: right center; }
 .gate-right svg { transform: scaleX(-1); }
 
+/* Ajuste de velocidad de la reja */
 .gate-wrapper.open .gate-left {
-  animation: closeLeft 0.6s ease reverse forwards;
+  animation: closeLeft 0.8s ease reverse forwards;
 }
 .gate-wrapper.open .gate-right {
-  animation: closeRight 0.6s ease reverse forwards;
+  animation: closeRight 0.8s ease reverse forwards;
 }
 #portal.closing .gate-left {
-  animation: closeLeft 0.6s ease forwards;
+  animation: closeLeft 0.8s ease forwards;
 }
 #portal.closing .gate-right {
-  animation: closeRight 0.6s ease forwards;
+  animation: closeRight 0.8s ease forwards;
 }
 @keyframes closeLeft {
   0% { transform: rotateY(-110deg) translateX(-20px); opacity: 0.2; }
@@ -329,7 +334,7 @@ video {
   pointer-events: auto;
 }
 
-/* ===== DESAPARICIÓN INSTANTÁNEA DE SECCIONES ===== */
+/* ===== SECCIONES: ANIMACIÓN SUAVE DE APARICIÓN ===== */
 .seccion {
   width: 100%;
   background: rgba(10, 18, 34, 0.55);
@@ -340,11 +345,10 @@ video {
   box-shadow: 0 4px 30px rgba(0,0,0,0.3), inset 0 0 40px rgba(212,175,55,0.03);
   opacity: 0;
   transform: translateY(30px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
+  transition: opacity 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   background-image: radial-gradient(circle at 10% 20%, rgba(212,175,55,0.05) 0%, transparent 20%),
                     radial-gradient(circle at 90% 80%, rgba(212,175,55,0.05) 0%, transparent 20%);
-  will-change: opacity, transform;
   contain: layout style paint;
 }
 .seccion.visible {
@@ -357,36 +361,17 @@ video {
   transform: translateY(30px) !important;
 }
 
-/* Retrasos de sección */
-#seccion-familia.visible { transition-delay: 0.1s; }
-#seccion-calendario.visible { transition-delay: 0.2s; }
-#seccion-contador.visible { transition-delay: 0.3s; }
-#seccion-lugares.visible { transition-delay: 0.4s; }
-#seccion-itinerario.visible { transition-delay: 0.5s; }
-#seccion-libro-firmas.visible { transition-delay: 0.6s; }
-#seccion-agradecimientos.visible { transition-delay: 0.7s; }
+/* Retrasos de sección (más lentos para apreciarlos) */
+#seccion-familia.visible { transition-delay: 0.15s; }
+#seccion-calendario.visible { transition-delay: 0.30s; }
+#seccion-contador.visible { transition-delay: 0.45s; }
+#seccion-lugares.visible { transition-delay: 0.60s; }
+#seccion-itinerario.visible { transition-delay: 0.75s; }
+#seccion-libro-firmas.visible { transition-delay: 0.90s; }
+#seccion-agradecimientos.visible { transition-delay: 1.05s; }
 
-/* ===== ELEMENTOS INTERNOS CON ANIMACIONES ESCALONADAS ===== */
-.seccion .animar {
-  opacity: 0;
-  transform: translateY(15px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-.seccion.visible .animar {
-  opacity: 1;
-  transform: translateY(0);
-}
-/* Retrasos para cada elemento */
-.seccion.visible .animar-1 { transition-delay: 0.1s; }
-.seccion.visible .animar-2 { transition-delay: 0.2s; }
-.seccion.visible .animar-3 { transition-delay: 0.3s; }
-.seccion.visible .animar-4 { transition-delay: 0.4s; }
-.seccion.visible .animar-5 { transition-delay: 0.5s; }
-.seccion.visible .animar-6 { transition-delay: 0.6s; }
-.seccion.visible .animar-7 { transition-delay: 0.7s; }
-.seccion.visible .animar-8 { transition-delay: 0.8s; }
-
-/* Aplicar a elementos comunes */
+/* ===== ELEMENTOS INTERNOS: SIN ANIMACIÓN INDIVIDUAL ===== */
+/* Los elementos internos aparecen con la sección, sin retrasos ni transiciones */
 .seccion h2,
 .seccion .seccion-subtitulo,
 .seccion .detalle-card,
@@ -398,33 +383,12 @@ video {
 .seccion .btn-mapa,
 .seccion .libro-firmas-contenido,
 .seccion .agradecimientos-contenido {
-  opacity: 0;
-  transform: translateY(15px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  opacity: 1;
+  transform: none;
+  transition: none;
 }
-.seccion.visible h2 { transition-delay: 0.1s; opacity: 1; transform: translateY(0); }
-.seccion.visible .seccion-subtitulo { transition-delay: 0.15s; opacity: 1; transform: translateY(0); }
-.seccion.visible .detalle-card { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
-.seccion.visible .familia-grupo { transition-delay: 0.25s; opacity: 1; transform: translateY(0); }
-.seccion.visible .clock .unit { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
-.seccion.visible .calendario-container { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
-.seccion.visible .calendario-eventos { transition-delay: 0.25s; opacity: 1; transform: translateY(0); }
-.seccion.visible .itinerario-lista { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
-.seccion.visible .btn-mapa { transition-delay: 0.3s; opacity: 1; transform: translateY(0); }
-.seccion.visible .libro-firmas-contenido { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
-.seccion.visible .agradecimientos-contenido { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
 
-/* Para las unidades del contador, retrasos individuales */
-.seccion.visible .clock .unit:nth-child(1) { transition-delay: 0.2s; }
-.seccion.visible .clock .unit:nth-child(2) { transition-delay: 0.3s; }
-.seccion.visible .clock .unit:nth-child(3) { transition-delay: 0.4s; }
-.seccion.visible .clock .unit:nth-child(4) { transition-delay: 0.5s; }
-
-/* Para las tarjetas de lugares, retrasos */
-.seccion.visible .detalle-card:nth-child(2) { transition-delay: 0.25s; }
-.seccion.visible .detalle-card:nth-child(4) { transition-delay: 0.35s; }
-
-/* Efecto de brillo en los títulos al aparecer */
+/* Excepción: el título tiene un efecto de brillo al aparecer (solo visual) */
 .seccion.visible h2 {
   animation: goldShine 1.2s ease forwards;
 }
@@ -613,7 +577,7 @@ h1#nombre-hero {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: rainbowMove 4s linear infinite;
+  animation: rainbowMove 6s linear infinite; /* más lento */
   user-select: none;
 }
 @keyframes rainbowMove {
@@ -640,7 +604,7 @@ h1#nombre-hero {
   margin: 0.4rem 0 0.2rem;
   opacity: 0.9;
   text-align: center;
-  animation: pulseHint 2s ease-in-out infinite;
+  animation: pulseHint 2.5s ease-in-out infinite; /* más lento */
 }
 @keyframes pulseHint {
   0%, 100% { opacity: 0.7; transform: scale(1); }
@@ -690,17 +654,17 @@ h1#nombre-hero {
   font-weight: 700;
   color: #ffd700;
 }
-/* Día 10: más brillo y rosa animada */
+/* Día 10: más brillo y rosa animada (más lenta) */
 .calendario-container .dia.dia-10 {
   border-color: #ff69b4;
   background: rgba(255, 105, 180, 0.2);
   box-shadow: 0 0 30px rgba(255, 105, 180, 0.5), inset 0 0 20px rgba(255, 105, 180, 0.2);
-  animation: brilloRosa 1.5s ease-in-out infinite alternate;
+  animation: brilloRosa 2s ease-in-out infinite alternate; /* más lento */
   transform: scale(1.08);
 }
 .calendario-container .dia.dia-10 .rosa {
   display: inline-block;
-  animation: flotarRosa 2s ease-in-out infinite;
+  animation: flotarRosa 2.5s ease-in-out infinite; /* más lento */
 }
 @keyframes brilloRosa {
   0% { box-shadow: 0 0 20px rgba(255, 105, 180, 0.4); }
@@ -710,12 +674,12 @@ h1#nombre-hero {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50% { transform: translateY(-5px) rotate(15deg); }
 }
-/* Día actual (si es octubre 2026) */
+/* Día actual (si es octubre 2026) - más lento */
 .calendario-container .dia.hoy {
   border-color: #ff1493;
   background: rgba(255, 20, 147, 0.15);
   box-shadow: 0 0 40px rgba(255, 20, 147, 0.6);
-  animation: brilloDiaActual 1.8s ease-in-out infinite alternate;
+  animation: brilloDiaActual 2.2s ease-in-out infinite alternate; /* más lento */
 }
 @keyframes brilloDiaActual {
   0% { box-shadow: 0 0 20px rgba(255, 20, 147, 0.3); }
@@ -773,7 +737,7 @@ h1#nombre-hero {
   box-shadow: 0 0 15px rgba(212,175,55,0.2);
 }
 
-/* ===== ITINERARIO CON DOS DÍAS Y BRILLO ===== */
+/* ===== ITINERARIO ===== */
 .itinerario-dia {
   margin-bottom: 1rem;
 }
@@ -810,7 +774,7 @@ h1#nombre-hero {
   border-left: 4px solid #ff69b4;
   border-radius: 4px;
   box-shadow: 0 0 30px rgba(255, 105, 180, 0.2);
-  animation: brilloTransparente 2s ease-in-out infinite alternate;
+  animation: brilloTransparente 2.5s ease-in-out infinite alternate; /* más lento */
 }
 @keyframes brilloTransparente {
   0% { box-shadow: 0 0 15px rgba(255, 105, 180, 0.1); }
@@ -830,7 +794,7 @@ h1#nombre-hero {
   color: #fae3a0;
 }
 
-/* ===== CONTADOR CON ANILLO CON RELIEVE ===== */
+/* ===== CONTADOR ===== */
 .clock {
   display: flex;
   flex-wrap: nowrap;
@@ -1186,14 +1150,14 @@ h1#nombre-hero {
   h1#nombre-hero { font-size: clamp(8.75rem, 17.5vh, 13.125rem); }
 }
 
-/* ===== MÓVILES: REDUCIR EFECTOS ===== */
+/* ===== MÓVILES ===== */
 @media (hover: none) and (pointer: coarse) {
   .portal-inner,
   #app-inner {
     will-change: auto;
   }
   * {
-    animation-duration: 0.6s !important;
+    animation-duration: 0.8s !important;
   }
   #glow, #glow2 {
     filter: none;
@@ -1220,7 +1184,7 @@ h1#nombre-hero {
 ::-webkit-scrollbar-thumb { background: rgba(201, 162, 77, 0.3); border-radius: 3px; }
 
 /* ============================================================
-   TEMAS DINÁMICOS – solo afectan al fondo y detalles menores (no bordes)
+   TEMAS DINÁMICOS (solo fondos, sin bordes)
    ============================================================ */
 html[data-time-period="sunrise"] #bg::after { opacity: 0.25; }
 html[data-time-period="sunrise"] .seccion { border-color: var(--border-gold); }
