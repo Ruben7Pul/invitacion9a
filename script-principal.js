@@ -1,4 +1,4 @@
-console.log('🚀 script-principal.js');
+console.log('🚀 script-principal ww.js');
 
 // Detección de hora del día (se mantiene)
 function detectarPeriodoDia() {
@@ -542,3 +542,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelectorAll('.seccion').forEach(sec => sec.classList.add('visible'));
   }
 });
+
+
