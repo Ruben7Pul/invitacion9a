@@ -1,4 +1,4 @@
-console.log('🚀 script-principal ss.js');
+console.log('🚀 script-principal.js');
 
 // Detección de hora del día
 function detectarPeriodoDia() {
@@ -81,7 +81,6 @@ function rellenarDatos(config) {
   const hint = document.getElementById('hint-juego');
   if (hint) hint.style.display = 'none';
 
-  // Rellenar firma en agradecimientos
   const firmaNombre = document.getElementById('firma-nombre');
   if (firmaNombre) {
     firmaNombre.textContent = config.nombre;
@@ -203,7 +202,6 @@ function initContadorCircular(config) {
 
     const maxValues = [365, 24, 60, 60];
     const values = [days, hours, minutes, seconds];
-    const ids = ['d', 'h', 'm', 's'];
 
     units.forEach((unit, index) => {
       const numEl = unit.querySelector('.num');
@@ -221,7 +219,6 @@ function initContadorCircular(config) {
       }
     });
 
-    // Mensaje dinámico
     const msgEl = document.getElementById('contador-mensaje');
     if (msgEl) {
       let mensaje = '';
@@ -236,7 +233,6 @@ function initContadorCircular(config) {
     }
   }
 
-  // Crear los SVG dentro de cada unidad si no existen
   units.forEach((unit) => {
     let circleWrap = unit.querySelector('.circle-wrap');
     if (!circleWrap) {
@@ -263,39 +259,12 @@ function initContadorCircular(config) {
   setInterval(actualizarContador, 200);
 }
 
-// ===== CONTROLES DEL MAPA INTERACTIVO =====
-function initMapaControles() {
-  const iframe = document.getElementById('mapa-iframe');
-  const botones = document.querySelectorAll('[data-ubicacion]');
-
-  if (!iframe || !botones.length) return;
-
-  // Coordenadas de las ubicaciones
-  const ubicaciones = {
-    misa: { center: '19.1830909,-99.4612969', zoom: 17, label: 'Capilla del Puente' },
-    recepcion: { center: '19.1839892,-99.4559442', zoom: 17, label: 'Auditorio Gualupita' }
-  };
-
-  botones.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const key = btn.dataset.ubicacion;
-      const ubic = ubicaciones[key];
-      if (!ubic) return;
-      // Cambiar el src del iframe para centrar en la ubicación seleccionada
-      const baseUrl = iframe.src.split('&center=')[0];
-      const newUrl = `${baseUrl}&center=${ubic.center}&zoom=${ubic.zoom}&maptype=roadmap&markers=color:0xd4af37%7C19.1830909,-99.4612969&markers=color:0xb8860b%7C19.1839892,-99.4559442`;
-      iframe.src = newUrl;
-    });
-  });
-}
-
 document.addEventListener('DOMContentLoaded', async () => {
   const config = await cargarConfig();
   rellenarDatos(config);
   generarCalendario();
   generarEventosCalendario(config);
   initContadorCircular(config);
-  initMapaControles();
 
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
@@ -486,7 +455,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Música
   const muteBtn = document.getElementById('music-toggle');
   if (muteBtn) {
     muteBtn.addEventListener('click', () => {
