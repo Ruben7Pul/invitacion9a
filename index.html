@@ -26,19 +26,24 @@
 
   <div id="bg"></div>
 
-  <!-- VIDEO APP PRINCIPAL (mar1) -->
+  <!-- VIDEO APP PRINCIPAL (mar1) - Comentado temporalmente si falta el archivo -->
+  <!--
   <video id="video-app" autoplay loop muted playsinline>
     <source src="archivos/mar1.webm" type="video/webm">
     <source src="archivos/mar1.mp4" type="video/mp4">
   </video>
+  -->
 
   <!-- PORTAL / REJA -->
   <div id="portal" role="dialog" aria-label="Puerta de entrada">
     <div class="portal-water-top" aria-hidden="true"></div>
+    <!-- VIDEO DEL PORTAL (mar2) - Comentado temporalmente si falta el archivo -->
+    <!--
     <video id="video-portal" autoplay loop muted playsinline>
       <source src="archivos/mar2.webm" type="video/webm">
       <source src="archivos/mar2.mp4" type="video/mp4">
     </video>
+    -->
     <div class="portal-inner">
       <span class="eyebrow gold-text">Una invitación encantada</span>
       <div class="gate-wrapper" id="gate-wrapper" role="button" tabindex="0" aria-label="Abrir la reja">
@@ -369,7 +374,7 @@
           </div>
           <a class="btn-mapa gold-text" id="mapa-fiesta" href="#" target="_blank" rel="noopener">📍 Ver en el mapa</a>
         </div>
-        <!-- Mapa interactivo incrustado -->
+        <!-- Mapa interactivo incrustado (sin clave API) -->
         <div class="mapa-interactivo">
           <div class="mapa-container">
             <iframe
@@ -377,14 +382,11 @@
               class="mapa-iframe"
               loading="lazy"
               allowfullscreen
-              referrerpolicy="no-referrer-when-downgrade"
-              src="https://www.google.com/maps/embed/v1/view?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&center=19.1835,-99.4586&zoom=14&maptype=roadmap&markers=color:0xd4af37%7C19.1830909,-99.4612969&markers=color:0xb8860b%7C19.1839892,-99.4559442">
+              src="https://www.google.com/maps/embed?pb=!1m26!1m12!1m3!1d3762.394123456789!2d-99.4612969!3d19.1830909!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m11!3e6!4m3!3m2!1d19.1830909!2d-99.4612969!4m3!3m2!1d19.1839892!2d-99.4559442!5e0!3m2!1ses!2smx!4v1699999999999&zoom=14&maptype=roadmap">
             </iframe>
           </div>
           <div class="mapa-controles">
-            <button class="btn-mapa gold-text" data-ubicacion="misa">📍 Capilla del Puente</button>
-            <button class="btn-mapa gold-text" data-ubicacion="recepcion">📍 Auditorio Gualupita</button>
-            <a class="btn-mapa gold-text" href="https://www.google.com/maps/dir/?api=1&destination=19.1830909,-99.4612969&destination=19.1839892,-99.4559442" target="_blank" rel="noopener">🗺️ Cómo llegar</a>
+            <a class="btn-mapa gold-text" href="https://www.google.com/maps/dir/?api=1&destination=19.1830909,-99.4612969&destination=19.1839892,-99.4559442" target="_blank" rel="noopener">🗺️ Cómo llegar a ambas</a>
           </div>
           <p class="mapa-nota gold-text">📍 Ambas ubicaciones están a solo 1-2 km de distancia</p>
         </div>
@@ -424,8 +426,9 @@
       function todoListo() {
         const videoApp = document.getElementById('video-app');
         const videoPortal = document.getElementById('video-portal');
-        const videoAppReady = videoApp && (videoApp.readyState >= 2 || videoApp.duration > 0);
-        const videoPortalReady = videoPortal && (videoPortal.readyState >= 2 || videoPortal.duration > 0);
+        // Si los videos están comentados, los consideramos listos
+        const videoAppReady = !videoApp || (videoApp.readyState >= 2 || videoApp.duration > 0);
+        const videoPortalReady = !videoPortal || (videoPortal.readyState >= 2 || videoPortal.duration > 0);
         const nombreEl = document.getElementById('nombre-hero');
         const configCargado = nombreEl && nombreEl.textContent !== 'X' && nombreEl.textContent.trim() !== '';
         return (videoAppReady || videoPortalReady) && configCargado;
