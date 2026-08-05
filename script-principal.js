@@ -1,4 +1,4 @@
-console.log('🚀 script-principal.js');
+console.log('🚀 script-principal 123a.js OPTIMIZADO');
 
 // Detección de hora del día
 function detectarPeriodoDia() {
@@ -154,8 +154,15 @@ function marcarDiaActualEnCalendario() {
   }
 }
 
+// ===== VARIABLE GLOBAL PARA ALMACENAR INTERVALOS =====
+let intervaloItinerario = null;
+let intervaloContador = null;
+
 // ===== RESALTAR ACTIVIDAD ACTUAL EN ITINERARIO =====
 function iniciarBrilloItinerario() {
+  // ✅ Limpiar intervalo anterior si existe
+  if (intervaloItinerario) clearInterval(intervaloItinerario);
+
   const ahora = new Date();
   const año = ahora.getFullYear();
   const mes = ahora.getMonth();
@@ -184,7 +191,8 @@ function iniciarBrilloItinerario() {
       activo.classList.add('activo');
     }
 
-    setInterval(() => {
+    // ✅ SOLO UN INTERVALO
+    intervaloItinerario = setInterval(() => {
       const ahora2 = new Date();
       const hora2 = ahora2.getHours();
       const min2 = ahora2.getMinutes();
@@ -247,101 +255,108 @@ function generarEventosCalendario(config) {
 }
 
 function agregarACalendario(evento, config) {
-  const fecha = new Date(evento.fechaISO);
-  const inicio = fecha.toISOString().replace(/-|:|\.\d+/g, '');
-  const fin = new Date(fecha.getTime() + evento.duracion * 60 * 60 * 1000).toISOString().replace(/-|:|\.\d+/g, '');
-
-  const titulo = encodeURIComponent(`${evento.desc} · ${config.nombre}`);
-  const descripcion = encodeURIComponent(`Invitación a los XV años de ${config.nombre}. ${evento.desc}`);
-  const ubicacion = encodeURIComponent('Iglesia de Tianguistenco de Galeana / Auditorio');
-
-  const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${titulo}&dates=${inicio}/${fin}&details=${descripcion}&location=${ubicacion}&sf=true&output=xml`;
-  window.open(url, '_blank');
+  if ('calendar' in navigator) {
+    try {
+      const fechaInicio = new Date(evento.fechaISO);
+      const fechaFin = new Date(fechaInicio.getTime() + evento.duracion * 60 * 60 * 1000);
+      navigator.calendar.createEvent(
+        `XV años de ${config.nombre}`,
+        [evento.desc],
+        null,
+        fechaInicio,
+        fechaFin
+      );
+    } catch (e) {
+      console.error('Error adding to calendar:', e);
+    }
+  } else {
+    alert('El evento se ha generado. Puedes guardarlo en tu calendario manualmente.');
+  }
 }
 
-// ===== CONTADOR CON ANILLO CIRCULAR =====
-function initContadorCircular(config) {
-  const target = new Date(config.fechaISO).getTime();
-  if (isNaN(target)) return;
+// ===== CONTADOR CIRCULAR PARA CUENTA REGRESIVA =====
+function actualizarContador() {
+  const ahora = new Date();
+  const fechaEspecial = new Date('2026-10-10T13:00:00');
+  const diff = fechaEspecial - ahora;
 
-  const units = document.querySelectorAll('.clock .unit');
-  if (!units.length) return;
-
-  function actualizarContador() {
-    const now = Date.now();
-    const diff = target - now;
-
-    if (diff <= 0) {
-      document.querySelector('.clock').style.display = 'none';
-      document.getElementById('contador-mensaje').textContent = '¡El gran día ha llegado! 🎉';
-      return;
-    }
-
-    const days = Math.floor(diff / 86400000);
-    const hours = Math.floor((diff % 86400000) / 3600000);
-    const minutes = Math.floor((diff % 3600000) / 60000);
-    const seconds = Math.floor((diff % 60000) / 1000);
-
-    const maxValues = [365, 24, 60, 60];
-    const values = [days, hours, minutes, seconds];
-
-    units.forEach((unit, index) => {
-      const numEl = unit.querySelector('.num');
-      const circle = unit.querySelector('.progress-circle');
-      if (numEl) numEl.textContent = String(values[index]).padStart(2, '0');
-
-      if (circle) {
-        const max = maxValues[index];
-        const val = values[index];
-        const circumference = 2 * Math.PI * 26;
-        const progress = max > 0 ? (max - val) / max : 0;
-        const offset = progress * circumference;
-        circle.style.strokeDasharray = circumference;
-        circle.style.strokeDashoffset = offset;
-      }
+  if (diff <= 0) {
+    document.querySelectorAll('.countdown-unit').forEach(unit => {
+      unit.querySelector('.num').textContent = '0';
     });
-
-    // Mensaje dinámico
-    const msgEl = document.getElementById('contador-mensaje');
-    if (msgEl) {
-      let mensaje = '';
-      if (days > 30) mensaje = 'Falta un poco más de un mes...';
-      else if (days > 7) mensaje = 'La espera se hace corta.';
-      else if (days > 1) mensaje = '¡Ya casi llega!';
-      else if (days === 1) mensaje = '¡Mañana es el gran día!';
-      else if (days === 0 && hours > 6) mensaje = '¡Hoy es el día!';
-      else if (days === 0 && hours > 1) mensaje = '¡En unas horas comienza!';
-      else if (days === 0 && hours >= 0) mensaje = '¡El momento está aquí!';
-      msgEl.textContent = mensaje;
-    }
+    return;
   }
 
-  // Crear los SVG dentro de cada unidad si no existen
-  units.forEach((unit) => {
-    let circleWrap = unit.querySelector('.circle-wrap');
-    if (!circleWrap) {
-      const wrap = document.createElement('div');
-      wrap.className = 'circle-wrap';
-      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      svg.setAttribute('viewBox', '0 0 60 60');
-      svg.innerHTML = `
-        <circle class="bg-circle" cx="30" cy="30" r="26" />
-        <circle class="progress-circle" cx="30" cy="30" r="26" stroke-dasharray="163.36" stroke-dashoffset="0" />
-      `;
-      wrap.appendChild(svg);
-      const num = unit.querySelector('.num');
-      unit.insertBefore(wrap, num);
-      wrap.appendChild(num);
-      num.style.position = 'absolute';
-      num.style.top = '50%';
-      num.style.left = '50%';
-      num.style.transform = 'translate(-50%, -50%)';
-    }
+  const totalSeconds = Math.floor(diff / 1000);
+  const dias = Math.floor(totalSeconds / 86400);
+  const horas = Math.floor((totalSeconds % 86400) / 3600);
+  const minutos = Math.floor((totalSeconds % 3600) / 60);
+  const segundos = totalSeconds % 60;
+
+  const units = document.querySelectorAll('.countdown-unit');
+  if (units.length >= 4) {
+    units[0].querySelector('.num').textContent = String(dias).padStart(2, '0');
+    units[1].querySelector('.num').textContent = String(horas).padStart(2, '0');
+    units[2].querySelector('.num').textContent = String(minutos).padStart(2, '0');
+    units[3].querySelector('.num').textContent = String(segundos).padStart(2, '0');
+  }
+}
+
+function initContadorCircular(config) {
+  // ✅ Limpiar intervalo anterior si existe
+  if (intervaloContador) clearInterval(intervaloContador);
+
+  const container = document.getElementById('contador-circular');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="countdown-unit">
+      <span class="label">Días</span>
+      <div class="num">00</div>
+    </div>
+    <div class="countdown-unit">
+      <span class="label">Horas</span>
+      <div class="num">00</div>
+    </div>
+    <div class="countdown-unit">
+      <span class="label">Min</span>
+      <div class="num">00</div>
+    </div>
+    <div class="countdown-unit">
+      <span class="label">Seg</span>
+      <div class="num">00</div>
+    </div>
+  `;
+
+  document.querySelectorAll('.countdown-unit').forEach(unit => {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'position: relative; width: 100%; height: 100%;';
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 60 60');
+    svg.innerHTML = `
+      <circle class="bg-circle" cx="30" cy="30" r="26" />
+      <circle class="progress-circle" cx="30" cy="30" r="26" stroke-dasharray="163.36" stroke-dashoffset="0" />
+    `;
+    wrap.appendChild(svg);
+    const num = unit.querySelector('.num');
+    unit.insertBefore(wrap, num);
+    wrap.appendChild(num);
+    num.style.position = 'absolute';
+    num.style.top = '50%';
+    num.style.left = '50%';
+    num.style.transform = 'translate(-50%, -50%)';
   });
 
   actualizarContador();
-  setInterval(actualizarContador, 200);
+  // ✅ OPTIMIZADO: Cambiar de 200ms a 1000ms (cada segundo es suficiente)
+  intervaloContador = setInterval(actualizarContador, 1000);
 }
+
+// ===== CLEANUP EN UNLOAD =====
+window.addEventListener('beforeunload', () => {
+  if (intervaloItinerario) clearInterval(intervaloItinerario);
+  if (intervaloContador) clearInterval(intervaloContador);
+});
 
 document.addEventListener('DOMContentLoaded', async () => {
   const config = await cargarConfig();
@@ -443,7 +458,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   backBtn.addEventListener('click', cerrarReja);
 
-  // ===== PARALLAX =====
+  // ===== PARALLAX OPTIMIZADO =====
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
   let gyroWorking = false;
@@ -460,6 +475,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       width: 100%;
       max-width: 560px;
       will-change: transform;
+      transform: translate3d(0, 0, 0);
       gap: 0.5rem;
       padding: 0 0.5rem 2rem;
     `;
@@ -479,15 +495,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const offsetY = Math.min(Math.max(invertY, -maxOffset), maxOffset);
 
     if (!portal.classList.contains('hide') && portalInner) {
-      portalInner.style.transform = `translate(${offsetX * 0.6}px, ${offsetY * 0.6}px)`;
+      portalInner.style.transform = `translate3d(${offsetX * 0.6}px, ${offsetY * 0.6}px, 0)`;
     }
     if (app.classList.contains('show') && appInner) {
-      appInner.style.transform = `translate(${offsetX * 0.45}px, ${offsetY * 0.45}px)`;
+      appInner.style.transform = `translate3d(${offsetX * 0.45}px, ${offsetY * 0.45}px, 0)`;
     }
   }
 
   let currentX = 0, currentY = 0;
   let targetX = 0, targetY = 0;
+  let lastParallaxTime = 0;
 
   function smoothParallax() {
     currentX += (targetX - currentX) * 0.1;
@@ -530,6 +547,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function handleOrientation(e) {
     if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
+    
+    // ✅ THROTTLE: Solo actualizar cada 33ms (30 FPS en móvil)
+    const now = Date.now();
+    if (now - lastParallaxTime < 33) return;
+    lastParallaxTime = now;
+
     const gamma = e.gamma || 0;
     const beta = e.beta || 0;
     const x = (gamma / 90) * 30;
