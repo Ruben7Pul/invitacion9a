@@ -193,7 +193,7 @@ body {
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
-  opacity: 0;
+  opacity: 1;
   mix-blend-mode: lighten;
 }
 .portal-water-top::before,
@@ -203,21 +203,21 @@ body {
   inset: 0;
   pointer-events: none;
   z-index: -1;
-  background: radial-gradient(ellipse 150px 100px at 15% 20%, rgba(150, 200, 255, 0.08), transparent 60%),
-              radial-gradient(ellipse 180px 120px at 85% 35%, rgba(150, 200, 255, 0.06), transparent 65%),
-              radial-gradient(ellipse 140px 90px at 50% 60%, rgba(180, 220, 255, 0.05), transparent 70%),
-              radial-gradient(ellipse 160px 110px at 25% 75%, rgba(150, 200, 255, 0.07), transparent 68%),
-              radial-gradient(ellipse 170px 115px at 75% 80%, rgba(160, 210, 255, 0.06), transparent 70%);
+  background: radial-gradient(ellipse 150px 100px at 15% 20%, rgba(150, 200, 255, 0.16), transparent 60%),
+              radial-gradient(ellipse 180px 120px at 85% 35%, rgba(150, 200, 255, 0.14), transparent 65%),
+              radial-gradient(ellipse 140px 90px at 50% 60%, rgba(180, 220, 255, 0.12), transparent 70%),
+              radial-gradient(ellipse 160px 110px at 25% 75%, rgba(150, 200, 255, 0.15), transparent 68%),
+              radial-gradient(ellipse 170px 115px at 75% 80%, rgba(160, 210, 255, 0.14), transparent 70%);
   animation: underwaterGlow 8s ease-in-out infinite;
 }
 .portal-water-top::after {
   animation-duration: 11s;
   animation-direction: reverse;
-  opacity: 0.6;
+  opacity: 0.8;
 }
 @keyframes underwaterGlow {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.6; }
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
 }
 .gate-leaf {
   position: absolute;
@@ -393,7 +393,7 @@ html.sin-reja #app {
 h1#nombre-hero {
   font-family: var(--script);
   font-weight: 400;
-  font-size: clamp(6.2rem, 20cqw, 7.8rem);
+  font-size: clamp(7.75rem, 25cqw, 9.75rem);
   line-height: 1.1;
   margin: 0.05rem 0;
   cursor: pointer;
@@ -921,7 +921,7 @@ h1#nombre-hero {
    ============================================================ */
 @media (max-width: 400px) {
   #app { padding: 0.3rem 0.6rem; }
-  h1#nombre-hero { font-size: clamp(5.4rem, 20cqw, 6.4rem); }
+  h1#nombre-hero { font-size: clamp(6.75rem, 25cqw, 8rem); }
   .frase-inline { font-size: clamp(1.3rem, 3.8cqw, 1.5rem); }
   .fecha-fija { font-size: clamp(1.4rem, 4cqw, 1.6rem); }
   #app-top .eyebrow { font-size: 0.7rem; }
@@ -945,7 +945,7 @@ h1#nombre-hero {
   #app { padding: 0.6rem 2rem; }
   #app-inner { max-width: 640px; gap: 0.4rem; }
   #oval-wrap { width: clamp(200px, 22vh, 300px); height: clamp(280px, 32vh, 420px); }
-  h1#nombre-hero { font-size: clamp(7.5rem, 15vh, 11rem); }
+  h1#nombre-hero { font-size: clamp(9.375rem, 18.75vh, 13.75rem); }
   .frase-inline { font-size: clamp(1.7rem, 3vh, 2.2rem); }
   .fecha-fija { font-size: clamp(1.8rem, 3.3vh, 2.4rem); }
   .hint { font-size: clamp(1.2rem, 2.2vh, 1.5rem); }
@@ -959,7 +959,148 @@ h1#nombre-hero {
 @media (min-width: 768px) and (max-height: 900px) {
   #app-mid { gap: 0.6rem; }
   #oval-wrap { width: clamp(180px, 20vh, 260px); height: clamp(250px, 30vh, 360px); }
-  h1#nombre-hero { font-size: clamp(7rem, 14vh, 10.5rem); }
+  h1#nombre-hero { font-size: clamp(8.75rem, 17.5vh, 13.125rem); }
 }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: rgba(201, 162, 77, 0.3); border-radius: 3px; }
+
+/* ============================================================
+   TEMAS DINÁMICOS POR HORA DEL DÍA
+   ============================================================ */
+
+/* AMANECER (6:00-8:00 AM) - Amarillo, Naranja, Rojo */
+html[data-time-period="sunrise"] {
+  --bg-brightness: 0.75;
+}
+html[data-time-period="sunrise"] #bg::after {
+  opacity: 1 - 0.75;
+}
+html[data-time-period="sunrise"] .top-btn {
+  background: rgba(255, 200, 0, 0.15);
+  border-color: #FFD700;
+  color: #FFD700;
+}
+html[data-time-period="sunrise"] #music-toggle {
+  color: #FF8C00;
+}
+html[data-time-period="sunrise"] #oval-wrap {
+  border-color: #FF8C00;
+  box-shadow: 0 0 30px rgba(255, 140, 0, 0.25), inset 0 0 40px rgba(255, 140, 0, 0.1);
+}
+html[data-time-period="sunrise"] .frase-inline {
+  color: #FF4444;
+}
+html[data-time-period="sunrise"] .fecha-fija {
+  color: #FF8C00;
+}
+html[data-time-period="sunrise"] .nav-btn {
+  background: rgba(255, 200, 0, 0.12);
+  border-color: #FFD700;
+  color: #FFD700;
+}
+html[data-time-period="sunrise"] .nav-btn:hover {
+  background: rgba(255, 200, 0, 0.25);
+  box-shadow: 0 0 20px rgba(255, 200, 0, 0.3);
+}
+html[data-time-period="sunrise"] h1#nombre-hero {
+  filter: blur(0.66px);
+}
+
+/* DÍA (8:00 AM - 5:00 PM) - Dorado (Normal) */
+html[data-time-period="day"] {
+  --bg-brightness: 1.0;
+}
+html[data-time-period="day"] #bg::after {
+  opacity: 0;
+}
+html[data-time-period="day"] .top-btn {
+  background: rgba(212, 175, 55, 0.12);
+  border-color: #d4af37;
+  color: #fae3a0;
+}
+html[data-time-period="day"] #music-toggle {
+  color: #d4af37;
+}
+html[data-time-period="day"] #oval-wrap {
+  border-color: #d4af37;
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.2), inset 0 0 40px rgba(212, 175, 55, 0.1);
+}
+html[data-time-period="day"] h1#nombre-hero {
+  filter: blur(0.33px);
+}
+
+/* OCASO (5:00 PM - 7:00 PM) - Morado, Azul Claro, Rosa */
+html[data-time-period="sunset"] {
+  --bg-brightness: 0.75;
+}
+html[data-time-period="sunset"] #bg::after {
+  opacity: 1 - 0.75;
+}
+html[data-time-period="sunset"] .top-btn {
+  background: rgba(200, 100, 200, 0.15);
+  border-color: #9966CC;
+  color: #D4A5FF;
+}
+html[data-time-period="sunset"] #music-toggle {
+  color: #00CCFF;
+}
+html[data-time-period="sunset"] #oval-wrap {
+  border-color: #9966CC;
+  box-shadow: 0 0 30px rgba(153, 102, 204, 0.25), inset 0 0 40px rgba(153, 102, 204, 0.1);
+}
+html[data-time-period="sunset"] .frase-inline {
+  color: #FF69B4;
+}
+html[data-time-period="sunset"] .fecha-fija {
+  color: #FF8C00;
+}
+html[data-time-period="sunset"] .nav-btn {
+  background: rgba(200, 100, 200, 0.12);
+  border-color: #9966CC;
+  color: #D4A5FF;
+}
+html[data-time-period="sunset"] .nav-btn:hover {
+  background: rgba(200, 100, 200, 0.25);
+  box-shadow: 0 0 20px rgba(153, 102, 204, 0.3);
+}
+html[data-time-period="sunset"] h1#nombre-hero {
+  filter: blur(0.66px);
+}
+
+/* NOCHE (7:00 PM - 6:00 AM) - Azul Oscuro, Negro, Azul Claro */
+html[data-time-period="night"] {
+  --bg-brightness: 0.5;
+}
+html[data-time-period="night"] #bg::after {
+  opacity: 1 - 0.5;
+}
+html[data-time-period="night"] .top-btn {
+  background: rgba(30, 60, 120, 0.15);
+  border-color: #1E3C78;
+  color: #6699DD;
+}
+html[data-time-period="night"] #music-toggle {
+  color: #1E3C78;
+}
+html[data-time-period="night"] #oval-wrap {
+  border-color: #1E3C78;
+  box-shadow: 0 0 30px rgba(30, 60, 120, 0.25), inset 0 0 40px rgba(30, 60, 120, 0.1);
+}
+html[data-time-period="night"] .frase-inline {
+  color: #1E3C78;
+}
+html[data-time-period="night"] .fecha-fija {
+  color: #1E3C78;
+}
+html[data-time-period="night"] .nav-btn {
+  background: rgba(30, 60, 120, 0.12);
+  border-color: #1E3C78;
+  color: #6699DD;
+}
+html[data-time-period="night"] .nav-btn:hover {
+  background: rgba(30, 60, 120, 0.25);
+  box-shadow: 0 0 20px rgba(30, 60, 120, 0.3);
+}
+html[data-time-period="night"] h1#nombre-hero {
+  filter: blur(1px);
+}

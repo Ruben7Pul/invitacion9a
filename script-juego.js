@@ -3,6 +3,43 @@
 // ============================================================
 console.log('🎮 script-juego.js cargado');
 
+// ============================================================
+// Detección de hora del día
+// ============================================================
+function detectarPeriodoDia() {
+  const ahora = new Date();
+  const hora = ahora.getHours();
+  
+  let periodo = 'day'; // default
+  
+  // 6:00-8:00 AM: Amanecer
+  if (hora >= 6 && hora < 8) {
+    periodo = 'sunrise';
+  }
+  // 8:00 AM - 5:00 PM (17:00): Día
+  else if (hora >= 8 && hora < 17) {
+    periodo = 'day';
+  }
+  // 5:00 PM - 7:00 PM (19:00): Ocaso
+  else if (hora >= 17 && hora < 19) {
+    periodo = 'sunset';
+  }
+  // 7:00 PM - 6:00 AM: Noche
+  else if (hora >= 19 || hora < 6) {
+    periodo = 'night';
+  }
+  
+  document.documentElement.setAttribute('data-time-period', periodo);
+  console.log('🌍 Período del día detectado en juego:', periodo);
+  return periodo;
+}
+
+// Detectar período al cargar
+detectarPeriodoDia();
+
+// Re-detectar cada minuto
+setInterval(detectarPeriodoDia, 60000);
+
 async function cargarConfig() {
   try {
     const res = await fetch(`../config.json?t=${Date.now()}`);
