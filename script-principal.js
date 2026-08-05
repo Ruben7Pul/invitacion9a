@@ -151,7 +151,7 @@ function marcarDiaActualEnCalendario() {
   }
 }
 
-// ===== GENERAR EVENTOS DEL CALENDARIO =====
+// ===== GENERAR EVENTOS DEL CALENDARIO (sin 11 de octubre) =====
 function generarEventosCalendario(config) {
   const container = document.getElementById('calendario-eventos');
   if (!container) return;
@@ -160,7 +160,7 @@ function generarEventosCalendario(config) {
     { fecha: '8 de octubre', desc: '🎂 Cumpleaños', fechaISO: '2026-10-08T09:00:00', duracion: 2 },
     { fecha: '10 de octubre', desc: '⛪ Misa', fechaISO: '2026-10-10T13:00:00', duracion: 2 },
     { fecha: '10 de octubre', desc: '🎉 Recepción', fechaISO: '2026-10-10T15:00:00', duracion: 5 },
-    { fecha: '11 de octubre', desc: '☀️ Desayuno', fechaISO: '2026-10-11T09:00:00', duracion: 3 },
+    // Evento del 11 de octubre eliminado
   ];
 
   container.innerHTML = '';
@@ -201,7 +201,7 @@ function agregarACalendario(evento, config) {
   window.open(url, '_blank');
 }
 
-// ===== RESALTAR ACTIVIDAD ACTUAL EN ITINERARIO =====
+// ===== RESALTAR ACTIVIDAD ACTUAL EN ITINERARIO (solo 10 de octubre) =====
 function iniciarBrilloItinerario() {
   const ahora = new Date();
   const año = ahora.getFullYear();
@@ -211,7 +211,7 @@ function iniciarBrilloItinerario() {
   const minutos = ahora.getMinutes();
   const totalMinutos = hora * 60 + minutos;
 
-  if (año === 2026 && mes === 9 && (dia === 10 || dia === 11)) {
+  if (año === 2026 && mes === 9 && dia === 10) { // solo 10 de octubre
     const items = document.querySelectorAll('.itinerario-item');
     let activo = null;
     let anterior = null;
@@ -634,13 +634,54 @@ document.addEventListener('DOMContentLoaded', async function() {
     }, 2000);
   }
 
+  // ===== NUEVA FUNCIÓN ABRIR REJA CON TRANSICIÓN =====
   function abrirReja(e) {
     if (e) e.stopPropagation();
+    
+    // 1. Cierra la reja (animación visual)
     gateWrapper.classList.add('open');
-    portal.classList.add('hide');
-    app.classList.add('show');
-    cargarContador();
-    if (window.playMusic) window.playMusic();
+    
+    // 2. Espera a que termine la animación de apertura (~0.65s)
+    setTimeout(() => {
+      const overlay = document.getElementById('transition-overlay');
+      const video = document.getElementById('transition-video');
+      
+      // Mostrar overlay
+      if (overlay) {
+        overlay.classList.add('show');
+      }
+      
+      // Reproducir video si existe
+      if (video) {
+        video.currentTime = 0;
+        video.play().catch(() => {});
+        
+        // Función que finaliza la transición
+        const finalizar = () => {
+          if (overlay) overlay.classList.remove('show');
+          // Ocultar portal y mostrar app
+          portal.classList.add('hide');
+          app.classList.add('show');
+          cargarContador();
+          if (window.playMusic) window.playMusic();
+          // Limpiar eventos
+          video.removeEventListener('ended', finalizar);
+          if (overlay) overlay.removeEventListener('click', finalizar);
+          clearTimeout(timeout);
+        };
+        
+        // Fallback por si el video no termina (máx 6s)
+        const timeout = setTimeout(finalizar, 6000);
+        video.addEventListener('ended', finalizar);
+        if (overlay) overlay.addEventListener('click', finalizar); // opcional: tocar para saltar
+      } else {
+        // Si no hay video, pasa directamente
+        portal.classList.add('hide');
+        app.classList.add('show');
+        cargarContador();
+        if (window.playMusic) window.playMusic();
+      }
+    }, 650);
   }
 
   function cerrarReja(e) {
@@ -664,6 +705,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }, 700);
   }
 
+  // Asignar eventos
   gateWrapper.addEventListener('click', abrirReja);
   gateWrapper.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirReja(e); }
