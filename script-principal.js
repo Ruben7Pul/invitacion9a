@@ -333,8 +333,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Observador para animaciones de secciones (ya están en CSS)
-  // Solo aseguramos que las secciones se marquen como visibles
+  // ===== OBSERVADOR PARA ANIMACIONES DE SECCIONES (con repetición) =====
   if ('IntersectionObserver' in window) {
     const secciones = document.querySelectorAll('.seccion');
     const observer = new IntersectionObserver((entries) => {
@@ -342,8 +341,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (entry.isIntersecting) {
           entry.target.classList.add('visible');
         } else {
-          // Opcional: si queremos que se oculten al salir de vista (para que la animación se repita)
-          // entry.target.classList.remove('visible');
+          entry.target.classList.remove('visible');
         }
       });
     }, { threshold: 0.15 });
