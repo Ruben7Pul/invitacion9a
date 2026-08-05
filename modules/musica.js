@@ -57,7 +57,7 @@ export function initMusica(cfg) {
   audio.play().catch(() => {});
   setTimeout(() => {
     if (audio.paused) audio.play().catch(() => {});
-    fadeVolume(0.6, 1000);
+    fadeVolume(0.8, 1000);
     isMuted = false;
   }, 300);
   const btn = getMuteBtn();
@@ -71,7 +71,7 @@ export function playMusic() {
   if (!audio) return;
   if (audio.paused) {
     audio.play().catch(() => {});
-    fadeVolume(0.6, 800);
+    fadeVolume(0.8, 800);
   }
   const btn = getMuteBtn();
   if (btn) {
@@ -104,7 +104,7 @@ export function toggleMusic() {
   if (isMuted || audio.volume === 0) {
     // Desmutear
     if (audio.paused) audio.play().catch(() => {});
-    fadeVolume(0.6, 600);
+    fadeVolume(0.8, 600);
     isMuted = false;
     if (btn) {
       btn.innerHTML = iconSound;

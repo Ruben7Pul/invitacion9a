@@ -181,8 +181,6 @@ export function initJuego(config, mobile = false) {
   paddleEl.style.willChange = 'transform';
   paddleEl.style.zIndex = '100';
   paddleEl.style.pointerEvents = 'none';
-  paddleEl.style.top = (STAGE_H - 14) + 'px';
-  paddleEl.style.left = '0';
 
   livesEl.style.fontFamily = "'Press Start 2P', monospace";
   livesEl.style.fontSize = '1.2rem';
@@ -720,7 +718,7 @@ export function initJuego(config, mobile = false) {
 
     const el = document.createElement('div');
     el.style.cssText = `
-      position: absolute; left: 0; top: 0;
+      position: absolute;
       width: ${size}px; height: ${size}px;
       border-radius: 50%;
       background: ${isGreen ? 'rgba(46, 204, 113, 0.7)' : 'rgba(231, 76, 60, 0.7)'};
@@ -729,7 +727,7 @@ export function initJuego(config, mobile = false) {
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-weight: bold; font-size: ${size * 0.5}px;
       pointer-events: none; z-index: 15;
-      will-change: transform;
+      transform: translate(-50%, -50%);
       text-shadow: 0 0 6px rgba(0,0,0,0.8);
     `;
     el.textContent = POWERUP_SYMBOLS[typeKey] || '?';
@@ -752,7 +750,7 @@ export function initJuego(config, mobile = false) {
 
     const el = document.createElement('div');
     el.style.cssText = `
-      position: absolute; left: 0; top: 0;
+      position: absolute;
       width: ${size}px; height: ${size}px;
       border-radius: 50%;
       background: radial-gradient(circle at 35% 30%, #fff4a0, #ffd700 50%, #b8860b);
@@ -1189,19 +1187,24 @@ export function initJuego(config, mobile = false) {
     paddleEl.style.opacity = '1';
     paddleEl.style.width = paddleWidth + 'px';
     paddleEl.style.transform = 'translateX(' + paddle.x + 'px)';
-    // (fondo, borde, sombra, radio, alto, top/left y z-index ya se fijan una
-    // sola vez al crear la pala — antes se reescribían aquí en cada cuadro
-    // sin necesidad, 60 veces por segundo, lo cual costaba rendimiento)
+    paddleEl.style.top = (STAGE_H - 14) + 'px';
+    paddleEl.style.left = '0';
+    paddleEl.style.background = '#111';
+    paddleEl.style.border = '2px solid #d4af37';
+    paddleEl.style.boxShadow = '0 0 25px rgba(212,175,55,0.3)';
+    paddleEl.style.borderRadius = '8px';
+    paddleEl.style.height = PADDLE_H + 'px';
+    paddleEl.style.zIndex = '100';
 
     let ballElements = inner.querySelectorAll('.ball-dynamic');
     while (ballElements.length < balls.length) {
       const el = document.createElement('div');
       el.className = 'ball-dynamic';
       el.style.cssText = `
-        position: absolute; left: 0; top: 0; width: ${BALL_R * 2}px; height: ${BALL_R * 2}px;
+        position: absolute; width: ${BALL_R * 2}px; height: ${BALL_R * 2}px;
         border-radius: 50%;
         pointer-events: none;
-        will-change: transform;
+        transform: translate(-50%, -50%);
         z-index: 25;
       `;
       updateBallStyle(el);
@@ -1214,23 +1217,15 @@ export function initJuego(config, mobile = false) {
     }
     for (let i = 0; i < balls.length; i++) {
       const el = ballElements[i];
-      // transform en vez de left/top: evita que el navegador recalcule el
-      // layout en cada cuadro (más liviano, especialmente en celular)
-      el.style.transform = 'translate(' + balls[i].x + 'px,' + balls[i].y + 'px) translate(-50%,-50%)';
+      el.style.left = balls[i].x + 'px';
+      el.style.top = balls[i].y + 'px';
     }
 
     for (const pu of powerups) {
-      if (pu.isBlue) {
-        // La bola azul ya anima su propio transform (brillo/escala) por CSS,
-        // así que su posición se mueve con left/top para no pisar esa animación.
-        pu.el.style.left = pu.x + 'px';
-        pu.el.style.top = pu.y + 'px';
-      } else {
-        pu.el.style.transform = 'translate(' + pu.x + 'px,' + pu.y + 'px) translate(-50%,-50%)';
-      }
+      pu.el.style.left = pu.x + 'px';
+      pu.el.style.top = pu.y + 'px';
     }
   }
-
 
   // ========== BUCLE PRINCIPAL ==========
   function gameLoop(timestamp) {
