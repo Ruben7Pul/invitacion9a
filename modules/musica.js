@@ -1,4 +1,4 @@
-console.log('📦 música (con fade)');
+console.log('📦 música (con fade y mute corregido)');
 
 let audio = null;
 let fadeInterval = null;
@@ -17,7 +17,6 @@ const iconMute = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 </svg>`;
 
 function getMuteBtn() {
-  // Buscar en el header y en el modal de pausa
   const btn = document.getElementById('music-toggle');
   if (btn) return btn;
   return document.querySelector('.pause-mute-btn');
@@ -33,7 +32,6 @@ function fadeVolume(targetVolume, duration = 800) {
   fadeInterval = setInterval(() => {
     const elapsed = (performance.now() - startTime) / duration;
     const progress = Math.min(elapsed, 1);
-    // easing suave (cubic)
     const eased = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
     audio.volume = startVolume + diff * eased;
     if (progress >= 1) {
@@ -47,23 +45,21 @@ function fadeVolume(targetVolume, duration = 800) {
 export function initMusica(cfg) {
   audio = document.getElementById('bg-music');
   if (!audio) {
-    audio = new Audio(cfg.audioFile);
+    audio = new Audio(cfg.audioFile || '../archivos/cancion1.mp3');
     audio.loop = true;
     document.body.appendChild(audio);
   }
-  audio.volume = 0; // iniciar en silencio para hacer fade in
+  audio.volume = 0;
   audio.addEventListener('error', (e) => {
     console.warn('⚠️ Error audio:', e);
   });
   audio.load();
-  // Reproducir automáticamente (el navegador puede bloquearlo, se intenta)
   audio.play().catch(() => {});
-  // Fade in al cargar (después de 200ms para que el navegador lo procese)
   setTimeout(() => {
     if (audio.paused) audio.play().catch(() => {});
     fadeVolume(0.8, 1000);
+    isMuted = false;
   }, 300);
-  // Actualizar icono del botón de mute
   const btn = getMuteBtn();
   if (btn) {
     btn.innerHTML = iconSound;
@@ -103,38 +99,30 @@ export function resetMusic() {
 export function toggleMusic() {
   if (!audio) return;
   const btn = getMuteBtn();
-  if (audio.paused) {
-    audio.play().catch(() => {});
-    fadeVolume(0.8, 800);
+  
+  // Si está silenciado o con volumen 0, lo activamos
+  if (isMuted || audio.volume === 0) {
+    // Desmutear
+    if (audio.paused) audio.play().catch(() => {});
+    fadeVolume(0.8, 600);
+    isMuted = false;
     if (btn) {
       btn.innerHTML = iconSound;
       btn.title = 'Silenciar música';
     }
-    isMuted = false;
   } else {
-    if (audio.volume > 0.1) {
-      // Si está sonando, silenciar con fade out
-      fadeVolume(0, 600);
-      if (btn) {
-        btn.innerHTML = iconMute;
-        btn.title = 'Activar música';
-      }
-      isMuted = true;
-      // No pausamos, solo bajamos el volumen para que reanude rápido
-    } else {
-      // Si ya estaba silenciado, reanudar
-      fadeVolume(0.8, 800);
-      if (btn) {
-        btn.innerHTML = iconSound;
-        btn.title = 'Silenciar música';
-      }
-      isMuted = false;
+    // Silenciar
+    fadeVolume(0, 600);
+    isMuted = true;
+    if (btn) {
+      btn.innerHTML = iconMute;
+      btn.title = 'Activar música';
     }
   }
 }
 
 export function isMusicMuted() {
-  return isMuted || audio?.volume === 0;
+  return isMuted || (audio && audio.volume === 0);
 }
 
 export function setMusicMute(muted) {
