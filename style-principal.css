@@ -1251,33 +1251,20 @@ h1#nombre-hero {
   border-radius: 16px;
   overflow: visible; /* Permitir que las imágenes sobresalgan */
   border: 2px solid #b8860b;
-  box-shadow: 
-    0 0 30px rgba(212, 175, 55, 0.15),
-    inset 0 0 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.15);
   margin: 0.5rem 0;
-  perspective: 1500px;
 }
 
 .collage-container .collage-item {
   position: absolute;
   border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.8);
+  border: 3px solid rgba(212, 175, 55, 0.5);
   pointer-events: none;
   will-change: transform, opacity;
   backface-visibility: hidden;
-  border: 2px solid rgba(212, 175, 55, 0.4);
-  background: rgba(10, 8, 16, 0.1);
-  filter: drop-shadow(0 10px 30px rgba(0,0,0,0.7)) drop-shadow(0 2px 10px rgba(212, 175, 55, 0.25));
-}
-
-.collage-container .collage-item::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(0,0,0,0.2) 100%);
-  border-radius: 10px;
-  pointer-events: none;
-  z-index: 2;
+  transition: opacity 1.5s ease, transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .collage-container .collage-item img {
@@ -1285,8 +1272,6 @@ h1#nombre-hero {
   height: 100%;
   object-fit: cover;
   display: block;
-  -webkit-user-select: none;
-  user-select: none;
 }
 
 /* Ocultar scroll del modal */
