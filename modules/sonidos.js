@@ -1,3 +1,4 @@
+// sonidos.js – versión ligera (solo sonidos esenciales)
 console.log('📦 sonidos optimizados (buffers)');
 
 let audioCtx = null;
@@ -9,10 +10,8 @@ export function ensureAudioCtx() {
     if (!audioCtx) {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
-    // No resumir automáticamente, solo devolver el contexto
     return audioCtx;
   } catch (e) {
-    // Silenciar errores de AudioContext
     soundEnabled = false;
     return null;
   }
@@ -43,30 +42,14 @@ function createSoundBuffer(ctx, freqs, dur, vol = 0.5) {
 function preloadSounds() {
   const ctx = ensureAudioCtx();
   if (!ctx) return;
-  // Solo precargar si el contexto está en estado 'running'
-  if (ctx.state !== 'running') {
-    // No precargar sonidos hasta que el usuario interactúe
-    return;
-  }
+  if (ctx.state !== 'running') return;
   const soundDefs = {
-    tap: { freqs: [1046, 1568], dur: 0.25, vol: 0.4 },
-    brick: { freqs: [1200], dur: 0.12, vol: 0.3 },
-    lose: { freqs: [392, 330], dur: 0.35, vol: 0.5 },
-    open: { freqs: [880, 1318, 1760], dur: 0.4, vol: 0.4 },
-    close: { freqs: [1318, 880], dur: 0.3, vol: 0.4 },
-    win: { freqs: [784, 988, 1175, 1568], dur: 0.6, vol: 0.5 },
-    clay: { freqs: [600, 800], dur: 0.12, vol: 0.3 },
-    wood: { freqs: [400, 500, 300], dur: 0.2, vol: 0.35 },
-    iron: { freqs: [200, 250, 300, 350], dur: 0.25, vol: 0.4 },
+    brick:        { freqs: [600, 800], dur: 0.15, vol: 0.4 },
+    lose:         { freqs: [392, 330], dur: 0.35, vol: 0.5 },
+    game_over:    { freqs: [440, 370, 330, 294, 262], dur: 0.9, vol: 0.6 },
+    extra_life:   { freqs: [880, 1175, 1568, 2093], dur: 0.5, vol: 0.8 },
     powerup_good: { freqs: [988, 1318, 1760], dur: 0.35, vol: 0.5 },
-    powerup_bad: { freqs: [440, 370, 330], dur: 0.4, vol: 0.5 },
-    blue_ball: { freqs: [523, 659, 784, 988, 1175], dur: 0.5, vol: 0.6 },
-    extra_life: { freqs: [880, 1175, 1568, 2093], dur: 0.5, vol: 0.8 },
-    wall_hit: { freqs: [880, 660], dur: 0.06, vol: 0.2 },
-    paddle_hit: { freqs: [1200, 900], dur: 0.05, vol: 0.25 },
-    game_over: { freqs: [440, 370, 330, 294, 262], dur: 0.9, vol: 0.6 },
-    fog_appear: { freqs: [200, 150, 100], dur: 0.8, vol: 0.3 },
-    fog_disappear: { freqs: [100, 150, 200], dur: 0.6, vol: 0.25 }
+    powerup_bad:  { freqs: [440, 370, 330], dur: 0.4, vol: 0.5 }
   };
   for (const [name, def] of Object.entries(soundDefs)) {
     soundBuffers[name] = createSoundBuffer(ctx, def.freqs, def.dur, def.vol);
@@ -79,33 +62,19 @@ function playSound(name) {
   try {
     const ctx = ensureAudioCtx();
     if (!ctx) return;
-    // Si el contexto no está activo, no reproducir
     if (ctx.state !== 'running') {
-      // Intentar reanudar silenciosamente
       ctx.resume().catch(() => {});
       return;
     }
     let buffer = soundBuffers[name];
     if (!buffer) {
       const defs = {
-        tap: { freqs: [1046, 1568], dur: 0.25, vol: 0.4 },
-        brick: { freqs: [1200], dur: 0.12, vol: 0.3 },
-        lose: { freqs: [392, 330], dur: 0.35, vol: 0.5 },
-        open: { freqs: [880, 1318, 1760], dur: 0.4, vol: 0.4 },
-        close: { freqs: [1318, 880], dur: 0.3, vol: 0.4 },
-        win: { freqs: [784, 988, 1175, 1568], dur: 0.6, vol: 0.5 },
-        clay: { freqs: [600, 800], dur: 0.12, vol: 0.3 },
-        wood: { freqs: [400, 500, 300], dur: 0.2, vol: 0.35 },
-        iron: { freqs: [200, 250, 300, 350], dur: 0.25, vol: 0.4 },
+        brick:        { freqs: [600, 800], dur: 0.15, vol: 0.4 },
+        lose:         { freqs: [392, 330], dur: 0.35, vol: 0.5 },
+        game_over:    { freqs: [440, 370, 330, 294, 262], dur: 0.9, vol: 0.6 },
+        extra_life:   { freqs: [880, 1175, 1568, 2093], dur: 0.5, vol: 0.8 },
         powerup_good: { freqs: [988, 1318, 1760], dur: 0.35, vol: 0.5 },
-        powerup_bad: { freqs: [440, 370, 330], dur: 0.4, vol: 0.5 },
-        blue_ball: { freqs: [523, 659, 784, 988, 1175], dur: 0.5, vol: 0.6 },
-        extra_life: { freqs: [880, 1175, 1568, 2093], dur: 0.5, vol: 0.8 },
-        wall_hit: { freqs: [880, 660], dur: 0.06, vol: 0.2 },
-        paddle_hit: { freqs: [1200, 900], dur: 0.05, vol: 0.25 },
-        game_over: { freqs: [440, 370, 330, 294, 262], dur: 0.9, vol: 0.6 },
-        fog_appear: { freqs: [200, 150, 100], dur: 0.8, vol: 0.3 },
-        fog_disappear: { freqs: [100, 150, 200], dur: 0.6, vol: 0.25 }
+        powerup_bad:  { freqs: [440, 370, 330], dur: 0.4, vol: 0.5 }
       };
       const def = defs[name];
       if (!def) return;
@@ -120,38 +89,22 @@ function playSound(name) {
     source.connect(gain).connect(ctx.destination);
     source.start();
   } catch (e) {
-    // Silenciar errores
     soundEnabled = false;
   }
 }
 
-export const soundTap = () => playSound('tap');
 export const soundBrick = () => playSound('brick');
 export const soundLose = () => playSound('lose');
-export const soundOpen = () => playSound('open');
-export const soundClose = () => playSound('close');
-export const soundWin = () => playSound('win');
-export const soundClay = () => playSound('clay');
-export const soundWood = () => playSound('wood');
-export const soundIron = () => playSound('iron');
+export const soundGameOver = () => playSound('game_over');
+export const soundExtraLife = () => playSound('extra_life');
 export const soundPowerupGood = () => playSound('powerup_good');
 export const soundPowerupBad = () => playSound('powerup_bad');
-export const soundBlueBall = () => playSound('blue_ball');
-export const soundExtraLife = () => playSound('extra_life');
-export const soundWallHit = () => playSound('wall_hit');
-export const soundPaddleHit = () => playSound('paddle_hit');
-export const soundGameOver = () => playSound('game_over');
-export const soundFogAppear = () => playSound('fog_appear');
-export const soundFogDisappear = () => playSound('fog_disappear');
 
 export function initSonidos() {
-  // No precargar sonidos automáticamente
-  // Solo cuando el usuario haga clic en la página
   document.addEventListener('click', () => {
     const ctx = ensureAudioCtx();
     if (ctx && ctx.state === 'suspended') {
       ctx.resume().catch(() => {});
-      // Precargar sonidos después de reanudar
       if (Object.keys(soundBuffers).length === 0) {
         setTimeout(preloadSounds, 100);
       }
