@@ -36,7 +36,6 @@ async function cargarConfig() {
   try {
     const config = await cargarConfig();
     const { initJuego } = await import('./modules/juego.js');
-    // Forzar mobile = false para que siempre use configuraciones estándar
     initJuego(config, false);
     console.log('✅ Juego iniciado correctamente');
   } catch (e) {
