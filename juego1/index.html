@@ -69,7 +69,7 @@
       position:fixed;
       inset:0;
       z-index:90;
-      background:rgba(6,4,10,0.3); /* mucho menos opaco, deja ver el video */
+      background:rgba(6,4,10,0.3);
       display:flex;
       align-items:center;
       justify-content:center;
@@ -191,7 +191,7 @@
       box-shadow:inset 0 2px 4px rgba(255,255,255,0.15), inset 0 -2px 4px rgba(0,0,0,0.3);
     }
     .brick.gone { opacity:0; transform:scale(0.3); pointer-events:none; }
-    /* ... (el resto de estilos de ladrillos se mantienen igual, omito por brevedad) ... */
+    /* ... (el resto de estilos de ladrillos se mantienen igual) ... */
     .brick-clay { background:#d9534f; background:linear-gradient(145deg,#e57373,#c62828); box-shadow:inset 0 2px 4px rgba(255,200,200,0.3), inset 0 -2px 4px rgba(0,0,0,0.4); }
     .brick-wood { background:#8b5a2b; background:linear-gradient(145deg,#a67c52,#6d4c2a); box-shadow:inset 0 2px 4px rgba(255,220,180,0.3), inset 0 -2px 4px rgba(0,0,0,0.4); }
     .brick-wood.cracked-1 { background:#7a4f24; background:linear-gradient(145deg,#8b6b3e,#5a3d1a); box-shadow:inset 0 2px 4px rgba(255,220,180,0.2), inset 0 -2px 4px rgba(0,0,0,0.5); position:relative; overflow:hidden; }
@@ -294,6 +294,7 @@
       border:2px solid #b8860b;
       box-shadow:inset 0 0 60px rgba(25,60,120,0.3);
       overflow:hidden;
+      text-align:center;
     }
     #menu-content { display:none; }
     #menu-gameover {
@@ -491,8 +492,8 @@
     <source src="../archivos/juegvideo.mp4" type="video/mp4">
   </video>
 
-  <!-- Música de fondo (se controla con el botón de mute) -->
-  <audio id="bg-music" src="../archivos/cancion.mp3" loop preload="auto"></audio>
+  <!-- Música de fondo (cancion1) -->
+  <audio id="bg-music" src="../archivos/cancion1.mp3" loop preload="auto"></audio>
 
   <div id="loading-veil" aria-hidden="true"></div>
   <script>
@@ -527,12 +528,12 @@
             <p id="gameover-theme-msg"></p>
             <div id="gameover-stats"></div>
             <div id="gameover-input-container">
-              <p style="color:#ffd700;">¡Puntuación dentro del Top 5!</p>
+              <p style="color:#ffd700;">¡Top 3!</p>
               <input type="text" id="player-name-input" maxlength="12" placeholder="Tu nombre" pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+">
               <button id="gameover-save" class="game-btn" style="font-size:0.7rem; margin-top:0.3rem;">Guardar</button>
               <p id="name-error" style="color:#ff6b6b; font-size:0.6rem; display:none;">Por favor, ingresa un nombre válido (solo letras).</p>
             </div>
-            <button id="gameover-menu-btn" class="game-btn" style="font-size:0.8rem; margin-top:0.5rem; display:none;">🏠 Salir</button>
+            <button id="gameover-menu-btn" class="game-btn" style="font-size:0.8rem; margin-top:0.5rem; display:none; margin-left:auto; margin-right:auto; text-align:center;">🔄 Nueva partida</button>
           </div>
         </div>
 
@@ -545,7 +546,7 @@
 
       <p class="game-help">
         Mueve con dedo, A/D o flechas · <span class="highlight">Pulsa pausa ⏸️</span> para menú<br>
-        <span style="font-size:0.7rem; opacity:0.7;">Power-ups: ↑ dureza, ↓ flaqueza, <> pala grande, -< pala mini, x3 multibola, 🌫️ niebla</span>
+        <span style="font-size:0.7rem; opacity:0.7;">Power-ups: ↑ dureza, ↓ flaqueza, <> pala grande, >< pala mini, x3 multibola, 🌫️ niebla</span>
       </p>
     </div>
   </div>
