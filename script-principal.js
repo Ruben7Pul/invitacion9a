@@ -86,6 +86,13 @@ function rellenarDatos(config) {
   if (firmaNombre) {
     firmaNombre.textContent = config.nombre;
   }
+
+  // Establecer enlace del libro de firmas (genérico por ahora)
+  const linkLibro = document.getElementById('link-libro-firmas');
+  if (linkLibro) {
+    linkLibro.href = '#';
+    linkLibro.setAttribute('data-link', 'https://forms.gle/ejemplo'); // Aquí pondrás tu link cuando lo tengas
+  }
 }
 
 // ===== GENERAR CALENDARIO =====
