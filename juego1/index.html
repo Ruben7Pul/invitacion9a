@@ -18,7 +18,7 @@
       font-family:'Cinzel',serif;
     }
 
-    /* Video de fondo (sin capa opaca que lo oscurezca) */
+    /* Video de fondo */
     #game-bg-video {
       position:fixed;
       inset:0;
@@ -169,68 +169,10 @@
       width:100%;
       height:100%;
       z-index:2;
-      background-image:url('../archivos/jueg1.png');
-      background-size:cover;
-      background-position:center;
-      background-repeat:no-repeat;
+      /* El fondo se dibuja en el canvas, pero dejamos el contenedor */
     }
 
-    /* LADRILLOS */
-    .brick {
-      position:absolute;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border-radius:4px;
-      transition:opacity 0.2s ease, transform 0.2s ease;
-      will-change:transform, opacity;
-      color:#fff;
-      font-weight:bold;
-      text-shadow:0 1px 2px rgba(0,0,0,0.5);
-      border:1px solid rgba(0,0,0,0.25);
-      box-shadow:inset 0 2px 4px rgba(255,255,255,0.15), inset 0 -2px 4px rgba(0,0,0,0.3);
-    }
-    .brick.gone { opacity:0; transform:scale(0.3); pointer-events:none; }
-    /* ... (el resto de estilos de ladrillos se mantienen igual) ... */
-    .brick-clay { background:#d9534f; background:linear-gradient(145deg,#e57373,#c62828); box-shadow:inset 0 2px 4px rgba(255,200,200,0.3), inset 0 -2px 4px rgba(0,0,0,0.4); }
-    .brick-wood { background:#8b5a2b; background:linear-gradient(145deg,#a67c52,#6d4c2a); box-shadow:inset 0 2px 4px rgba(255,220,180,0.3), inset 0 -2px 4px rgba(0,0,0,0.4); }
-    .brick-wood.cracked-1 { background:#7a4f24; background:linear-gradient(145deg,#8b6b3e,#5a3d1a); box-shadow:inset 0 2px 4px rgba(255,220,180,0.2), inset 0 -2px 4px rgba(0,0,0,0.5); position:relative; overflow:hidden; }
-    .brick-wood.cracked-1::after { content:''; position:absolute; top:10%; left:30%; width:2px; height:80%; background:rgba(0,0,0,0.4); transform:rotate(15deg); box-shadow:1px 0 2px rgba(0,0,0,0.2); }
-    .brick-wood.cracked-1::before { content:''; position:absolute; top:20%; left:60%; width:2px; height:60%; background:rgba(0,0,0,0.3); transform:rotate(-10deg); }
-    .brick-iron { background:#7a8a9a; background:linear-gradient(145deg,#9aa9b9,#5a6a7a); box-shadow:inset 0 2px 4px rgba(200,220,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.4); }
-    .brick-iron.cracked-1 { background:#6a7a8a; background:linear-gradient(145deg,#7a8a9a,#4a5a6a); box-shadow:inset 0 2px 4px rgba(200,220,255,0.2), inset 0 -2px 4px rgba(0,0,0,0.5); position:relative; overflow:hidden; }
-    .brick-iron.cracked-1::after { content:''; position:absolute; top:5%; left:20%; width:2px; height:90%; background:rgba(0,0,0,0.5); transform:rotate(20deg); box-shadow:1px 0 2px rgba(0,0,0,0.3); }
-    .brick-iron.cracked-1::before { content:''; position:absolute; top:15%; left:50%; width:2px; height:70%; background:rgba(0,0,0,0.4); transform:rotate(-15deg); }
-    .brick-iron.cracked-2 { background:#5a6a7a; background:linear-gradient(145deg,#5a6a7a,#3a4a5a); box-shadow:inset 0 2px 4px rgba(200,220,255,0.1), inset 0 -2px 4px rgba(0,0,0,0.6); position:relative; overflow:hidden; }
-    .brick-iron.cracked-2::after { content:''; position:absolute; top:0; left:10%; width:2px; height:100%; background:rgba(0,0,0,0.6); transform:rotate(30deg); box-shadow:1px 0 3px rgba(0,0,0,0.3); }
-    .brick-iron.cracked-2::before { content:''; position:absolute; top:10%; left:40%; width:2px; height:80%; background:rgba(0,0,0,0.5); transform:rotate(-20deg); box-shadow:1px 0 2px rgba(0,0,0,0.2); }
-    .brick-iron.cracked-2 .crack-extra { position:absolute; top:5%; left:70%; width:2px; height:60%; background:rgba(0,0,0,0.4); transform:rotate(5deg); }
-
-    #paddle, #ball {
-      position:absolute;
-      top:0;
-      left:0;
-      will-change:transform;
-      transform-origin:0 0;
-    }
-    #paddle {
-      height:12px;
-      border-radius:8px;
-      background:#111;
-      border:2px solid #d4af37;
-      box-shadow:0 0 25px rgba(212,175,55,0.3);
-      z-index:100;
-      pointer-events:none;
-      top:406px;
-    }
-    #ball {
-      width:12px;
-      height:12px;
-      border-radius:50%;
-      background:radial-gradient(circle at 35% 30%, #fff, #d68a96 60%, #a13545);
-      box-shadow:0 0 12px rgba(255,200,200,0.5);
-      z-index:11;
-    }
+    /* Los ladrillos, paleta y bola ya no son nodos DOM, se dibujan en canvas */
 
     #game-msg {
       position:absolute;
@@ -475,8 +417,6 @@
       #game-panel { max-width:98vw; }
       .game-btn { font-size:0.7rem; padding:0.3rem 0.8rem; }
       .pause-modal-card { padding:1rem 0.8rem; }
-      #paddle { height:10px; width:50px; top:406px; }
-      #ball { width:10px; height:10px; }
       .game-help { font-size:0.6rem; }
       #loading-tips { font-size:0.55rem; padding:0.2rem 0.6rem; }
     }
@@ -492,7 +432,7 @@
     <source src="../archivos/juegvideo.mp4" type="video/mp4">
   </video>
 
-  <!-- Música de fondo (cancion1) -->
+  <!-- Música de fondo -->
   <audio id="bg-music" src="../archivos/cancion1.mp3" loop preload="auto"></audio>
 
   <div id="loading-veil" aria-hidden="true"></div>
@@ -517,8 +457,7 @@
 
       <div id="game-stage">
         <div id="game-inner">
-          <div id="paddle"></div>
-          <div id="ball"></div>
+          <!-- La paleta y la bola ya no están aquí, se dibujan en el canvas -->
         </div>
 
         <div id="game-menu" style="display:none;">
