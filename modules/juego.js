@@ -134,6 +134,9 @@ export function initJuego(config, mobile = false) {
   // ========== ELEMENTOS ==========
   const overlay = document.getElementById('game-overlay');
   const stage = document.getElementById('game-stage');
+  const inner = document.getElementById('game-inner');
+  
+  // Crear el canvas y reemplazar el contenido de game-inner
   const canvas = document.createElement('canvas');
   canvas.width = STAGE_W;
   canvas.height = STAGE_H;
@@ -141,9 +144,16 @@ export function initJuego(config, mobile = false) {
   canvas.style.height = '100%';
   canvas.style.display = 'block';
   canvas.style.imageRendering = 'pixelated';
-  // Reemplazar el contenido de game-stage por el canvas
-  stage.innerHTML = '';
-  stage.appendChild(canvas);
+  
+  // Limpiar SOLO el contenedor interior (para no borrar el menú)
+  if (inner) {
+    inner.innerHTML = '';
+    inner.appendChild(canvas);
+  } else {
+    // Fallback por si acaso
+    stage.innerHTML = '';
+    stage.appendChild(canvas);
+  }
   const ctx = canvas.getContext('2d');
 
   const livesEl = document.getElementById('lives');
@@ -159,7 +169,7 @@ export function initJuego(config, mobile = false) {
   const gameoverMenuBtn = document.getElementById('gameover-menu-btn');
   const nameError = document.getElementById('name-error');
 
-  // Estilos para la interfaz (no cambian)
+  // Estilos para la interfaz
   livesEl.style.fontFamily = "'Press Start 2P', monospace";
   livesEl.style.fontSize = '1.2rem';
   livesEl.style.letterSpacing = '0.1em';
@@ -216,10 +226,10 @@ export function initJuego(config, mobile = false) {
   let gameOver = false;
   let pendingHighScore = false;
 
-  // Imágenes para grietas (se cargan una sola vez)
+  // Imágenes para grietas
   const crackImages = {};
   let imagesLoaded = 0;
-  const totalImages = 2; // griet1.png y griet2.png
+  const totalImages = 2;
 
   function loadCrackImages(callback) {
     const names = ['griet1.png', 'griet2.png'];
@@ -238,7 +248,7 @@ export function initJuego(config, mobile = false) {
     });
   }
 
-  // ========== MODAL DE PAUSA (sin cambios) ==========
+  // ========== MODAL DE PAUSA ==========
   let pauseModal = null;
   let pauseModalOverlay = null;
 
@@ -468,7 +478,6 @@ export function initJuego(config, mobile = false) {
         originalHits: type.hits,
         isGolden: false,
         goldenExpiresAt: 0,
-        // para grietas guardamos el nivel de daño (0 = sin grieta)
         crackLevel: 0
       };
       bricks.push(brick);
@@ -685,7 +694,7 @@ export function initJuego(config, mobile = false) {
     blueBallActive = false;
   }
 
-  // Mensajes flotantes con canvas (se dibujan en el canvas)
+  // Mensajes flotantes
   let floatingMessages = [];
 
   function showFloatingMessage(text, color = '#fff', duration = 1500) {
@@ -717,7 +726,8 @@ export function initJuego(config, mobile = false) {
       ctx2.shadowColor = 'rgba(0,0,0,0.8)';
       ctx2.shadowBlur = 15;
       ctx2.fillStyle = 'rgba(0,0,0,0.5)';
-      ctx2.roundRect ? ctx2.roundRect(x - w/2, y - h/2, w, h, 20) : null;
+      ctx2.beginPath();
+      ctx2.roundRect(x - w/2, y - h/2, w, h, 20);
       ctx2.fill();
       ctx2.shadowBlur = 0;
       ctx2.fillStyle = msg.color;
@@ -830,7 +840,7 @@ export function initJuego(config, mobile = false) {
     updateUI();
   }
 
-  // Variables para UI optimizada
+  // UI optimizada
   let lastLivesString = '';
   let lastScoreValue = -1;
 
@@ -998,11 +1008,7 @@ export function initJuego(config, mobile = false) {
   function draw() {
     ctx.clearRect(0, 0, STAGE_W, STAGE_H);
 
-    // Fondo (jueg1.png) – lo dibujamos con una imagen
-    const bg = new Image();
-    bg.src = '../archivos/jueg1.png';
-    // Usamos un patrón: dibujamos el fondo solo si la imagen está cargada, si no, un color sólido
-    // Para evitar recargar la imagen cada frame, la guardamos en una variable estática
+    // Fondo
     if (!draw.bgImage) {
       draw.bgImage = new Image();
       draw.bgImage.src = '../archivos/jueg1.png';
@@ -1014,28 +1020,22 @@ export function initJuego(config, mobile = false) {
       ctx.fillRect(0, 0, STAGE_W, STAGE_H);
     }
 
-    // Dibujar ladrillos
+    // Ladrillos
     for (const br of bricks) {
       if (!br.alive) continue;
       const x = br.x, y = br.y, w = br.w, h = br.h;
-      const type = br.type;
-      let color = type.color;
-      if (br.isGolden) {
-        color = '#ffd700';
-      }
-      // Degradado
+      let color = br.type.color;
+      if (br.isGolden) color = '#ffd700';
       const grad = ctx.createLinearGradient(x, y, x + w, y + h);
-      const base = color;
       const darker = adjustColor(color, -20);
-      grad.addColorStop(0, base);
+      grad.addColorStop(0, color);
       grad.addColorStop(0.5, darker);
-      grad.addColorStop(1, base);
+      grad.addColorStop(1, color);
       ctx.fillStyle = grad;
       ctx.shadowColor = 'rgba(0,0,0,0.3)';
       ctx.shadowBlur = 6;
       ctx.fillRect(x, y, w, h);
       ctx.shadowBlur = 0;
-
       if (br.isGolden) {
         ctx.strokeStyle = '#ffd700';
         ctx.lineWidth = 2;
@@ -1048,8 +1048,6 @@ export function initJuego(config, mobile = false) {
         ctx.lineWidth = 1;
         ctx.strokeRect(x, y, w, h);
       }
-
-      // Dibujar grietas si corresponde
       const crackSrc = getCrackImageSrc(br);
       if (crackSrc) {
         const img = crackImages[crackSrc.split('/').pop()];
@@ -1057,8 +1055,6 @@ export function initJuego(config, mobile = false) {
           ctx.drawImage(img, x + w*0.1, y + h*0.1, w*0.8, h*0.8);
         }
       }
-
-      // Etiqueta del valor (1,2,3)
       ctx.fillStyle = '#fff';
       ctx.font = 'bold 12px Arial';
       ctx.textAlign = 'center';
@@ -1069,17 +1065,14 @@ export function initJuego(config, mobile = false) {
       ctx.shadowBlur = 0;
     }
 
-    // Dibujar power-ups
+    // Power-ups
     for (const pu of powerups) {
       const x = pu.x, y = pu.y, size = pu.size;
       const isGreen = pu.color === 'verde';
       const isBlue = pu.isBlue;
       let color;
-      if (isBlue) {
-        color = '#ffd700';
-      } else {
-        color = isGreen ? 'rgba(46, 204, 113, 0.7)' : 'rgba(231, 76, 60, 0.7)';
-      }
+      if (isBlue) color = '#ffd700';
+      else color = isGreen ? 'rgba(46, 204, 113, 0.7)' : 'rgba(231, 76, 60, 0.7)';
       ctx.beginPath();
       ctx.arc(x, y, size/2, 0, Math.PI*2);
       ctx.fillStyle = color;
@@ -1090,7 +1083,6 @@ export function initJuego(config, mobile = false) {
       ctx.strokeStyle = isBlue ? '#fff8dc' : (isGreen ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,0,0.8)');
       ctx.lineWidth = 2;
       ctx.stroke();
-      // Símbolo
       ctx.fillStyle = '#fff';
       ctx.font = `${size * 0.5}px Arial`;
       ctx.textAlign = 'center';
@@ -1102,7 +1094,7 @@ export function initJuego(config, mobile = false) {
       ctx.shadowBlur = 0;
     }
 
-    // Dibujar bolas
+    // Bolas
     for (const b of balls) {
       const x = b.x, y = b.y;
       let grad;
@@ -1138,7 +1130,7 @@ export function initJuego(config, mobile = false) {
       ctx.stroke();
     }
 
-    // Dibujar paleta
+    // Paleta
     const px = paddle.x, py = STAGE_H - 14;
     const pw = paddleWidth, ph = PADDLE_H;
     ctx.shadowColor = 'rgba(212,175,55,0.3)';
@@ -1150,7 +1142,7 @@ export function initJuego(config, mobile = false) {
     ctx.lineWidth = 2;
     ctx.strokeRect(px, py, pw, ph);
 
-    // Niebla (máscara de niebla)
+    // Niebla
     const boundary = NIEBLA_HEIGHTS[nieblaLevel] || 0;
     if (boundary > 0) {
       const gradNiebla = ctx.createRadialGradient(
@@ -1162,7 +1154,6 @@ export function initJuego(config, mobile = false) {
       gradNiebla.addColorStop(1, 'rgba(180,190,210,0.6)');
       ctx.fillStyle = gradNiebla;
       ctx.fillRect(0, 0, STAGE_W, boundary);
-      // Efecto de plumas
       const feather = NIEBLA_FEATHER;
       const gradFeather = ctx.createLinearGradient(0, boundary - feather, 0, boundary);
       gradFeather.addColorStop(0, 'rgba(255,255,255,0)');
@@ -1171,10 +1162,8 @@ export function initJuego(config, mobile = false) {
       ctx.fillRect(0, boundary - feather, STAGE_W, feather);
     }
 
-    // Mensajes flotantes
     drawFloatingMessages(ctx);
 
-    // Si no está lanzada, mostrar "Toca para lanzar"
     if (!launched && running && !gameOver) {
       ctx.fillStyle = 'rgba(255,255,255,0.7)';
       ctx.font = '12px "Press Start 2P", monospace';
@@ -1210,9 +1199,7 @@ export function initJuego(config, mobile = false) {
     lastTime = timestamp;
 
     uiCounter++;
-    if (uiCounter % 2 === 0) {
-      updateUI();
-    }
+    if (uiCounter % 2 === 0) updateUI();
 
     let paddleMoved = false;
     if (keys.left) {
@@ -1299,8 +1286,6 @@ export function initJuego(config, mobile = false) {
             if (uiCounter % 2 === 0) updateUI();
             spawnPowerup(br);
             if (gamePoints <= REGEN_THRESHOLD) requestRegeneration();
-          } else {
-            // Solo actualizamos la grieta visual, pero no hay elemento DOM
           }
           break;
         }
@@ -1427,10 +1412,9 @@ export function initJuego(config, mobile = false) {
     scale = Math.min(availW / STAGE_W, availH / STAGE_H);
     stage.style.width = (STAGE_W * scale) + 'px';
     stage.style.height = (STAGE_H * scale) + 'px';
-    // El canvas ya se escala con CSS
   }
 
-  // ========== EVENTOS DEL JUGADOR ==========
+  // ========== EVENTOS ==========
   stage.addEventListener('mousedown', (e) => {
     if (e.target.closest('#game-menu')) return;
     if (!running || paused || gameOver) return;
@@ -1500,7 +1484,6 @@ export function initJuego(config, mobile = false) {
     }
   });
 
-  // ========== TECLA ESPACIO PARA PAUSA ==========
   function handleSpacePause(e) {
     if (e.key === ' ' || e.key === 'Space') {
       e.preventDefault();
@@ -1518,7 +1501,6 @@ export function initJuego(config, mobile = false) {
   }
   document.addEventListener('keydown', handleSpacePause);
 
-  // ========== VISIBILITY CHANGE ==========
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       if (running && !paused && !gameOver && launched) {
@@ -1527,7 +1509,6 @@ export function initJuego(config, mobile = false) {
     }
   });
 
-  // ========== GAME OVER: GUARDAR PUNTAJE ==========
   gameoverSave.addEventListener('click', (e) => {
     e.stopPropagation();
     const name = playerNameInput.value.trim();
@@ -1549,7 +1530,6 @@ export function initJuego(config, mobile = false) {
   }
 
   // ========== INICIO ==========
-  // Cargar imágenes de grietas antes de empezar
   loadCrackImages(() => {
     createPauseModal();
     startGame();
