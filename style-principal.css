@@ -307,6 +307,7 @@ body {
 }
 
 /* Retrasos de sección */
+#seccion-inicio.visible { transition-delay: 0.05s; }
 #seccion-familia.visible { transition-delay: 0.1s; }
 #seccion-calendario.visible { transition-delay: 0.2s; }
 #seccion-contador.visible { transition-delay: 0.3s; }
@@ -365,6 +366,16 @@ body {
 .seccion.visible .btn-mapa { transition-delay: 0.3s; opacity: 1; transform: translate3d(0, 0, 0); }
 .seccion.visible .libro-firmas-contenido { transition-delay: 0.2s; opacity: 1; transform: translate3d(0, 0, 0); }
 .seccion.visible .agradecimientos-contenido { transition-delay: 0.2s; opacity: 1; transform: translate3d(0, 0, 0); }
+
+/* Para la sección de inicio, elementos específicos */
+#seccion-inicio.visible #app-top,
+#seccion-inicio.visible #app-mid {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+#seccion-inicio.visible #app-top { transition-delay: 0.05s; }
+#seccion-inicio.visible #app-mid { transition-delay: 0.1s; }
 
 .seccion.visible .clock .unit:nth-child(1) { transition-delay: 0.2s; }
 .seccion.visible .clock .unit:nth-child(2) { transition-delay: 0.3s; }
@@ -456,6 +467,7 @@ html.sin-reja #app {
   flex-shrink: 0;
 }
 
+/* ===== CONTENIDO DE LA SECCIÓN DE INICIO ===== */
 #app-top {
   width: 100%;
   display: flex;
