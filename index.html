@@ -220,130 +220,126 @@
     </div>
   </div>
 
-  <!-- APP PRINCIPAL -->
+  <!-- APP PRINCIPAL (scrollable) -->
   <div id="app" role="main">
-    <div id="app-top">
-      <button type="button" id="back-link" class="top-btn" aria-label="Volver a la reja">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
-          <path d="M19 12H5M12 19l-7-7 7-7"/>
-        </svg>
-      </button>
-      <span class="eyebrow gold-text">Te invito a mis XV años</span>
-      <button id="music-toggle" aria-label="Silenciar o activar música" class="top-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-          <path d="M4 9 L4 15 L8 15 L13 20 L13 4 L8 9 Z"/>
-          <path d="M16.5 8.5 a6 6 0 0 1 0 7"/>
-          <path d="M19 6 a10 10 0 0 1 0 12"/>
-        </svg>
-      </button>
-    </div>
+    <div id="app-inner">
+      <div id="app-top">
+        <button type="button" id="back-link" class="top-btn" aria-label="Volver a la reja">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <span class="eyebrow gold-text">Te invito a mis XV años</span>
+        <button id="music-toggle" aria-label="Silenciar o activar música" class="top-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M4 9 L4 15 L8 15 L13 20 L13 4 L8 9 Z"/>
+            <path d="M16.5 8.5 a6 6 0 0 1 0 7"/>
+            <path d="M19 6 a10 10 0 0 1 0 12"/>
+          </svg>
+        </button>
+      </div>
 
-    <div id="app-mid">
-      <div id="oval-wrap">
-        <div class="oval-frame">
-          <div class="oval-mask">
-            <img src="archivos/centro.gif" alt="Imagen central" class="gif-central" loading="lazy">
+      <div id="app-mid">
+        <div id="oval-wrap">
+          <div class="oval-frame">
+            <div class="oval-mask">
+              <img src="archivos/centro.gif" alt="Imagen central" class="gif-central" loading="lazy">
+            </div>
           </div>
         </div>
+
+        <div class="name-wrap">
+          <h1 id="nombre-hero">X</h1>
+        </div>
+
+        <p class="frase-inline gold-text" id="frase-texto">Cargando...</p>
+        <p class="fecha-fija gold-text" id="fecha-fija">Cargando...</p>
+        <p class="hint gold-text" id="hint-juego">👆 Toca el nombre para jugar</p>
       </div>
 
-      <div class="name-wrap">
-        <h1 id="nombre-hero">X</h1>
-      </div>
+      <!-- SECCIÓN CONTADOR -->
+      <section id="seccion-contador" class="seccion">
+        <h2 class="gold-text">⏳ El reloj ⏳</h2>
+        <p class="seccion-subtitulo gold-text">Faltan para el gran baile</p>
+        <div class="clock calendar-style" id="clock">
+          <div class="unit"><span class="num" id="d">00</span><span class="lbl gold-text">Días</span></div>
+          <div class="unit"><span class="num" id="h">00</span><span class="lbl gold-text">Horas</span></div>
+          <div class="unit"><span class="num" id="m">00</span><span class="lbl gold-text">Min</span></div>
+          <div class="unit"><span class="num" id="s">00</span><span class="lbl gold-text">Seg</span></div>
+        </div>
+      </section>
 
-      <p class="frase-inline gold-text" id="frase-texto">Cargando...</p>
-      <p class="fecha-fija gold-text" id="fecha-fija">Cargando...</p>
-      <p class="hint gold-text" id="hint-juego">👆 Toca el nombre para jugar</p>
+      <!-- SECCIÓN LUGARES -->
+      <section id="seccion-lugares" class="seccion">
+        <h2 class="gold-text">🏰 Donde 🏰</h2>
+        <div class="detalle-card">
+          <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2 L12 8 M8 6 L16 6 M6 22 L18 22 L18 12 L6 12 Z M9 22 L9 16 L15 16 L15 22"/></svg>
+          <h3 class="gold-text">Misa</h3>
+          <div class="detalle-info">
+            <p class="hora gold-text" id="hora-misa">--</p>
+            <p class="lugar gold-text" id="lugar-misa">--</p>
+          </div>
+          <a class="btn-mapa gold-text" id="mapa-misa" href="#" target="_blank" rel="noopener">📍 Ver en el mapa</a>
+        </div>
+        <div class="divider-thin" aria-hidden="true"></div>
+        <div class="detalle-card">
+          <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 21 C12 21 4 14.5 4 9 C4 5 7.5 2 12 2 C16.5 2 20 5 20 9 C20 14.5 12 21 12 21 Z"/><circle cx="12" cy="9" r="2.4"/></svg>
+          <h3 class="gold-text">Recepción</h3>
+          <div class="detalle-info">
+            <p class="hora gold-text" id="hora-fiesta">--</p>
+            <p class="lugar gold-text" id="lugar-fiesta">--</p>
+          </div>
+          <a class="btn-mapa gold-text" id="mapa-fiesta" href="#" target="_blank" rel="noopener">📍 Ver en el mapa</a>
+        </div>
+      </section>
+
+      <!-- SECCIÓN FAMILIA -->
+      <section id="seccion-familia" class="seccion">
+        <h2 class="gold-text">👑 Mi familia 👑</h2>
+        <p class="seccion-subtitulo gold-text">La corte que me acompaña</p>
+        <div class="familia-grupo">
+          <div class="familia-titulo">
+            <span class="corona">⚜️</span>
+            <h3 class="gold-text">Mis papás</h3>
+            <span class="corona">⚜️</span>
+          </div>
+          <div class="familia-nombres">
+            <p class="gold-text"><span class="tratamiento">Sr.</span> <span id="padre1">--</span></p>
+            <p class="gold-text"><span class="tratamiento">Sra.</span> <span id="padre2">--</span></p>
+          </div>
+          <p class="familia-detalle gold-text">"Su amor me ha dado alas"</p>
+        </div>
+        <div class="divider-thin" aria-hidden="true"></div>
+        <div class="familia-grupo">
+          <div class="familia-titulo">
+            <span class="corona">🌹</span>
+            <h3 class="gold-text">Padrinos de honor</h3>
+            <span class="corona">🌹</span>
+          </div>
+          <div class="familia-nombres">
+            <p class="gold-text"><span class="tratamiento">Sr.</span> <span id="padrino1">--</span></p>
+            <p class="gold-text"><span class="tratamiento">Sra.</span> <span id="padrino2">--</span></p>
+          </div>
+          <p class="familia-detalle gold-text">"Su guía ilumina mi camino"</p>
+        </div>
+      </section>
     </div>
 
+    <!-- NAVEGACIÓN STICKY -->
     <nav id="nav" aria-label="Navegación principal">
-      <button class="nav-btn" data-modal="modal-contador" aria-label="Cuenta regresiva">
+      <button class="nav-btn" data-target="seccion-contador" aria-label="Cuenta regresiva">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="13" r="8"/><path d="M12 9 L12 13 L15 15 M9 2 L15 2"/></svg>
         <span>Cuenta</span>
       </button>
-      <button class="nav-btn" data-modal="modal-detalles" aria-label="Lugares y horarios">
+      <button class="nav-btn" data-target="seccion-lugares" aria-label="Lugares y horarios">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21 C12 21 4 14.5 4 9 C4 5 7.5 2 12 2 C16.5 2 20 5 20 9 C20 14.5 12 21 12 21 Z"/><circle cx="12" cy="9" r="2.4"/></svg>
         <span>Lugares</span>
       </button>
-      <button class="nav-btn" data-modal="modal-familia" aria-label="Familia">
+      <button class="nav-btn" data-target="seccion-familia" aria-label="Familia">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21 C6 16.8 3 13.4 3 9.6 C3 6.6 5.3 4.5 8 4.5 C9.7 4.5 11.1 5.3 12 6.6 C12.9 5.3 14.3 4.5 16 4.5 C18.7 4.5 21 6.6 21 9.6 C21 13.4 18 16.8 12 21 Z"/></svg>
         <span>Familia</span>
       </button>
     </nav>
-  </div>
-
-  <!-- MODALES -->
-  <div class="modal-overlay" id="modal-contador" role="dialog" aria-modal="true" aria-labelledby="modal-contador-title">
-    <div class="modal-card">
-      <button class="modal-close" data-close aria-label="Cerrar">&times;</button>
-      <h2 id="modal-contador-title" class="gold-text">⏳ El reloj ⏳</h2>
-      <p class="modal-subtitle gold-text">Faltan para el gran baile</p>
-      <div class="clock calendar-style" id="clock">
-        <div class="unit"><span class="num" id="d">00</span><span class="lbl gold-text">Días</span></div>
-        <div class="unit"><span class="num" id="h">00</span><span class="lbl gold-text">Horas</span></div>
-        <div class="unit"><span class="num" id="m">00</span><span class="lbl gold-text">Min</span></div>
-        <div class="unit"><span class="num" id="s">00</span><span class="lbl gold-text">Seg</span></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="modal-detalles" role="dialog" aria-modal="true" aria-labelledby="modal-detalles-title">
-    <div class="modal-card">
-      <button class="modal-close" data-close aria-label="Cerrar">&times;</button>
-      <h2 id="modal-detalles-title" class="gold-text">🏰 Donde 🏰</h2>
-      <div class="detalle-card">
-        <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2 L12 8 M8 6 L16 6 M6 22 L18 22 L18 12 L6 12 Z M9 22 L9 16 L15 16 L15 22"/></svg>
-        <h3 class="gold-text">Misa</h3>
-        <div class="detalle-info">
-          <p class="hora gold-text" id="hora-misa">--</p>
-          <p class="lugar gold-text" id="lugar-misa">--</p>
-        </div>
-        <a class="btn-mapa gold-text" id="mapa-misa" href="#" target="_blank" rel="noopener">📍 Ver en el mapa</a>
-      </div>
-      <div class="divider-thin" aria-hidden="true"></div>
-      <div class="detalle-card">
-        <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 21 C12 21 4 14.5 4 9 C4 5 7.5 2 12 2 C16.5 2 20 5 20 9 C20 14.5 12 21 12 21 Z"/><circle cx="12" cy="9" r="2.4"/></svg>
-        <h3 class="gold-text">Recepción</h3>
-        <div class="detalle-info">
-          <p class="hora gold-text" id="hora-fiesta">--</p>
-          <p class="lugar gold-text" id="lugar-fiesta">--</p>
-        </div>
-        <a class="btn-mapa gold-text" id="mapa-fiesta" href="#" target="_blank" rel="noopener">📍 Ver en el mapa</a>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="modal-familia" role="dialog" aria-modal="true" aria-labelledby="modal-familia-title">
-    <div class="modal-card">
-      <button class="modal-close" data-close aria-label="Cerrar">&times;</button>
-      <h2 id="modal-familia-title" class="gold-text">👑 Mi familia 👑</h2>
-      <p class="modal-subtitle gold-text">La corte que me acompaña</p>
-      <div class="familia-grupo">
-        <div class="familia-titulo">
-          <span class="corona">⚜️</span>
-          <h3 class="gold-text">Mis papás</h3>
-          <span class="corona">⚜️</span>
-        </div>
-        <div class="familia-nombres">
-          <p class="gold-text"><span class="tratamiento">Sr.</span> <span id="padre1">--</span></p>
-          <p class="gold-text"><span class="tratamiento">Sra.</span> <span id="padre2">--</span></p>
-        </div>
-        <p class="familia-detalle gold-text">"Su amor me ha dado alas"</p>
-      </div>
-      <div class="divider-thin" aria-hidden="true"></div>
-      <div class="familia-grupo">
-        <div class="familia-titulo">
-          <span class="corona">🌹</span>
-          <h3 class="gold-text">Padrinos de honor</h3>
-          <span class="corona">🌹</span>
-        </div>
-        <div class="familia-nombres">
-          <p class="gold-text"><span class="tratamiento">Sr.</span> <span id="padrino1">--</span></p>
-          <p class="gold-text"><span class="tratamiento">Sra.</span> <span id="padrino2">--</span></p>
-        </div>
-        <p class="familia-detalle gold-text">"Su guía ilumina mi camino"</p>
-      </div>
-    </div>
   </div>
 
   <script type="module" src="script-principal.js"></script>
