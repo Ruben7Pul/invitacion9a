@@ -1,4 +1,4 @@
-console.log('🚀 script-principal.js');
+console.log('🚀 script 123-principal.js');
 
 // ============================================================
 // Detección de hora del día y aplicación de colores
