@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS COMPLETOS (SIN NAV STICKY)
+   🌹 INVITACIÓN XV – ESTILOS REPARADOS Y CON ANIMACIONES
    ============================================================ */
 
 :root {
@@ -95,6 +95,7 @@ body {
   text-shadow: 0 2px 8px rgba(0,0,0,0.8);
 }
 
+/* ===== PORTAL ===== */
 #portal {
   position: fixed;
   inset: 0;
@@ -103,7 +104,7 @@ body {
   align-items: center;
   justify-content: center;
   background: radial-gradient(ellipse at 50% 35%, #0d1f4a 0%, #0a122a 75%);
-  transition: opacity 0.5s ease, visibility 0.5s ease;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
 }
 #portal.hide {
   opacity: 0;
@@ -257,6 +258,7 @@ body {
 }
 .portal-caption.show { opacity: 1; }
 
+/* ===== APP ===== */
 #app {
   position: fixed;
   inset: 0;
@@ -266,7 +268,7 @@ body {
   align-items: center;
   padding: 0.4rem 0.8rem 0;
   opacity: 0;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.6s ease;
   text-align: center;
   pointer-events: none;
   overflow-y: auto;
@@ -425,7 +427,7 @@ h1#nombre-hero {
   100% { background-position: 300% 50%; }
 }
 
-/* SECCIONES */
+/* ===== SECCIONES ===== */
 .seccion {
   width: 100%;
   background: rgba(10, 18, 34, 0.55);
@@ -435,8 +437,8 @@ h1#nombre-hero {
   margin: 0.4rem 0;
   box-shadow: 0 4px 30px rgba(0,0,0,0.3), inset 0 0 40px rgba(212,175,55,0.03);
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
 }
 .seccion.visible {
   opacity: 1;
@@ -456,25 +458,10 @@ h1#nombre-hero {
   border-bottom: 2px solid rgba(212, 175, 55, 0.2);
   position: relative;
 }
-.seccion h2::before {
-  content: '✦';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #d4af37;
-  font-size: 0.8rem;
-  opacity: 0.5;
-}
+/* Quitamos los símbolos decorativos que se superponían */
+.seccion h2::before,
 .seccion h2::after {
-  content: '✦';
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #d4af37;
-  font-size: 0.8rem;
-  opacity: 0.5;
+  display: none;
 }
 
 .seccion-subtitulo {
@@ -488,6 +475,7 @@ h1#nombre-hero {
   text-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
 }
 
+/* ===== CONTADOR ===== */
 .clock {
   display: flex;
   flex-wrap: nowrap;
@@ -533,6 +521,7 @@ h1#nombre-hero {
   opacity: 0.6;
 }
 
+/* ===== LUGARES ===== */
 .detalle-card {
   background: rgba(10, 18, 34, 0.55);
   border: 2px solid #b8860b;
@@ -542,26 +531,10 @@ h1#nombre-hero {
   box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.03), 0 4px 20px rgba(0,0,0,0.4);
   position: relative;
 }
-.detalle-card::before {
-  content: '❧';
-  position: absolute;
-  top: -10px;
-  right: 20px;
-  color: #d4af37;
-  font-size: 1rem;
-  background: #0d1424;
-  padding: 0 6px;
-}
+/* Eliminamos los pseudo-elementos decorativos que causaban solapamiento */
+.detalle-card::before,
 .detalle-card::after {
-  content: '❧';
-  position: absolute;
-  bottom: -10px;
-  left: 20px;
-  color: #d4af37;
-  font-size: 1rem;
-  background: #0d1424;
-  padding: 0 6px;
-  transform: scaleX(-1);
+  display: none;
 }
 .detalle-card .icono {
   width: 34px;
@@ -628,6 +601,7 @@ h1#nombre-hero {
   box-shadow: 0 0 25px rgba(212, 175, 55, 0.2);
 }
 
+/* ===== FAMILIA ===== */
 .familia-grupo {
   background: rgba(10, 18, 34, 0.5);
   border: 2px solid #b8860b;
@@ -637,26 +611,10 @@ h1#nombre-hero {
   box-shadow: inset 0 0 30px rgba(0,0,0,0.2);
   position: relative;
 }
-.familia-grupo::before {
-  content: '⚜';
-  position: absolute;
-  top: -10px;
-  left: 18px;
-  color: #d4af37;
-  font-size: 0.9rem;
-  background: #0d1424;
-  padding: 0 6px;
-}
+/* Eliminamos pseudo-elementos decorativos */
+.familia-grupo::before,
 .familia-grupo::after {
-  content: '⚜';
-  position: absolute;
-  bottom: -10px;
-  right: 18px;
-  color: #d4af37;
-  font-size: 0.9rem;
-  background: #0d1424;
-  padding: 0 6px;
-  transform: scaleX(-1);
+  display: none;
 }
 .familia-titulo {
   display: flex;
@@ -710,6 +668,7 @@ h1#nombre-hero {
   padding-top: 0.3rem;
 }
 
+/* ===== DIVISOR ===== */
 .divider-thin {
   height: 2px;
   background: linear-gradient(90deg, transparent, #d4af37, #fae3a0, #d4af37, transparent);
@@ -718,29 +677,15 @@ h1#nombre-hero {
   box-shadow: 0 0 18px rgba(212, 175, 55, 0.15);
   position: relative;
 }
-.divider-thin::before {
-  content: '⚜';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scaleX(-1);
-  background: #0d1424;
-  padding: 0 8px;
-  color: #d4af37;
-  font-size: 0.8rem;
-}
+/* Eliminamos los símbolos que se superponían en el divisor */
+.divider-thin::before,
 .divider-thin::after {
-  content: '⚜';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #0d1424;
-  padding: 0 8px;
-  color: #d4af37;
-  font-size: 0.8rem;
+  display: none;
 }
 
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
 @media (max-width: 400px) {
   #app { padding: 0.3rem 0.6rem 0; }
   #app-inner { gap: 0.3rem; padding: 0 0.2rem 2rem; }
@@ -753,8 +698,6 @@ h1#nombre-hero {
   .calendar-style .num { font-size: 1.4rem !important; }
   .calendar-style .unit { padding: 0.3rem 0.1rem; min-width: 35px; }
   .detalle-card, .familia-grupo { padding: 1rem 1.1rem 0.9rem; margin-bottom: 1.3rem; }
-  .detalle-card::before, .familia-grupo::before { top: -9px; }
-  .detalle-card::after, .familia-grupo::after { bottom: -9px; }
   .detalle-info { margin-bottom: 0.7rem; }
   .familia-nombres { margin: 0.5rem 0 0.35rem; }
   .divider-thin { margin: 1.1rem 0 1.3rem; }
@@ -778,7 +721,9 @@ h1#nombre-hero {
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: rgba(201, 162, 77, 0.3); border-radius: 3px; }
 
-/* TEMAS DINÁMICOS POR HORA DEL DÍA */
+/* ============================================================
+   TEMAS DINÁMICOS POR HORA DEL DÍA
+   ============================================================ */
 html[data-time-period="sunrise"] #bg::after { opacity: 0.25; }
 html[data-time-period="sunrise"] .top-btn { background: rgba(255, 200, 0, 0.15); border-color: #FFD700; color: #FFD700; }
 html[data-time-period="sunrise"] #music-toggle { color: #FF8C00; }
