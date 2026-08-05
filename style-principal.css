@@ -589,6 +589,18 @@ h1#nombre-hero {
   50% { opacity: 1; transform: scale(1.02); }
 }
 
+/* ===== ADVERTENCIAS EN LUGARES ===== */
+.advertencia {
+  font-size: clamp(0.75rem, 1.5vw, 0.9rem);
+  color: #ffcc66;
+  text-align: center;
+  margin-top: 0.5rem;
+  padding: 0.2rem 0.5rem;
+  border-top: 1px dashed rgba(212, 175, 55, 0.2);
+  font-style: italic;
+  opacity: 0.9;
+}
+
 /* ===== CALENDARIO ===== */
 .calendario-container {
   display: grid;
@@ -692,9 +704,6 @@ h1#nombre-hero {
 .calendario-evento .evento-info .desc {
   color: #fae3a0;
 }
-.calendario-evento .evento-info .hora {
-  display: none !important;
-}
 .calendario-evento .btn-agregar {
   font-family: var(--serif-display);
   font-size: clamp(0.55rem, 1.2vw, 0.7rem);
@@ -765,6 +774,17 @@ h1#nombre-hero {
 .itinerario-evento {
   text-align: right;
   color: #fae3a0;
+}
+.itinerario-nota {
+  font-family: var(--serif-body);
+  font-size: clamp(0.8rem, 1.5vw, 0.95rem);
+  color: #e0cfa0;
+  text-align: center;
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(212, 175, 55, 0.2);
+  font-style: italic;
+  opacity: 0.8;
 }
 
 /* ===== CONTADOR CON ANILLO CON RELIEVE ===== */
