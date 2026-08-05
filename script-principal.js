@@ -1,6 +1,6 @@
 console.log('🚀 script-principal.js');
 
-// Detección de hora del día (se mantiene para otros usos)
+// Detección de hora del día (se mantiene)
 function detectarPeriodoDia() {
   const ahora = new Date();
   const hora = ahora.getHours();
@@ -50,7 +50,6 @@ function rellenarDatos(config) {
     nombreEl.textContent = config.nombre;
     nombreEl.setAttribute('data-text', config.nombre);
   }
-  // Ya no se usa fecha-fija, eliminada
   const fraseEl = document.getElementById('frase-texto');
   if (fraseEl) fraseEl.textContent = config.frase;
   const horaMisa = document.getElementById('hora-misa');
@@ -83,17 +82,20 @@ function rellenarDatos(config) {
   if (hint) hint.style.display = 'none';
 }
 
-// Generar calendario de octubre 2026
+// Generar calendario de octubre 2026 con rosa en día 10
 function generarCalendario() {
   const container = document.getElementById('calendario-container');
   if (!container) return;
   const year = 2026;
   const month = 9; // octubre (0-index)
-  const fechaEspecial = 8; // día 8
+  const fechaEspecial = 10; // día 10
 
   const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
   const primerDia = new Date(year, month, 1).getDay(); // 0=domingo
   const diasEnMes = new Date(year, month + 1, 0).getDate();
+
+  // Limpiar el contenedor (por si se llama varias veces)
+  container.innerHTML = '';
 
   // Encabezados
   diasSemana.forEach(nombre => {
@@ -128,8 +130,6 @@ function generarCalendario() {
 document.addEventListener('DOMContentLoaded', async () => {
   const config = await cargarConfig();
   rellenarDatos(config);
-
-  // Generar calendario
   generarCalendario();
 
   try {
@@ -333,13 +333,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Observador para animaciones de secciones (con retrasos)
+  // Observador para animaciones de secciones (ya están en CSS)
+  // Solo aseguramos que las secciones se marquen como visibles
   if ('IntersectionObserver' in window) {
     const secciones = document.querySelectorAll('.seccion');
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('visible');
+        } else {
+          // Opcional: si queremos que se oculten al salir de vista (para que la animación se repita)
+          // entry.target.classList.remove('visible');
         }
       });
     }, { threshold: 0.15 });
