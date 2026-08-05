@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style-principal.css?v=20260810">
+  <link rel="stylesheet" href="style-principal.css?v=20260811">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌹</text></svg>">
 </head>
 <body>
@@ -27,7 +27,7 @@
   <div id="bg"></div>
 
   <!-- VIDEO APP PRINCIPAL (mar1) -->
-  <video id="video-app" autoplay loop muted playsinline>
+  <video id="video-app" autoplay loop muted playsinline preload="metadata">
     <source src="archivos/mar1.mp4" type="video/mp4">
     <source src="archivos/mar1.webm" type="video/webm">
   </video>
@@ -35,7 +35,7 @@
   <!-- PORTAL / REJA -->
   <div id="portal" role="dialog" aria-label="Puerta de entrada">
     <div class="portal-water-top" aria-hidden="true"></div>
-    <video id="video-portal" autoplay loop muted playsinline>
+    <video id="video-portal" autoplay loop muted playsinline preload="metadata">
       <source src="archivos/mar2.mp4" type="video/mp4">
       <source src="archivos/mar2.webm" type="video/webm">
     </video>
@@ -242,7 +242,7 @@
         <div id="oval-wrap">
           <div class="oval-frame">
             <div class="oval-mask">
-              <img src="archivos/centro.gif" alt="Imagen central" class="gif-central" loading="lazy">
+              <img src="archivos/centro.gif" alt="Imagen central" class="gif-central" loading="lazy" width="200" height="290">
             </div>
           </div>
         </div>
@@ -322,7 +322,7 @@
           </div>
           <div class="detalle-botones">
             <a class="btn-mapa gold-text" id="mapa-misa" href="#" target="_blank" rel="noopener">📍 Ver en el mapa</a>
-            <a class="btn-mapa gold-text" href="" target="_blank" rel="noopener">🚗 Cómo llegar</a>
+            <a class="btn-mapa gold-text" href="https://www.google.com/maps/dir/?api=1&destination=19.1830909,-99.4612969" target="_blank" rel="noopener">🚗 Cómo llegar</a>
           </div>
         </div>
         <div class="divider-thin" aria-hidden="true"></div>
@@ -335,7 +335,7 @@
           </div>
           <div class="detalle-botones">
             <a class="btn-mapa gold-text" id="mapa-fiesta" href="#" target="_blank" rel="noopener">📍 Ver en el mapa</a>
-            <a class="btn-mapa gold-text" href="" rel="noopener">🚗 Cómo llegar</a>
+            <a class="btn-mapa gold-text" href="https://www.google.com/maps/dir/?api=1&destination=19.1839892,-99.4559442" target="_blank" rel="noopener">🚗 Cómo llegar</a>
           </div>
         </div>
       </section>
