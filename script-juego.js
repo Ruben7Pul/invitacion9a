@@ -35,6 +35,12 @@ async function cargarConfig() {
 (async function init() {
   try {
     const config = await cargarConfig();
+    // Cargar música
+    const { initMusica, toggleMusic, isMusicMuted } = await import('./modules/musica.js');
+    initMusica(config);
+    window.toggleMusic = toggleMusic;
+    window.isMusicMuted = isMusicMuted;
+    // Cargar juego
     const { initJuego } = await import('./modules/juego.js');
     initJuego(config, false);
     console.log('✅ Juego iniciado correctamente');
