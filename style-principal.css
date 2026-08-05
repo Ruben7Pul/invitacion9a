@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS OPTIMIZADOS (CON CORRECCIONES VISUALES)
+   🌹 INVITACIÓN XV – ESTILOS OPTIMIZADOS (CON GPU ACCELERATION)
    ============================================================ */
 
 :root {
@@ -113,7 +113,7 @@ body {
 
 /* ===== ELIMINAR PUNTOS BLANCOS Y BLUR ===== */
 .portal-water-top {
-  display: none !important; /* Eliminamos el efecto de agua que causaba puntos blancos */
+  display: none !important;
 }
 
 /* ===== PORTAL ===== */
@@ -397,7 +397,7 @@ body {
   position: relative;
 }
 .seccion h2::after {
-  content: ''; /* Quitamos la rosa decorativa que se superponía */
+  content: '';
 }
 
 .seccion-subtitulo {
@@ -692,7 +692,6 @@ h1#nombre-hero {
 .calendario-evento .evento-info .desc {
   color: #fae3a0;
 }
-/* Quitamos la hora de los eventos */
 .calendario-evento .evento-info .hora {
   display: none !important;
 }
@@ -943,7 +942,7 @@ h1#nombre-hero {
   box-shadow: 0 0 25px rgba(212, 175, 55, 0.2);
 }
 
-/* ===== LIBRO DE FIRMAS ===== */
+/* ===== DEDICATORIAS ===== */
 .libro-firmas-contenido {
   text-align: center;
   padding: 0.5rem 0;
