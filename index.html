@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style-principal.css?v=20260809">
+  <link rel="stylesheet" href="style-principal.css?v=20260810">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌹</text></svg>">
 </head>
 <body>
@@ -252,7 +252,6 @@
         </div>
 
         <p class="frase-inline gold-text" id="frase-texto">Cargando...</p>
-        <!-- El hint se ha movido al final de la página -->
       </div>
 
       <!-- SECCIÓN 1: FAMILIA -->
@@ -300,26 +299,7 @@
 
       <!-- SECCIÓN 3: CONTADOR -->
       <section id="seccion-contador" class="seccion">
-        <h2 class="gold-text">
-          <svg class="reloj-arena" viewBox="0 0 100 100" width="40" height="40">
-            <defs>
-              <linearGradient id="arenaGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#f5e6b8"/>
-                <stop offset="100%" stop-color="#d4af37"/>
-              </linearGradient>
-            </defs>
-            <polygon points="50,5 15,95 85,95" fill="rgba(255,215,0,0.15)" stroke="#d4af37" stroke-width="2"/>
-            <polygon points="50,95 15,5 85,5" fill="rgba(255,215,0,0.05)" stroke="#d4af37" stroke-width="2"/>
-            <line x1="50" y1="45" x2="50" y2="55" stroke="#d4af37" stroke-width="2" stroke-dasharray="2 4" class="arena-caida"/>
-            <polygon points="30,80 70,80 50,95" fill="url(#arenaGrad)" class="arena-abajo">
-              <animate attributeName="points" values="30,80 70,80 50,95;25,75 75,75 50,95;30,80 70,80 50,95" dur="3s" repeatCount="indefinite"/>
-            </polygon>
-            <polygon points="30,20 70,20 50,5" fill="url(#arenaGrad)" class="arena-arriba">
-              <animate attributeName="points" values="30,20 70,20 50,5;35,25 65,25 50,5;30,20 70,20 50,5" dur="3s" repeatCount="indefinite"/>
-            </polygon>
-          </svg>
-          El reloj
-        </h2>
+        <h2 class="gold-text">⏳ El reloj</h2>
         <p class="seccion-subtitulo gold-text">Faltan para el gran baile</p>
         <div class="clock calendar-style" id="clock">
           <div class="unit"><span class="num" id="d">00</span><span class="lbl gold-text">Días</span></div>
