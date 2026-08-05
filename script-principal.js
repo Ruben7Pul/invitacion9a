@@ -1,4 +1,4 @@
-console.log('🚀 script-principal.js');
+console.log('🚀 script-principal 23.js');
 
 // Detección de hora del día
 function detectarPeriodoDia() {
