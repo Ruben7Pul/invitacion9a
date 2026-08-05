@@ -78,9 +78,6 @@ function rellenarDatos(config) {
   const ogDesc = document.querySelector('meta[property="og:description"]');
   if (ogDesc) ogDesc.content = `Te invitamos a celebrar los 15 años de ${config.nombre}. ¡No faltes!`;
 
-  const hint = document.getElementById('hint-juego');
-  if (hint) hint.style.display = 'none';
-
   // Rellenar firma en agradecimientos
   const firmaNombre = document.getElementById('firma-nombre');
   if (firmaNombre) {
@@ -102,6 +99,7 @@ function generarCalendario() {
   const year = 2026;
   const month = 9;
   const fechaEspecial = 10;
+  const diasEspeciales = [8, 10, 11];
 
   const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
   const primerDia = new Date(year, month, 1).getDay();
@@ -126,12 +124,92 @@ function generarCalendario() {
     const div = document.createElement('div');
     div.className = 'dia';
     if (d === fechaEspecial) {
-      div.classList.add('especial');
+      div.classList.add('especial', 'dia-10');
       div.innerHTML = `${d}<span class="rosa">🌹</span>`;
+    } else if (diasEspeciales.includes(d)) {
+      div.classList.add('especial');
+      div.textContent = d;
     } else {
       div.textContent = d;
     }
     container.appendChild(div);
+  }
+}
+
+// ===== MARCAR DÍA ACTUAL EN CALENDARIO =====
+function marcarDiaActualEnCalendario() {
+  const ahora = new Date();
+  const año = ahora.getFullYear();
+  const mes = ahora.getMonth(); // 0-11
+  const dia = ahora.getDate();
+
+  // Solo si es octubre de 2026
+  if (año === 2026 && mes === 9) {
+    const celdas = document.querySelectorAll('.calendario-container .dia');
+    celdas.forEach(celda => {
+      const num = parseInt(celda.textContent);
+      if (num === dia) {
+        celda.classList.add('hoy');
+      }
+    });
+  }
+}
+
+// ===== RESALTAR ACTIVIDAD ACTUAL EN ITINERARIO =====
+function iniciarBrilloItinerario() {
+  const ahora = new Date();
+  const año = ahora.getFullYear();
+  const mes = ahora.getMonth();
+  const dia = ahora.getDate();
+  const hora = ahora.getHours();
+  const minutos = ahora.getMinutes();
+  const totalMinutos = hora * 60 + minutos;
+
+  // Solo si es 10 o 11 de octubre de 2026
+  if (año === 2026 && mes === 9 && (dia === 10 || dia === 11)) {
+    const items = document.querySelectorAll('.itinerario-item');
+    let activo = null;
+    let anterior = null;
+
+    items.forEach(item => {
+      const horaMin = parseInt(item.dataset.hora);
+      if (totalMinutos >= horaMin) {
+        anterior = item;
+      }
+    });
+
+    if (anterior) {
+      activo = anterior;
+    }
+
+    if (activo) {
+      activo.classList.add('activo');
+    }
+
+    // Actualizar cada minuto
+    setInterval(() => {
+      const ahora2 = new Date();
+      const hora2 = ahora2.getHours();
+      const min2 = ahora2.getMinutes();
+      const totalMin2 = hora2 * 60 + min2;
+
+      // Solo si sigue siendo el mismo día
+      if (ahora2.getDate() === dia && ahora2.getMonth() === mes && ahora2.getFullYear() === año) {
+        const items2 = document.querySelectorAll('.itinerario-item');
+        let nuevoActivo = null;
+        items2.forEach(item => {
+          const horaMin2 = parseInt(item.dataset.hora);
+          if (totalMin2 >= horaMin2) {
+            nuevoActivo = item;
+          }
+        });
+
+        items2.forEach(item => item.classList.remove('activo'));
+        if (nuevoActivo) {
+          nuevoActivo.classList.add('activo');
+        }
+      }
+    }, 60000);
   }
 }
 
@@ -275,6 +353,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   generarCalendario();
   generarEventosCalendario(config);
   initContadorCircular(config);
+  marcarDiaActualEnCalendario();
+  iniciarBrilloItinerario();
 
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
