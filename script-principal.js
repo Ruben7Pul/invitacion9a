@@ -88,7 +88,7 @@ function rellenarDatos(config) {
   const linkLibro = document.getElementById('link-libro-firmas');
   if (linkLibro) {
     linkLibro.href = '#';
-    linkLibro.setAttribute('data-link', 'https://forms.gle/ejemplo'); // Aquí pondrás tu link cuando lo tengas
+    linkLibro.setAttribute('data-link', 'https://forms.gle/ejemplo');
   }
 }
 
@@ -140,10 +140,9 @@ function generarCalendario() {
 function marcarDiaActualEnCalendario() {
   const ahora = new Date();
   const año = ahora.getFullYear();
-  const mes = ahora.getMonth(); // 0-11
+  const mes = ahora.getMonth();
   const dia = ahora.getDate();
 
-  // Solo si es octubre de 2026
   if (año === 2026 && mes === 9) {
     const celdas = document.querySelectorAll('.calendario-container .dia');
     celdas.forEach(celda => {
@@ -165,7 +164,6 @@ function iniciarBrilloItinerario() {
   const minutos = ahora.getMinutes();
   const totalMinutos = hora * 60 + minutos;
 
-  // Solo si es 10 o 11 de octubre de 2026
   if (año === 2026 && mes === 9 && (dia === 10 || dia === 11)) {
     const items = document.querySelectorAll('.itinerario-item');
     let activo = null;
@@ -186,14 +184,12 @@ function iniciarBrilloItinerario() {
       activo.classList.add('activo');
     }
 
-    // Actualizar cada minuto
     setInterval(() => {
       const ahora2 = new Date();
       const hora2 = ahora2.getHours();
       const min2 = ahora2.getMinutes();
       const totalMin2 = hora2 * 60 + min2;
 
-      // Solo si sigue siendo el mismo día
       if (ahora2.getDate() === dia && ahora2.getMonth() === mes && ahora2.getFullYear() === año) {
         const items2 = document.querySelectorAll('.itinerario-item');
         let nuevoActivo = null;
@@ -305,7 +301,6 @@ function initContadorCircular(config) {
       }
     });
 
-    // Mensaje dinámico
     const msgEl = document.getElementById('contador-mensaje');
     if (msgEl) {
       let mensaje = '';
@@ -320,7 +315,6 @@ function initContadorCircular(config) {
     }
   }
 
-  // Crear los SVG dentro de cada unidad si no existen
   units.forEach((unit) => {
     let circleWrap = unit.querySelector('.circle-wrap');
     if (!circleWrap) {
@@ -545,7 +539,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Música
   const muteBtn = document.getElementById('music-toggle');
   if (muteBtn) {
     muteBtn.addEventListener('click', () => {
@@ -553,7 +546,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Observador para animaciones de secciones
+  // ===== OBSERVADOR PARA ANIMACIONES DE SECCIONES =====
   if ('IntersectionObserver' in window) {
     const secciones = document.querySelectorAll('.seccion');
     const observer = new IntersectionObserver((entries) => {
