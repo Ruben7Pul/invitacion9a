@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – COMPLETO CON SONIDOS
+// juego.js – COMPLETO CON NUEVOS ICONOS, SONIDOS Y MENSAJES
 // ============================================================
-console.log('📦 juego.js (con sonidos)');
+console.log('📦 juego.js (con sonidos y mejoras visuales)');
 
 import { 
   soundTap, 
@@ -14,11 +14,13 @@ import {
   soundIron,
   soundPowerupGood,
   soundPowerupBad,
-  soundExtraLife,
   soundBlueBall,
+  soundExtraLife,
   soundWallHit,
-  soundGameOver,
   soundPaddleHit,
+  soundGameOver,
+  soundFogAppear,
+  soundFogDisappear,
   ensureAudioCtx
 } from './sonidos.js';
 
@@ -102,10 +104,17 @@ const GREEN_PROB_TABLE = [
   37.500, 32.8125, 28.125, 23.4375, 18.750, 14.0625, 9.375, 4.6875, 0.000
 ];
 
-const GREEN_WEIGHTS = { MULTIBOLA: 15, PALA_GRANDE: 35, DUREZA: 50 };
-const RED_WEIGHTS   = { BOLA_NIEBLA: 10, PALA_MINI: 35, FLAQUESA: 55 };
+// ========== NUEVOS ICONOS ==========
+const POWERUP_SYMBOLS = {
+  MULTIBOLA: 'x3',
+  PALA_GRANDE: '<>',
+  DUREZA: '↑',
+  BOLA_NIEBLA: '🌫️',
+  PALA_MINI: '-<',
+  FLAQUESA: '↓'
+};
 
-// ========== PUNTUACIONES (localStorage) ==========
+// ========== PUNTUACIONES ==========
 function getHighScores() {
   try {
     const data = localStorage.getItem('highscores');
@@ -130,9 +139,7 @@ function isHighScore(score) {
 
 // ========== FUNCIÓN PRINCIPAL ==========
 export function initJuego(config, mobile = false) {
-  console.log('🎮 Iniciando juego (con sonidos)');
-  
-  // Inicializar contexto de audio
+  console.log('🎮 Iniciando juego (con sonidos y mejoras)');
   ensureAudioCtx();
 
   if (!document.querySelector('#pixel-font')) {
@@ -177,23 +184,18 @@ export function initJuego(config, mobile = false) {
   const modalRules = document.getElementById('modal-rules');
   const rulesClose = document.getElementById('rules-close');
 
-  // ========== SI NO HAY nombreEl (página del juego) ==========
   if (nombreEl) {
     nombreEl.addEventListener('click', () => {
       soundTap();
       openGame();
     });
   } else {
-    setTimeout(() => {
-      openGame();
-    }, 300);
+    setTimeout(openGame, 300);
   }
 
-  // Ocultar título del menú
   const menuTitle = menuEl?.querySelector('h2');
   if (menuTitle) menuTitle.style.display = 'none';
 
-  // Estilos de la paleta
   paddleEl.style.background = '#111';
   paddleEl.style.border = '2px solid #d4af37';
   paddleEl.style.boxShadow = '0 0 25px rgba(212,175,55,0.3)';
@@ -294,6 +296,7 @@ export function initJuego(config, mobile = false) {
   let paddleSizeMultiplier = 1;
   let paddleWidth = PADDLE_W_BASE;
   let nieblaLevel = 0;
+  let prevNieblaLevel = 0;
 
   let gameStartTime = 0;
   let pausedTime = 0;
@@ -335,6 +338,34 @@ export function initJuego(config, mobile = false) {
   function getThemeMessage(score) {
     const tier = Math.min(Math.floor(Math.max(score, 0) / 10000), THEME_MESSAGES.length - 1);
     return THEME_MESSAGES[tier];
+  }
+
+  // ========== MENSAJES FLOTANTES ==========
+  function showFloatingMessage(text, color = '#fff', duration = 1500) {
+    const el = document.createElement('div');
+    el.style.cssText = `
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1.1rem;
+      color: ${color};
+      text-shadow: 0 0 20px rgba(0,0,0,0.9), 0 0 10px ${color}40;
+      pointer-events: none;
+      z-index: 30;
+      animation: floatMsg 1.8s ease forwards;
+      text-align: center;
+      white-space: nowrap;
+      background: rgba(0,0,0,0.4);
+      padding: 0.3rem 1.2rem;
+      border-radius: 30px;
+      backdrop-filter: blur(2px);
+      border: 1px solid ${color}60;
+    `;
+    el.textContent = text;
+    inner.appendChild(el);
+    setTimeout(() => el.remove(), duration + 200);
   }
 
   // ========== FUNCIONES DEL MENÚ ==========
@@ -923,12 +954,7 @@ export function initJuego(config, mobile = false) {
     powerupsInAir++;
     lastPowerupTime = now;
 
-    // SONIDO: power-up aparece
-    if (color === 'verde') {
-      soundPowerupGood();
-    } else {
-      soundPowerupBad();
-    }
+    // NO sonido al aparecer (solo al recoger)
 
     const isGreen = color === 'verde';
     const size = isGreen ? 24 : 36;
@@ -951,16 +977,7 @@ export function initJuego(config, mobile = false) {
       transform: translate(-50%, -50%);
       text-shadow: 0 0 6px rgba(0,0,0,0.8);
     `;
-    let symbol = '';
-    switch (typeKey) {
-      case 'MULTIBOLA': symbol = '🌀'; break;
-      case 'PALA_GRANDE': symbol = '📏'; break;
-      case 'DUREZA': symbol = '⚡'; break;
-      case 'BOLA_NIEBLA': symbol = '🌫️'; break;
-      case 'PALA_MINI': symbol = '📐'; break;
-      case 'FLAQUESA': symbol = '⬇️'; break;
-    }
-    el.textContent = symbol;
+    el.textContent = POWERUP_SYMBOLS[typeKey] || '?';
     inner.appendChild(el);
 
     powerups.push({
@@ -973,7 +990,7 @@ export function initJuego(config, mobile = false) {
   function spawnBlueBall() {
     if (blueBallActive) return;
     blueBallActive = true;
-    const size = 20;
+    const size = 22;
     const speed = 60;
     const x = Math.random() * (STAGE_W - size) + size/2;
     const y = 10;
@@ -983,28 +1000,44 @@ export function initJuego(config, mobile = false) {
       position: absolute;
       width: ${size}px; height: ${size}px;
       border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, #88ddff, #0066ff 60%, #0000aa);
-      border: 3px solid #fff;
-      box-shadow: 0 0 30px rgba(0,150,255,0.9);
+      background: radial-gradient(circle at 35% 30%, #fff4a0, #ffd700 50%, #b8860b);
+      border: 3px solid #fff8dc;
+      box-shadow: 0 0 40px rgba(255,215,0,0.9), 0 0 80px rgba(255,215,0,0.4);
       display: flex; align-items: center; justify-content: center;
-      color: #fff; font-weight: bold; font-size: 14px;
+      color: #fff; font-weight: bold; font-size: 16px;
       pointer-events: none; z-index: 26;
       transform: translate(-50%, -50%);
-      text-shadow: 0 0 6px rgba(0,0,0,0.8);
+      text-shadow: 0 0 10px rgba(0,0,0,0.8);
+      animation: goldenGlow 1s ease-in-out infinite alternate;
     `;
     el.textContent = '★';
     inner.appendChild(el);
+
+    // Añadir keyframe si no existe
+    if (!document.querySelector('#golden-glow')) {
+      const style = document.createElement('style');
+      style.id = 'golden-glow';
+      style.textContent = `
+        @keyframes goldenGlow {
+          0% { box-shadow: 0 0 30px rgba(255,215,0,0.6), 0 0 60px rgba(255,215,0,0.3); transform: translate(-50%, -50%) scale(1); }
+          100% { box-shadow: 0 0 60px rgba(255,215,0,1), 0 0 120px rgba(255,215,0,0.5); transform: translate(-50%, -50%) scale(1.1); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
 
     powerups.push({
       x: x, y: y, vy: speed, size: size,
       type: 'BOLA_AZUL', el: el, alive: true, isBlue: true
     });
     powerupsInAir++;
-    soundBlueBall();
+    // No sonido al aparecer, solo al recoger
   }
 
   function applyBlueBall() {
     playerScore += 2000;
+    soundBlueBall();
+    showFloatingMessage('+2000', '#ffd700', 1500);
     nieblaLevel = 0;
     updateNiebla();
     if (paddleSizeMultiplier < 1) paddleSizeMultiplier = 1;
@@ -1043,29 +1076,6 @@ export function initJuego(config, mobile = false) {
     updateUI();
     blueBallActive = false;
     draw();
-    soundBlueBall();
-  }
-
-  function showFloatingMessage(text, color = '#fff') {
-    const el = document.createElement('div');
-    el.style.cssText = `
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-family: 'Press Start 2P', monospace;
-      font-size: 1.2rem;
-      color: ${color};
-      text-shadow: 0 0 20px rgba(0,0,0,0.8);
-      pointer-events: none;
-      z-index: 30;
-      animation: floatMsg 2s ease forwards;
-      text-align: center;
-      white-space: nowrap;
-    `;
-    el.textContent = text;
-    inner.appendChild(el);
-    setTimeout(() => el.remove(), 2500);
   }
 
   function launchBall() {
@@ -1100,6 +1110,7 @@ export function initJuego(config, mobile = false) {
     paddleWidth = PADDLE_W_BASE;
     ballDurability = 1;
     nieblaLevel = 0;
+    prevNieblaLevel = 0;
     updateNiebla();
     lives = 3;
     playerScore = 0;
@@ -1146,6 +1157,7 @@ export function initJuego(config, mobile = false) {
     paddleWidth = PADDLE_W_BASE;
     ballDurability = 1;
     nieblaLevel = 0;
+    prevNieblaLevel = 0;
     updateNiebla();
     lives = 3;
     playerScore = 0;
@@ -1219,6 +1231,7 @@ export function initJuego(config, mobile = false) {
     paddleWidth = PADDLE_W_BASE;
     ballDurability = 1;
     nieblaLevel = 0;
+    prevNieblaLevel = 0;
     updateNiebla();
     updateDurabilityVisual();
     updateUI();
@@ -1226,7 +1239,7 @@ export function initJuego(config, mobile = false) {
 
     if (lives <= 0) {
       soundGameOver();
-      setTimeout(() => endGame(), 300);
+      setTimeout(() => endGame(), 400);
       return;
     }
 
@@ -1303,6 +1316,7 @@ export function initJuego(config, mobile = false) {
       if (lives < MAX_LIVES) {
         lives++;
         soundExtraLife();
+        showFloatingMessage('+1 VIDA ❤️', '#ff4444', 1500);
         updateLivesUI();
       } else {
         if (!blueBallActive) pendingBlueBall = true;
@@ -1353,6 +1367,14 @@ export function initJuego(config, mobile = false) {
     const totalHeight = boundary > 0 ? boundary + NIEBLA_FEATHER : 0;
     nieblaEl.style.height = totalHeight + 'px';
     nieblaEl.style.opacity = boundary > 0 ? 1 : 0;
+    
+    // Sonidos de niebla
+    if (nieblaLevel > prevNieblaLevel) {
+      soundFogAppear();
+    } else if (nieblaLevel < prevNieblaLevel && nieblaLevel === 0) {
+      soundFogDisappear();
+    }
+    prevNieblaLevel = nieblaLevel;
   }
 
   function draw() {
@@ -1505,7 +1527,7 @@ export function initJuego(config, mobile = false) {
 
           const damage = ballDurability;
           br.hits -= damage;
-          soundBrick();
+          soundBrick(); // sonido de impacto general
           if (br.hits <= 0) {
             br.alive = false;
             br.el.classList.add('gone');
@@ -1517,7 +1539,7 @@ export function initJuego(config, mobile = false) {
             gamePoints -= br.value;
             ladrillosRotos++;
             
-            // Sonido según tipo de ladrillo
+            // Sonido de destrucción según material
             switch (br.type) {
               case BRICK_TYPES.CLAY: soundClay(); break;
               case BRICK_TYPES.WOOD: soundWood(); break;
@@ -1561,7 +1583,7 @@ export function initJuego(config, mobile = false) {
         if (pu.isBlue) {
           applyBlueBall();
         } else {
-          // Sonido al recoger power-up
+          // Sonido al recoger power-up (solo aquí)
           if (pu.color === 'verde') {
             soundPowerupGood();
           } else {
@@ -1748,5 +1770,5 @@ export function initJuego(config, mobile = false) {
 
   window.addEventListener('resize', () => { layoutStage(); draw(); });
   layoutStage();
-  console.log('✅ Juego inicializado con sonidos');
+  console.log('✅ Juego inicializado con sonidos y mejoras');
 }
