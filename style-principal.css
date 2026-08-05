@@ -1,32 +1,6 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS CORREGIDOS (GPU LIMITADA)
+   🌹 INVITACIÓN XV – ANIMACIONES LENTAS, CARGA RÁPIDA
    ============================================================ */
-
-/* ===== GPU ACCELERATION (CON LÍMITE) ===== */
-html, body {
-  transform: translate3d(0, 0, 0);
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
-  scrollbar-gutter: stable;
-}
-
-/* Solo acelerar lo que realmente se mueve */
-#video-app,
-#video-portal,
-.portal-inner,
-#app-inner,
-.gate-leaf {
-  will-change: transform;
-  transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-/* Las secciones NO necesitan will-change constante */
-.seccion {
-  /* will-change: opacity; -- eliminado para evitar sobrecarga */
-  contain: layout style paint;
-}
 
 /* ===== VARIABLES ===== */
 :root {
@@ -67,6 +41,8 @@ body {
   position: fixed;
   inset: 0;
   font-size: clamp(16px, 2.2vw, 20px);
+  /* Solo GPU para el body, sin excesos */
+  transform: translate3d(0, 0, 0);
 }
 
 /* ===== FONDO ===== */
@@ -81,7 +57,6 @@ body {
   background-position: 50% 35%;
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;
-  will-change: transform;
 }
 #bg::after {
   content: '';
@@ -108,6 +83,10 @@ body {
   object-fit: cover;
   pointer-events: none;
   aspect-ratio: 16 / 9;
+  /* GPU para videos siempre */
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
 }
 #video-app {
   z-index: 1;
@@ -166,6 +145,7 @@ video {
   justify-content: center;
   position: relative;
   z-index: 1;
+  /* GPU para el parallax */
   will-change: transform;
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
@@ -192,30 +172,30 @@ video {
 .gate-wrapper.active {
   pointer-events: auto;
 }
-/* Eliminamos el brillo blanco y el blur de la reja */
+/* Brillo de la reja más lento y suave */
 .gate-wrapper.active .gate-leaf svg {
-  animation: gateGlowPulse 2.6s ease-in-out infinite;
+  animation: gateGlowPulse 4s ease-in-out infinite;
 }
 @keyframes gateGlowPulse {
-  0%, 100% { filter: drop-shadow(0 0 15px rgba(201, 162, 77, 0.25)); }
-  50% { filter: drop-shadow(0 0 28px rgba(212, 175, 55, 0.4)); }
+  0%, 100% { filter: drop-shadow(0 0 15px rgba(201, 162, 77, 0.2)); }
+  50% { filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.35)); }
 }
 .gate-wrapper::after {
   content: '';
   position: absolute;
   inset: -12%;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 224, 150, 0.3) 0%, rgba(212, 175, 55, 0.12) 40%, transparent 72%);
+  background: radial-gradient(circle, rgba(255, 224, 150, 0.25) 0%, rgba(212, 175, 55, 0.08) 40%, transparent 72%);
   opacity: 0;
   pointer-events: none;
   z-index: 2;
 }
 .gate-wrapper.open::after {
-  animation: gateOpenFlash 1.1s ease-out forwards;
+  animation: gateOpenFlash 1.5s ease-out forwards;
 }
 @keyframes gateOpenFlash {
   0% { opacity: 0; transform: scale(0.85); }
-  30% { opacity: 0.6; transform: scale(1.05); }
+  30% { opacity: 0.5; transform: scale(1.05); }
   100% { opacity: 0; transform: scale(1.35); }
 }
 
@@ -238,11 +218,11 @@ video {
   inset: 0;
   pointer-events: none;
   z-index: -1;
-  background: radial-gradient(ellipse 150px 100px at 15% 20%, rgba(150, 200, 255, 0.12), transparent 60%),
-              radial-gradient(ellipse 180px 120px at 85% 35%, rgba(150, 200, 255, 0.10), transparent 65%),
-              radial-gradient(ellipse 140px 90px at 50% 60%, rgba(180, 220, 255, 0.08), transparent 70%),
-              radial-gradient(ellipse 160px 110px at 25% 75%, rgba(150, 200, 255, 0.10), transparent 68%),
-              radial-gradient(ellipse 170px 115px at 75% 80%, rgba(160, 210, 255, 0.09), transparent 70%);
+  background: radial-gradient(ellipse 150px 100px at 15% 20%, rgba(150, 200, 255, 0.10), transparent 60%),
+              radial-gradient(ellipse 180px 120px at 85% 35%, rgba(150, 200, 255, 0.08), transparent 65%),
+              radial-gradient(ellipse 140px 90px at 50% 60%, rgba(180, 220, 255, 0.06), transparent 70%),
+              radial-gradient(ellipse 160px 110px at 25% 75%, rgba(150, 200, 255, 0.08), transparent 68%),
+              radial-gradient(ellipse 170px 115px at 75% 80%, rgba(160, 210, 255, 0.07), transparent 70%);
   animation: underwaterGlow 8s ease-in-out infinite;
 }
 .portal-water-top::after {
@@ -261,6 +241,7 @@ video {
   height: 100%;
   backface-visibility: hidden;
   transition: none;
+  /* GPU para animación de apertura */
   will-change: transform;
   transform: translate3d(0, 0, 0);
 }
@@ -268,25 +249,25 @@ video {
   width: 100%;
   height: 100%;
   display: block;
-  filter: drop-shadow(0 0 15px rgba(201, 162, 77, 0.2));
+  filter: drop-shadow(0 0 15px rgba(201, 162, 77, 0.15));
   paint-order: stroke fill markers;
 }
 .gate-left { left: 0; transform-origin: left center; }
 .gate-right { right: 0; transform-origin: right center; }
 .gate-right svg { transform: scaleX(-1); }
 
-/* Ajuste de velocidad de la reja */
+/* Animación de la reja más lenta (1.5s) */
 .gate-wrapper.open .gate-left {
-  animation: closeLeft 0.8s ease reverse forwards;
+  animation: closeLeft 1.5s ease reverse forwards;
 }
 .gate-wrapper.open .gate-right {
-  animation: closeRight 0.8s ease reverse forwards;
+  animation: closeRight 1.5s ease reverse forwards;
 }
 #portal.closing .gate-left {
-  animation: closeLeft 0.8s ease forwards;
+  animation: closeLeft 1.5s ease forwards;
 }
 #portal.closing .gate-right {
-  animation: closeRight 0.8s ease forwards;
+  animation: closeRight 1.5s ease forwards;
 }
 @keyframes closeLeft {
   0% { transform: rotateY(-110deg) translateX(-20px); opacity: 0.2; }
@@ -334,7 +315,7 @@ video {
   pointer-events: auto;
 }
 
-/* ===== SECCIONES: ANIMACIÓN SUAVE DE APARICIÓN ===== */
+/* ===== SECCIONES ===== */
 .seccion {
   width: 100%;
   background: rgba(10, 18, 34, 0.55);
@@ -345,7 +326,7 @@ video {
   box-shadow: 0 4px 30px rgba(0,0,0,0.3), inset 0 0 40px rgba(212,175,55,0.03);
   opacity: 0;
   transform: translateY(30px);
-  transition: opacity 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: opacity 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   background-image: radial-gradient(circle at 10% 20%, rgba(212,175,55,0.05) 0%, transparent 20%),
                     radial-gradient(circle at 90% 80%, rgba(212,175,55,0.05) 0%, transparent 20%);
@@ -361,17 +342,16 @@ video {
   transform: translateY(30px) !important;
 }
 
-/* Retrasos de sección (más lentos para apreciarlos) */
-#seccion-familia.visible { transition-delay: 0.15s; }
-#seccion-calendario.visible { transition-delay: 0.30s; }
-#seccion-contador.visible { transition-delay: 0.45s; }
-#seccion-lugares.visible { transition-delay: 0.60s; }
-#seccion-itinerario.visible { transition-delay: 0.75s; }
-#seccion-libro-firmas.visible { transition-delay: 0.90s; }
-#seccion-agradecimientos.visible { transition-delay: 1.05s; }
+/* Retrasos de sección (más espaciados) */
+#seccion-familia.visible { transition-delay: 0.2s; }
+#seccion-calendario.visible { transition-delay: 0.4s; }
+#seccion-contador.visible { transition-delay: 0.6s; }
+#seccion-lugares.visible { transition-delay: 0.8s; }
+#seccion-itinerario.visible { transition-delay: 1.0s; }
+#seccion-libro-firmas.visible { transition-delay: 1.2s; }
+#seccion-agradecimientos.visible { transition-delay: 1.4s; }
 
 /* ===== ELEMENTOS INTERNOS: SIN ANIMACIÓN INDIVIDUAL ===== */
-/* Los elementos internos aparecen con la sección, sin retrasos ni transiciones */
 .seccion h2,
 .seccion .seccion-subtitulo,
 .seccion .detalle-card,
@@ -388,13 +368,13 @@ video {
   transition: none;
 }
 
-/* Excepción: el título tiene un efecto de brillo al aparecer (solo visual) */
+/* Excepción: brillo del título al aparecer (más lento) */
 .seccion.visible h2 {
-  animation: goldShine 1.2s ease forwards;
+  animation: goldShine 1.8s ease forwards;
 }
 @keyframes goldShine {
   0% { text-shadow: 0 0 0 rgba(212,175,55,0); }
-  50% { text-shadow: 0 0 30px rgba(212,175,55,0.8); }
+  40% { text-shadow: 0 0 30px rgba(212,175,55,0.8); }
   100% { text-shadow: 0 0 25px rgba(212,175,55,0.3); }
 }
 
@@ -472,10 +452,11 @@ html.sin-reja #app {
   justify-content: flex-start;
   width: 100%;
   max-width: 560px;
-  will-change: transform;
   gap: 0.8rem;
   padding: 0 0.5rem 2rem;
   flex-shrink: 0;
+  /* GPU solo para parallax */
+  will-change: transform;
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
 }
@@ -577,7 +558,7 @@ h1#nombre-hero {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: rainbowMove 6s linear infinite; /* más lento */
+  animation: rainbowMove 10s linear infinite; /* MUY LENTO */
   user-select: none;
 }
 @keyframes rainbowMove {
@@ -604,10 +585,10 @@ h1#nombre-hero {
   margin: 0.4rem 0 0.2rem;
   opacity: 0.9;
   text-align: center;
-  animation: pulseHint 2.5s ease-in-out infinite; /* más lento */
+  animation: pulseHint 4s ease-in-out infinite; /* MUY LENTO */
 }
 @keyframes pulseHint {
-  0%, 100% { opacity: 0.7; transform: scale(1); }
+  0%, 100% { opacity: 0.6; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.02); }
 }
 
@@ -645,7 +626,6 @@ h1#nombre-hero {
   flex-direction: column;
   font-size: clamp(0.9rem, 2vw, 1.1rem);
 }
-/* Días 8, 10, 11 especiales */
 .calendario-container .dia.especial {
   border-color: #d4af37;
   background: rgba(212, 175, 55, 0.15);
@@ -654,17 +634,17 @@ h1#nombre-hero {
   font-weight: 700;
   color: #ffd700;
 }
-/* Día 10: más brillo y rosa animada (más lenta) */
+/* Día 10: brillo rosa muy lento */
 .calendario-container .dia.dia-10 {
   border-color: #ff69b4;
   background: rgba(255, 105, 180, 0.2);
   box-shadow: 0 0 30px rgba(255, 105, 180, 0.5), inset 0 0 20px rgba(255, 105, 180, 0.2);
-  animation: brilloRosa 2s ease-in-out infinite alternate; /* más lento */
+  animation: brilloRosa 3.5s ease-in-out infinite alternate;
   transform: scale(1.08);
 }
 .calendario-container .dia.dia-10 .rosa {
   display: inline-block;
-  animation: flotarRosa 2.5s ease-in-out infinite; /* más lento */
+  animation: flotarRosa 4s ease-in-out infinite;
 }
 @keyframes brilloRosa {
   0% { box-shadow: 0 0 20px rgba(255, 105, 180, 0.4); }
@@ -679,7 +659,7 @@ h1#nombre-hero {
   border-color: #ff1493;
   background: rgba(255, 20, 147, 0.15);
   box-shadow: 0 0 40px rgba(255, 20, 147, 0.6);
-  animation: brilloDiaActual 2.2s ease-in-out infinite alternate; /* más lento */
+  animation: brilloDiaActual 3s ease-in-out infinite alternate;
 }
 @keyframes brilloDiaActual {
   0% { box-shadow: 0 0 20px rgba(255, 20, 147, 0.3); }
@@ -774,7 +754,7 @@ h1#nombre-hero {
   border-left: 4px solid #ff69b4;
   border-radius: 4px;
   box-shadow: 0 0 30px rgba(255, 105, 180, 0.2);
-  animation: brilloTransparente 2.5s ease-in-out infinite alternate; /* más lento */
+  animation: brilloTransparente 3.5s ease-in-out infinite alternate;
 }
 @keyframes brilloTransparente {
   0% { box-shadow: 0 0 15px rgba(255, 105, 180, 0.1); }
@@ -1157,10 +1137,7 @@ h1#nombre-hero {
     will-change: auto;
   }
   * {
-    animation-duration: 0.8s !important;
-  }
-  #glow, #glow2 {
-    filter: none;
+    animation-duration: 1s !important;
   }
   video {
     opacity: 0.95;
