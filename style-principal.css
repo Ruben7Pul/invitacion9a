@@ -282,7 +282,8 @@ body {
   opacity: 1;
   pointer-events: auto;
 }
-/* Cuando se oculta la app, también desvanecemos los elementos internos con retraso */
+
+/* ===== DESAPARICIÓN ESCALONADA DE ELEMENTOS ===== */
 #app:not(.show) .seccion,
 #app:not(.show) #app-mid,
 #app:not(.show) #app-top {
@@ -299,6 +300,41 @@ body {
 #app:not(.show) #app-top {
   transition-delay: 0s, 0s;
 }
+
+/* Retrasos específicos para elementos hijos al desaparecer */
+#app:not(.show) .seccion h2 {
+  transition-delay: 0s;
+}
+#app:not(.show) .seccion .seccion-subtitulo {
+  transition-delay: 0.05s;
+}
+#app:not(.show) .seccion .detalle-card,
+#app:not(.show) .seccion .familia-grupo {
+  transition-delay: 0.1s;
+}
+#app:not(.show) .seccion .clock .unit {
+  transition-delay: 0.15s;
+}
+#app:not(.show) .seccion .calendario-container {
+  transition-delay: 0.15s;
+}
+#app:not(.show) .seccion .calendario-nota {
+  transition-delay: 0.2s;
+}
+#app:not(.show) .seccion .btn-mapa {
+  transition-delay: 0.2s;
+}
+/* Retrasos individuales para las unidades del contador */
+#app:not(.show) .seccion .clock .unit:nth-child(1) { transition-delay: 0.1s; }
+#app:not(.show) .seccion .clock .unit:nth-child(2) { transition-delay: 0.15s; }
+#app:not(.show) .seccion .clock .unit:nth-child(3) { transition-delay: 0.2s; }
+#app:not(.show) .seccion .clock .unit:nth-child(4) { transition-delay: 0.25s; }
+/* Retrasos para las tarjetas de lugares */
+#app:not(.show) .seccion .detalle-card:nth-child(2) { transition-delay: 0.1s; }
+#app:not(.show) .seccion .detalle-card:nth-child(4) { transition-delay: 0.15s; }
+/* Retrasos para los grupos de familia */
+#app:not(.show) .seccion .familia-grupo:nth-child(2) { transition-delay: 0.1s; }
+#app:not(.show) .seccion .familia-grupo:nth-child(4) { transition-delay: 0.15s; }
 
 html.sin-reja #portal {
   display: none !important;
@@ -872,7 +908,7 @@ h1#nombre-hero {
    TEMAS DINÁMICOS – solo afectan al fondo y detalles menores (no bordes)
    ============================================================ */
 html[data-time-period="sunrise"] #bg::after { opacity: 0.25; }
-html[data-time-period="sunrise"] .seccion { border-color: var(--border-gold); } /* se mantiene dorado */
+html[data-time-period="sunrise"] .seccion { border-color: var(--border-gold); }
 html[data-time-period="sunrise"] .detalle-card, 
 html[data-time-period="sunrise"] .familia-grupo,
 html[data-time-period="sunrise"] .calendar-style .unit { border-color: var(--border-gold); }
