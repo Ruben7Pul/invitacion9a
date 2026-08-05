@@ -71,8 +71,8 @@ function buildPatternCells(predicate) {
 }
 
 // ========== LADRILLO ESPECIAL (dorado) ==========
-const SPECIAL_BRICK_CHANCE = 0.10; // probabilidad al generar ladrillos
-const SPECIAL_BRICK_DURATION_MS = 7000; // 7 segundos
+const SPECIAL_BRICK_CHANCE = 0.10;
+const SPECIAL_BRICK_DURATION_MS = 7000;
 const SPECIAL_BRICK_POINTS = 500;
 
 // ========== PROBABILIDAD POWER-UP VERDE ==========
@@ -313,7 +313,6 @@ export function initJuego(config, mobile = false) {
         lastDifficultyUpdate = performance.now();
       }
       // No resetear lastTime para evitar delta grande
-      // lastTime = 0;  // <-- ya no lo reseteamos
     }
   }
 
@@ -423,9 +422,7 @@ export function initJuego(config, mobile = false) {
     return cells;
   }
 
-  // Crear un ladrillo especial (dorado)
   function createSpecialBrick() {
-    // Si ya existe uno, no crear otro
     if (specialBrick) return;
     const free = getFreeCells();
     if (free.length === 0) return;
@@ -445,10 +442,10 @@ export function initJuego(config, mobile = false) {
       alive: true,
       hits: 1,
       maxHits: 1,
-      value: 0, // no aporta a gamePoints
+      value: 0,
       playerPoints: SPECIAL_BRICK_POINTS,
       cell: cell,
-      type: { color: '#ffd700' }, // color dorado
+      type: { color: '#ffd700' },
       isSpecial: true,
       expiresAt: performance.now() + SPECIAL_BRICK_DURATION_MS
     };
@@ -456,7 +453,6 @@ export function initJuego(config, mobile = false) {
     specialBrick = brick;
   }
 
-  // Revisar expiración del ladrillo especial
   function checkSpecialBrickExpiry() {
     if (!specialBrick) return;
     if (!specialBrick.alive) {
@@ -465,12 +461,10 @@ export function initJuego(config, mobile = false) {
     }
     if (performance.now() >= specialBrick.expiresAt) {
       specialBrick.alive = false;
-      // remover visualmente (solo se marca como muerto, se dibujará con opacidad 0)
       specialBrick = null;
     }
   }
 
-  // Generar ladrillos iniciales (incluyendo posibilidad de especial)
   function placeBricks(values, excludeCells = new Set(), preferredCells = null) {
     const cols = BRICK_COLS, rows = BRICK_ROWS;
     const brickW = 38, brickH = 16, gap = 3;
@@ -515,8 +509,6 @@ export function initJuego(config, mobile = false) {
       bricks.push(brick);
       gamePoints += type.value;
     }
-    // Después de colocar, intentar crear un ladrillo especial (si no existe)
-    // Solo si no hay ya uno
     if (!specialBrick && Math.random() < SPECIAL_BRICK_CHANCE) {
       createSpecialBrick();
     }
@@ -535,14 +527,12 @@ export function initJuego(config, mobile = false) {
     if (balls.length > 1) {
       const exclude = getCellsWithBalls();
       const values = generateBrickValues();
-      const before = bricks.length;
       placeBricks(values, exclude, preferredCells);
       pendingRegeneration = false;
       return;
     }
     if (launched && balls.some(b => b.y < BALL_LOW_Y)) {
       const values = generateBrickValues();
-      const before = bricks.length;
       placeBricks(values, undefined, preferredCells);
       pendingRegeneration = false;
     }
@@ -611,7 +601,7 @@ export function initJuego(config, mobile = false) {
   }
 
   function spawnPowerup(brick) {
-    // Eliminado el límite de 36 ladrillos rotos
+    // Sin límite de 36 ladrillos rotos
     if (powerupsInAir >= 2) return;
 
     const now = performance.now();
@@ -708,16 +698,13 @@ export function initJuego(config, mobile = false) {
     blueBallActive = false;
   }
 
-  // Lógica de cambio de tamaño de pala
   function applyPaddleSize(type) {
     if (type === 'grande') {
       if (paddleSizeMultiplier === 1) paddleSizeMultiplier = 1.35;
       else if (paddleSizeMultiplier === 0.65) paddleSizeMultiplier = 1;
-      // si ya es 1.35, se queda
     } else if (type === 'mini') {
       if (paddleSizeMultiplier === 1) paddleSizeMultiplier = 0.65;
       else if (paddleSizeMultiplier === 1.35) paddleSizeMultiplier = 1;
-      // si ya es 0.65, se queda
     }
     paddleWidth = PADDLE_W_BASE * paddleSizeMultiplier;
   }
@@ -916,7 +903,7 @@ export function initJuego(config, mobile = false) {
     ballDurability = 1;
     nieblaLevel = 0;
     prevNieblaLevel = 0;
-    specialBrick = null; // al perder vida, se elimina el ladrillo especial
+    specialBrick = null;
     updateUI();
 
     if (lives <= 0) {
@@ -1068,7 +1055,7 @@ export function initJuego(config, mobile = false) {
       ctx.fillRect(0, 0, STAGE_W, STAGE_H);
     }
 
-    // 2. Niebla (opaca) - se dibuja ANTES de los objetos para que quede debajo
+    // 2. Niebla (opaca)
     const boundary = NIEBLA_HEIGHTS[nieblaLevel] || 0;
     if (boundary > 0) {
       const gradNiebla = ctx.createLinearGradient(0, 0, 0, boundary);
@@ -1077,7 +1064,6 @@ export function initJuego(config, mobile = false) {
       gradNiebla.addColorStop(1, '#c8d4e8');
       ctx.fillStyle = gradNiebla;
       ctx.fillRect(0, 0, STAGE_W, boundary);
-      // Pluma inferior para difuminar
       const feather = NIEBLA_FEATHER;
       const gradFeather = ctx.createLinearGradient(0, boundary - feather, 0, boundary);
       gradFeather.addColorStop(0, 'rgba(255,255,255,0)');
@@ -1086,7 +1072,7 @@ export function initJuego(config, mobile = false) {
       ctx.fillRect(0, boundary - feather, STAGE_W, feather);
     }
 
-    // 3. Ladrillos (incluyendo el especial)
+    // 3. Ladrillos
     for (const br of bricks) {
       if (!br.alive) continue;
       const x = br.x, y = br.y, w = br.w, h = br.h;
@@ -1106,7 +1092,6 @@ export function initJuego(config, mobile = false) {
       ctx.fillStyle = grad;
       ctx.fill();
       ctx.shadowBlur = 0;
-      // Borde y brillo
       if (isSpecial) {
         ctx.strokeStyle = '#ffd700';
         ctx.lineWidth = 2;
@@ -1116,7 +1101,6 @@ export function initJuego(config, mobile = false) {
         ctx.roundRect(x, y, w, h, radius);
         ctx.stroke();
         ctx.shadowBlur = 0;
-        // Brillo interior (reflejo)
         const gradBright = ctx.createLinearGradient(x, y, x, y + h/2);
         gradBright.addColorStop(0, 'rgba(255,255,200,0.6)');
         gradBright.addColorStop(1, 'rgba(255,255,200,0)');
@@ -1130,7 +1114,6 @@ export function initJuego(config, mobile = false) {
         ctx.beginPath();
         ctx.roundRect(x, y, w, h, radius);
         ctx.stroke();
-        // Brillo sutil para todos los ladrillos
         const gradBright = ctx.createLinearGradient(x, y, x, y + h/3);
         gradBright.addColorStop(0, 'rgba(255,255,255,0.15)');
         gradBright.addColorStop(1, 'rgba(255,255,255,0)');
@@ -1139,7 +1122,6 @@ export function initJuego(config, mobile = false) {
         ctx.roundRect(x+2, y+2, w-4, h/3, 2);
         ctx.fill();
       }
-      // Grietas (solo si no es especial o si tiene daño)
       if (!isSpecial) {
         const crackSrc = getCrackImageSrc(br);
         if (crackSrc) {
@@ -1151,7 +1133,7 @@ export function initJuego(config, mobile = false) {
       }
     }
 
-    // 4. Power-ups (incluyendo la estrella azul)
+    // 4. Power-ups
     for (const pu of powerups) {
       const x = pu.x, y = pu.y, size = pu.size;
       const isGreen = pu.color === 'verde';
@@ -1185,13 +1167,13 @@ export function initJuego(config, mobile = false) {
       const x = b.x, y = b.y;
       let grad;
       switch (ballDurability) {
-        case 1: // gris metálico
+        case 1:
           grad = ctx.createRadialGradient(x-2, y-2, 2, x, y, BALL_R);
           grad.addColorStop(0, '#e0e0e0');
           grad.addColorStop(0.5, '#909090');
           grad.addColorStop(1, '#404040');
           break;
-        case 2: // rojo fuego
+        case 2:
           grad = ctx.createRadialGradient(x-3, y-3, 2, x, y, BALL_R+2);
           grad.addColorStop(0, '#fff5b0');
           grad.addColorStop(0.3, '#ff8800');
@@ -1200,7 +1182,7 @@ export function initJuego(config, mobile = false) {
           ctx.shadowColor = '#ff4400';
           ctx.shadowBlur = 20;
           break;
-        case 3: // azul plasma
+        case 3:
           grad = ctx.createRadialGradient(x-3, y-3, 2, x, y, BALL_R+2);
           grad.addColorStop(0, '#c8ffff');
           grad.addColorStop(0.3, '#00aaff');
@@ -1240,10 +1222,8 @@ export function initJuego(config, mobile = false) {
     ctx.roundRect(px, py, pw, ph, radiusP);
     ctx.stroke();
 
-    // 7. Mensajes flotantes (encima de todo)
+    // 7. Mensajes flotantes
     drawFloatingMessages(ctx);
-
-    // Eliminado el mensaje "Toca / Click"
   }
 
   // ========== BUCLE PRINCIPAL ==========
@@ -1414,15 +1394,10 @@ export function initJuego(config, mobile = false) {
       }
     }
 
-    // Comprobar expiración del ladrillo especial
     checkSpecialBrickExpiry();
-
-    // Regeneración
     if (pendingRegeneration) checkAndRegenerate();
 
-    // Intentar crear un nuevo ladrillo especial si no hay y ha pasado un tiempo
-    // (se crea al regenerar o aleatoriamente)
-    if (!specialBrick && Math.random() < 0.002) { // 0.2% por frame ~ cada 5 segundos
+    if (!specialBrick && Math.random() < 0.002) {
       createSpecialBrick();
     }
 
@@ -1503,7 +1478,7 @@ export function initJuego(config, mobile = false) {
   // ========== EVENTOS ==========
   stage.addEventListener('mousedown', (e) => {
     if (e.target.closest('#game-menu')) return;
-    if (e.target.closest('.pause-modal-overlay')) return; // evitar clic en modal
+    if (e.target.closest('.pause-modal-overlay')) return;
     if (!running || paused || gameOver) return;
     const rect = stage.getBoundingClientRect();
     const localX = (e.clientX - rect.left) / scale;
