@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style-principal.css?v=20260812">
+  <link rel="stylesheet" href="style-principal.css?v=20260813">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌹</text></svg>">
 </head>
 <body>
@@ -221,37 +221,37 @@
   <!-- APP PRINCIPAL (scrollable) -->
   <div id="app" role="main">
     <div id="app-inner">
-      <div id="app-top">
-        <button type="button" id="back-link" class="top-btn gold-btn" aria-label="Volver a la reja">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
-          </svg>
-        </button>
-        <span class="eyebrow gold-text">Te invito a mis XV años</span>
-        <button id="music-toggle" aria-label="Silenciar o activar música" class="top-btn gold-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-            <path d="M4 9 L4 15 L8 15 L13 20 L13 4 L8 9 Z"/>
-            <path d="M16.5 8.5 a6 6 0 0 1 0 7"/>
-            <path d="M19 6 a10 10 0 0 1 0 12"/>
-          </svg>
-        </button>
-      </div>
-
-      <div id="app-mid">
-        <div id="oval-wrap">
-          <div class="oval-frame">
-            <div class="oval-mask">
-              <img src="archivos/centro.gif" alt="Imagen central" class="gif-central" loading="lazy">
+      <!-- SECCIÓN 0: INICIO (nueva) -->
+      <section id="seccion-inicio" class="seccion">
+        <div id="app-top">
+          <button type="button" id="back-link" class="top-btn gold-btn" aria-label="Volver a la reja">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <span class="eyebrow gold-text">Te invito a mis XV años</span>
+          <button id="music-toggle" aria-label="Silenciar o activar música" class="top-btn gold-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path d="M4 9 L4 15 L8 15 L13 20 L13 4 L8 9 Z"/>
+              <path d="M16.5 8.5 a6 6 0 0 1 0 7"/>
+              <path d="M19 6 a10 10 0 0 1 0 12"/>
+            </svg>
+          </button>
+        </div>
+        <div id="app-mid">
+          <div id="oval-wrap">
+            <div class="oval-frame">
+              <div class="oval-mask">
+                <img src="archivos/centro.gif" alt="Imagen central" class="gif-central" loading="lazy">
+              </div>
             </div>
           </div>
+          <div class="name-wrap">
+            <h1 id="nombre-hero">X</h1>
+          </div>
+          <p class="frase-inline gold-text" id="frase-texto">Cargando...</p>
         </div>
-
-        <div class="name-wrap">
-          <h1 id="nombre-hero">X</h1>
-        </div>
-
-        <p class="frase-inline gold-text" id="frase-texto">Cargando...</p>
-      </div>
+      </section>
 
       <!-- SECCIÓN 1: FAMILIA -->
       <section id="seccion-familia" class="seccion">
