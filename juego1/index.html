@@ -46,12 +46,12 @@
       content:'';
       position:absolute;
       inset:0;
-      background: radial-gradient(circle at 50% 35%, rgba(255,235,180,0.28), transparent 60%);
-      animation: fallbackGlow 6s ease-in-out infinite;
+      background: radial-gradient(circle at 50% 35%, rgba(255,235,180,0.35), transparent 65%);
+      animation: fallbackGlow 4.5s ease-in-out infinite;
     }
     @keyframes fallbackGlow {
-      0%, 100% { opacity:0.35; }
-      50% { opacity:0.75; }
+      0%, 100% { opacity:0.45; transform: scale(0.95); }
+      50% { opacity:0.85; transform: scale(1.05); }
     }
     body.bg-lag #game-bg-video { opacity:0; }
     body.bg-lag #game-bg-fallback { opacity:1; }
@@ -504,6 +504,7 @@
       #ball { width:10px; height:10px; }
       .game-help { font-size:0.6rem; }
       #loading-tips { font-size:0.55rem; padding:0.2rem 0.6rem; }
+      #game-score { font-weight:900; filter: brightness(1.3); text-shadow: 0 0 8px rgba(255,215,0,0.6) !important; }
     }
     @media (min-width:768px) {
       #game-stage { max-width:450px; }
