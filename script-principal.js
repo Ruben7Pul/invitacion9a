@@ -1,4 +1,4 @@
-console.log('🚀 script-principal.js');
+console.log('🚀 script-principal gg.js');
 
 // Detección de hora del día
 function detectarPeriodoDia() {
@@ -346,6 +346,8 @@ var collageIndiceActual = 0;
 var collageZIndex = 1;
 var collageElementos = [];
 var collageIndices = [];
+var collageHistorialImagenes = [];  // Últimas 5 imágenes mostradas
+var collageUltimaRotacion = 0;  // Rotación anterior (positiva o negativa)
 
 function iniciarCollage() {
   var container = document.getElementById('collage-container');
@@ -400,6 +402,51 @@ function shuffleArray(arr) {
   return copied;
 }
 
+function elegirImagenAleatoria() {
+  // Obtener imágenes disponibles (no en historial reciente)
+  var disponibles = [];
+  for (var i = 0; i < imagenesCollage.length; i++) {
+    if (collageHistorialImagenes.indexOf(i) === -1) {
+      disponibles.push(i);
+    }
+  }
+  
+  // Si no hay disponibles, limpiar historial
+  if (disponibles.length === 0) {
+    collageHistorialImagenes = [];
+    disponibles = Array.from({length: imagenesCollage.length}, (_, i) => i);
+  }
+  
+  // Elegir aleatoriamente de disponibles
+  var indiceElegido = disponibles[Math.floor(Math.random() * disponibles.length)];
+  
+  // Agregar al historial (máx 5)
+  collageHistorialImagenes.push(indiceElegido);
+  if (collageHistorialImagenes.length > 5) {
+    collageHistorialImagenes.shift();
+  }
+  
+  return indiceElegido;
+}
+
+function elegirRotacionContraria() {
+  // Si última rotación fue positiva, elegir negativa
+  // Si última rotación fue negativa, elegir positiva
+  var esPositivaAnterior = collageUltimaRotacion > 0;
+  var nuevaRotacion;
+  
+  if (esPositivaAnterior) {
+    // Rotación negativa: -25 a 0
+    nuevaRotacion = -25 + Math.random() * 25;
+  } else {
+    // Rotación positiva: 0 a 25
+    nuevaRotacion = Math.random() * 25;
+  }
+  
+  collageUltimaRotacion = nuevaRotacion;
+  return nuevaRotacion;
+}
+
 function renderCollage(container) {
   container.innerHTML = '';
   var total = imagenesCollage.length;
@@ -408,24 +455,18 @@ function renderCollage(container) {
   collageIndiceActual = 0;
   collageZIndex = 1;
   collageElementos = [];
-  collageIndices = shuffleArray(Array.from({length: total}, (_, i) => i));
-  var indiceActualEnShuffled = 0;
+  collageHistorialImagenes = [];
+  collageUltimaRotacion = 0;
 
   function mostrarSiguienteImagen() {
-    var indiceEnImagen = collageIndices[indiceActualEnShuffled % collageIndices.length];
+    var indiceEnImagen = elegirImagenAleatoria();
     var src = imagenesCollage[indiceEnImagen];
-    indiceActualEnShuffled++;
-    
-    if (indiceActualEnShuffled >= collageIndices.length) {
-      collageIndices = shuffleArray(Array.from({length: total}, (_, i) => i));
-      indiceActualEnShuffled = 0;
-    }
     
     var w = 75;
     var h = 75;
     var x = Math.random() * (100 - w);
     var y = Math.random() * (100 - h);
-    var rot = (Math.random() - 0.5) * 50;
+    var rot = elegirRotacionContraria();
     var scaleX = Math.random() > 0.5 ? 1 : -1;
     
     var div = document.createElement('div');
