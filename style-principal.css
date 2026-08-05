@@ -183,42 +183,40 @@ body {
   100% { opacity: 0; transform: scale(1.35); }
 }
 
-/* Franja de "agua" mágica en la parte superior del portal */
-.portal-water-top {
+/* Sensación de estar debajo del agua en toda la escena del portal
+   (como rayos de luz filtrándose bajo el mar, no solo una franja arriba) */
+.portal-underwater {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: clamp(70px, 16%, 140px);
+  inset: 0;
   pointer-events: none;
   z-index: 2;
   overflow: hidden;
-  opacity: 0.55;
+  opacity: 0.5;
   mix-blend-mode: screen;
 }
-.portal-water-top::before,
-.portal-water-top::after {
+.portal-underwater::before,
+.portal-underwater::after {
   content: '';
   position: absolute;
-  inset: -20% -50%;
+  inset: -30% -60%;
   background: repeating-linear-gradient(
-    100deg,
-    rgba(140, 190, 230, 0.14) 0px,
-    rgba(140, 190, 230, 0.14) 36px,
-    rgba(230, 210, 160, 0.08) 36px,
-    rgba(230, 210, 160, 0.08) 72px
+    115deg,
+    rgba(140, 200, 230, 0.10) 0px,
+    rgba(140, 200, 230, 0.10) 30px,
+    rgba(230, 220, 170, 0.05) 30px,
+    rgba(230, 220, 170, 0.05) 60px
   );
-  background-size: 200% 100%;
-  animation: waterFlow 9s linear infinite;
+  background-size: 220% 100%;
+  animation: waterDrift 16s linear infinite;
 }
-.portal-water-top::after {
-  animation-duration: 14s;
+.portal-underwater::after {
+  animation-duration: 24s;
   animation-direction: reverse;
-  opacity: 0.6;
+  opacity: 0.7;
 }
-@keyframes waterFlow {
+@keyframes waterDrift {
   0% { background-position: 0% 0%; }
-  100% { background-position: 200% 0%; }
+  100% { background-position: 220% 0%; }
 }
 .gate-leaf {
   position: absolute;
@@ -394,7 +392,7 @@ html.sin-reja #app {
 h1#nombre-hero {
   font-family: var(--script);
   font-weight: 400;
-  font-size: clamp(5.8rem, 19cqw, 7rem);
+  font-size: clamp(6.5rem, 21cqw, 8rem);
   line-height: 1.1;
   margin: 0.05rem 0;
   cursor: pointer;
@@ -506,7 +504,7 @@ h1#nombre-hero {
   border: 2px solid #b8860b;
   border-radius: 14px;
   padding: 0.6rem 0.2rem;
-  box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.06), 0 4px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 0 24px rgba(212, 175, 55, 0.2), 0 0 20px rgba(212, 175, 55, 0.3), 0 4px 20px rgba(0, 0, 0, 0.4);
   position: relative;
   flex: 1;
   min-width: 50px;
@@ -934,18 +932,26 @@ h1#nombre-hero {
   .modal-card h2 { font-size: clamp(1.1rem, 3.5vw, 1.5rem) !important; }
   .calendar-style .num { font-size: 1.4rem !important; }
   .calendar-style .unit { padding: 0.3rem 0.1rem; min-width: 35px; }
-  .detalle-card, .familia-grupo { padding: 1rem 1.1rem 0.9rem; margin-bottom: 1.3rem; }
-  .detalle-card::before, .familia-grupo::before { top: -9px; }
-  .detalle-card::after, .familia-grupo::after { bottom: -9px; }
-  .detalle-info { margin-bottom: 0.7rem; }
-  .familia-nombres { margin: 0.5rem 0 0.35rem; }
-  .divider-thin { margin: 1.1rem 0 1.3rem; }
+}
+/* Corrección de tarjetas apretadas/superpuestas dentro de los modales —
+   aplica a TODO celular (no solo pantallas muy chicas) */
+@media (max-width: 767px) {
+  .modal-card { padding-top: 1.6rem; }
+  .detalle-card, .familia-grupo { padding: 1.1rem 1.1rem 0.9rem; margin: 0 0 1.5rem; overflow: visible; }
+  .detalle-card::before, .familia-grupo::before { top: -10px; }
+  .detalle-card::after, .familia-grupo::after { bottom: -10px; }
+  .detalle-card .icono { margin-bottom: 0.3rem; }
+  .detalle-card h3, .familia-grupo h3 { margin-bottom: 0.5rem; }
+  .detalle-info { margin-bottom: 0.8rem; }
+  .familia-nombres { margin: 0.6rem 0 0.4rem; }
+  .familia-titulo { margin-bottom: 0.5rem; }
+  .divider-thin { margin: 1.3rem 0 1.5rem; }
 }
 @media (min-width: 768px) {
   #app { padding: 0.6rem 2rem; }
   #app-inner { max-width: 640px; gap: 0.4rem; }
   #oval-wrap { width: clamp(200px, 22vh, 300px); height: clamp(280px, 32vh, 420px); }
-  h1#nombre-hero { font-size: clamp(7rem, 14vh, 10rem); }
+  h1#nombre-hero { font-size: clamp(8rem, 16vh, 11.5rem); }
   .frase-inline { font-size: clamp(1.7rem, 3vh, 2.2rem); }
   .fecha-fija { font-size: clamp(1.8rem, 3.3vh, 2.4rem); }
   .hint { font-size: clamp(1.2rem, 2.2vh, 1.5rem); }
