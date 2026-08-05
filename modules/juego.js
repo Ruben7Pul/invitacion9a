@@ -381,7 +381,7 @@ export function initJuego(config, mobile = false) {
     }
   }
 
-  // ========== FUNCIONES DEL JUEGO ==========
+  // ========== FUNCIONES DEL JUEGO (ladrillos, power-ups, etc.) ==========
   function getBrickTypeFromValue(val) {
     if (val === 1) return BRICK_TYPES.CLAY;
     if (val === 2) return BRICK_TYPES.WOOD;
@@ -1059,6 +1059,9 @@ export function initJuego(config, mobile = false) {
         gameoverInputContainer.style.display = 'none';
         gameoverMenuBtn.style.display = 'block';
         gameoverMenuBtn.textContent = '🔄 Nueva partida';
+        gameoverMenuBtn.style.marginLeft = 'auto';
+        gameoverMenuBtn.style.marginRight = 'auto';
+        gameoverMenuBtn.style.display = 'block';
         gameoverMenuBtn.onclick = () => {
           menuEl.style.display = 'none';
           cleanGameState();
@@ -1597,7 +1600,6 @@ export function initJuego(config, mobile = false) {
   // ========== VISIBILITY CHANGE: PAUSA CUANDO SE CAMBIA DE PESTAÑA ==========
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-      // Si el juego está corriendo, no está pausado, no está en game over y la pelota ya fue lanzada
       if (running && !paused && !gameOver && launched) {
         openPauseModal();
       }
