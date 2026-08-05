@@ -1,4 +1,4 @@
-console.log('🚀 script-principal 123a.js OPTIMIZADO');
+console.log('🚀 script-principal.js OPTIMIZADO');
 
 // Detección de hora del día
 function detectarPeriodoDia() {
@@ -78,13 +78,11 @@ function rellenarDatos(config) {
   const ogDesc = document.querySelector('meta[property="og:description"]');
   if (ogDesc) ogDesc.content = `Te invitamos a celebrar los 15 años de ${config.nombre}. ¡No faltes!`;
 
-  // Rellenar firma en agradecimientos
   const firmaNombre = document.getElementById('firma-nombre');
   if (firmaNombre) {
     firmaNombre.textContent = config.nombre;
   }
 
-  // Establecer enlace del libro de firmas (genérico)
   const linkLibro = document.getElementById('link-libro-firmas');
   if (linkLibro) {
     linkLibro.href = '#';
@@ -154,13 +152,12 @@ function marcarDiaActualEnCalendario() {
   }
 }
 
-// ===== VARIABLE GLOBAL PARA ALMACENAR INTERVALOS =====
+// ===== VARIABLES GLOBALES PARA ALMACENAR INTERVALOS =====
 let intervaloItinerario = null;
 let intervaloContador = null;
 
 // ===== RESALTAR ACTIVIDAD ACTUAL EN ITINERARIO =====
 function iniciarBrilloItinerario() {
-  // ✅ Limpiar intervalo anterior si existe
   if (intervaloItinerario) clearInterval(intervaloItinerario);
 
   const ahora = new Date();
@@ -191,7 +188,6 @@ function iniciarBrilloItinerario() {
       activo.classList.add('activo');
     }
 
-    // ✅ SOLO UN INTERVALO
     intervaloItinerario = setInterval(() => {
       const ahora2 = new Date();
       const hora2 = ahora2.getHours();
@@ -303,7 +299,6 @@ function actualizarContador() {
 }
 
 function initContadorCircular(config) {
-  // ✅ Limpiar intervalo anterior si existe
   if (intervaloContador) clearInterval(intervaloContador);
 
   const container = document.getElementById('contador-circular');
@@ -348,7 +343,6 @@ function initContadorCircular(config) {
   });
 
   actualizarContador();
-  // ✅ OPTIMIZADO: Cambiar de 200ms a 1000ms (cada segundo es suficiente)
   intervaloContador = setInterval(actualizarContador, 1000);
 }
 
@@ -548,7 +542,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   function handleOrientation(e) {
     if (portal.classList.contains('hide') && !app.classList.contains('show')) return;
     
-    // ✅ THROTTLE: Solo actualizar cada 33ms (30 FPS en móvil)
     const now = Date.now();
     if (now - lastParallaxTime < 33) return;
     lastParallaxTime = now;
