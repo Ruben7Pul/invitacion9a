@@ -1,5 +1,5 @@
 // ============================================================
-// juego.js – VERSIÓN FINAL CON TOP 3, NUEVA PARTIDA Y CORRECCIONES
+// juego.js – VERSIÓN FINAL CON TOP 3, NUEVA PARTIDA AUTOMÁTICA Y PAUSA POR VISIBILITY
 // ============================================================
 console.log('📦 juego.js (final)');
 
@@ -44,7 +44,7 @@ const NIEBLA_HEIGHTS = [0, Math.round(170 * 1.15), Math.round(STAGE_H * 0.60), M
 const NIEBLA_FEATHER = 26;
 const MAX_LIVES = 3;
 const SCORE_PER_LIFE = 10000;
-const TOP_SCORES_COUNT = 3; // CAMBIADO: top 3 en lugar de top 5
+const TOP_SCORES_COUNT = 3;
 
 // ========== TIPOS DE LADRILLOS ==========
 const BRICK_TYPES = {
@@ -112,7 +112,7 @@ const POWERUP_SYMBOLS = {
   PALA_GRANDE: '<>',
   DUREZA: '↑',
   BOLA_NIEBLA: '🌫️',
-  PALA_MINI: '><', // CAMBIADO: de '-<' a '><'
+  PALA_MINI: '><',
   FLAQUESA: '↓'
 };
 
@@ -136,7 +136,6 @@ function addHighScore(name, score) {
 function isHighScore(score) {
   const scores = getHighScores();
   if (scores.length < TOP_SCORES_COUNT) return true;
-  // Solo si es estrictamente mayor que el último (sin empates)
   return score > scores[scores.length - 1].score;
 }
 
@@ -382,7 +381,7 @@ export function initJuego(config, mobile = false) {
     }
   }
 
-  // ========== FUNCIONES DEL JUEGO (ladrillos, power-ups, etc.) ==========
+  // ========== FUNCIONES DEL JUEGO ==========
   function getBrickTypeFromValue(val) {
     if (val === 1) return BRICK_TYPES.CLAY;
     if (val === 2) return BRICK_TYPES.WOOD;
@@ -1035,7 +1034,7 @@ export function initJuego(config, mobile = false) {
     }, 300);
   }
 
-  // ========== GAME OVER Y NUEVA PARTIDA ==========
+  // ========== GAME OVER ==========
   function endGame() {
     running = false;
     gameOver = true;
@@ -1049,7 +1048,6 @@ export function initJuego(config, mobile = false) {
       if (isTop) {
         pendingHighScore = true;
         gameoverInputContainer.style.display = 'block';
-        // Cambiar mensaje a "¡Top 3!"
         const label = gameoverInputContainer.querySelector('p');
         if (label) label.textContent = '¡Top 3!';
         playerNameInput.value = '';
@@ -1578,17 +1576,15 @@ export function initJuego(config, mobile = false) {
     }
   });
 
-  // ========== TECLA ESPACIO PARA PAUSA (NUEVO) ==========
+  // ========== TECLA ESPACIO PARA PAUSA ==========
   function handleSpacePause(e) {
     if (e.key === ' ' || e.key === 'Space') {
       e.preventDefault();
       if (!running || gameOver) return;
-      // Si la pelota no ha sido lanzada, lanzarla (igual que antes)
       if (!launched) {
         launchBall();
         return;
       }
-      // Si está en pausa, reanudar; si no, pausar
       if (paused) {
         closePauseModal();
       } else {
@@ -1598,8 +1594,15 @@ export function initJuego(config, mobile = false) {
   }
   document.addEventListener('keydown', handleSpacePause);
 
-  // ========== ELIMINADO: visibilitychange (no pausar al cambiar de pestaña) ==========
-  // Ya no se usa.
+  // ========== VISIBILITY CHANGE: PAUSA CUANDO SE CAMBIA DE PESTAÑA ==========
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      // Si el juego está corriendo, no está pausado, no está en game over y la pelota ya fue lanzada
+      if (running && !paused && !gameOver && launched) {
+        openPauseModal();
+      }
+    }
+  });
 
   // ========== GAME OVER: GUARDAR PUNTAJE (si es top 3) ==========
   gameoverSave.addEventListener('click', (e) => {
@@ -1613,14 +1616,10 @@ export function initJuego(config, mobile = false) {
     addHighScore(name, playerScore);
     pendingHighScore = false;
     gameoverInputContainer.style.display = 'none';
-    // Mostrar botón de nueva partida
-    gameoverMenuBtn.style.display = 'block';
-    gameoverMenuBtn.textContent = '🔄 Nueva partida';
-    gameoverMenuBtn.onclick = () => {
-      menuEl.style.display = 'none';
-      cleanGameState();
-      startGame();
-    };
+    // Guardado exitoso -> ir directamente a nueva partida
+    menuEl.style.display = 'none';
+    cleanGameState();
+    startGame();
   });
 
   // ========== FUNCIÓN AUXILIAR ==========
