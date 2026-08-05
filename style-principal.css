@@ -183,40 +183,41 @@ body {
   100% { opacity: 0; transform: scale(1.35); }
 }
 
-/* Sensación de estar debajo del agua en toda la escena del portal
-   (como rayos de luz filtrándose bajo el mar, no solo una franja arriba) */
-.portal-underwater {
+/* Efecto submarino: rayos de luz filtrados bajo el agua */
+.portal-water-top {
   position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  opacity: 0;
+  mix-blend-mode: lighten;
+}
+.portal-water-top::before,
+.portal-water-top::after {
+  content: '';
+  position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 2;
-  overflow: hidden;
-  opacity: 0.5;
-  mix-blend-mode: screen;
+  z-index: -1;
+  background: radial-gradient(ellipse 150px 100px at 15% 20%, rgba(150, 200, 255, 0.08), transparent 60%),
+              radial-gradient(ellipse 180px 120px at 85% 35%, rgba(150, 200, 255, 0.06), transparent 65%),
+              radial-gradient(ellipse 140px 90px at 50% 60%, rgba(180, 220, 255, 0.05), transparent 70%),
+              radial-gradient(ellipse 160px 110px at 25% 75%, rgba(150, 200, 255, 0.07), transparent 68%),
+              radial-gradient(ellipse 170px 115px at 75% 80%, rgba(160, 210, 255, 0.06), transparent 70%);
+  animation: underwaterGlow 8s ease-in-out infinite;
 }
-.portal-underwater::before,
-.portal-underwater::after {
-  content: '';
-  position: absolute;
-  inset: -30% -60%;
-  background: repeating-linear-gradient(
-    115deg,
-    rgba(140, 200, 230, 0.10) 0px,
-    rgba(140, 200, 230, 0.10) 30px,
-    rgba(230, 220, 170, 0.05) 30px,
-    rgba(230, 220, 170, 0.05) 60px
-  );
-  background-size: 220% 100%;
-  animation: waterDrift 16s linear infinite;
-}
-.portal-underwater::after {
-  animation-duration: 24s;
+.portal-water-top::after {
+  animation-duration: 11s;
   animation-direction: reverse;
-  opacity: 0.7;
+  opacity: 0.6;
 }
-@keyframes waterDrift {
-  0% { background-position: 0% 0%; }
-  100% { background-position: 220% 0%; }
+@keyframes underwaterGlow {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
 }
 .gate-leaf {
   position: absolute;
@@ -392,7 +393,7 @@ html.sin-reja #app {
 h1#nombre-hero {
   font-family: var(--script);
   font-weight: 400;
-  font-size: clamp(6.5rem, 21cqw, 8rem);
+  font-size: clamp(6.2rem, 20cqw, 7.8rem);
   line-height: 1.1;
   margin: 0.05rem 0;
   cursor: pointer;
@@ -504,7 +505,7 @@ h1#nombre-hero {
   border: 2px solid #b8860b;
   border-radius: 14px;
   padding: 0.6rem 0.2rem;
-  box-shadow: inset 0 0 24px rgba(212, 175, 55, 0.2), 0 0 20px rgba(212, 175, 55, 0.3), 0 4px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.06), 0 4px 20px rgba(0, 0, 0, 0.4);
   position: relative;
   flex: 1;
   min-width: 50px;
@@ -920,7 +921,7 @@ h1#nombre-hero {
    ============================================================ */
 @media (max-width: 400px) {
   #app { padding: 0.3rem 0.6rem; }
-  h1#nombre-hero { font-size: clamp(5rem, 18cqw, 5.8rem); }
+  h1#nombre-hero { font-size: clamp(5.4rem, 20cqw, 6.4rem); }
   .frase-inline { font-size: clamp(1.3rem, 3.8cqw, 1.5rem); }
   .fecha-fija { font-size: clamp(1.4rem, 4cqw, 1.6rem); }
   #app-top .eyebrow { font-size: 0.7rem; }
@@ -928,30 +929,23 @@ h1#nombre-hero {
   #nav { padding: 0.3rem; gap: 0.2rem; }
   .nav-btn svg { width: 22px; height: 22px; }
   .nav-btn span { font-size: 0.55rem; }
-  .modal-card { padding: 1rem 0.6rem; }
+  .modal-overlay { padding: 0.8rem; }
+  .modal-card { padding: 1.2rem 0.8rem; max-width: 100%; max-height: 90vh; }
   .modal-card h2 { font-size: clamp(1.1rem, 3.5vw, 1.5rem) !important; }
   .calendar-style .num { font-size: 1.4rem !important; }
   .calendar-style .unit { padding: 0.3rem 0.1rem; min-width: 35px; }
-}
-/* Corrección de tarjetas apretadas/superpuestas dentro de los modales —
-   aplica a TODO celular (no solo pantallas muy chicas) */
-@media (max-width: 767px) {
-  .modal-card { padding-top: 1.6rem; }
-  .detalle-card, .familia-grupo { padding: 1.1rem 1.1rem 0.9rem; margin: 0 0 1.5rem; overflow: visible; }
-  .detalle-card::before, .familia-grupo::before { top: -10px; }
-  .detalle-card::after, .familia-grupo::after { bottom: -10px; }
-  .detalle-card .icono { margin-bottom: 0.3rem; }
-  .detalle-card h3, .familia-grupo h3 { margin-bottom: 0.5rem; }
-  .detalle-info { margin-bottom: 0.8rem; }
-  .familia-nombres { margin: 0.6rem 0 0.4rem; }
-  .familia-titulo { margin-bottom: 0.5rem; }
-  .divider-thin { margin: 1.3rem 0 1.5rem; }
+  .detalle-card, .familia-grupo { padding: 1rem 1.1rem 0.9rem; margin-bottom: 1.3rem; }
+  .detalle-card::before, .familia-grupo::before { top: -9px; }
+  .detalle-card::after, .familia-grupo::after { bottom: -9px; }
+  .detalle-info { margin-bottom: 0.7rem; }
+  .familia-nombres { margin: 0.5rem 0 0.35rem; }
+  .divider-thin { margin: 1.1rem 0 1.3rem; }
 }
 @media (min-width: 768px) {
   #app { padding: 0.6rem 2rem; }
   #app-inner { max-width: 640px; gap: 0.4rem; }
   #oval-wrap { width: clamp(200px, 22vh, 300px); height: clamp(280px, 32vh, 420px); }
-  h1#nombre-hero { font-size: clamp(8rem, 16vh, 11.5rem); }
+  h1#nombre-hero { font-size: clamp(7.5rem, 15vh, 11rem); }
   .frase-inline { font-size: clamp(1.7rem, 3vh, 2.2rem); }
   .fecha-fija { font-size: clamp(1.8rem, 3.3vh, 2.4rem); }
   .hint { font-size: clamp(1.2rem, 2.2vh, 1.5rem); }
@@ -965,7 +959,7 @@ h1#nombre-hero {
 @media (min-width: 768px) and (max-height: 900px) {
   #app-mid { gap: 0.6rem; }
   #oval-wrap { width: clamp(180px, 20vh, 260px); height: clamp(250px, 30vh, 360px); }
-  h1#nombre-hero { font-size: clamp(6.5rem, 13vh, 9rem); }
+  h1#nombre-hero { font-size: clamp(7rem, 14vh, 10.5rem); }
 }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: rgba(201, 162, 77, 0.3); border-radius: 3px; }
