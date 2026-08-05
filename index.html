@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style-principal.css?v=20260807">
+  <link rel="stylesheet" href="style-principal.css?v=20260808">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌹</text></svg>">
 </head>
 <body>
@@ -255,7 +255,7 @@
         <p class="hint gold-text" id="hint-juego">👆 Toca el nombre para jugar</p>
       </div>
 
-      <!-- SECCIÓN FAMILIA -->
+      <!-- SECCIÓN 1: FAMILIA -->
       <section id="seccion-familia" class="seccion">
         <h2 class="gold-text">👑 Mi familia 👑</h2>
         <p class="seccion-subtitulo gold-text">La corte que me acompaña</p>
@@ -286,7 +286,7 @@
         </div>
       </section>
 
-      <!-- SECCIÓN CALENDARIO -->
+      <!-- SECCIÓN 2: CALENDARIO (FECHA) -->
       <section id="seccion-calendario" class="seccion">
         <h2 class="gold-text">📅 Octubre 2026</h2>
         <p class="seccion-subtitulo gold-text">El mes de la celebración</p>
@@ -298,7 +298,50 @@
         </div>
       </section>
 
-      <!-- SECCIÓN ITINERARIO -->
+      <!-- SECCIÓN 3: CONTADOR -->
+      <section id="seccion-contador" class="seccion">
+        <h2 class="gold-text">⏳ El reloj ⏳</h2>
+        <p class="seccion-subtitulo gold-text">Faltan para el gran baile</p>
+        <div class="clock calendar-style" id="clock">
+          <div class="unit"><span class="num" id="d">00</span><span class="lbl gold-text">Días</span></div>
+          <div class="unit"><span class="num" id="h">00</span><span class="lbl gold-text">Horas</span></div>
+          <div class="unit"><span class="num" id="m">00</span><span class="lbl gold-text">Min</span></div>
+          <div class="unit"><span class="num" id="s">00</span><span class="lbl gold-text">Seg</span></div>
+        </div>
+        <p id="contador-mensaje" class="gold-text" style="font-family:var(--script); font-size:clamp(1.2rem,3vw,1.6rem); margin-top:0.6rem;">Cargando...</p>
+      </section>
+
+      <!-- SECCIÓN 4: DÓNDE (LUGARES) -->
+      <section id="seccion-lugares" class="seccion">
+        <h2 class="gold-text">🏰 Donde 🏰</h2>
+        <div class="detalle-card">
+          <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2 L12 8 M8 6 L16 6 M6 22 L18 22 L18 12 L6 12 Z M9 22 L9 16 L15 16 L15 22"/></svg>
+          <h3 class="gold-text">Misa</h3>
+          <div class="detalle-info">
+            <p class="hora gold-text" id="hora-misa">--</p>
+            <p class="lugar gold-text" id="lugar-misa">--</p>
+          </div>
+          <div class="detalle-botones">
+            <a class="btn-mapa gold-text" id="mapa-misa" href="#" target="_blank" rel="noopener">📍 Ver en el mapa</a>
+            <a class="btn-mapa gold-text" href="https://www.google.com/maps/dir/?api=1&destination=19.1830909,-99.4612969" target="_blank" rel="noopener">🚗 Cómo llegar</a>
+          </div>
+        </div>
+        <div class="divider-thin" aria-hidden="true"></div>
+        <div class="detalle-card">
+          <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 21 C12 21 4 14.5 4 9 C4 5 7.5 2 12 2 C16.5 2 20 5 20 9 C20 14.5 12 21 12 21 Z"/><circle cx="12" cy="9" r="2.4"/></svg>
+          <h3 class="gold-text">Recepción</h3>
+          <div class="detalle-info">
+            <p class="hora gold-text" id="hora-fiesta">--</p>
+            <p class="lugar gold-text" id="lugar-fiesta">--</p>
+          </div>
+          <div class="detalle-botones">
+            <a class="btn-mapa gold-text" id="mapa-fiesta" href="#" target="_blank" rel="noopener">📍 Ver en el mapa</a>
+            <a class="btn-mapa gold-text" href="https://www.google.com/maps/dir/?api=1&destination=19.1839892,-99.4559442" target="_blank" rel="noopener">🚗 Cómo llegar</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 5: ITINERARIO -->
       <section id="seccion-itinerario" class="seccion">
         <h2 class="gold-text">📋 Itinerario</h2>
         <p class="seccion-subtitulo gold-text">El orden de la celebración</p>
@@ -334,50 +377,21 @@
         </div>
       </section>
 
-      <!-- SECCIÓN CONTADOR -->
-      <section id="seccion-contador" class="seccion">
-        <h2 class="gold-text">⏳ El reloj ⏳</h2>
-        <p class="seccion-subtitulo gold-text">Faltan para el gran baile</p>
-        <div class="clock calendar-style" id="clock">
-          <div class="unit"><span class="num" id="d">00</span><span class="lbl gold-text">Días</span></div>
-          <div class="unit"><span class="num" id="h">00</span><span class="lbl gold-text">Horas</span></div>
-          <div class="unit"><span class="num" id="m">00</span><span class="lbl gold-text">Min</span></div>
-          <div class="unit"><span class="num" id="s">00</span><span class="lbl gold-text">Seg</span></div>
-        </div>
-        <p id="contador-mensaje" class="gold-text" style="font-family:var(--script); font-size:clamp(1.2rem,3vw,1.6rem); margin-top:0.6rem;">Cargando...</p>
-      </section>
-
-      <!-- SECCIÓN LUGARES -->
-      <section id="seccion-lugares" class="seccion">
-        <h2 class="gold-text">🏰 Donde 🏰</h2>
-        <div class="detalle-card">
-          <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2 L12 8 M8 6 L16 6 M6 22 L18 22 L18 12 L6 12 Z M9 22 L9 16 L15 16 L15 22"/></svg>
-          <h3 class="gold-text">Misa</h3>
-          <div class="detalle-info">
-            <p class="hora gold-text" id="hora-misa">--</p>
-            <p class="lugar gold-text" id="lugar-misa">--</p>
-          </div>
-          <div class="detalle-botones">
-            <a class="btn-mapa gold-text" id="mapa-misa" href="#" target="_blank" rel="noopener">📍 Ver en el mapa</a>
-            <a class="btn-mapa gold-text" href="https://www.google.com/maps/dir/?api=1&destination=19.1830909,-99.4612969" target="_blank" rel="noopener">🚗 Cómo llegar</a>
-          </div>
-        </div>
-        <div class="divider-thin" aria-hidden="true"></div>
-        <div class="detalle-card">
-          <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 21 C12 21 4 14.5 4 9 C4 5 7.5 2 12 2 C16.5 2 20 5 20 9 C20 14.5 12 21 12 21 Z"/><circle cx="12" cy="9" r="2.4"/></svg>
-          <h3 class="gold-text">Recepción</h3>
-          <div class="detalle-info">
-            <p class="hora gold-text" id="hora-fiesta">--</p>
-            <p class="lugar gold-text" id="lugar-fiesta">--</p>
-          </div>
-          <div class="detalle-botones">
-            <a class="btn-mapa gold-text" id="mapa-fiesta" href="#" target="_blank" rel="noopener">📍 Ver en el mapa</a>
-            <a class="btn-mapa gold-text" href="https://www.google.com/maps/dir/?api=1&destination=19.1839892,-99.4559442" target="_blank" rel="noopener">🚗 Cómo llegar</a>
-          </div>
+      <!-- SECCIÓN 6: LIBRO DE FIRMAS -->
+      <section id="seccion-libro-firmas" class="seccion">
+        <h2 class="gold-text">📖 Libro de firmas</h2>
+        <p class="seccion-subtitulo gold-text">Déjanos tu mensaje</p>
+        <div class="libro-firmas-contenido">
+          <p class="libro-firmas-texto">
+            Queremos que seas parte de este día especial. Déjanos un mensaje, una bendición o un consejo en nuestro libro de firmas digital.
+          </p>
+          <a href="#" id="link-libro-firmas" class="btn-mapa gold-text" target="_blank" rel="noopener" style="margin-top: 0.8rem; font-size: clamp(0.9rem, 2vw, 1rem); padding: 0.5rem 2rem;">
+            ✍️ Firmar el libro
+          </a>
         </div>
       </section>
 
-      <!-- SECCIÓN AGRADECIMIENTOS -->
+      <!-- SECCIÓN 7: AGRADECIMIENTOS -->
       <section id="seccion-agradecimientos" class="seccion">
         <h2 class="gold-text">🙏 Gracias</h2>
         <p class="seccion-subtitulo gold-text">De todo corazón</p>
