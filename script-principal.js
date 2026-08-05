@@ -338,6 +338,142 @@ function initContadorCircular(config) {
   setInterval(actualizarContador, 200);
 }
 
+// ===== COLLAGE DE GUSTOS =====
+let collageInicializado = false;
+let collageTimer = null;
+
+function iniciarCollage() {
+  const container = document.getElementById('collage-container');
+  if (!container) return;
+
+  // Detectar cuántas imágenes hay (imgcoll1.jpg, imgcoll2.jpg, ... hasta 12)
+  const maxImages = 12;
+  const imagenes = [];
+  for (let i = 1; i <= maxImages; i++) {
+    const src = `archivos/imgcoll${i}.jpg`;
+    // Verificar si existe (usando fetch)
+    try {
+      const img = new Image();
+      img.onload = () => {
+        imagenes.push(src);
+        if (imagenes.length === maxImages || i === maxImages) {
+          // Todas las imágenes intentadas, ahora renderizar
+          renderCollage(imagenes, container);
+        }
+      };
+      img.onerror = () => {
+        if (i === maxImages) {
+          renderCollage(imagenes, container);
+        }
+      };
+      img.src = src;
+    } catch(e) {
+      if (i === maxImages) {
+        renderCollage(imagenes, container);
+      }
+    }
+  }
+}
+
+function renderCollage(imagenes, container) {
+  if (imagenes.length === 0) {
+    container.innerHTML = '<div style="text-align:center; padding:2rem; color:#fae3a0; font-family:var(--script); font-size:1.2rem;">No se encontraron imágenes.</div>';
+    return;
+  }
+
+  // Mezclar aleatoriamente
+  const shuffled = [...imagenes].sort(() => Math.random() - 0.5);
+  const total = shuffled.length;
+
+  // Limpiar contenedor
+  container.innerHTML = '';
+
+  // Definir disposición aleatoria (tamaños y posiciones)
+  const grid = [];
+  // Generar posiciones aleatorias (en porcentaje)
+  for (let i = 0; i < total; i++) {
+    const w = 20 + Math.random() * 30; // 20% - 50%
+    const h = 20 + Math.random() * 30;
+    const x = Math.random() * (100 - w);
+    const y = Math.random() * (100 - h);
+    const rot = (Math.random() - 0.5) * 8; // -4deg a 4deg
+    grid.push({ w, h, x, y, rot, src: shuffled[i] });
+  }
+
+  // Crear elementos
+  grid.forEach((item, index) => {
+    const div = document.createElement('div');
+    div.className = 'collage-item hidden';
+    div.style.cssText = `
+      width: ${item.w}%;
+      height: ${item.h}%;
+      left: ${item.x}%;
+      top: ${item.y}%;
+      transform: rotate(${item.rot}deg) scale(0.8);
+      z-index: ${Math.floor(Math.random() * 10)};
+    `;
+    const img = document.createElement('img');
+    img.src = item.src;
+    img.loading = 'lazy';
+    img.alt = 'Gusto';
+    div.appendChild(img);
+    container.appendChild(div);
+  });
+
+  // Animar aparición escalonada
+  const items = container.querySelectorAll('.collage-item');
+  items.forEach((el, idx) => {
+    setTimeout(() => {
+      el.classList.remove('hidden');
+      el.classList.add('visible');
+      // Resetear transform con la rotación original (ya aplicada en style)
+      el.style.transform = `rotate(${grid[idx].rot}deg) scale(1)`;
+    }, 100 + idx * 80);
+  });
+
+  // Después de que todas aparezcan, iniciar ciclo de desvanecimiento aleatorio
+  if (collageTimer) clearInterval(collageTimer);
+  collageTimer = setInterval(() => {
+    // Elegir 1-2 imágenes al azar para ocultar
+    const visibles = container.querySelectorAll('.collage-item.visible');
+    if (visibles.length === 0) {
+      // Si todas están ocultas, reaparecen todas
+      const all = container.querySelectorAll('.collage-item');
+      all.forEach((el, idx) => {
+        setTimeout(() => {
+          el.classList.remove('hidden');
+          el.classList.add('visible');
+          el.style.transform = `rotate(${grid[idx].rot}deg) scale(1)`;
+        }, 100 + idx * 60);
+      });
+      return;
+    }
+    const toHide = Math.min(1 + Math.floor(Math.random() * 2), visibles.length);
+    const indices = [];
+    const disponibles = Array.from(visibles);
+    for (let i = 0; i < toHide; i++) {
+      const rand = Math.floor(Math.random() * disponibles.length);
+      const el = disponibles.splice(rand, 1)[0];
+      if (el) {
+        el.classList.remove('visible');
+        el.classList.add('hidden');
+        el.style.transform = `rotate(${parseFloat(el.style.transform.match(/rotate\(([^)]+)\)/)?.[1] || 0}deg) scale(0.8)`;
+      }
+    }
+  }, 2000 + Math.random() * 2000);
+}
+
+function limpiarCollage() {
+  if (collageTimer) {
+    clearInterval(collageTimer);
+    collageTimer = null;
+  }
+  const container = document.getElementById('collage-container');
+  if (container) {
+    container.innerHTML = '<div id="collage-loading" style="text-align:center; padding:2rem; color:#fae3a0; font-family:var(--script); font-size:1.2rem;">Cargando collage...</div>';
+  }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const config = await cargarConfig();
   rellenarDatos(config);
@@ -347,6 +483,52 @@ document.addEventListener('DOMContentLoaded', async () => {
   marcarDiaActualEnCalendario();
   iniciarBrilloItinerario();
 
+  // ---- COLLAGE ----
+  const btnAbrir = document.getElementById('btn-abrir-gustos');
+  const modal = document.getElementById('modal-gustos');
+  const closeBtns = modal.querySelectorAll('[data-close-gustos]');
+  const container = document.getElementById('collage-container');
+
+  if (btnAbrir && modal) {
+    btnAbrir.addEventListener('click', () => {
+      modal.classList.add('open');
+      // Iniciar collage (si no está iniciado o se requiere reinicio)
+      if (!collageInicializado) {
+        iniciarCollage();
+        collageInicializado = true;
+      } else {
+        // Si ya está inicializado, limpiar y reiniciar para nueva aleatoriedad
+        limpiarCollage();
+        iniciarCollage();
+      }
+    });
+
+    closeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        modal.classList.remove('open');
+        limpiarCollage();
+        collageInicializado = false;
+      });
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('open');
+        limpiarCollage();
+        collageInicializado = false;
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('open')) {
+        modal.classList.remove('open');
+        limpiarCollage();
+        collageInicializado = false;
+      }
+    });
+  }
+
+  // ---- MÚSICA Y RESTO ----
   try {
     const { initSonidos } = await import('./modules/sonidos.js');
     initSonidos();
