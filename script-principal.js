@@ -1,4 +1,4 @@
-console.log('🚀 script-principal oo.js');
+console.log('🚀 script-principal.js');
 
 // Detección de hora del día (se mantiene)
 function detectarPeriodoDia() {
@@ -87,7 +87,7 @@ function generarCalendario() {
   const container = document.getElementById('calendario-container');
   if (!container) return;
   const year = 2026;
-  const month = 9; // octubre
+  const month = 9;
   const fechaEspecial = 10;
 
   const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
@@ -356,7 +356,70 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   backBtn.addEventListener('click', cerrarReja);
 
-  // Parallax
+  // ===== MODAL MAPA INTERACTIVO =====
+  const btnMapa = document.getElementById('btn-abrir-mapa');
+  const modalMapa = document.getElementById('modal-mapa');
+  const closeMapa = modalMapa?.querySelector('[data-close-mapa]');
+
+  if (btnMapa && modalMapa && closeMapa) {
+    btnMapa.addEventListener('click', () => {
+      modalMapa.classList.add('open');
+    });
+
+    closeMapa.addEventListener('click', () => {
+      modalMapa.classList.remove('open');
+    });
+
+    modalMapa.addEventListener('click', (e) => {
+      if (e.target === modalMapa) {
+        modalMapa.classList.remove('open');
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modalMapa.classList.contains('open')) {
+        modalMapa.classList.remove('open');
+      }
+    });
+  }
+
+  // ===== MODAL AGRADECIMIENTOS =====
+  const btnAgradecimientos = document.getElementById('btn-abrir-agradecimientos');
+  const modalAgradecimientos = document.getElementById('modal-agradecimientos');
+  const closeAgradecimientos = modalAgradecimientos?.querySelector('[data-close-agradecimientos]');
+
+  // Rellenar el nombre en la firma
+  const firmaNombre = document.getElementById('firma-nombre');
+  if (firmaNombre) {
+    const nombreHero = document.getElementById('nombre-hero');
+    if (nombreHero) {
+      firmaNombre.textContent = nombreHero.textContent;
+    }
+  }
+
+  if (btnAgradecimientos && modalAgradecimientos && closeAgradecimientos) {
+    btnAgradecimientos.addEventListener('click', () => {
+      modalAgradecimientos.classList.add('open');
+    });
+
+    closeAgradecimientos.addEventListener('click', () => {
+      modalAgradecimientos.classList.remove('open');
+    });
+
+    modalAgradecimientos.addEventListener('click', (e) => {
+      if (e.target === modalAgradecimientos) {
+        modalAgradecimientos.classList.remove('open');
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modalAgradecimientos.classList.contains('open')) {
+        modalAgradecimientos.classList.remove('open');
+      }
+    });
+  }
+
+  // ===== PARALLAX =====
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const hasGyro = typeof DeviceOrientationEvent !== 'undefined';
   let gyroWorking = false;
