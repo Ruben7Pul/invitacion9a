@@ -1,5 +1,5 @@
 // ============================================================
-// juego.js – VERSIÓN COMPLETA CON CORRECCIONES
+// juego.js – VERSIÓN COMPLETA CON MÚSICA, NUEVA PARTIDA Y MUTE
 // ============================================================
 console.log('📦 juego.js (completo)');
 
@@ -164,7 +164,7 @@ export function initJuego(config, mobile = false) {
   const gameoverMenuBtn = document.getElementById('gameover-menu-btn');
   const nameError = document.getElementById('name-error');
 
-  // Asegurar que el fondo jueg1.png esté siempre visible
+  // Asegurar fondo jueg1.png
   if (inner) {
     inner.style.backgroundImage = "url('../archivos/jueg1.png')";
     inner.style.backgroundSize = 'cover';
@@ -293,6 +293,7 @@ export function initJuego(config, mobile = false) {
       </div>
       <div class="pause-buttons">
         <button class="game-btn" id="pause-resume-btn">▶ Reanudar</button>
+        <button class="game-btn mute-btn pause-mute-btn" id="pause-mute-btn">🔊 Silenciar</button>
         <button class="game-btn exit-btn" id="pause-exit-btn">🚪 Salir</button>
       </div>
     `;
@@ -303,6 +304,18 @@ export function initJuego(config, mobile = false) {
     pauseModal = card;
 
     document.getElementById('pause-resume-btn').addEventListener('click', closePauseModal);
+    document.getElementById('pause-mute-btn').addEventListener('click', () => {
+      if (window.toggleMusic) window.toggleMusic();
+      // Actualizar texto del botón
+      const btn = document.getElementById('pause-mute-btn');
+      if (btn) {
+        if (window.isMusicMuted && window.isMusicMuted()) {
+          btn.innerHTML = '🔇 Silenciado';
+        } else {
+          btn.innerHTML = '🔊 Silenciar';
+        }
+      }
+    });
     document.getElementById('pause-exit-btn').addEventListener('click', () => {
       closePauseModal();
       if (animFrameId) cancelAnimationFrame(animFrameId);
@@ -315,6 +328,15 @@ export function initJuego(config, mobile = false) {
   function openPauseModal() {
     if (!pauseModalOverlay) createPauseModal();
     updatePauseModal();
+    // Actualizar estado del botón de mute
+    const muteBtn = document.getElementById('pause-mute-btn');
+    if (muteBtn) {
+      if (window.isMusicMuted && window.isMusicMuted()) {
+        muteBtn.innerHTML = '🔇 Silenciado';
+      } else {
+        muteBtn.innerHTML = '🔊 Silenciar';
+      }
+    }
     pauseModalOverlay.classList.add('open');
     if (!paused) {
       paused = true;
@@ -361,7 +383,7 @@ export function initJuego(config, mobile = false) {
     }
   }
 
-  // ========== FUNCIONES DEL JUEGO ==========
+  // ========== FUNCIONES DEL JUEGO (ladrillos, power-ups, etc.) ==========
   function getBrickTypeFromValue(val) {
     if (val === 1) return BRICK_TYPES.CLAY;
     if (val === 2) return BRICK_TYPES.WOOD;
@@ -1014,6 +1036,7 @@ export function initJuego(config, mobile = false) {
     }, 300);
   }
 
+  // ========== GAME OVER Y NUEVA PARTIDA ==========
   function endGame() {
     running = false;
     gameOver = true;
@@ -1035,7 +1058,12 @@ export function initJuego(config, mobile = false) {
         pendingHighScore = false;
         gameoverInputContainer.style.display = 'none';
         gameoverMenuBtn.style.display = 'block';
-        gameoverMenuBtn.textContent = '🏠 Salir';
+        gameoverMenuBtn.textContent = '🔄 Nueva partida';
+        gameoverMenuBtn.onclick = () => {
+          menuEl.style.display = 'none';
+          cleanGameState();
+          startGame();
+        };
       }
       menuEl.style.display = 'flex';
       menuGameover.style.display = 'block';
@@ -1045,6 +1073,7 @@ export function initJuego(config, mobile = false) {
     pauseBtn.style.display = 'none';
   }
 
+  // ========== INICIO DE PARTIDA ==========
   function startGame() {
     resetGameState();
     gameTimeActive = false;
@@ -1101,6 +1130,7 @@ export function initJuego(config, mobile = false) {
     }
   }
 
+  // ========== RENDERIZADO Y ACTUALIZACIÓN VISUAL ==========
   function updateDurabilityVisual() {
     const ballElements = inner.querySelectorAll('.ball-dynamic');
     for (const el of ballElements) updateBallStyle(el);
@@ -1194,6 +1224,7 @@ export function initJuego(config, mobile = false) {
     }
   }
 
+  // ========== BUCLE PRINCIPAL ==========
   function gameLoop(timestamp) {
     if (!running) {
       animFrameId = requestAnimationFrame(gameLoop);
@@ -1252,6 +1283,7 @@ export function initJuego(config, mobile = false) {
       return;
     }
 
+    // Actualizar bolas
     for (let i = balls.length - 1; i >= 0; i--) {
       const b = balls[i];
       b.x += b.vx * delta;
@@ -1348,6 +1380,7 @@ export function initJuego(config, mobile = false) {
       }
     }
 
+    // Actualizar power-ups
     for (let i = powerups.length - 1; i >= 0; i--) {
       const pu = powerups[i];
       pu.y += pu.vy * delta;
@@ -1473,7 +1506,7 @@ export function initJuego(config, mobile = false) {
     inner.style.transformOrigin = 'top left';
   }
 
-  // ========== EVENTOS ==========
+  // ========== EVENTOS DEL JUGADOR ==========
   stage.addEventListener('mousedown', (e) => {
     if (e.target.closest('#game-menu')) return;
     if (!running || paused || gameOver) return;
@@ -1543,7 +1576,7 @@ export function initJuego(config, mobile = false) {
     }
   });
 
-  // ========== GAME OVER: GUARDAR PUNTAJE ==========
+  // ========== GAME OVER: GUARDAR PUNTAJE (si es top) ==========
   gameoverSave.addEventListener('click', (e) => {
     e.stopPropagation();
     const name = playerNameInput.value.trim();
@@ -1555,22 +1588,20 @@ export function initJuego(config, mobile = false) {
     addHighScore(name, playerScore);
     pendingHighScore = false;
     gameoverInputContainer.style.display = 'none';
-    cleanGameState();
-    window.location.href = '../index.html?volver=1';
+    // Mostrar botón de nueva partida
+    gameoverMenuBtn.style.display = 'block';
+    gameoverMenuBtn.textContent = '🔄 Nueva partida';
+    gameoverMenuBtn.onclick = () => {
+      menuEl.style.display = 'none';
+      cleanGameState();
+      startGame();
+    };
   });
 
-  gameoverMenuBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    window.location.href = '../index.html?volver=1';
-  });
-
+  // ========== FUNCIÓN AUXILIAR ==========
   function isValidName(name) {
     return /^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/.test(name);
   }
-
-  playerNameInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') gameoverSave.click();
-  });
 
   // ========== INICIO ==========
   createPauseModal();
