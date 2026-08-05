@@ -352,7 +352,7 @@ function iniciarCollage() {
   container.style.aspectRatio = '1 / 1';
   container.style.width = '100%';
 
-  var maxImages = 12;
+  var maxImages = 9;
   var imagenes = [];
   var cargadas = 0;
   var totalIntentos = maxImages;
