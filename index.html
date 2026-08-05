@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style-principal.css?v=20260806">
+  <link rel="stylesheet" href="style-principal.css?v=20260807">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌹</text></svg>">
 </head>
 <body>
@@ -369,69 +369,51 @@
           </div>
           <a class="btn-mapa gold-text" id="mapa-fiesta" href="#" target="_blank" rel="noopener">📍 Ver en el mapa</a>
         </div>
-        <!-- Botón para abrir el mapa interactivo -->
-        <button id="btn-abrir-mapa" class="btn-mapa gold-text" style="margin-top: 0.8rem; border: 2px solid #d4af37; background: rgba(212, 175, 55, 0.15);">
-          🗺️ Ver mapa interactivo
-        </button>
+        <!-- Mapa interactivo incrustado -->
+        <div class="mapa-interactivo">
+          <div class="mapa-container">
+            <iframe
+              id="mapa-iframe"
+              class="mapa-iframe"
+              loading="lazy"
+              allowfullscreen
+              referrerpolicy="no-referrer-when-downgrade"
+              src="https://www.google.com/maps/embed/v1/view?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&center=19.1835,-99.4586&zoom=14&maptype=roadmap&markers=color:0xd4af37%7C19.1830909,-99.4612969&markers=color:0xb8860b%7C19.1839892,-99.4559442">
+            </iframe>
+          </div>
+          <div class="mapa-controles">
+            <button class="btn-mapa gold-text" data-ubicacion="misa">📍 Capilla del Puente</button>
+            <button class="btn-mapa gold-text" data-ubicacion="recepcion">📍 Auditorio Gualupita</button>
+            <a class="btn-mapa gold-text" href="https://www.google.com/maps/dir/?api=1&destination=19.1830909,-99.4612969&destination=19.1839892,-99.4559442" target="_blank" rel="noopener">🗺️ Cómo llegar</a>
+          </div>
+          <p class="mapa-nota gold-text">📍 Ambas ubicaciones están a solo 1-2 km de distancia</p>
+        </div>
       </section>
 
-      <!-- Botón para abrir Agradecimientos (al final de #app-inner) -->
-      <button id="btn-abrir-agradecimientos" class="btn-mapa gold-text" style="margin-top: 0.5rem; border: 2px solid #d4af37; background: rgba(212, 175, 55, 0.15); width: 100%;">
-        🙏 Agradecimientos
-      </button>
-    </div>
-  </div>
-
-  <!-- ===== MODAL MAPA INTERACTIVO ===== -->
-  <div id="modal-mapa" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-mapa-title">
-    <div class="modal-card modal-mapa-card">
-      <button class="modal-close" data-close-mapa aria-label="Cerrar mapa">&times;</button>
-      <h2 id="modal-mapa-title" class="gold-text">🗺️ Ubicaciones</h2>
-      <p class="modal-subtitle gold-text">Iglesia y Salón de eventos</p>
-      <div class="mapa-container">
-        <iframe
-          class="mapa-iframe"
-          loading="lazy"
-          allowfullscreen
-          referrerpolicy="no-referrer-when-downgrade"
-          src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=Capilla+del+Puente+Tianguistenco&center=19.1830909,-99.4612969&zoom=15&maptype=roadmap">
-        </iframe>
-      </div>
-      <div class="mapa-leyenda">
-        <div class="leyenda-item"><span class="marcador" style="background:#d4af37;"></span> Capilla del Puente (Misa)</div>
-        <div class="leyenda-item"><span class="marcador" style="background:#b8860b;"></span> Auditorio Gualupita (Recepción)</div>
-      </div>
-      <p class="mapa-nota gold-text">📍 Ambas ubicaciones están a solo 1-2 km de distancia</p>
-    </div>
-  </div>
-  <!-- ===== FIN MODAL MAPA ===== -->
-
-  <!-- ===== MODAL AGRADECIMIENTOS ===== -->
-  <div id="modal-agradecimientos" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-agradecimientos-title">
-    <div class="modal-card modal-agradecimientos-card">
-      <button class="modal-close" data-close-agradecimientos aria-label="Cerrar agradecimientos">&times;</button>
-      <h2 id="modal-agradecimientos-title" class="gold-text">🙏 Gracias</h2>
-      <p class="modal-subtitle gold-text">De todo corazón</p>
-      <div class="agradecimientos-contenido">
-        <p class="agradecimientos-texto">
-          Queremos expresar nuestro más profundo agradecimiento a todos los que han hecho posible este sueño.
-          A nuestra familia, por su amor incondicional; a nuestros padrinos, por su guía y apoyo; y a cada uno de ustedes, por formar parte de este día tan especial.
-        </p>
-        <p class="agradecimientos-texto" style="font-family: var(--script); font-size: 1.4rem; color: #d4af37;">
-          ¡Los llevamos en el corazón!
-        </p>
-        <div class="agradecimientos-firma">
-          <span class="firma-nombre" id="firma-nombre">---</span>
-          <span class="firma-rol">y su familia</span>
+      <!-- SECCIÓN AGRADECIMIENTOS -->
+      <section id="seccion-agradecimientos" class="seccion">
+        <h2 class="gold-text">🙏 Gracias</h2>
+        <p class="seccion-subtitulo gold-text">De todo corazón</p>
+        <div class="agradecimientos-contenido">
+          <p class="agradecimientos-texto">
+            Queremos expresar nuestro más profundo agradecimiento a todos los que han hecho posible este sueño.
+            A nuestra familia, por su amor incondicional; a nuestros padrinos, por su guía y apoyo; y a cada uno de ustedes, por formar parte de este día tan especial.
+          </p>
+          <p class="agradecimientos-texto" style="font-family: var(--script); font-size: 1.4rem; color: #d4af37;">
+            ¡Los llevamos en el corazón!
+          </p>
+          <div class="agradecimientos-firma">
+            <span class="firma-nombre" id="firma-nombre">---</span>
+            <span class="firma-rol">y su familia</span>
+          </div>
         </div>
-      </div>
-      <div class="divider-thin" aria-hidden="true"></div>
-      <p class="agradecimientos-no-faltes gold-text">
-        🌹 No faltes, te esperamos con los brazos abiertos 🌹
-      </p>
+        <div class="divider-thin" aria-hidden="true"></div>
+        <p class="agradecimientos-no-faltes gold-text">
+          🌹 No faltes, te esperamos con los brazos abiertos 🌹
+        </p>
+      </section>
     </div>
   </div>
-  <!-- ===== FIN MODAL AGRADECIMIENTOS ===== -->
 
   <script type="module" src="script-principal.js"></script>
 
