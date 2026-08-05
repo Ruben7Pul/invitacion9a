@@ -19,7 +19,7 @@
       font-family:'Cinzel',serif;
     }
 
-    /* Video de fondo con fallback */
+    /* Video de fondo (opcional) */
     #game-bg-video {
       position:fixed;
       inset:0;
@@ -30,21 +30,6 @@
       pointer-events:none;
       opacity:0.5;
       mix-blend-mode:screen;
-    }
-    /* Si el video falla, se usa un fondo sólido */
-    #game-bg-video.error {
-      display:none;
-    }
-    #game-bg-video.error + .video-fallback {
-      display:block !important;
-    }
-    .video-fallback {
-      display:none;
-      position:fixed;
-      inset:0;
-      z-index:0;
-      background:radial-gradient(ellipse at 50% 35%, #0d1f4a 0%, #0a122a 75%);
-      pointer-events:none;
     }
 
     @keyframes rainbowScore {
@@ -165,6 +150,9 @@
     #game-stage {
       position:relative;
       background:#0e0a18;
+      background-image:url('../archivos/jueg1.png');
+      background-size:cover;
+      background-position:center;
       border:2px solid #b8860b;
       border-radius:16px;
       overflow:hidden;
@@ -183,7 +171,7 @@
       z-index:2;
     }
 
-    /* LADRILLOS (estilos resumidos, igual que antes) */
+    /* LADRILLOS */
     .brick {
       position:absolute;
       display:flex;
@@ -199,7 +187,19 @@
       box-shadow:inset 0 2px 4px rgba(255,255,255,0.15), inset 0 -2px 4px rgba(0,0,0,0.3);
     }
     .brick.gone { opacity:0; transform:scale(0.3); pointer-events:none; }
-    /* ... el resto de estilos de ladrillos se mantienen igual ... */
+    .brick-clay { background:#d9534f; background:linear-gradient(145deg,#e57373,#c62828); box-shadow:inset 0 2px 4px rgba(255,200,200,0.3), inset 0 -2px 4px rgba(0,0,0,0.4); }
+    .brick-wood { background:#8b5a2b; background:linear-gradient(145deg,#a67c52,#6d4c2a); box-shadow:inset 0 2px 4px rgba(255,220,180,0.3), inset 0 -2px 4px rgba(0,0,0,0.4); }
+    .brick-wood.cracked-1 { background:#7a4f24; background:linear-gradient(145deg,#8b6b3e,#5a3d1a); box-shadow:inset 0 2px 4px rgba(255,220,180,0.2), inset 0 -2px 4px rgba(0,0,0,0.5); position:relative; overflow:hidden; }
+    .brick-wood.cracked-1::after { content:''; position:absolute; top:10%; left:30%; width:2px; height:80%; background:rgba(0,0,0,0.4); transform:rotate(15deg); box-shadow:1px 0 2px rgba(0,0,0,0.2); }
+    .brick-wood.cracked-1::before { content:''; position:absolute; top:20%; left:60%; width:2px; height:60%; background:rgba(0,0,0,0.3); transform:rotate(-10deg); }
+    .brick-iron { background:#7a8a9a; background:linear-gradient(145deg,#9aa9b9,#5a6a7a); box-shadow:inset 0 2px 4px rgba(200,220,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.4); }
+    .brick-iron.cracked-1 { background:#6a7a8a; background:linear-gradient(145deg,#7a8a9a,#4a5a6a); box-shadow:inset 0 2px 4px rgba(200,220,255,0.2), inset 0 -2px 4px rgba(0,0,0,0.5); position:relative; overflow:hidden; }
+    .brick-iron.cracked-1::after { content:''; position:absolute; top:5%; left:20%; width:2px; height:90%; background:rgba(0,0,0,0.5); transform:rotate(20deg); box-shadow:1px 0 2px rgba(0,0,0,0.3); }
+    .brick-iron.cracked-1::before { content:''; position:absolute; top:15%; left:50%; width:2px; height:70%; background:rgba(0,0,0,0.4); transform:rotate(-15deg); }
+    .brick-iron.cracked-2 { background:#5a6a7a; background:linear-gradient(145deg,#5a6a7a,#3a4a5a); box-shadow:inset 0 2px 4px rgba(200,220,255,0.1), inset 0 -2px 4px rgba(0,0,0,0.6); position:relative; overflow:hidden; }
+    .brick-iron.cracked-2::after { content:''; position:absolute; top:0; left:10%; width:2px; height:100%; background:rgba(0,0,0,0.6); transform:rotate(30deg); box-shadow:1px 0 3px rgba(0,0,0,0.3); }
+    .brick-iron.cracked-2::before { content:''; position:absolute; top:10%; left:40%; width:2px; height:80%; background:rgba(0,0,0,0.5); transform:rotate(-20deg); box-shadow:1px 0 2px rgba(0,0,0,0.2); }
+    .brick-iron.cracked-2 .crack-extra { position:absolute; top:5%; left:70%; width:2px; height:60%; background:rgba(0,0,0,0.4); transform:rotate(5deg); }
 
     #paddle, #ball {
       position:absolute;
@@ -341,7 +341,7 @@
       font-weight:bold;
     }
 
-    /* Modal de pausa */
+    /* MODAL DE PAUSA (sin perlas) */
     .pause-modal-overlay {
       position:absolute;
       inset:0;
@@ -457,28 +457,14 @@
       border-color:rgba(201,162,77,0.6);
     }
 
-    /* Tips de carga (ocultos por defecto) */
-    #loading-tips {
-      position:absolute;
-      bottom:10px;
-      left:50%;
-      transform:translateX(-50%);
-      z-index:300;
-      color:#fae3a0;
-      font-family:'Cinzel',serif;
-      font-size:0.7rem;
-      text-align:center;
-      opacity:0.8;
-      background:rgba(0,0,0,0.5);
-      padding:0.3rem 1rem;
-      border-radius:20px;
-      backdrop-filter:blur(2px);
-      border:1px solid rgba(212,175,55,0.2);
-      pointer-events:none;
-      transition:opacity 0.5s;
-      max-width:90%;
+    /* Eliminar cualquier posible perla o adorno extra */
+    .pause-modal-card::before,
+    .pause-modal-card::after,
+    #game-stage::before,
+    #game-stage::after {
+      display: none !important;
+      content: none !important;
     }
-    #loading-tips.hidden { opacity:0; }
 
     @media (max-width:400px) {
       #game-panel { max-width:98vw; }
@@ -487,7 +473,6 @@
       #paddle { height:10px; width:50px; top:406px; }
       #ball { width:10px; height:10px; }
       .game-help { font-size:0.6rem; }
-      #loading-tips { font-size:0.55rem; padding:0.2rem 0.6rem; }
     }
     @media (min-width:768px) {
       #game-stage { max-width:450px; }
@@ -495,35 +480,30 @@
   </style>
 </head>
 <body style="background:#0e0a18">
-  <!-- Video de fondo con fallback -->
-  <div class="video-fallback" id="video-fallback"></div>
-  <video id="game-bg-video" autoplay loop muted playsinline>
+  <!-- Video de fondo (opcional) -->
+  <video id="game-bg-video" autoplay loop muted playsinline style="display:none;" onerror="this.style.display='none'">
     <source src="../archivos/juegvideo.webm" type="video/webm">
     <source src="../archivos/juegvideo.mp4" type="video/mp4">
   </video>
+  <script>
+    // Intentar mostrar el video si existe
+    (function() {
+      var video = document.getElementById('game-bg-video');
+      if (video) {
+        video.style.display = 'block';
+        video.play().catch(function() {
+          video.style.display = 'none';
+        });
+        // Si falla la carga, ocultarlo
+        video.addEventListener('error', function() {
+          video.style.display = 'none';
+        });
+      }
+    })();
+  </script>
 
   <div id="loading-veil" aria-hidden="true"></div>
   <script>
-    // Manejo de error del video: si falla, mostrar fallback y ocultar video
-    (function() {
-      const video = document.getElementById('game-bg-video');
-      const fallback = document.getElementById('video-fallback');
-      if (video) {
-        video.addEventListener('error', function(e) {
-          console.warn('⚠️ Video de fondo no cargado, usando fallback');
-          this.classList.add('error');
-          if (fallback) fallback.style.display = 'block';
-        });
-        // También si después de 3 segundos no está listo, forzar fallback
-        setTimeout(() => {
-          if (video.readyState < 2) {
-            video.classList.add('error');
-            if (fallback) fallback.style.display = 'block';
-          }
-        }, 3000);
-      }
-    })();
-
     setTimeout(function () {
       var veil = document.getElementById('loading-veil');
       if (!veil) return;
@@ -568,8 +548,6 @@
         <div id="game-msg">
           <p id="game-msg-text">¡Game Over!</p>
         </div>
-
-        <div id="loading-tips" class="hidden"></div>
       </div>
 
       <p class="game-help">
