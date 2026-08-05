@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS COMPLETOS (CON LIBRO DE FIRMAS)
+   🌹 INVITACIÓN XV – ESTILOS COMPLETOS (CON RELOJ DE ARENA Y BRILLOS)
    ============================================================ */
 
 :root {
@@ -626,6 +626,27 @@ h1#nombre-hero {
   text-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
 }
 
+/* ===== RELOJ DE ARENA ===== */
+.reloj-arena {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.3rem;
+}
+.arena-caida {
+  animation: caerArena 1.5s ease-in-out infinite;
+}
+@keyframes caerArena {
+  0%, 100% { stroke-dashoffset: 0; }
+  50% { stroke-dashoffset: 10; }
+}
+.arena-arriba, .arena-abajo {
+  animation: latirArena 3s ease-in-out infinite;
+}
+@keyframes latirArena {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
 /* ===== CALENDARIO ===== */
 .calendario-container {
   display: grid;
@@ -660,6 +681,7 @@ h1#nombre-hero {
   flex-direction: column;
   font-size: clamp(0.9rem, 2vw, 1.1rem);
 }
+/* Días 8, 10, 11 especiales */
 .calendario-container .dia.especial {
   border-color: #d4af37;
   background: rgba(212, 175, 55, 0.15);
@@ -668,9 +690,36 @@ h1#nombre-hero {
   font-weight: 700;
   color: #ffd700;
 }
-.calendario-container .dia .rosa {
-  font-size: 1.2rem;
-  margin-top: -2px;
+/* Día 10: más brillo y rosa animada */
+.calendario-container .dia.dia-10 {
+  border-color: #ff69b4;
+  background: rgba(255, 105, 180, 0.2);
+  box-shadow: 0 0 30px rgba(255, 105, 180, 0.5), inset 0 0 20px rgba(255, 105, 180, 0.2);
+  animation: brilloRosa 1.5s ease-in-out infinite alternate;
+  transform: scale(1.08);
+}
+.calendario-container .dia.dia-10 .rosa {
+  display: inline-block;
+  animation: flotarRosa 2s ease-in-out infinite;
+}
+@keyframes brilloRosa {
+  0% { box-shadow: 0 0 20px rgba(255, 105, 180, 0.4); }
+  100% { box-shadow: 0 0 50px rgba(255, 105, 180, 0.8), 0 0 80px rgba(255, 105, 180, 0.3); }
+}
+@keyframes flotarRosa {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-5px) rotate(15deg); }
+}
+/* Día actual (si es octubre 2026) */
+.calendario-container .dia.hoy {
+  border-color: #ff1493;
+  background: rgba(255, 20, 147, 0.15);
+  box-shadow: 0 0 40px rgba(255, 20, 147, 0.6);
+  animation: brilloDiaActual 1.8s ease-in-out infinite alternate;
+}
+@keyframes brilloDiaActual {
+  0% { box-shadow: 0 0 20px rgba(255, 20, 147, 0.3); }
+  100% { box-shadow: 0 0 60px rgba(255, 20, 147, 0.9), 0 0 100px rgba(255, 20, 147, 0.4); }
 }
 
 .calendario-eventos {
@@ -724,7 +773,21 @@ h1#nombre-hero {
   box-shadow: 0 0 15px rgba(212,175,55,0.2);
 }
 
-/* ===== ITINERARIO ===== */
+/* ===== ITINERARIO CON DOS DÍAS Y BRILLO ===== */
+.itinerario-dia {
+  margin-bottom: 1rem;
+}
+.itinerario-dia-titulo {
+  font-family: var(--serif-display);
+  font-size: clamp(0.9rem, 2.2vw, 1.1rem);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #fae3a0;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  padding-bottom: 0.3rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
 .itinerario-lista {
   display: flex;
   flex-direction: column;
@@ -740,6 +803,18 @@ h1#nombre-hero {
   font-family: var(--serif-body);
   font-size: clamp(0.9rem, 2vw, 1.1rem);
   color: #f0e0c0;
+  transition: all 0.5s ease;
+}
+.itinerario-item.activo {
+  background: rgba(255, 105, 180, 0.15);
+  border-left: 4px solid #ff69b4;
+  border-radius: 4px;
+  box-shadow: 0 0 30px rgba(255, 105, 180, 0.2);
+  animation: brilloTransparente 2s ease-in-out infinite alternate;
+}
+@keyframes brilloTransparente {
+  0% { box-shadow: 0 0 15px rgba(255, 105, 180, 0.1); }
+  100% { box-shadow: 0 0 35px rgba(255, 105, 180, 0.3); }
 }
 .itinerario-item.especial {
   border-bottom: 2px solid #d4af37;
@@ -755,7 +830,7 @@ h1#nombre-hero {
   color: #fae3a0;
 }
 
-/* ===== CONTADOR CON ANILLO ===== */
+/* ===== CONTADOR CON ANILLO CON RELIEVE ===== */
 .clock {
   display: flex;
   flex-wrap: nowrap;
@@ -766,11 +841,11 @@ h1#nombre-hero {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: rgba(10, 18, 34, 0.55);
+  background: radial-gradient(ellipse at 30% 30%, rgba(30, 50, 80, 0.6), rgba(10, 18, 34, 0.8));
   border: 2px solid var(--border-gold);
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 0.6rem 0.2rem;
-  box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.06), 0 4px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 0 30px rgba(212, 175, 55, 0.08), 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(212, 175, 55, 0.1);
   position: relative;
   flex: 1;
   min-width: 60px;
@@ -788,14 +863,15 @@ h1#nombre-hero {
 }
 .clock .unit .circle-wrap .bg-circle {
   fill: none;
-  stroke: rgba(212, 175, 55, 0.15);
-  stroke-width: 4;
+  stroke: rgba(212, 175, 55, 0.2);
+  stroke-width: 5;
 }
 .clock .unit .circle-wrap .progress-circle {
   fill: none;
   stroke: #d4af37;
-  stroke-width: 4;
+  stroke-width: 6;
   stroke-linecap: round;
+  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4));
   transition: stroke-dashoffset 0.3s ease;
 }
 .clock .unit .num {
