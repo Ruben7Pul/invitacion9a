@@ -85,8 +85,7 @@ function rellenarDatos(config) {
 
   const linkLibro = document.getElementById('link-libro-firmas');
   if (linkLibro) {
-    linkLibro.href = '#';
-    linkLibro.setAttribute('data-link', 'https://forms.gle/ejemplo');
+    linkLibro.href = 'https://docs.google.com/forms/d/e/1FAIpQLSd9CtYaj-_JR6s5MhZQXrxQPPPBfFTjmB-2FoBk6lvA8PWAIg/viewform';
   }
 }
 
@@ -312,7 +311,6 @@ function initContadorCircular(config) {
     }
   }
 
-  // Crear los SVG dentro de cada unidad si no existen
   units.forEach((unit) => {
     let circleWrap = unit.querySelector('.circle-wrap');
     if (!circleWrap) {
