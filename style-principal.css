@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS COMPLETOS (CON RELOJ DE ARENA Y BRILLOS)
+   🌹 INVITACIÓN XV – ESTILOS CON ADORNOS Y ANIMACIONES
    ============================================================ */
 
 :root {
@@ -12,6 +12,8 @@
   --script: 'Pinyon Script', cursive;
   --border-gold: #b8860b;
   --border-gold-light: #d4af37;
+  --rosa: #ff69b4;
+  --rosa-claro: #ffb6c1;
 }
 
 *:focus {
@@ -283,7 +285,7 @@ body {
   pointer-events: auto;
 }
 
-/* ===== DESAPARICIÓN ESCALONADA DE ELEMENTOS (al cerrar la app) ===== */
+/* ===== DESAPARICIÓN ESCALONADA ===== */
 #app:not(.show) .seccion,
 #app:not(.show) #app-mid,
 #app:not(.show) #app-top {
@@ -304,7 +306,7 @@ body {
   transition-delay: 0.2s, 0.2s;
 }
 
-/* Retrasos específicos para elementos hijos al desaparecer */
+/* Retrasos específicos para elementos hijos */
 #app:not(.show) .seccion h2 {
   transition-delay: 0s;
 }
@@ -333,15 +335,12 @@ body {
 #app:not(.show) .seccion .btn-mapa {
   transition-delay: 0.2s;
 }
-/* Retrasos individuales para las unidades del contador */
 #app:not(.show) .seccion .clock .unit:nth-child(1) { transition-delay: 0.1s; }
 #app:not(.show) .seccion .clock .unit:nth-child(2) { transition-delay: 0.15s; }
 #app:not(.show) .seccion .clock .unit:nth-child(3) { transition-delay: 0.2s; }
 #app:not(.show) .seccion .clock .unit:nth-child(4) { transition-delay: 0.25s; }
-/* Retrasos para las tarjetas de lugares */
 #app:not(.show) .seccion .detalle-card:nth-child(2) { transition-delay: 0.1s; }
 #app:not(.show) .seccion .detalle-card:nth-child(4) { transition-delay: 0.15s; }
-/* Retrasos para los grupos de familia */
 #app:not(.show) .seccion .familia-grupo:nth-child(2) { transition-delay: 0.1s; }
 #app:not(.show) .seccion .familia-grupo:nth-child(4) { transition-delay: 0.15s; }
 
@@ -466,6 +465,11 @@ h1#nombre-hero {
   color: transparent;
   animation: rainbowMove 4s linear infinite;
   user-select: none;
+  position: relative;
+  transition: transform 0.3s ease;
+}
+h1#nombre-hero:hover {
+  transform: scale(1.05);
 }
 @keyframes rainbowMove {
   0% { background-position: 0% 50%; }
@@ -483,32 +487,8 @@ h1#nombre-hero {
   background-clip: unset !important;
   animation: none !important;
 }
-.hint {
-  font-style: italic;
-  font-size: clamp(1.2rem, 3.3cqw, 1.2rem);
-  margin: 0.05rem 0;
-  opacity: 0.8;
-  color: var(--gold-light);
-  text-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
-}
 
-/* ===== HINT FINAL ===== */
-.hint-final {
-  font-family: var(--script);
-  font-size: clamp(1.2rem, 3vw, 1.5rem);
-  color: #fae3a0;
-  text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
-  margin: 0.4rem 0 0.2rem;
-  opacity: 0.9;
-  text-align: center;
-  animation: pulseHint 2s ease-in-out infinite;
-}
-@keyframes pulseHint {
-  0%, 100% { opacity: 0.7; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.02); }
-}
-
-/* ===== SECCIONES - Bordes dorados fijos ===== */
+/* ===== SECCIONES CON ADORNOS ===== */
 .seccion {
   width: 100%;
   background: rgba(10, 18, 34, 0.55);
@@ -521,14 +501,44 @@ h1#nombre-hero {
   transform: translateY(30px);
   transition: opacity 0.7s ease, transform 0.7s ease;
   position: relative;
-  background-image: radial-gradient(circle at 10% 20%, rgba(212,175,55,0.05) 0%, transparent 20%),
-                    radial-gradient(circle at 90% 80%, rgba(212,175,55,0.05) 0%, transparent 20%);
+  /* Patrón de pétalos sutil en el fondo */
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(212,175,55,0.04) 0%, transparent 20%),
+    radial-gradient(circle at 90% 80%, rgba(212,175,55,0.04) 0%, transparent 20%),
+    radial-gradient(circle at 20% 90%, rgba(255,105,180,0.03) 0%, transparent 15%),
+    radial-gradient(circle at 80% 10%, rgba(255,105,180,0.03) 0%, transparent 15%);
+  /* Adornos en las esquinas */
+}
+.seccion::before {
+  content: '❧';
+  position: absolute;
+  top: -8px;
+  left: 12px;
+  color: #d4af37;
+  font-size: 1.2rem;
+  background: rgba(10, 18, 34, 0.8);
+  padding: 0 6px;
+  border-radius: 4px;
+  opacity: 0.7;
+}
+.seccion::after {
+  content: '❧';
+  position: absolute;
+  bottom: -8px;
+  right: 12px;
+  color: #d4af37;
+  font-size: 1.2rem;
+  background: rgba(10, 18, 34, 0.8);
+  padding: 0 6px;
+  border-radius: 4px;
+  opacity: 0.7;
+  transform: scaleX(-1);
 }
 .seccion.visible {
   opacity: 1;
   transform: translateY(0);
 }
-/* Retrasos de sección (nuevo orden) */
+/* Retrasos de sección */
 #seccion-familia.visible { transition-delay: 0.1s; }
 #seccion-calendario.visible { transition-delay: 0.2s; }
 #seccion-contador.visible { transition-delay: 0.3s; }
@@ -537,74 +547,7 @@ h1#nombre-hero {
 #seccion-libro-firmas.visible { transition-delay: 0.6s; }
 #seccion-agradecimientos.visible { transition-delay: 0.7s; }
 
-/* ===== ELEMENTOS INTERNOS CON ANIMACIONES ESCALONADAS ===== */
-.seccion .animar {
-  opacity: 0;
-  transform: translateY(15px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-.seccion.visible .animar {
-  opacity: 1;
-  transform: translateY(0);
-}
-/* Retrasos para cada elemento */
-.seccion.visible .animar-1 { transition-delay: 0.1s; }
-.seccion.visible .animar-2 { transition-delay: 0.2s; }
-.seccion.visible .animar-3 { transition-delay: 0.3s; }
-.seccion.visible .animar-4 { transition-delay: 0.4s; }
-.seccion.visible .animar-5 { transition-delay: 0.5s; }
-.seccion.visible .animar-6 { transition-delay: 0.6s; }
-.seccion.visible .animar-7 { transition-delay: 0.7s; }
-.seccion.visible .animar-8 { transition-delay: 0.8s; }
-
-/* Aplicar a elementos comunes */
-.seccion h2,
-.seccion .seccion-subtitulo,
-.seccion .detalle-card,
-.seccion .familia-grupo,
-.seccion .clock .unit,
-.seccion .calendario-container,
-.seccion .calendario-eventos,
-.seccion .itinerario-lista,
-.seccion .btn-mapa,
-.seccion .libro-firmas-contenido,
-.seccion .agradecimientos-contenido {
-  opacity: 0;
-  transform: translateY(15px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-.seccion.visible h2 { transition-delay: 0.1s; opacity: 1; transform: translateY(0); }
-.seccion.visible .seccion-subtitulo { transition-delay: 0.15s; opacity: 1; transform: translateY(0); }
-.seccion.visible .detalle-card { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
-.seccion.visible .familia-grupo { transition-delay: 0.25s; opacity: 1; transform: translateY(0); }
-.seccion.visible .clock .unit { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
-.seccion.visible .calendario-container { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
-.seccion.visible .calendario-eventos { transition-delay: 0.25s; opacity: 1; transform: translateY(0); }
-.seccion.visible .itinerario-lista { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
-.seccion.visible .btn-mapa { transition-delay: 0.3s; opacity: 1; transform: translateY(0); }
-.seccion.visible .libro-firmas-contenido { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
-.seccion.visible .agradecimientos-contenido { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
-
-/* Para las unidades del contador, retrasos individuales */
-.seccion.visible .clock .unit:nth-child(1) { transition-delay: 0.2s; }
-.seccion.visible .clock .unit:nth-child(2) { transition-delay: 0.3s; }
-.seccion.visible .clock .unit:nth-child(3) { transition-delay: 0.4s; }
-.seccion.visible .clock .unit:nth-child(4) { transition-delay: 0.5s; }
-
-/* Para las tarjetas de lugares, retrasos */
-.seccion.visible .detalle-card:nth-child(2) { transition-delay: 0.25s; }
-.seccion.visible .detalle-card:nth-child(4) { transition-delay: 0.35s; }
-
-/* Efecto de brillo en los títulos al aparecer */
-.seccion.visible h2 {
-  animation: goldShine 1.2s ease forwards;
-}
-@keyframes goldShine {
-  0% { text-shadow: 0 0 0 rgba(212,175,55,0); }
-  50% { text-shadow: 0 0 30px rgba(212,175,55,0.8); }
-  100% { text-shadow: 0 0 25px rgba(212,175,55,0.3); }
-}
-
+/* ===== TÍTULOS DE SECCIÓN CON ADORNOS ===== */
 .seccion h2 {
   font-family: var(--serif-display);
   text-align: center;
@@ -618,17 +561,33 @@ h1#nombre-hero {
   border-bottom: 2px solid rgba(212, 175, 55, 0.2);
   position: relative;
 }
+.seccion h2::before {
+  content: '🌹';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  color: #d4af37;
+  opacity: 0.4;
+}
 .seccion h2::after {
   content: '🌹';
   position: absolute;
-  bottom: -12px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 1.2rem;
-  background: #0d1424;
-  padding: 0 6px;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
   color: #d4af37;
-  text-shadow: 0 0 10px rgba(212,175,55,0.3);
+  opacity: 0.4;
+}
+.seccion.visible h2 {
+  animation: goldShine 1.2s ease forwards;
+}
+@keyframes goldShine {
+  0% { text-shadow: 0 0 0 rgba(212,175,55,0); }
+  50% { text-shadow: 0 0 30px rgba(212,175,55,0.8); }
+  100% { text-shadow: 0 0 25px rgba(212,175,55,0.3); }
 }
 
 .seccion-subtitulo {
@@ -641,6 +600,60 @@ h1#nombre-hero {
   letter-spacing: 0.05em;
   text-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
 }
+
+/* ===== ELEMENTOS INTERNOS CON ANIMACIONES ===== */
+.seccion .animar {
+  opacity: 0;
+  transform: translateY(15px) scale(0.98);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.seccion.visible .animar {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.seccion.visible .animar-1 { transition-delay: 0.1s; }
+.seccion.visible .animar-2 { transition-delay: 0.2s; }
+.seccion.visible .animar-3 { transition-delay: 0.3s; }
+.seccion.visible .animar-4 { transition-delay: 0.4s; }
+.seccion.visible .animar-5 { transition-delay: 0.5s; }
+.seccion.visible .animar-6 { transition-delay: 0.6s; }
+.seccion.visible .animar-7 { transition-delay: 0.7s; }
+.seccion.visible .animar-8 { transition-delay: 0.8s; }
+
+.seccion h2,
+.seccion .seccion-subtitulo,
+.seccion .detalle-card,
+.seccion .familia-grupo,
+.seccion .clock .unit,
+.seccion .calendario-container,
+.seccion .calendario-eventos,
+.seccion .itinerario-lista,
+.seccion .btn-mapa,
+.seccion .libro-firmas-contenido,
+.seccion .agradecimientos-contenido {
+  opacity: 0;
+  transform: translateY(15px) scale(0.98);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.seccion.visible h2 { transition-delay: 0.1s; opacity: 1; transform: translateY(0) scale(1); }
+.seccion.visible .seccion-subtitulo { transition-delay: 0.15s; opacity: 1; transform: translateY(0) scale(1); }
+.seccion.visible .detalle-card { transition-delay: 0.2s; opacity: 1; transform: translateY(0) scale(1); }
+.seccion.visible .familia-grupo { transition-delay: 0.25s; opacity: 1; transform: translateY(0) scale(1); }
+.seccion.visible .clock .unit { transition-delay: 0.2s; opacity: 1; transform: translateY(0) scale(1); }
+.seccion.visible .calendario-container { transition-delay: 0.2s; opacity: 1; transform: translateY(0) scale(1); }
+.seccion.visible .calendario-eventos { transition-delay: 0.25s; opacity: 1; transform: translateY(0) scale(1); }
+.seccion.visible .itinerario-lista { transition-delay: 0.2s; opacity: 1; transform: translateY(0) scale(1); }
+.seccion.visible .btn-mapa { transition-delay: 0.3s; opacity: 1; transform: translateY(0) scale(1); }
+.seccion.visible .libro-firmas-contenido { transition-delay: 0.2s; opacity: 1; transform: translateY(0) scale(1); }
+.seccion.visible .agradecimientos-contenido { transition-delay: 0.2s; opacity: 1; transform: translateY(0) scale(1); }
+
+.seccion.visible .clock .unit:nth-child(1) { transition-delay: 0.2s; }
+.seccion.visible .clock .unit:nth-child(2) { transition-delay: 0.3s; }
+.seccion.visible .clock .unit:nth-child(3) { transition-delay: 0.4s; }
+.seccion.visible .clock .unit:nth-child(4) { transition-delay: 0.5s; }
+
+.seccion.visible .detalle-card:nth-child(2) { transition-delay: 0.25s; }
+.seccion.visible .detalle-card:nth-child(4) { transition-delay: 0.35s; }
 
 /* ===== RELOJ DE ARENA ===== */
 .reloj-arena {
@@ -689,7 +702,7 @@ h1#nombre-hero {
   padding: 0.2rem 0;
   text-align: center;
   color: #f0e0c0;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
@@ -697,7 +710,11 @@ h1#nombre-hero {
   flex-direction: column;
   font-size: clamp(0.9rem, 2vw, 1.1rem);
 }
-/* Días 8, 10, 11 especiales */
+.calendario-container .dia:hover {
+  transform: scale(1.08);
+  border-color: #d4af37;
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+}
 .calendario-container .dia.especial {
   border-color: #d4af37;
   background: rgba(212, 175, 55, 0.15);
@@ -706,7 +723,6 @@ h1#nombre-hero {
   font-weight: 700;
   color: #ffd700;
 }
-/* Día 10: más brillo y rosa animada */
 .calendario-container .dia.dia-10 {
   border-color: #ff69b4;
   background: rgba(255, 105, 180, 0.2);
@@ -726,7 +742,6 @@ h1#nombre-hero {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50% { transform: translateY(-5px) rotate(15deg); }
 }
-/* Día actual (si es octubre 2026) */
 .calendario-container .dia.hoy {
   border-color: #ff1493;
   background: rgba(255, 20, 147, 0.15);
@@ -755,6 +770,12 @@ h1#nombre-hero {
   padding: 0.3rem 0.8rem;
   font-size: clamp(0.8rem, 1.5vw, 0.95rem);
   color: #f0e0c0;
+  transition: all 0.3s ease;
+}
+.calendario-evento:hover {
+  border-color: #d4af37;
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
+  transform: translateY(-2px);
 }
 .calendario-evento .evento-info {
   display: flex;
@@ -787,9 +808,10 @@ h1#nombre-hero {
   background: rgba(201, 162, 77, 0.2);
   border-color: rgba(201, 162, 77, 0.6);
   box-shadow: 0 0 15px rgba(212,175,55,0.2);
+  transform: scale(1.05);
 }
 
-/* ===== ITINERARIO CON DOS DÍAS Y BRILLO ===== */
+/* ===== ITINERARIO ===== */
 .itinerario-dia {
   margin-bottom: 1rem;
 }
@@ -803,6 +825,15 @@ h1#nombre-hero {
   padding-bottom: 0.3rem;
   margin-bottom: 0.5rem;
   text-align: center;
+  position: relative;
+}
+.itinerario-dia-titulo::before,
+.itinerario-dia-titulo::after {
+  content: '✦';
+  color: #d4af37;
+  font-size: 0.8rem;
+  opacity: 0.5;
+  margin: 0 0.5rem;
 }
 .itinerario-lista {
   display: flex;
@@ -820,6 +851,11 @@ h1#nombre-hero {
   font-size: clamp(0.9rem, 2vw, 1.1rem);
   color: #f0e0c0;
   transition: all 0.5s ease;
+  position: relative;
+}
+.itinerario-item:hover {
+  background: rgba(212, 175, 55, 0.05);
+  border-radius: 4px;
 }
 .itinerario-item.activo {
   background: rgba(255, 105, 180, 0.15);
@@ -831,6 +867,15 @@ h1#nombre-hero {
 @keyframes brilloTransparente {
   0% { box-shadow: 0 0 15px rgba(255, 105, 180, 0.1); }
   100% { box-shadow: 0 0 35px rgba(255, 105, 180, 0.3); }
+}
+.itinerario-item.activo::before {
+  content: '🌹';
+  position: absolute;
+  left: -24px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  animation: flotarRosa 2s ease-in-out infinite;
 }
 .itinerario-item.especial {
   border-bottom: 2px solid #d4af37;
@@ -846,7 +891,7 @@ h1#nombre-hero {
   color: #fae3a0;
 }
 
-/* ===== CONTADOR CON ANILLO CON RELIEVE ===== */
+/* ===== CONTADOR CON ANILLO ===== */
 .clock {
   display: flex;
   flex-wrap: nowrap;
@@ -866,6 +911,11 @@ h1#nombre-hero {
   flex: 1;
   min-width: 60px;
   text-align: center;
+  transition: all 0.3s ease;
+}
+.clock .unit:hover {
+  transform: translateY(-4px);
+  box-shadow: inset 0 0 30px rgba(212, 175, 55, 0.15), 0 12px 40px rgba(0,0,0,0.6), 0 0 0 2px rgba(212, 175, 55, 0.2);
 }
 .clock .unit .circle-wrap {
   position: relative;
@@ -922,6 +972,17 @@ h1#nombre-hero {
   border-radius: 2px;
   opacity: 0.6;
 }
+.clock .unit::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 15%;
+  width: 70%;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, #d4af37, transparent);
+  border-radius: 2px;
+  opacity: 0.3;
+}
 
 #contador-mensaje {
   font-family: var(--script);
@@ -943,6 +1004,12 @@ h1#nombre-hero {
   margin-bottom: 1rem;
   box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.03), 0 4px 20px rgba(0,0,0,0.4);
   position: relative;
+  transition: all 0.4s ease;
+}
+.detalle-card:hover {
+  transform: translateY(-4px);
+  border-color: #d4af37;
+  box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.08), 0 8px 30px rgba(0,0,0,0.5), 0 0 30px rgba(212, 175, 55, 0.1);
 }
 .detalle-card .icono {
   width: 34px;
@@ -952,6 +1019,10 @@ h1#nombre-hero {
   display: block;
   stroke-width: 1.8;
   filter: drop-shadow(0 0 6px rgba(212,175,55,0.3));
+  transition: transform 0.4s ease;
+}
+.detalle-card:hover .icono {
+  transform: scale(1.1) rotate(-5deg);
 }
 .detalle-card h3 {
   font-family: var(--serif-display);
@@ -1015,7 +1086,7 @@ h1#nombre-hero {
   cursor: pointer;
 }
 .btn-mapa:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px) scale(1.03);
   background: rgba(201, 162, 77, 0.2);
   border-color: rgba(201, 162, 77, 0.6);
   box-shadow: 0 0 25px rgba(212, 175, 55, 0.2);
@@ -1046,6 +1117,12 @@ h1#nombre-hero {
   margin-bottom: 1rem;
   box-shadow: inset 0 0 30px rgba(0,0,0,0.2);
   position: relative;
+  transition: all 0.4s ease;
+}
+.familia-grupo:hover {
+  transform: translateY(-3px);
+  border-color: #d4af37;
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.2), 0 8px 25px rgba(0,0,0,0.3);
 }
 .familia-titulo {
   display: flex;
@@ -1058,6 +1135,11 @@ h1#nombre-hero {
   font-size: 1.2rem;
   color: #d4af37;
   opacity: 0.6;
+  animation: brilloCorona 2s ease-in-out infinite alternate;
+}
+@keyframes brilloCorona {
+  0% { opacity: 0.4; transform: scale(1); }
+  100% { opacity: 0.8; transform: scale(1.1); }
 }
 .familia-grupo h3 {
   font-family: var(--serif-display);
@@ -1079,6 +1161,11 @@ h1#nombre-hero {
   font-size: clamp(1.1rem, 2.8vw, 1.4rem);
   color: #f0e0c0;
   font-weight: 500;
+  transition: all 0.3s ease;
+}
+.familia-nombres p:hover {
+  color: #d4af37;
+  text-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
 }
 .familia-nombres .tratamiento {
   font-size: 0.75rem;
@@ -1122,6 +1209,11 @@ h1#nombre-hero {
   display: block;
   font-size: clamp(2rem, 5vw, 2.8rem);
   color: #d4af37;
+  animation: brilloNombre 2.5s ease-in-out infinite alternate;
+}
+@keyframes brilloNombre {
+  0% { text-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
+  100% { text-shadow: 0 0 30px rgba(212, 175, 55, 0.6), 0 0 60px rgba(212, 175, 55, 0.2); }
 }
 .agradecimientos-firma .firma-rol {
   display: block;
@@ -1141,7 +1233,23 @@ h1#nombre-hero {
   margin-top: 0.2rem;
 }
 
-/* ===== DIVISOR ===== */
+/* ===== HINT FINAL ===== */
+.hint-final {
+  font-family: var(--script);
+  font-size: clamp(1.2rem, 3vw, 1.5rem);
+  color: #fae3a0;
+  text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+  margin: 0.4rem 0 0.2rem;
+  opacity: 0.9;
+  text-align: center;
+  animation: pulseHint 2s ease-in-out infinite;
+}
+@keyframes pulseHint {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.02); }
+}
+
+/* ===== DIVISOR DECORATIVO ===== */
 .divider-thin {
   height: 2px;
   background: linear-gradient(90deg, transparent, #d4af37, #fae3a0, #d4af37, transparent);
@@ -1151,15 +1259,17 @@ h1#nombre-hero {
   position: relative;
 }
 .divider-thin::before {
-  content: '🌹';
+  content: '🌹 ✦ 🌹';
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   background: #0d1424;
-  padding: 0 8px;
+  padding: 0 12px;
   color: #d4af37;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  white-space: nowrap;
 }
 
 /* ============================================================
@@ -1185,6 +1295,8 @@ h1#nombre-hero {
   .calendario-evento { flex-wrap: wrap; gap: 0.2rem; justify-content: center; }
   .itinerario-item { font-size: 0.8rem; }
   .detalle-botones { flex-direction: column; align-items: center; }
+  .seccion::before, .seccion::after { font-size: 0.9rem; }
+  .seccion h2::before, .seccion h2::after { font-size: 0.7rem; }
 }
 @media (min-width: 768px) {
   #app { padding: 0.6rem 2rem 0; }
