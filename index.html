@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style-principal.css?v=20260813">
+  <link rel="stylesheet" href="style-principal.css?v=20260814">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌹</text></svg>">
 </head>
 <body>
@@ -221,7 +221,7 @@
   <!-- APP PRINCIPAL (scrollable) -->
   <div id="app" role="main">
     <div id="app-inner">
-      <!-- SECCIÓN 0: INICIO (nueva) -->
+      <!-- SECCIÓN 0: INICIO -->
       <section id="seccion-inicio" class="seccion">
         <div id="app-top">
           <button type="button" id="back-link" class="top-btn gold-btn" aria-label="Volver a la reja">
@@ -284,16 +284,12 @@
         </div>
       </section>
 
-      <!-- SECCIÓN 2: CALENDARIO (FECHA) -->
+      <!-- SECCIÓN 2: CALENDARIO -->
       <section id="seccion-calendario" class="seccion">
         <h2 class="gold-text">📅 Fecha 📅</h2>
         <p class="seccion-subtitulo gold-text" style="font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 700;">Octubre 2026</p>
-        <div class="calendario-container" id="calendario-container">
-          <!-- Generado por JavaScript -->
-        </div>
-        <div class="calendario-eventos" id="calendario-eventos">
-          <!-- Generado por JavaScript -->
-        </div>
+        <div class="calendario-container" id="calendario-container"></div>
+        <div class="calendario-eventos" id="calendario-eventos"></div>
       </section>
 
       <!-- SECCIÓN 3: CONTADOR -->
@@ -309,7 +305,16 @@
         <p id="contador-mensaje" class="gold-text" style="font-family:var(--script); font-size:clamp(1.2rem,3vw,1.6rem); margin-top:0.6rem;">Cargando...</p>
       </section>
 
-      <!-- SECCIÓN 4: DÓNDE (LUGARES) -->
+      <!-- SECCIÓN 4: GUSTOS (NUEVA) -->
+      <section id="seccion-gustos" class="seccion">
+        <h2 class="gold-text">🎨 Gustos 🎨</h2>
+        <button id="btn-abrir-gustos" class="btn-mapa gold-text" style="margin-top: 0.5rem; border: 2px solid #d4af37; background: rgba(212, 175, 55, 0.15); width: 100%; font-size: clamp(1rem, 2.5vw, 1.3rem); padding: 0.6rem 1rem;">
+          🖼️ Conoce mis gustos
+        </button>
+        <p class="seccion-subtitulo gold-text" style="margin-top: 0.4rem; font-size: clamp(0.8rem, 1.5vw, 0.95rem); opacity:0.7;">Algunas de mis inspiraciones</p>
+      </section>
+
+      <!-- SECCIÓN 5: DÓNDE (LUGARES) -->
       <section id="seccion-lugares" class="seccion">
         <h2 class="gold-text">🏰 Donde 🏰</h2>
         <div class="detalle-card">
@@ -341,51 +346,30 @@
         </div>
       </section>
 
-      <!-- SECCIÓN 5: ITINERARIO -->
+      <!-- SECCIÓN 6: ITINERARIO -->
       <section id="seccion-itinerario" class="seccion">
         <h2 class="gold-text">📋 Itinerario 📋</h2>
         <div class="itinerario-dia">
           <h3 class="itinerario-dia-titulo gold-text">10 de octubre</h3>
           <div class="itinerario-lista" id="itinerario-10">
-            <div class="itinerario-item" data-hora="780">
-              <span class="itinerario-hora">1:00 PM</span>
-              <span class="itinerario-evento">Misa</span>
-            </div>
-            <div class="itinerario-item" data-hora="900">
-              <span class="itinerario-hora">3:00 PM</span>
-              <span class="itinerario-evento">Recepción</span>
-            </div>
-            <div class="itinerario-item" data-hora="1020">
-              <span class="itinerario-hora">5:00 PM</span>
-              <span class="itinerario-evento">Payaso</span>
-            </div>
-            <div class="itinerario-item" data-hora="1080">
-              <span class="itinerario-hora">6:00 PM</span>
-              <span class="itinerario-evento">Piñata</span>
-            </div>
-            <div class="itinerario-item" data-hora="1140">
-              <span class="itinerario-hora">7:00 PM</span>
-              <span class="itinerario-evento">Vals</span>
-            </div>
-            <div class="itinerario-item" data-hora="1200">
-              <span class="itinerario-hora">8:00 PM</span>
-              <span class="itinerario-evento">Pastel</span>
-            </div>
+            <div class="itinerario-item" data-hora="780"><span class="itinerario-hora">1:00 PM</span><span class="itinerario-evento">Misa</span></div>
+            <div class="itinerario-item" data-hora="900"><span class="itinerario-hora">3:00 PM</span><span class="itinerario-evento">Recepción</span></div>
+            <div class="itinerario-item" data-hora="1020"><span class="itinerario-hora">5:00 PM</span><span class="itinerario-evento">Payaso</span></div>
+            <div class="itinerario-item" data-hora="1080"><span class="itinerario-hora">6:00 PM</span><span class="itinerario-evento">Piñata</span></div>
+            <div class="itinerario-item" data-hora="1140"><span class="itinerario-hora">7:00 PM</span><span class="itinerario-evento">Vals</span></div>
+            <div class="itinerario-item" data-hora="1200"><span class="itinerario-hora">8:00 PM</span><span class="itinerario-evento">Pastel</span></div>
           </div>
         </div>
         <div class="itinerario-dia">
           <h3 class="itinerario-dia-titulo gold-text">11 de octubre</h3>
           <div class="itinerario-lista">
-            <div class="itinerario-item" data-hora="540">
-              <span class="itinerario-hora">9:00 AM</span>
-              <span class="itinerario-evento">Desayuno</span>
-            </div>
+            <div class="itinerario-item" data-hora="540"><span class="itinerario-hora">9:00 AM</span><span class="itinerario-evento">Desayuno</span></div>
           </div>
         </div>
         <p class="itinerario-nota gold-text">📌 Los horarios pueden variar.</p>
       </section>
 
-      <!-- SECCIÓN 6: DEDICATORIAS -->
+      <!-- SECCIÓN 7: DEDICATORIAS -->
       <section id="seccion-libro-firmas" class="seccion">
         <h2 class="gold-text">📖 Dedicatorias 📖</h2>
         <div class="libro-firmas-contenido">
@@ -395,10 +379,13 @@
           <a href="https://docs.google.com/forms/d/e/1FAIpQLSd9CtYaj-_JR6s5MhZQXrxQPPPBfFTjmB-2FoBk6lvA8PWAIg/viewform" id="link-libro-firmas" class="btn-mapa gold-text" target="_blank" rel="noopener" style="margin-top: 0.8rem; font-size: clamp(0.9rem, 2vw, 1rem); padding: 0.5rem 2rem;">
             ✍️ Escribir dedicatoria
           </a>
+          <p class="libro-firmas-nota gold-text" style="font-size: clamp(0.8rem, 1.8vw, 1rem); margin-top: 0.6rem; opacity: 0.8; font-style: italic;">
+            📌 El día del evento se tendrá también un libro de firmas físico.
+          </p>
         </div>
       </section>
 
-      <!-- SECCIÓN 7: AGRADECIMIENTOS -->
+      <!-- SECCIÓN 8: AGRADECIMIENTOS -->
       <section id="seccion-agradecimientos" class="seccion">
         <h2 class="gold-text">🙏 Gracias 🙏</h2>
         <div class="agradecimientos-contenido">
@@ -424,6 +411,21 @@
       <p class="hint-final gold-text" id="hint-juego">👆 Toca el nombre para jugar</p>
     </div>
   </div>
+
+  <!-- ===== MODAL GUSTOS (COLLAGE) ===== -->
+  <div id="modal-gustos" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-gustos-title">
+    <div class="modal-card modal-gustos-card">
+      <button class="modal-close" data-close-gustos aria-label="Cerrar gustos">&times;</button>
+      <h2 id="modal-gustos-title" class="gold-text">🎨 Mis gustos 🎨</h2>
+      <p class="modal-subtitle gold-text">Un poco de lo que me inspira</p>
+      <div id="collage-container" class="collage-container">
+        <!-- Las imágenes se inyectarán aquí con JS -->
+        <div id="collage-loading" style="text-align:center; padding:2rem; color:#fae3a0; font-family:var(--script); font-size:1.2rem;">Cargando collage...</div>
+      </div>
+      <button class="btn-mapa gold-text btn-cerrar-collage" data-close-gustos style="margin: 1rem auto 0; display: block;">Salir</button>
+    </div>
+  </div>
+  <!-- ===== FIN MODAL GUSTOS ===== -->
 
   <script type="module" src="script-principal.js"></script>
 
