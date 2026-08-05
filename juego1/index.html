@@ -10,9 +10,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
-    /* ============================================================
-       ESTILOS DEL JUEGO – COMPLETO E INDEPENDIENTE
-       ============================================================ */
     * { margin:0; padding:0; box-sizing:border-box; }
     html, body {
       height:100%;
@@ -21,7 +18,7 @@
       font-family:'Cinzel',serif;
     }
 
-    /* Video de fondo (100% brillo) */
+    /* Video de fondo (sin capa opaca que lo oscurezca) */
     #game-bg-video {
       position:fixed;
       inset:0;
@@ -72,7 +69,7 @@
       position:fixed;
       inset:0;
       z-index:90;
-      background:rgba(6,4,10,0.85);
+      background:rgba(6,4,10,0.3); /* mucho menos opaco, deja ver el video */
       display:flex;
       align-items:center;
       justify-content:center;
@@ -194,6 +191,7 @@
       box-shadow:inset 0 2px 4px rgba(255,255,255,0.15), inset 0 -2px 4px rgba(0,0,0,0.3);
     }
     .brick.gone { opacity:0; transform:scale(0.3); pointer-events:none; }
+    /* ... (el resto de estilos de ladrillos se mantienen igual, omito por brevedad) ... */
     .brick-clay { background:#d9534f; background:linear-gradient(145deg,#e57373,#c62828); box-shadow:inset 0 2px 4px rgba(255,200,200,0.3), inset 0 -2px 4px rgba(0,0,0,0.4); }
     .brick-wood { background:#8b5a2b; background:linear-gradient(145deg,#a67c52,#6d4c2a); box-shadow:inset 0 2px 4px rgba(255,220,180,0.3), inset 0 -2px 4px rgba(0,0,0,0.4); }
     .brick-wood.cracked-1 { background:#7a4f24; background:linear-gradient(145deg,#8b6b3e,#5a3d1a); box-shadow:inset 0 2px 4px rgba(255,220,180,0.2), inset 0 -2px 4px rgba(0,0,0,0.5); position:relative; overflow:hidden; }
@@ -315,7 +313,6 @@
       margin:0.4rem auto 0;
       line-height:1.4;
     }
-    #gameover-stats { display:none; }
     #gameover-input-container input {
       font-family:'Press Start 2P',monospace;
       background:#1a1a2e;
@@ -356,7 +353,7 @@
       position:absolute;
       inset:0;
       z-index:200;
-      background:rgba(6,10,25,0.85);
+      background:rgba(6,10,25,0.7);
       display:flex;
       align-items:center;
       justify-content:center;
@@ -441,6 +438,15 @@
       background:rgba(201,162,77,0.2);
       border-color:rgba(201,162,77,0.6);
     }
+    .pause-modal-card .pause-buttons .game-btn.mute-btn {
+      border-color:#4d96ff;
+      color:#aac8ff;
+      background:rgba(77,150,255,0.08);
+    }
+    .pause-modal-card .pause-buttons .game-btn.mute-btn:hover {
+      background:rgba(77,150,255,0.2);
+      border-color:rgba(77,150,255,0.6);
+    }
 
     #loading-tips {
       position:absolute;
@@ -484,6 +490,9 @@
     <source src="../archivos/juegvideo.webm" type="video/webm">
     <source src="../archivos/juegvideo.mp4" type="video/mp4">
   </video>
+
+  <!-- Música de fondo (se controla con el botón de mute) -->
+  <audio id="bg-music" src="../archivos/cancion.mp3" loop preload="auto"></audio>
 
   <div id="loading-veil" aria-hidden="true"></div>
   <script>
