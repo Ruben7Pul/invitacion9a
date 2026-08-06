@@ -1,7 +1,7 @@
 // ============================================================
 // juego.js – VERSIÓN CANVAS CORREGIDA (sin modal, con 3 botones)
 // ============================================================
-console.log('📦 juego.js (canvas sin modal, botones directos)');
+console.log('📦 juego.js (canvas sin modal, botones en header)');
 
 import {
   soundBrick,
@@ -129,7 +129,7 @@ function isHighScore(score) {
 
 // ========== FUNCIÓN PRINCIPAL ==========
 export function initJuego(config, mobile = false) {
-  console.log('🎮 Iniciando juego (sin modal, con botones directos)');
+  console.log('🎮 Iniciando juego (sin modal, botones en header)');
 
   // ========== ELEMENTOS ==========
   const overlay = document.getElementById('game-overlay');
@@ -169,16 +169,10 @@ export function initJuego(config, mobile = false) {
   const nameError = document.getElementById('name-error');
 
   livesEl.style.fontFamily = "'Press Start 2P', monospace";
-  livesEl.style.fontSize = '1.2rem';
+  livesEl.style.fontSize = 'clamp(0.9rem,2.2vw,1.2rem)';
   livesEl.style.letterSpacing = '0.1em';
   scoreEl.style.fontFamily = "'Press Start 2P', monospace";
-  scoreEl.style.fontSize = '0.9rem';
-  scoreEl.style.background = 'linear-gradient(90deg, #ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #8800ff)';
-  scoreEl.style.backgroundSize = '300% 100%';
-  scoreEl.style.animation = 'rainbowScore 3s linear infinite';
-  scoreEl.style.webkitBackgroundClip = 'text';
-  scoreEl.style.backgroundClip = 'text';
-  scoreEl.style.color = 'transparent';
+  scoreEl.style.fontSize = 'clamp(0.7rem,1.8vw,0.9rem)';
 
   // ========== VARIABLES DE ESTADO ==========
   let scale = 1;
@@ -872,7 +866,6 @@ export function initJuego(config, mobile = false) {
     }
     livesEl.style.display = 'none';
     scoreEl.style.display = 'none';
-    // Ocultar botones de control al game over
     pauseBtn.style.display = 'none';
     muteBtn.style.display = 'none';
     exitBtn.style.display = 'none';
@@ -1413,7 +1406,6 @@ export function initJuego(config, mobile = false) {
     if (!running || paused || gameOver) return;
     if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') { keys.left = true; e.preventDefault(); }
     else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') { keys.right = true; e.preventDefault(); }
-    // Tecla espacio para pausa
     if (e.key === ' ' || e.key === 'Space') {
       e.preventDefault();
       if (!running || gameOver) return;
@@ -1457,16 +1449,12 @@ export function initJuego(config, mobile = false) {
 
   // ========== EVENTOS DE BOTONES ==========
   pauseBtn.addEventListener('click', togglePause);
-
   muteBtn.addEventListener('click', () => {
     if (window.toggleMusic) window.toggleMusic();
-    // Actualizar ícono después de un breve delay para que el estado cambie
     setTimeout(syncMuteIcon, 100);
   });
-
   exitBtn.addEventListener('click', salir);
 
-  // Sincronizar mute cada vez que se abra o se reanude (por si acaso)
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden && running && !gameOver) {
       syncMuteIcon();
