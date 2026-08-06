@@ -1,4 +1,4 @@
-console.log('🚀 principal/script-principal.js (sin reja, página aparte)');
+console.log('🚀 principal/script-principal 22.js (sin reja, página aparte)');
 
 import { obtenerNivel } from '../modules/perf.js';
 
@@ -25,8 +25,7 @@ async function cargarConfig() {
       padre: 'Papá',
       madre: 'Mamá',
       padrino: 'Padrino',
-      madrina: 'Madrina',
-      audioFile: '../archivos/cancion.mp3'
+      madrina: 'Madrina'
     };
   }
 }
@@ -551,7 +550,6 @@ function aplicarAjustesRendimiento(nivel) {
     });
   }
 
-  // ===== INDICADOR DE RENDIMIENTO =====
   const hint = document.getElementById('hint-juego');
   if (hint) {
     hint.innerHTML = '';
@@ -659,15 +657,14 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   try {
     var { initMusica, playMusic, toggleMusic, resetMusic } = await import('../modules/musica.js');
-    initMusica(config);
+    initMusica();
     window.playMusic = playMusic;
     window.toggleMusic = toggleMusic;
     window.resetMusic = resetMusic;
     
-    // Iniciar la música automáticamente al cargar la app
     setTimeout(() => {
       if (window.playMusic) window.playMusic();
-    }, 300); // pequeño retraso para asegurar que el audio esté listo
+    }, 300);
   } catch (e) { console.error('❌ Música:', e); }
 
   var appIniciada = false;
@@ -808,6 +805,3 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.querySelectorAll('.seccion').forEach(function(sec) { sec.classList.add('visible'); });
   }
 });
-
-
-//
