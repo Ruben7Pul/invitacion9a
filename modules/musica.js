@@ -1,4 +1,4 @@
-console.log('🎵 goga música 23 (con fade y mute corregido)');
+console.log('🎵 goga música 23 (con fade, mute y rutas personalizadas)');
 
 let audio = null;
 let fadeInterval = null;
@@ -6,7 +6,8 @@ let isMuted = false;
 let autoplayPending = false;
 let autoplayListenerAdded = false;
 
-const AUDIO_SRC = '../archivos/cancion.mp3';
+const DEFAULT_AUDIO_SRC = '../archivos/cancion.mp3';
+let audioSrc = DEFAULT_AUDIO_SRC;
 
 const iconSound = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
   <path d="M4 9 L4 15 L8 15 L13 20 L13 4 L8 9 Z"/>
@@ -96,22 +97,24 @@ function createAudio(src) {
   return el;
 }
 
-export function initMusica() {
-  console.log('🎵 Iniciando música con ruta fija:', AUDIO_SRC);
+export function initMusica(src) {
+  if (src) audioSrc = src;
+  console.log('🎵 Iniciando música con ruta:', audioSrc);
+
   audio = document.getElementById('bg-music');
   if (!audio) {
-    audio = createAudio(AUDIO_SRC);
-    audio.addEventListener('error', (e) => {
-      console.warn('⚠️ Error cargando audio:', AUDIO_SRC, e);
-    });
+    // Si no existe, lo creamos
+    audio = createAudio(audioSrc);
     document.body.appendChild(audio);
   } else {
-    console.log('🎵 Usando elemento <audio> existente en el DOM');
-    if (audio.src !== window.location.origin + '/' + AUDIO_SRC.replace(/^\.\.\//, '')) {
-      audio.src = AUDIO_SRC;
-      audio.load();
-    }
+    // Si existe, forzamos la actualización del src y recargamos
+    console.log('🎵 Elemento <audio> encontrado. Forzando actualización a:', audioSrc);
+    audio.src = audioSrc;
+    audio.load(); // Recarga el audio con el nuevo src
+    // Aseguramos que el loop esté activo
+    audio.loop = true;
   }
+
   audio.volume = 0;
   isMuted = false;
   updateIcon(true);
@@ -155,44 +158,47 @@ export function resetMusic() {
 
 export function toggleMusic() {
   if (!audio) return;
-
-  if (audio.paused) {
-    const ok = tryPlay();
-    if (ok) {
-      fadeVolume(0.6, 600);
-      isMuted = false;
-      updateIcon(true);
-    } else {
-      autoplayPending = true;
-      setupAutoplayListener();
+  try {
+    if (audio.paused) {
+      const ok = tryPlay();
+      if (ok) {
+        fadeVolume(0.6, 600);
+        isMuted = false;
+        updateIcon(true);
+      } else {
+        autoplayPending = true;
+        setupAutoplayListener();
+      }
+      return;
     }
-    return;
-  }
 
-  if (!isMuted && audio.volume > 0) {
-    fadeVolume(0, 600);
-    isMuted = true;
-    updateIcon(false);
-    return;
-  }
-
-  if (isMuted || audio.volume === 0) {
-    const ok = tryPlay();
-    if (ok) {
-      fadeVolume(0.6, 600);
-      isMuted = false;
-      updateIcon(true);
-    } else {
-      autoplayPending = true;
-      setupAutoplayListener();
+    if (!isMuted && audio.volume > 0) {
+      fadeVolume(0, 600);
+      isMuted = true;
+      updateIcon(false);
+      return;
     }
-    return;
-  }
 
-  isMuted = !isMuted;
-  const targetVol = isMuted ? 0 : 0.6;
-  fadeVolume(targetVol, 600);
-  updateIcon(!isMuted);
+    if (isMuted || audio.volume === 0) {
+      const ok = tryPlay();
+      if (ok) {
+        fadeVolume(0.6, 600);
+        isMuted = false;
+        updateIcon(true);
+      } else {
+        autoplayPending = true;
+        setupAutoplayListener();
+      }
+      return;
+    }
+
+    isMuted = !isMuted;
+    const targetVol = isMuted ? 0 : 0.6;
+    fadeVolume(targetVol, 600);
+    updateIcon(!isMuted);
+  } catch (e) {
+    console.error('❌ Error en toggleMusic:', e);
+  }
 }
 
 export function isMusicMuted() {
