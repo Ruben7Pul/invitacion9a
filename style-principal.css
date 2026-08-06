@@ -276,6 +276,103 @@ body {
   pointer-events: auto;
 }
 
+/* ===== OVERLAY DE TRANSICIÓN (con degradado vertical) ===== */
+#transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(to bottom, 
+    #0a1f3a 0%, 
+    #0b2b5a 25%, 
+    #0d2a4a 50%, 
+    #0b2b5a 75%, 
+    #061530 100%
+  );
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+  pointer-events: none;
+}
+#transition-overlay.show {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.transition-video-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: transparent;
+}
+
+#transition-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 12px;
+  box-shadow: 0 0 60px rgba(0, 20, 80, 0.6);
+}
+
+.transition-text {
+  position: relative;
+  z-index: 2;
+  font-family: var(--script);
+  font-size: clamp(1.8rem, 5vw, 3.5rem);
+  color: #fae3a0;
+  text-shadow: 0 0 30px rgba(212, 175, 55, 0.8);
+  animation: pulseText 2.5s ease-in-out infinite;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 0.6rem 2.5rem;
+  border-radius: 60px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1.5px solid rgba(212, 175, 55, 0.35);
+  box-shadow: 0 0 60px rgba(212, 175, 55, 0.15);
+  letter-spacing: 0.1em;
+  margin-top: 1rem;
+}
+
+@keyframes pulseText {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.06); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .transition-video-wrapper {
+    max-width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 0;
+  }
+  #transition-video {
+    object-fit: cover;
+    object-position: center;
+    border-radius: 0;
+    box-shadow: none;
+    width: 100%;
+    height: 100%;
+  }
+  .transition-text {
+    font-size: clamp(1.4rem, 6vw, 2.2rem);
+    padding: 0.4rem 1.2rem;
+    margin-top: 0.8rem;
+  }
+}
+
 /* ===== SECCIONES ===== */
 .seccion {
   width: 100%;
@@ -306,7 +403,6 @@ body {
   transform: translate3d(0, 30px, 0) !important;
 }
 
-/* Retrasos de sección */
 #seccion-inicio.visible { transition-delay: 0.05s; }
 #seccion-familia.visible { transition-delay: 0.1s; }
 #seccion-calendario.visible { transition-delay: 0.2s; }
@@ -317,7 +413,6 @@ body {
 #seccion-libro-firmas.visible { transition-delay: 0.6s; }
 #seccion-agradecimientos.visible { transition-delay: 0.7s; }
 
-/* ===== ELEMENTOS INTERNOS ===== */
 .seccion .animar {
   opacity: 0;
   transform: translate3d(0, 15px, 0);
@@ -367,7 +462,6 @@ body {
 .seccion.visible .libro-firmas-contenido { transition-delay: 0.2s; opacity: 1; transform: translate3d(0, 0, 0); }
 .seccion.visible .agradecimientos-contenido { transition-delay: 0.2s; opacity: 1; transform: translate3d(0, 0, 0); }
 
-/* Sección inicio */
 #seccion-inicio.visible #app-top,
 #seccion-inicio.visible #app-mid {
   opacity: 1;
@@ -422,7 +516,6 @@ body {
   text-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
 }
 
-/* ===== DESAPARICIÓN DE LA APP AL CERRAR ===== */
 #app:not(.show) .seccion,
 #app:not(.show) #app-mid,
 #app:not(.show) #app-top {
@@ -467,7 +560,6 @@ html.sin-reja #app {
   flex-shrink: 0;
 }
 
-/* ===== CONTENIDO DE LA SECCIÓN DE INICIO ===== */
 #app-top {
   width: 100%;
   display: flex;
@@ -601,7 +693,6 @@ h1#nombre-hero {
   50% { opacity: 1; transform: scale(1.02); }
 }
 
-/* ===== ADVERTENCIAS EN LUGARES ===== */
 .advertencia {
   font-size: clamp(0.75rem, 1.5vw, 0.9rem);
   color: #ffcc66;
@@ -613,7 +704,6 @@ h1#nombre-hero {
   opacity: 0.9;
 }
 
-/* ===== CALENDARIO ===== */
 .calendario-container {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -736,7 +826,6 @@ h1#nombre-hero {
   box-shadow: 0 0 15px rgba(212,175,55,0.2);
 }
 
-/* ===== ITINERARIO ===== */
 .itinerario-dia {
   margin-bottom: 1rem;
 }
@@ -799,7 +888,6 @@ h1#nombre-hero {
   opacity: 0.8;
 }
 
-/* ===== CONTADOR CON ANILLO ===== */
 .clock {
   display: flex;
   flex-wrap: nowrap;
@@ -887,7 +975,6 @@ h1#nombre-hero {
   transition: opacity 0.5s ease;
 }
 
-/* ===== LUGARES ===== */
 .detalle-card {
   background: rgba(10, 18, 34, 0.55);
   border: 2px solid var(--border-gold);
@@ -974,7 +1061,6 @@ h1#nombre-hero {
   box-shadow: 0 0 25px rgba(212, 175, 55, 0.2);
 }
 
-/* ===== DEDICATORIAS ===== */
 .libro-firmas-contenido {
   text-align: center;
   padding: 0.5rem 0;
@@ -997,7 +1083,6 @@ h1#nombre-hero {
   display: inline-block;
 }
 
-/* ===== FAMILIA ===== */
 .familia-grupo {
   background: rgba(10, 18, 34, 0.5);
   border: 2px solid var(--border-gold);
@@ -1059,7 +1144,6 @@ h1#nombre-hero {
   padding-top: 0.3rem;
 }
 
-/* ===== AGRADECIMIENTOS ===== */
 .agradecimientos-contenido {
   text-align: center;
   padding: 0.5rem 0;
@@ -1101,7 +1185,6 @@ h1#nombre-hero {
   margin-top: 0.2rem;
 }
 
-/* ===== DIVISOR ===== */
 .divider-thin {
   height: 2px;
   background: linear-gradient(90deg, transparent, #d4af37, #fae3a0, #d4af37, transparent);
@@ -1148,7 +1231,7 @@ h1#nombre-hero {
 .modal-gustos-card {
   max-width: 650px;
   max-height: 90vh;
-  overflow: hidden; /* Sin scroll */
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   padding: 1.5rem 1.2rem;
@@ -1238,7 +1321,6 @@ h1#nombre-hero {
   text-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
 }
 
-/* ===== COLLAGE ===== */
 .collage-container {
   flex: 1;
   min-height: 0;
@@ -1273,7 +1355,6 @@ h1#nombre-hero {
   user-select: none;
 }
 
-/* Ocultar scroll del modal */
 .modal-gustos-card::-webkit-scrollbar {
   display: none;
 }
@@ -1287,9 +1368,6 @@ h1#nombre-hero {
   display: block;
 }
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
 @media (max-width: 400px) {
   #app { padding: 0.3rem 0.6rem 0; }
   #app-inner { gap: 0.6rem; padding: 0 0.2rem 2rem; }
@@ -1331,9 +1409,6 @@ h1#nombre-hero {
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: rgba(201, 162, 77, 0.3); border-radius: 3px; }
 
-/* ============================================================
-   OPTIMIZACIONES PARA MÓVILES
-   ============================================================ */
 @media (hover: none) and (pointer: coarse) {
   * {
     animation-duration: 0.6s !important;
@@ -1352,18 +1427,3 @@ h1#nombre-hero {
     opacity: 0.95;
   }
 }
-
-/* ============================================================
-   TEMAS DINÁMICOS – solo afectan al fondo y detalles menores (no bordes)
-   ============================================================ */
-html[data-time-period="sunrise"] #bg::after { opacity: 0.25; }
-html[data-time-period="sunrise"] .seccion { border-color: var(--border-gold); }
-html[data-time-period="sunrise"] .detalle-card, 
-html[data-time-period="sunrise"] .familia-grupo,
-html[data-time-period="sunrise"] .calendar-style .unit { border-color: var(--border-gold); }
-
-html[data-time-period="day"] #bg::after { opacity: 0; }
-
-html[data-time-period="sunset"] #bg::after { opacity: 0.25; }
-
-html[data-time-period="night"] #bg::after { opacity: 0.5; }
