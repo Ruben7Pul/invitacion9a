@@ -1,4 +1,4 @@
-console.log('🚪 script-portal tt.js');
+console.log('🚪 script-portal.js');
 
 import { iniciarMedicionFPS, detenerMedicion, clasificarNivel, guardarNivel } from './modules/perf.js';
 
@@ -207,6 +207,3 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   }
 });
-
-
-//
