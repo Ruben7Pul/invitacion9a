@@ -1367,8 +1367,6 @@ h1#nombre-hero {
   background: linear-gradient(135deg, #0b0818 0%, #0a1a3a 25%, #0a2a5a 50%, #0a1a3a 75%, #0b0818 100%);
   border-radius: 16px;
   overflow: hidden;
-  border: 2px solid #b8860b;
-  box-shadow: 0 0 30px rgba(212, 175, 55, 0.15);
   margin: 0.5rem 0;
 }
 
@@ -1469,7 +1467,6 @@ h1#nombre-hero {
   background-clip: text !important;
   color: transparent !important;
 }
-.perf-bajo .collage-item { transition-duration: 0.3s !important; }
 .perf-bajo .seccion { transition-duration: 0.3s !important; }
 .perf-bajo #oval-wrap { animation: none !important; }
 .perf-bajo .hint-final { animation: none !important; }
@@ -1477,9 +1474,7 @@ h1#nombre-hero {
 .perf-bajo .calendario-container .dia.hoy { animation: none !important; }
 
 .perf-medio #nombre-hero { animation-duration: 2s !important; }
-.perf-medio .collage-item { transition-duration: 0.3s !important; }
 
 @media (hover: none) and (pointer: coarse) {
   .perf-bajo .seccion { transition-duration: 0.15s !important; }
-  .perf-bajo .collage-item { transition-duration: 0.2s !important; }
 }
