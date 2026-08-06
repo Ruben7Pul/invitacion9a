@@ -81,7 +81,7 @@ function generarCalendario() {
   const year = 2026;
   const month = 9;
   const fechaEspecial = 10;
-  const diasEspeciales = [8, 10, 11];
+  const diasEspeciales = [8, 10];
 
   const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
   const primerDia = new Date(year, month, 1).getDay();
@@ -618,9 +618,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     requestAnimationFrame(paso);
   }
 
-  const FADE_IN_MS = 500;   // fundido de entrada del audio
-  const FADE_OUT_SEC = 0.9; // fundido de salida, en segundos, antes de que acabe el clip
-  const FADE_OUT_SKIP_MS = 250; // fundido rápido si el usuario salta la transición
+  const FADE_IN_MS = 1300;    // fundido de entrada del audio (más largo = más seguro)
+  const FADE_OUT_SEC = 1.8;   // el fundido de salida empieza 1.8s antes de que acabe el clip
+  const FADE_OUT_SKIP_MS = 400; // fundido si el usuario salta la transición
 
   // ===== FUNCIÓN ABRIR REJA: reproduce el video completo (con audio) y luego muestra la app =====
   function abrirReja(e) {
@@ -651,7 +651,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       if (video) {
         video.removeEventListener('ended', finalizar);
         video.removeEventListener('error', onError);
-        video.removeEventListener('loadedmetadata', iniciarReproduccion);
+        video.removeEventListener('loadedmetadata', onMetadata);
         if (fadeOutTimeoutId) clearTimeout(fadeOutTimeoutId);
         // Fundido rápido por si se corta antes de tiempo (skip / timeout de seguridad),
         // y detener el video para que no siga sonando bajo la app principal.
@@ -679,27 +679,40 @@ document.addEventListener('DOMContentLoaded', async function() {
     };
     programarSeguridad(30); // tope amplio inicial mientras carga metadata
 
-    function iniciarReproduccion() {
-      // Ahora sí conocemos la duración real del clip: ajustamos la red de seguridad
-      // y programamos el fundido de salida para que termine justo al acabar el clip.
+    // Programa el fundido de salida y la red de seguridad en cuanto se conoce la duración real.
+    // Esto NO bloquea la reproducción (que ya arrancó de forma síncrona más abajo).
+    const programarConDuracion = () => {
       if (video.duration && isFinite(video.duration)) {
         console.log(`⏱️ Duración real del video: ${video.duration.toFixed(1)}s`);
         programarSeguridad(video.duration);
 
-        const inicioFadeOutMs = Math.max(0, (video.duration - FADE_OUT_SEC)) * 1000;
+        const margenSeguro = FADE_OUT_SEC + 0.1; // un poco antes, por seguridad
+        const inicioFadeOutMs = Math.max(0, (video.duration - margenSeguro)) * 1000;
         if (fadeOutTimeoutId) clearTimeout(fadeOutTimeoutId);
         fadeOutTimeoutId = setTimeout(() => {
           fadeVolumen(video, 0, FADE_OUT_SEC * 1000);
         }, inicioFadeOutMs);
       }
+    };
 
+    const onMetadata = () => programarConDuracion();
+
+    if (video) {
+      video.addEventListener('ended', finalizar);
+      video.addEventListener('error', onError);
+
+      // IMPORTANTE: play() se llama de inmediato, dentro del mismo gesto de clic del usuario.
+      // Si esperamos a un evento asíncrono (como 'loadedmetadata') antes de reproducir,
+      // el navegador deja de considerarlo una acción iniciada por el usuario y bloquea el audio,
+      // por eso antes el fundido "no se notaba" (en realidad estaba sonando mudo).
       video.muted = false;
       video.volume = 0;
-      video.currentTime = 0;
+      try { video.currentTime = 0; } catch (err) { /* puede fallar si aún no hay metadata, no pasa nada */ }
+
       video.play().then(() => {
         fadeVolumen(video, 1, FADE_IN_MS);
       }).catch((err) => {
-        // Si el navegador bloquea el audio (política de autoplay), reintentar en silencio
+        // Si el navegador igual bloquea el audio, reintentar en silencio
         // para que al menos se vea el video en vez de quedarnos sin nada.
         console.warn('No se pudo reproducir con audio, reintentando en silencio:', err);
         video.muted = true;
@@ -708,18 +721,11 @@ document.addEventListener('DOMContentLoaded', async function() {
           finalizar();
         });
       });
-    }
 
-    if (video) {
-      video.addEventListener('ended', finalizar);
-      video.addEventListener('error', onError);
-
-      if (video.readyState >= 1) {
-        // Metadata (duración) ya disponible
-        iniciarReproduccion();
+      if (video.readyState >= 1 && video.duration && isFinite(video.duration)) {
+        programarConDuracion();
       } else {
-        video.addEventListener('loadedmetadata', iniciarReproduccion, { once: true });
-        video.load();
+        video.addEventListener('loadedmetadata', onMetadata, { once: true });
       }
     } else {
       // No existe el elemento de video: pasar directo tras un breve instante
