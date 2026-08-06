@@ -13,5 +13,5 @@
   "madre": "",
   "padrino": "",
   "madrina": "",
-  "audioFile": "archivos/cancion.mp3"
+  "audioFile": "../archivos/cancion.mp3"
 }

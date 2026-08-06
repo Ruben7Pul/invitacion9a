@@ -1,151 +1,60 @@
-# 🌹 Invitación XV - Estructura Arreglada
+# 🌹 Invitación XV - Estructura (actualizada)
 
-## Problema Original
-El HTML del juego estaba revueltometido en el script y style principales, causando conflictos al tratar de separar los módulos.
+## Por qué está dividida en 3 páginas
 
-## Solución Implementada
-Se dividieron los archivos en **dos capas completamente independientes**:
+Antes, `index.html` cargaba a la vez 3 videos (reja, fondo de app, y el de
+transición al abrir la reja) y arrancaba la música de fondo desde el
+principio. En celular eso causaba lag al decodificar varios videos al mismo
+tiempo, y a veces la música se pisaba con el audio del video de transición.
 
-### 1️⃣ CAPA PRINCIPAL (index.html + script-principal.js + style-principal.css)
-- **Responsabilidad**: Portal, reja, invitación, modales, música, partículas
-- **archivos**:
-  - `index.html` - HTML de la invitación principal
-  - `script-principal.js` - Lógica de la invitación (carga perezosa del juego)
-  - `style-principal.css` - Estilos de la invitación (sin nada del juego)
+La solución fue copiar el mismo patrón que ya usaba el juego (`juego1/`):
+en vez de mostrar/ocultar secciones con CSS dentro de una sola página, cada
+pantalla es una **navegación real** a otra página. Así el navegador destruye
+por completo el video/audio anterior antes de cargar el siguiente — nunca
+coexisten, y nunca se pueden pisar entre sí.
 
-#### Cómo funciona:
-1. Al cargar `index.html`, se carga **script-principal.js** 
-2. El usuario abre la reja (click en el nombre) → se crea un **iframe** que carga `juegos1.html`
-3. El juego se ejecuta **completamente aislado** en el iframe
-4. El usuario puede cerrar el iframe y volver a la invitación
-
-**Ventaja**: Cero conflictos entre CSS/JS de la invitación y el juego.
-
----
-
-### 2️⃣ CAPA DEL JUEGO (juegos1.html + script-juego.js + style-juego.css)
-- **Responsabilidad**: Juego de breakout, bolas, ladrillos, puntuaciones
-- **archivos**:
-  - `juegos1.html` - HTML del juego (completo e independiente)
-  - `script-juego.js` - Lógica del juego (carga `modules/juego.js`)
-  - `style-juego.css` - Estilos del juego (solo juego)
-
-#### Cómo funciona:
-1. `juegos1.html` se abre en un iframe desde `script-principal.js`
-2. Carga `script-juego.js`, que carga el módulo `modules/juego.js`
-3. El juego se ejecuta sin interferencias
-
----
-
-## 📂 Estructura Actual
+## 📂 Estructura actual
 
 ```
-invitacion-quinceañera/
-├── index.html                    ← PRINCIPAL: Invitación
-├── juegos1.html                  ← JUEGO: Breakout (en iframe)
-├── script-principal.js           ← Script principal (SIN juego)
-├── script-juego.js               ← Script juego (importa modules/juego.js)
-├── script.js                     ← Script original (OBSOLETO)
-├── style-principal.css           ← Estilos principales (SIN juego)
-├── style-juego.css               ← Estilos juego (SOLO juego)
-├── style.css                     ← Estilos originales (OBSOLETO)
+invitacion9a-main/
+├── index.html                  ← PORTAL: reja + video de transición (mar2.mp4, incbella.mp4)
+├── script-portal.js            ← Lógica de la reja. Al terminar, navega a principal/index.html
+│
+├── principal/
+│   ├── index.html               ← APP: secciones, calendario, collage, música (mar1.mp4)
+│   └── script-principal.js      ← Lógica de la app. El botón "volver" navega a ../index.html
+│
+├── juego1/
+│   ├── index.html                ← Juego Breakout (sin cambios)
+│   └── h.js                      ← Al terminar, navega a ../principal/index.html?volver=1
+│
 ├── modules/
-│   ├── juego.js                  ← Lógica del juego (bolas, ladrillos, etc)
-│   ├── contador.js               ← Contador regresivo
-│   ├── modal.js                  ← Modales
-│   ├── musica.js                 ← Música de fondo
-│   └── sonidos.js                ← Efectos de sonido
-├── archivos/
-│   ├── bella.jpg                 ← Imagen de fondo
-│   ├── centro.gif                ← GIF central
-│   ├── cancion.mp3               ← Música
-│   ├── mar1.mp4 / mar2.mp4       ← Videos
-│   └── griet*.png, jueg1.png     ← Texturas del juego
-└── config.json                   ← Configuración (nombre, fechas, etc)
+│   ├── musica.js                 ← Música de fondo (compartido, solo se usa desde principal/)
+│   ├── sonidos.js
+│   ├── contador.js
+│   ├── modal.js
+│   └── juego.js
+├── archivos/                     ← Videos, audio, imágenes (compartido)
+├── config.json                   ← Datos del evento (compartido)
+└── style-principal.css           ← Estilos, compartidos por index.html y principal/index.html
 ```
 
----
+## 🔀 Flujo de navegación
 
-## 🔧 Cambios Realizados
+1. `index.html` (portal) — el usuario toca la reja.
+2. Se reproduce `incbella.mp4` con audio (video de transición).
+3. Al terminar (o si el usuario lo salta), navega a `principal/index.html`.
+4. Ahí arranca `mar1.mp4` de fondo y la música (`cancion.mp3`), con fundido de entrada.
+5. Si el usuario toca el nombre → navega a `juego1/`.
+6. Al terminar el juego → navega a `principal/index.html?volver=1` (se muestra
+   la app de inmediato, sin ningún parpadeo, gracias a la clase `sin-reja`).
+7. Botón "←" (volver) en la app → navega de vuelta a `../index.html` (portal).
 
-### ✅ index.html
-- Cambió de `script.js` → `script-principal.js`
-- Cambió de `style.css` → `style-principal.css`
-- Eliminados todos los estilos del juego de CSS
+## 📝 Rutas compartidas
 
-### ✅ script-principal.js (NUEVO)
-- Copia de `script.js` pero **sin cargar módulos de juego directamente**
-- Al hacer clic en el nombre, **crea un iframe** que carga `juegos1.html`
-- El iframe se añade como hermano de `#portal` y `#app`
-
-### ✅ style-principal.css (NUEVO)
-- Contiene SOLO los estilos de:
-  - Portal / Reja
-  - APP principal
-  - Modales
-  - Contador
-  - Familia
-  - Responsive
-
-### ✅ juegos1.html
-- Agregados `viewport-fit=cover` y `v=` de versionado
-- Mantenido íntegro sin cambios estructurales
-
-### ✅ script-juego.js
-- Mantenido igual (carga `modules/juego.js` correctamente)
-
-### ✅ style-juego.css
-- Mantenido igual (estilos solo del juego)
-
----
-
-## 🚀 Cómo Usar
-
-### Desarrollo Local
-```bash
-# Sirve los archivos con un servidor (Python, Node.js, etc)
-python -m http.server 8000
-
-# O con Node.js
-npx http-server
-
-# Abre en el navegador: http://localhost:8000/index.html
-```
-
-### Producción
-- Sube todos los archivos al servidor
-- El flujo es:
-  1. Usuario abre `index.html`
-  2. Ve la invitación con reja
-  3. Toca el nombre para jugar (carga iframe con `juegos1.html`)
-  4. Juega el breakout
-  5. Puede cerrar el juego y volver a la invitación
-
----
-
-## ⚠️ ARCHIVOS OBSOLETOS (puedes eliminar)
-- `script.js` - Reemplazado por `script-principal.js`
-- `style.css` - Reemplazado por `script-principal.css` y `style-juego.css`
-
----
-
-## 🐛 Solución de Problemas
-
-### El juego no aparece al hacer clic en el nombre
-1. Abre la consola (F12)
-2. Busca errores de red (¿existe `juegos1.html`?)
-3. Verifica que `config.json` existe
-4. Mira si hay errores en la carga de `modules/juego.js`
-
-### El CSS del juego afecta la invitación o viceversa
-- **Imposible**: Están en archivos separados (`style-principal.css` y `style-juego.css`)
-- Si ocurre, limpia el cache del navegador (Ctrl+Shift+Supr)
-
-### El contador regresivo no funciona
-- Verifica que `config.json` tiene `fechaISO` en formato ISO 8601
-- Revisa `modules/contador.js` está presente
-
----
+Como `principal/` está un nivel más adentro, todo lo que carga desde ahí usa
+`../`: `../style-principal.css`, `../config.json`, `../archivos/...`,
+`../modules/...`. Es el mismo criterio que ya usaba `juego1/`.
 
 ## 📝 Configuración (config.json)
 
@@ -165,22 +74,14 @@ npx http-server
   "madre": "Mamá",
   "padrino": "Padrino",
   "madrina": "Madrina",
-  "audioFile": "archivos/cancion.mp3"
+  "audioFile": "../archivos/cancion.mp3"
 }
 ```
 
----
-
-## 💡 Próximas Mejoras Opcionales
-
-1. **Service Worker** para cachear assets
-2. **Animaciones CSS** más suaves en transiciones
-3. **Dark Mode** automático basado en hora del día
-4. **Compartir en redes** con og:image dinámico
-5. **Analytics** para saber quién abrió la invitación
+⚠️ `audioFile` debe llevar `../` porque `config.json` ahora se consume desde
+`principal/index.html`.
 
 ---
 
-**Creado**: 2026-08-03  
-**Arreglado por**: Claude  
-**Estado**: ✅ Funcional y separado en dos capas
+**Actualizado**: 2026-08-05
+**Estado**: ✅ Portal, app y juego separados en páginas independientes

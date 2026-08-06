@@ -516,9 +516,6 @@ body {
   transition-delay: 0.2s, 0.2s;
 }
 
-html.sin-reja #portal {
-  display: none !important;
-}
 html.sin-reja #app {
   opacity: 1 !important;
   pointer-events: auto !important;
