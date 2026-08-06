@@ -1372,13 +1372,7 @@ h1#nombre-hero {
 
 .collage-container .collage-item {
   position: absolute;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-  border: 1px solid rgba(212, 175, 55, 0.3);
   pointer-events: none;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
 }
 
 .collage-container .collage-item img {
@@ -1386,6 +1380,9 @@ h1#nombre-hero {
   height: 100%;
   object-fit: contain;
   display: block;
+  border-radius: 20px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
   -webkit-user-select: none;
   user-select: none;
 }
