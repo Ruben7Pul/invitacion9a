@@ -37,11 +37,16 @@
 
   <div id="bg"></div>
 
+  <!-- VIDEO APP PRINCIPAL (mar1) — único video de fondo en esta página -->
   <video id="video-app" autoplay loop muted playsinline>
     <source src="../archivos/mar1.mp4" type="video/mp4">
     <source src="../archivos/mar1.webm" type="video/webm">
   </video>
 
+  <!-- ===== AUDIO DE FONDO ===== -->
+  <audio id="bg-music" src="../archivos/cancion.mp3" loop preload="auto"></audio>
+
+  <!-- APP PRINCIPAL (scrollable) -->
   <div id="app" role="main">
     <div id="app-inner">
       <!-- SECCIÓN 0: INICIO -->
@@ -164,7 +169,6 @@
       <section id="seccion-itinerario" class="seccion">
         <h2 class="gold-text">📋 Itinerario 📋</h2>
         <div class="itinerario-dia">
-          <!-- Título eliminado -->
           <div class="itinerario-lista" id="itinerario-10">
             <div class="itinerario-item" data-hora="780"><span class="itinerario-hora">1:00 PM</span><span class="itinerario-evento">Misa</span></div>
             <div class="itinerario-item" data-hora="900"><span class="itinerario-hora">3:00 PM</span><span class="itinerario-evento">Recepción</span></div>
@@ -199,7 +203,6 @@
         <button id="btn-abrir-gustos" class="btn-mapa gold-text" style="margin-top: 0.5rem; border: 2px solid #d4af37; background: rgba(212, 175, 55, 0.15); width: 100%; font-size: clamp(1rem, 2.5vw, 1.3rem); padding: 0.6rem 1rem;">
           🖼️ Conoce mis gustos
         </button>
-        <!-- "Algunas de mis inspiraciones" eliminado -->
       </section>
 
       <!-- SECCIÓN 8: AGRADECIMIENTOS -->
