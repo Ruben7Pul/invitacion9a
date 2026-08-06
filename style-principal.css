@@ -295,7 +295,6 @@ body {
   visibility: hidden;
   transition: opacity 0.8s ease, visibility 0.8s ease;
   pointer-events: none;
-  /* Aceleración por GPU: promueve el overlay a su propia capa de composición */
   transform: translateZ(0);
   will-change: opacity;
   backface-visibility: hidden;
@@ -327,15 +326,13 @@ body {
   height: 100%;
   object-fit: cover;
   object-position: center;
-  background: #0a1f3a; /* color de fondo mientras carga */
-  /* Aceleración por GPU para que la decodificación/composición del video vaya fluida */
+  background: #0a1f3a;
   transform: translateZ(0);
   will-change: transform;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
 
-/* Texto "Abriendo el castillo..." desactivado: ahora solo se ve el video */
 .transition-text {
   display: none;
 }
@@ -604,7 +601,7 @@ html.sin-reja #app {
   width: clamp(150px, 26cqw, 200px);
   height: clamp(210px, 38cqw, 290px);
   margin-bottom: 0.1rem;
-  margin-top: 0.9rem; /* bajado un poco respecto al borde superior */
+  margin-top: 0.9rem;
   position: relative;
   animation: ovalFlotar 6s ease-in-out infinite;
   will-change: transform;
@@ -1397,32 +1394,67 @@ h1#nombre-hero {
 ::-webkit-scrollbar-thumb { background: rgba(201, 162, 77, 0.3); border-radius: 3px; }
 
 @media (hover: none) and (pointer: coarse) {
-  /* Antes esto forzaba animation-duration: 0.6s en TODO (*),
-     sin importar la duración original de cada animación.
-     Eso hacía que cada una acelerara en una proporción distinta
-     (una de 6s pasaba a ser 10x más rápida, una de 1.2s casi no cambiaba),
-     y se veía como que "unas van muy rápido y otras lento".
-     Ahora se ajusta cada animación por separado, más corta que en
-     PC (por rendimiento) pero manteniendo su velocidad relativa. */
-  #glow, #glow2 {
-    filter: none !important;
-  }
-  .portal-inner,
-  #app-inner {
-    will-change: auto;
-  }
-  .seccion {
-    contain: none;
-  }
-  video {
-    opacity: 0.95;
-  }
+  /* Ajustes de animaciones para móviles (más rápidas) */
+  .gate-wrapper.active .gate-leaf svg { animation-duration: 1.8s; }
+  #oval-wrap { animation-duration: 4s; }
+  h1#nombre-hero { animation-duration: 2.5s; }
+  .hint-final { animation-duration: 1.3s; }
+  .calendario-container .dia.dia-10 { animation-duration: 1s; }
+  .calendario-container .dia.dia-10 .rosa { animation-duration: 1.3s; }
+  .calendario-container .dia.hoy { animation-duration: 1.2s; }
+}
 
-  .gate-wrapper.active .gate-leaf svg { animation-duration: 1.8s; } /* antes 2.6s */
-  #oval-wrap { animation-duration: 4s; } /* antes 6s */
-  h1#nombre-hero { animation-duration: 2.5s; } /* antes 4s (rainbowMove) */
-  .hint-final { animation-duration: 1.3s; } /* antes 2s (pulseHint) */
-  .calendario-container .dia.dia-10 { animation-duration: 1s; } /* antes 1.5s (brilloRosa) */
-  .calendario-container .dia.dia-10 .rosa { animation-duration: 1.3s; } /* antes 2s (flotarRosa) */
-  .calendario-container .dia.hoy { animation-duration: 1.2s; } /* antes 1.8s (brilloDiaActual) */
+/* ============================================================
+   AJUSTES POR RENDIMIENTO (perf-bajo, perf-medio)
+   ============================================================ */
+
+/* Nivel bajo: desactivar animaciones pesadas */
+.perf-bajo #nombre-hero {
+  animation: none !important;
+  background: linear-gradient(90deg, #d4af37, #fae3a0) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+}
+
+.perf-bajo .collage-item {
+  transition-duration: 0.3s !important;
+}
+
+.perf-bajo .seccion {
+  transition-duration: 0.3s !important;
+}
+
+.perf-bajo #oval-wrap {
+  animation: none !important;
+}
+
+.perf-bajo .hint-final {
+  animation: none !important;
+}
+
+.perf-bajo .calendario-container .dia.dia-10 {
+  animation: none !important;
+}
+
+.perf-bajo .calendario-container .dia.hoy {
+  animation: none !important;
+}
+
+.perf-medio #nombre-hero {
+  animation-duration: 2s !important; /* más rápida para consumir menos */
+}
+
+.perf-medio .collage-item {
+  transition-duration: 0.3s !important;
+}
+
+/* Si el dispositivo es móvil y además bajo, reducir aún más */
+@media (hover: none) and (pointer: coarse) {
+  .perf-bajo .seccion {
+    transition-duration: 0.15s !important;
+  }
+  .perf-bajo .collage-item {
+    transition-duration: 0.2s !important;
+  }
 }
