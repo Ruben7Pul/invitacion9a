@@ -535,7 +535,6 @@ function renderCollage(container) {
     var y = Math.min(maxY, Math.max(0, centroY - h / 2));
 
     var rot = elegirRotacionContraria();
-    var scaleX = Math.random() > 0.5 ? 1 : -1;
 
     var div = document.createElement('div');
     div.className = 'collage-item';
@@ -546,7 +545,7 @@ function renderCollage(container) {
       'top:' + y + '%;' +
       'z-index:' + collageZIndex + ';' +
       'opacity: 1;' +
-      'transform: rotate(' + rot + 'deg) scaleX(' + scaleX + ');';
+      'transform: rotate(' + rot + 'deg);';
 
     var img = document.createElement('img');
     img.src = src;
@@ -732,6 +731,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   var nombreEl = document.getElementById('nombre-hero');
   var firmaNombreEl = document.getElementById('firma-nombre');
+  var hintJuegoEl = document.getElementById('hint-juego');
 
   function irAlJuego() {
     window.location.href = '../juego1/';
@@ -739,6 +739,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   if (nombreEl) nombreEl.addEventListener('click', irAlJuego);
   if (firmaNombreEl) firmaNombreEl.addEventListener('click', irAlJuego);
+  if (hintJuegoEl) hintJuegoEl.addEventListener('click', irAlJuego);
 
   var app = document.getElementById('app');
   var backBtn = document.getElementById('back-link');
