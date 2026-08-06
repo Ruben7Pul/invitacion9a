@@ -1,4 +1,4 @@
-console.log('🚀 script-principal.js (con reproducción de video mejorada)');
+console.log('🚀 script-principal.js (con reproducción inmediata)');
 
 async function cargarConfig() {
   try {
@@ -601,79 +601,73 @@ document.addEventListener('DOMContentLoaded', async function() {
     }, 2000);
   }
 
-  // ===== FUNCIÓN ABRIR REJA CON TRANSICIÓN MEJORADA =====
+  // ===== FUNCIÓN ABRIR REJA CON REPRODUCCIÓN INMEDIATA =====
   function abrirReja(e) {
     if (e) e.stopPropagation();
 
-    // 1. Abrir la reja (animación)
-    gateWrapper.classList.add('open');
-
-    // 2. Obtener el video y el overlay
+    // Obtener elementos
     const overlay = document.getElementById('transition-overlay');
     const video = document.getElementById('transition-video');
 
-    // 3. Intentar reproducir el video inmediatamente (dentro del gesto del usuario)
+    // 1. Mostrar overlay y reproducir video INMEDIATAMENTE
+    if (overlay) overlay.classList.add('show');
+
     if (video) {
-      // Asegurar que el video está cargado
+      // Forzar carga si es necesario
       if (video.readyState < 2) {
         video.load();
       }
+      video.currentTime = 0;
       // Intentar reproducir
       video.play().catch(err => {
-        console.warn('No se pudo reproducir el video automáticamente:', err);
-        // Si falla, mostraremos el overlay y esperaremos el timeout
+        console.warn('Error al reproducir video:', err);
+        // Si falla, mostramos un mensaje en consola y esperamos timeout
       });
     }
 
-    // 4. Después de que termine la animación de la reja, mostrar el overlay
-    setTimeout(() => {
-      if (overlay) {
-        overlay.classList.add('show');
-      }
+    // 2. Abrir la reja (animación)
+    gateWrapper.classList.add('open');
 
-      // Si el video no se está reproduciendo, intentar de nuevo
-      if (video && video.paused) {
-        video.play().catch(() => {});
-      }
+    // 3. Definir la función para finalizar la transición
+    let transicionFinalizada = false;
 
-      // Función para finalizar la transición
-      const finalizar = () => {
-        if (overlay) overlay.classList.remove('show');
-        portal.classList.add('hide');
-        app.classList.add('show');
-        cargarContador();
-        if (window.playMusic) window.playMusic();
-        // Limpiar eventos
-        if (video) {
-          video.removeEventListener('ended', finalizar);
-          video.removeEventListener('error', onError);
-        }
-        overlay.removeEventListener('click', finalizar);
-        clearTimeout(timeout);
-      };
+    const finalizar = () => {
+      if (transicionFinalizada) return;
+      transicionFinalizada = true;
 
-      // Si el video tiene un error, finalizar después de un tiempo
-      const onError = (err) => {
-        console.warn('Error en el video:', err);
-        // Esperar un poco y finalizar
-        setTimeout(finalizar, 1000);
-      };
+      if (overlay) overlay.classList.remove('show');
+      portal.classList.add('hide');
+      app.classList.add('show');
+      cargarContador();
+      if (window.playMusic) window.playMusic();
 
+      // Limpiar eventos
       if (video) {
-        video.addEventListener('ended', finalizar);
-        video.addEventListener('error', onError);
+        video.removeEventListener('ended', finalizar);
+        video.removeEventListener('error', onError);
       }
+      overlay.removeEventListener('click', finalizar);
+      clearTimeout(timeout);
+    };
 
-      // Fallback: si el video no termina en 8 segundos, forzar finalización
-      const timeout = setTimeout(() => {
-        console.warn('Timeout de video, forzando finalización');
-        finalizar();
-      }, 8000);
+    const onError = (err) => {
+      console.warn('Error en video:', err);
+      setTimeout(finalizar, 1000);
+    };
 
-      // También permitir cerrar haciendo clic en el overlay (opcional)
-      overlay.addEventListener('click', finalizar);
+    if (video) {
+      video.addEventListener('ended', finalizar);
+      video.addEventListener('error', onError);
+    }
 
-    }, 650); // tiempo de la animación de apertura
+    // Fallback: si el video no termina en 8 segundos, forzar finalización
+    const timeout = setTimeout(() => {
+      console.warn('Timeout de video, forzando finalización');
+      finalizar();
+    }, 8000);
+
+    // También permitir cerrar haciendo clic en el overlay (opcional)
+    overlay.addEventListener('click', finalizar);
   }
 
   function cerrarReja(e) {
