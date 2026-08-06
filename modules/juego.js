@@ -290,7 +290,7 @@ export function initJuego(config, mobile = false) {
       if (animFrameId) cancelAnimationFrame(animFrameId);
       running = false;
       gameOver = true;
-      window.location.href = '../index.html?volver=1';
+      window.location.href = '../principal/index.html?volver=1';
     });
   }
 
