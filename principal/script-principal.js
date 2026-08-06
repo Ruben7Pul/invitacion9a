@@ -1,4 +1,4 @@
-console.log('🚀 principal/script-principal 22.js (sin reja, página aparte)');
+console.log('🚀 principal/script-principal.js (sin reja, página aparte)');
 
 import { obtenerNivel } from '../modules/perf.js';
 
@@ -142,7 +142,7 @@ function generarEventosCalendario(config) {
   if (!container) return;
 
   const eventos = [
-    { fecha: '8 de octubre', desc: '🎂 Cumpleaños', fechaISO: '2026-10-08T09:00:00', duracion: 2 },
+    { fecha: '8 de octubre', desc: '🎂 Mi Cumpleaños', fechaISO: '2026-10-08T09:00:00', duracion: 2 },
     { fecha: '10 de octubre', desc: '⛪ Misa', fechaISO: '2026-10-10T13:00:00', duracion: 2 },
     { fecha: '10 de octubre', desc: '🎉 Recepción', fechaISO: '2026-10-10T15:00:00', duracion: 5 },
   ];
@@ -181,7 +181,7 @@ function agregarACalendario(evento, config) {
   const descripcion = encodeURIComponent(`Invitación a los XV años de ${config.nombre}. ${evento.desc}`);
 
   let ubicacion = '';
-  if (!evento.desc.includes('Cumpleaños')) {
+  if (!evento.desc.includes('Mi Cumpleaños')) {
     if (evento.desc.includes('Misa')) {
       ubicacion = encodeURIComponent('Capilla del Puente, Rayon 164, Tianguistenco de Galeana, 52603 Guadalupe Yancuictlalpan, Méx., México');
     } else if (evento.desc.includes('Recepción')) {
@@ -267,7 +267,7 @@ function initContadorCircular(config) {
 
     if (diff <= 0) {
       document.querySelector('.clock').style.display = 'none';
-      document.getElementById('contador-mensaje').textContent = '¡El gran día ha llegado! 🎉';
+      document.getElementById('contador-mensaje').textContent = '🎉 ¡El gran día ha llegado! 🎉';
       return;
     }
 
@@ -302,7 +302,7 @@ function initContadorCircular(config) {
       else if (days > 7) mensaje = 'La espera se hace corta.';
       else if (days > 1) mensaje = '¡Ya casi llega!';
       else if (days === 1) mensaje = '¡Mañana es el gran día!';
-      else if (days === 0 && hours > 6) mensaje = '¡Hoy es el día!';
+      else if (days === 0 && hours > 6) mensaje = '¡Hoy es el gran día!';
       else if (days === 0 && hours > 1) mensaje = '¡En unas horas comienza!';
       else if (days === 0 && hours >= 0) mensaje = '¡El momento está aquí!';
       msgEl.textContent = mensaje;
@@ -444,14 +444,14 @@ function renderCollage(container) {
   function mostrarSiguienteImagen() {
     var indiceEnImagen = elegirImagenAleatoria();
     var src = imagenesCollage[indiceEnImagen];
-    
+
     var w = 75;
     var h = 75;
     var x = Math.random() * (100 - w);
     var y = Math.random() * (100 - h);
     var rot = elegirRotacionContraria();
     var scaleX = Math.random() > 0.5 ? 1 : -1;
-    
+
     var div = document.createElement('div');
     div.className = 'collage-item';
     div.style.cssText =
@@ -463,7 +463,7 @@ function renderCollage(container) {
       'opacity: 0;' +
       'transform: rotate(' + rot + 'deg) scaleX(' + scaleX + ') scale(0.92);' +
       'transition: opacity 0.4s ease-out, transform 0.4s ease-out;';
-    
+
     var img = document.createElement('img');
     img.src = src;
     img.alt = 'Gusto';
@@ -471,9 +471,9 @@ function renderCollage(container) {
     img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
     div.appendChild(img);
     container.appendChild(div);
-    
+
     collageElementos.push(div);
-    
+
     void div.offsetHeight;
     requestAnimationFrame(function() {
       requestAnimationFrame(function() {
@@ -481,14 +481,14 @@ function renderCollage(container) {
         div.style.transform = 'rotate(' + rot + 'deg) scaleX(' + scaleX + ') scale(1)';
       });
     });
-    
+
     if (collageElementos.length > 4) {
       var antiguoDiv = collageElementos.shift();
       if (antiguoDiv.parentNode) {
         antiguoDiv.parentNode.removeChild(antiguoDiv);
       }
     }
-    
+
     collageZIndex++;
   }
 
@@ -515,7 +515,7 @@ function limpiarCollage() {
 // ===== AJUSTES POR RENDIMIENTO =====
 function aplicarAjustesRendimiento(nivel) {
   const nivelNormalizado = (nivel === 'alto' || nivel === 'medio' || nivel === 'bajo') ? nivel : 'desconocido';
-  
+
   const html = document.documentElement;
   if (nivelNormalizado !== 'desconocido') {
     html.classList.add('perf-' + nivelNormalizado);
@@ -553,13 +553,13 @@ function aplicarAjustesRendimiento(nivel) {
   const hint = document.getElementById('hint-juego');
   if (hint) {
     hint.innerHTML = '';
-    
+
     const msgSpan = document.createElement('span');
     msgSpan.textContent = '👆 Toca el nombre para jugar';
-    
+
     const perfSpan = document.createElement('span');
     perfSpan.className = 'perf-indicator';
-    
+
     const levelNames = {
       'alto': 'Alto',
       'medio': 'Medio',
@@ -578,17 +578,17 @@ function aplicarAjustesRendimiento(nivel) {
       'bajo': 'Rendimiento bajo: animaciones básicas (máxima fluidez).',
       'desconocido': 'No se pudo detectar el rendimiento. Se usan ajustes por defecto.'
     };
-    
+
     const color = levelColors[nivelNormalizado] || '#888';
     const name = levelNames[nivelNormalizado] || '?';
     const desc = levelDescriptions[nivelNormalizado] || 'Rendimiento no detectado.';
-    
+
     perfSpan.title = desc;
     perfSpan.innerHTML = `
       <span class="dot" style="background:${color};"></span>
       <span class="label">${name}</span>
     `;
-    
+
     hint.appendChild(msgSpan);
     hint.appendChild(perfSpan);
   }
@@ -657,11 +657,11 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   try {
     var { initMusica, playMusic, toggleMusic, resetMusic } = await import('../modules/musica.js');
-    initMusica();
+    initMusica(); // usa cancion.mp3 por defecto
     window.playMusic = playMusic;
     window.toggleMusic = toggleMusic;
     window.resetMusic = resetMusic;
-    
+
     setTimeout(() => {
       if (window.playMusic) window.playMusic();
     }, 300);
