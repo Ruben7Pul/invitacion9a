@@ -512,7 +512,7 @@ function limpiarCollage() {
   }
 }
 
-// ===== AJUSTES POR RENDIMIENTO (INDICADOR SIN ETIQUETA) =====
+// ===== AJUSTES POR RENDIMIENTO =====
 function aplicarAjustesRendimiento(nivel) {
   const nivelNormalizado = (nivel === 'alto' || nivel === 'medio' || nivel === 'bajo') ? nivel : 'desconocido';
 
@@ -550,17 +550,13 @@ function aplicarAjustesRendimiento(nivel) {
     });
   }
 
-  // ===== INDICADOR DE RENDIMIENTO: SOLO LA BOLITA (SIN ETIQUETA, SIN TOOLTIP) =====
+  // ===== INDICADOR DE RENDIMIENTO: SOLO BOLITA =====
   const hint = document.getElementById('hint-juego');
   if (hint) {
-    // Limpiar contenido previo
     hint.innerHTML = '';
-
-    // Mensaje principal
     const msgSpan = document.createElement('span');
     msgSpan.textContent = '👆 Toca el nombre para jugar';
 
-    // Bolita de rendimiento (sin texto, sin title)
     const dotSpan = document.createElement('span');
     dotSpan.className = 'perf-indicator';
 
@@ -570,10 +566,8 @@ function aplicarAjustesRendimiento(nivel) {
       'bajo': '#f44336',
       'desconocido': '#aaaaaa'
     };
-
     const color = levelColors[nivelNormalizado] || '#888';
     dotSpan.innerHTML = `<span class="dot" style="background:${color};"></span>`;
-    // No se añade title (tooltip)
 
     hint.appendChild(msgSpan);
     hint.appendChild(dotSpan);
@@ -635,7 +629,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
 
-  // ---- MÚSICA Y RESTO ----
+  // ---- MÚSICA ----
   try {
     var { initSonidos } = await import('../modules/sonidos.js');
     initSonidos();
@@ -643,14 +637,15 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   try {
     var { initMusica, playMusic, toggleMusic, resetMusic } = await import('../modules/musica.js');
-    initMusica();
+    initMusica(); // usa cancion.mp3 por defecto
     window.playMusic = playMusic;
     window.toggleMusic = toggleMusic;
     window.resetMusic = resetMusic;
 
+    // Intentar reproducir lo antes posible
     setTimeout(() => {
       if (window.playMusic) window.playMusic();
-    }, 300);
+    }, 100);
   } catch (e) { console.error('❌ Música:', e); }
 
   var appIniciada = false;
