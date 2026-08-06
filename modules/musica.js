@@ -27,7 +27,7 @@ function getMuteBtn() {
   return document.querySelector('.pause-mute-btn');
 }
 
-function updateIcon(soundOn) {
+export function updateIcon(soundOn) {
   const btn = getMuteBtn();
   if (!btn) return;
   if (soundOn) {
@@ -38,6 +38,9 @@ function updateIcon(soundOn) {
     btn.title = 'Activar música';
   }
 }
+
+// Exponer updateIcon globalmente para que otros módulos puedan usarlo
+window.updateIcon = updateIcon;
 
 function fadeVolume(targetVolume, duration = 800) {
   if (!audio) return;
@@ -103,15 +106,13 @@ export function initMusica(src) {
 
   audio = document.getElementById('bg-music');
   if (!audio) {
-    // Si no existe, lo creamos
     audio = createAudio(audioSrc);
     document.body.appendChild(audio);
   } else {
-    // Si existe, forzamos la actualización del src y recargamos
+    // Forzar actualización del src
     console.log('🎵 Elemento <audio> encontrado. Forzando actualización a:', audioSrc);
     audio.src = audioSrc;
-    audio.load(); // Recarga el audio con el nuevo src
-    // Aseguramos que el loop esté activo
+    audio.load();
     audio.loop = true;
   }
 
