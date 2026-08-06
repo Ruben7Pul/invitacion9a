@@ -39,7 +39,7 @@ export function updateIcon(soundOn) {
   }
 }
 
-// Exponer updateIcon globalmente para que otros módulos puedan usarlo
+// Exponer updateIcon globalmente para que otros módulos lo usen
 window.updateIcon = updateIcon;
 
 function fadeVolume(targetVolume, duration = 800) {
@@ -109,7 +109,6 @@ export function initMusica(src) {
     audio = createAudio(audioSrc);
     document.body.appendChild(audio);
   } else {
-    // Forzar actualización del src
     console.log('🎵 Elemento <audio> encontrado. Forzando actualización a:', audioSrc);
     audio.src = audioSrc;
     audio.load();
