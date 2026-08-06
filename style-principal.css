@@ -603,12 +603,12 @@ html.sin-reja #app {
   margin-bottom: 0.1rem;
   margin-top: 0.9rem;
   position: relative;
-  animation: ovalFlotar 6s ease-in-out infinite;
+  animation: ovalFlotar 4.5s ease-in-out infinite;
   will-change: transform;
 }
 @keyframes ovalFlotar {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(10px); }
+  0%, 100% { transform: translateY(-10px); }
+  50% { transform: translateY(14px); }
 }
 .oval-mask {
   width: 100%;
@@ -629,7 +629,7 @@ html.sin-reja #app {
 h1#nombre-hero {
   font-family: var(--script);
   font-weight: 400;
-  font-size: clamp(7.75rem, 25cqw, 9.75rem);
+  font-size: clamp(9.3rem, 30cqw, 11.7rem);
   line-height: 1.1;
   margin: 0.05rem 0;
   cursor: pointer;
@@ -1202,6 +1202,8 @@ h1#nombre-hero {
   display: block;
   font-size: clamp(2rem, 5vw, 2.8rem);
   color: #d4af37;
+  cursor: pointer;
+  user-select: none;
 }
 .agradecimientos-firma .firma-rol {
   display: block;
@@ -1380,6 +1382,8 @@ h1#nombre-hero {
   height: 100%;
   object-fit: contain;
   display: block;
+  border-radius: 16px;
+  border: 1px solid rgba(212, 175, 55, 0.45);
   -webkit-user-select: none;
   user-select: none;
 }
@@ -1403,7 +1407,7 @@ h1#nombre-hero {
 @media (max-width: 400px) {
   #app { padding: 0.3rem 0.6rem 0; }
   #app-inner { gap: 0.6rem; padding: 0 0.2rem 2rem; }
-  h1#nombre-hero { font-size: clamp(6.75rem, 25cqw, 8rem); }
+  h1#nombre-hero { font-size: clamp(8.1rem, 30cqw, 9.6rem); }
   .frase-inline { font-size: clamp(1.3rem, 3.8cqw, 1.5rem); }
   #app-top .eyebrow { font-size: 0.7rem; }
   .top-btn { font-size: 1.1rem; min-width: 32px; height: 32px; }
@@ -1427,7 +1431,7 @@ h1#nombre-hero {
   #app { padding: 0.6rem 2rem 0; }
   #app-inner { max-width: 640px; gap: 1rem; padding: 0 0.5rem 3rem; }
   #oval-wrap { width: clamp(200px, 22vh, 300px); height: clamp(280px, 32vh, 420px); }
-  h1#nombre-hero { font-size: clamp(9.375rem, 18.75vh, 13.75rem); }
+  h1#nombre-hero { font-size: clamp(11.25rem, 22.5vh, 16.5rem); }
   .frase-inline { font-size: clamp(1.7rem, 3vh, 2.2rem); }
   .hint-final { font-size: clamp(1.2rem, 2.2vh, 1.5rem); }
   .seccion { padding: 1.5rem 1.5rem; }
@@ -1435,7 +1439,7 @@ h1#nombre-hero {
 @media (min-width: 768px) and (max-height: 900px) {
   #app-mid { gap: 0.6rem; }
   #oval-wrap { width: clamp(180px, 20vh, 260px); height: clamp(250px, 30vh, 360px); }
-  h1#nombre-hero { font-size: clamp(8.75rem, 17.5vh, 13.125rem); }
+  h1#nombre-hero { font-size: clamp(10.5rem, 21vh, 15.75rem); }
 }
 
 ::-webkit-scrollbar { width: 4px; }
