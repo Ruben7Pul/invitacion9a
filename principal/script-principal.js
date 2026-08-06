@@ -543,9 +543,18 @@ function renderCollage(container) {
 
     var rot = elegirRotacionContraria();
 
-    var div = document.createElement('div');
-    div.className = 'collage-item';
-    div.style.cssText =
+    // Antes había un <div class="collage-item"> envolviendo a la imagen (y
+    // la imagen adentro con width/height:100%). Ese div se calculaba con la
+    // misma relación de aspecto que la imagen, pero al ser un elemento
+    // aparte terminaba comportándose como una "caja" extra que estorbaba a
+    // la hora de agregar cosas encima. Ahora la propia <img> es el
+    // elemento posicionado: no hay contenedor de por medio.
+    var elemento = document.createElement('img');
+    elemento.className = 'collage-item';
+    elemento.src = src;
+    elemento.alt = 'Gusto';
+    elemento.loading = 'lazy';
+    elemento.style.cssText =
       'width:' + w + '%;' +
       'height:' + h + '%;' +
       'left:' + x + '%;' +
@@ -553,26 +562,19 @@ function renderCollage(container) {
       'z-index:' + collageZIndex + ';' +
       'opacity: 0;' +
       'transform: rotate(' + rot + 'deg) scale(0.92);';
-
-    var img = document.createElement('img');
-    img.src = src;
-    img.alt = 'Gusto';
-    img.loading = 'lazy';
-    img.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;';
-    div.appendChild(img);
-    container.appendChild(div);
+    container.appendChild(elemento);
 
     // Fundido de entrada: se dispara un frame después de insertar el
     // elemento para que la transición CSS sí se ejecute (si se pusiera
     // opacity:1 de una vez, el navegador no anima el cambio).
     requestAnimationFrame(function() {
       requestAnimationFrame(function() {
-        div.style.opacity = '1';
-        div.style.transform = 'rotate(' + rot + 'deg) scale(1)';
+        elemento.style.opacity = '1';
+        elemento.style.transform = 'rotate(' + rot + 'deg) scale(1)';
       });
     });
 
-    collageElementos.push({ div: div, zona: indiceZona });
+    collageElementos.push({ div: elemento, zona: indiceZona });
     collageZIndex++;
 
     // La imagen más antigua se retira SIEMPRE después de que la nueva ya
@@ -881,13 +883,20 @@ document.addEventListener('DOMContentLoaded', async function() {
     var secciones = document.querySelectorAll('.seccion');
     var observer = new IntersectionObserver(function(entries) {
       entries.forEach(function(entry) {
+        // Antes se agregaba/quitaba "visible" cada vez que se cruzaba el
+        // umbral, así que si el scroll se quedaba justo en el punto exacto
+        // (algo muy común en secciones más altas que la pantalla) la clase
+        // entraba y salía sin parar y la sección parpadeaba (aparecía y
+        // desaparecía). Ahora la animación se dispara una sola vez: en
+        // cuanto la sección se hace visible se queda así para siempre y
+        // dejamos de observarla, sin importar hacia dónde se siga
+        // scrolleando.
         if (entry.isIntersecting) {
           entry.target.classList.add('visible');
-        } else {
-          entry.target.classList.remove('visible');
+          observer.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.15 });
+    }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
     secciones.forEach(function(sec) { observer.observe(sec); });
   } else {
     document.querySelectorAll('.seccion').forEach(function(sec) { sec.classList.add('visible'); });
