@@ -323,7 +323,6 @@ export function initJuego(config, mobile = false) {
         lastDifficultyUpdate = performance.now();
       }
       lastTime = 0;
-      // No lanzar la bola automáticamente
     }
   }
 
@@ -593,8 +592,6 @@ export function initJuego(config, mobile = false) {
   }
 
   function spawnPowerup(brick) {
-    // Quitamos el límite de 36 ladrillos rotos
-    // if (ladrillosRotos <= 36) return;  // ELIMINADO
     if (powerupsInAir >= 2) return;
 
     const now = performance.now();
@@ -1200,197 +1197,198 @@ export function initJuego(config, mobile = false) {
     drawFloatingMessages(ctx);
   }
 
-  // ========== BUCLE PRINCIPAL ==========
+  // ========== BUCLE PRINCIPAL (con try-catch para evitar congelación) ==========
   function gameLoop(timestamp) {
-    if (!running) {
-      draw();
-      animFrameId = requestAnimationFrame(gameLoop);
-      return;
-    }
-    if (paused) {
-      draw();
-      animFrameId = requestAnimationFrame(gameLoop);
-      return;
-    }
-
-    if (gameTimeActive && launched) {
-      const now = performance.now();
-      if (lastDifficultyUpdate === 0) lastDifficultyUpdate = now;
-      difficultyTime += (now - lastDifficultyUpdate) / 1000;
-      lastDifficultyUpdate = now;
-    } else {
-      lastDifficultyUpdate = performance.now();
-    }
-
-    const delta = lastTime ? Math.min((timestamp - lastTime) / 1000, MAX_DELTA) : 0.016;
-    lastTime = timestamp;
-
-    uiCounter++;
-    if (uiCounter % 2 === 0) updateUI();
-
-    let paddleMoved = false;
-    if (keys.left) {
-      paddle.x = Math.max(0, paddle.x - PADDLE_SPEED * delta);
-      paddleMoved = true;
-    }
-    if (keys.right) {
-      paddle.x = Math.min(STAGE_W - paddleWidth, paddle.x + PADDLE_SPEED * delta);
-      paddleMoved = true;
-    }
-    if (touchActive) {
-      paddle.x = Math.max(0, Math.min(STAGE_W - paddleWidth, touchX));
-      paddleMoved = true;
-    }
-    if (mouseActive) {
-      paddle.x = Math.max(0, Math.min(STAGE_W - paddleWidth, mouseX));
-      paddleMoved = true;
-    }
-
-    if (!launched) {
-      if (balls.length > 0) {
-        const b = balls[0];
-        b.x = paddle.x + paddleWidth / 2;
-        b.y = STAGE_H - 14 - BALL_R;
+    try {
+      if (!running) {
+        draw();
+        animFrameId = requestAnimationFrame(gameLoop);
+        return;
       }
-      // No lanzar automáticamente al mover la paleta si no se ha lanzado antes
-      // Solo lanzar si se hace clic/touch, eso se maneja en los eventos
-      draw();
-      animFrameId = requestAnimationFrame(gameLoop);
-      return;
-    }
-
-    // Actualizar bolas (sin cambios)
-    for (let i = balls.length - 1; i >= 0; i--) {
-      const b = balls[i];
-      b.x += b.vx * delta;
-      b.y += b.vy * delta;
-
-      if (b.x - BALL_R < 0) { b.x = BALL_R; b.vx = Math.abs(b.vx); }
-      if (b.x + BALL_R > STAGE_W) { b.x = STAGE_W - BALL_R; b.vx = -Math.abs(b.vx); }
-      if (b.y - BALL_R < 0) { b.y = BALL_R; b.vy = Math.abs(b.vy); }
-
-      const py = STAGE_H - 14;
-      if (b.vy > 0 && b.y + BALL_R >= py && b.y + BALL_R <= py + 10 &&
-          b.x >= paddle.x - BALL_R && b.x <= paddle.x + paddleWidth + BALL_R) {
-        b.y = py - BALL_R;
-        let hit = (b.x - (paddle.x + paddleWidth / 2)) / (paddleWidth / 2);
-        hit = Math.max(-0.85, Math.min(0.85, hit));
-        const angle = hit * 0.7;
-        const speed = getCurrentBallSpeed();
-        b.vx = Math.sin(angle) * speed;
-        b.vy = -Math.cos(angle) * speed;
-        comboCount = 0;
+      if (paused) {
+        draw();
+        animFrameId = requestAnimationFrame(gameLoop);
+        return;
       }
 
-      for (const br of bricks) {
-        if (!br.alive) continue;
-        if (b.x + BALL_R > br.x && b.x - BALL_R < br.x + br.w &&
-            b.y + BALL_R > br.y && b.y - BALL_R < br.y + br.h) {
+      if (gameTimeActive && launched) {
+        const now = performance.now();
+        if (lastDifficultyUpdate === 0) lastDifficultyUpdate = now;
+        difficultyTime += (now - lastDifficultyUpdate) / 1000;
+        lastDifficultyUpdate = now;
+      } else {
+        lastDifficultyUpdate = performance.now();
+      }
 
-          const overlapX = Math.min(b.x + BALL_R - br.x, br.x + br.w - (b.x - BALL_R));
-          const overlapY = Math.min(b.y + BALL_R - br.y, br.y + br.h - (b.y - BALL_R));
-          if (overlapX < overlapY) {
-            if (b.x < br.x + br.w / 2) b.x = br.x - BALL_R;
-            else b.x = br.x + br.w + BALL_R;
-            b.vx = -b.vx;
+      const delta = lastTime ? Math.min((timestamp - lastTime) / 1000, MAX_DELTA) : 0.016;
+      lastTime = timestamp;
+
+      uiCounter++;
+      if (uiCounter % 2 === 0) updateUI();
+
+      let paddleMoved = false;
+      if (keys.left) {
+        paddle.x = Math.max(0, paddle.x - PADDLE_SPEED * delta);
+        paddleMoved = true;
+      }
+      if (keys.right) {
+        paddle.x = Math.min(STAGE_W - paddleWidth, paddle.x + PADDLE_SPEED * delta);
+        paddleMoved = true;
+      }
+      if (touchActive) {
+        paddle.x = Math.max(0, Math.min(STAGE_W - paddleWidth, touchX));
+        paddleMoved = true;
+      }
+      if (mouseActive) {
+        paddle.x = Math.max(0, Math.min(STAGE_W - paddleWidth, mouseX));
+        paddleMoved = true;
+      }
+
+      if (!launched) {
+        if (balls.length > 0) {
+          const b = balls[0];
+          b.x = paddle.x + paddleWidth / 2;
+          b.y = STAGE_H - 14 - BALL_R;
+        }
+        draw();
+        animFrameId = requestAnimationFrame(gameLoop);
+        return;
+      }
+
+      // Actualizar bolas
+      for (let i = balls.length - 1; i >= 0; i--) {
+        const b = balls[i];
+        b.x += b.vx * delta;
+        b.y += b.vy * delta;
+
+        if (b.x - BALL_R < 0) { b.x = BALL_R; b.vx = Math.abs(b.vx); }
+        if (b.x + BALL_R > STAGE_W) { b.x = STAGE_W - BALL_R; b.vx = -Math.abs(b.vx); }
+        if (b.y - BALL_R < 0) { b.y = BALL_R; b.vy = Math.abs(b.vy); }
+
+        const py = STAGE_H - 14;
+        if (b.vy > 0 && b.y + BALL_R >= py && b.y + BALL_R <= py + 10 &&
+            b.x >= paddle.x - BALL_R && b.x <= paddle.x + paddleWidth + BALL_R) {
+          b.y = py - BALL_R;
+          let hit = (b.x - (paddle.x + paddleWidth / 2)) / (paddleWidth / 2);
+          hit = Math.max(-0.85, Math.min(0.85, hit));
+          const angle = hit * 0.7;
+          const speed = getCurrentBallSpeed();
+          b.vx = Math.sin(angle) * speed;
+          b.vy = -Math.cos(angle) * speed;
+          comboCount = 0;
+        }
+
+        for (const br of bricks) {
+          if (!br.alive) continue;
+          if (b.x + BALL_R > br.x && b.x - BALL_R < br.x + br.w &&
+              b.y + BALL_R > br.y && b.y - BALL_R < br.y + br.h) {
+
+            const overlapX = Math.min(b.x + BALL_R - br.x, br.x + br.w - (b.x - BALL_R));
+            const overlapY = Math.min(b.y + BALL_R - br.y, br.y + br.h - (b.y - BALL_R));
+            if (overlapX < overlapY) {
+              if (b.x < br.x + br.w / 2) b.x = br.x - BALL_R;
+              else b.x = br.x + br.w + BALL_R;
+              b.vx = -b.vx;
+            } else {
+              if (b.y < br.y + br.h / 2) b.y = br.y - BALL_R;
+              else b.y = br.y + br.h + BALL_R;
+              b.vy = -b.vy;
+            }
+
+            const damage = ballDurability;
+            br.hits -= damage;
+            if (br.hits <= 0) {
+              soundBrick();
+              br.alive = false;
+              if (br.isGolden && goldenBrickRef === br) goldenBrickRef = null;
+              comboCount++;
+              const comboMult = 1 + Math.min(comboCount * COMBO_BONUS_PER_HIT, COMBO_BONUS_CAP);
+              const basePoints = br.isGolden ? br.playerPoints * 3 : br.playerPoints;
+              playerScore += Math.round(basePoints * comboMult);
+              gamePoints -= br.value;
+              ladrillosRotos++;
+              if (uiCounter % 2 === 0) updateUI();
+              spawnPowerup(br);
+              if (gamePoints <= REGEN_THRESHOLD) requestRegeneration();
+            }
+            break;
+          }
+        }
+
+        if (b.y - BALL_R > STAGE_H) {
+          balls.splice(i, 1);
+          if (balls.length === 0) {
+            loseLife();
+            if (lives <= 0) {
+              draw();
+              animFrameId = requestAnimationFrame(gameLoop);
+              return;
+            }
+          }
+        }
+      }
+
+      // Actualizar power-ups
+      for (let i = powerups.length - 1; i >= 0; i--) {
+        const pu = powerups[i];
+        pu.y += pu.vy * delta;
+
+        const px = paddle.x;
+        const py2 = STAGE_H - 14 - PADDLE_H / 2;
+        if (pu.y + pu.size / 2 > py2 - PADDLE_H / 2 &&
+            pu.y - pu.size / 2 < py2 + PADDLE_H / 2 &&
+            pu.x + pu.size / 2 > px &&
+            pu.x - pu.size / 2 < px + paddleWidth) {
+          if (pu.isBlue) {
+            applyBlueBall();
           } else {
-            if (b.y < br.y + br.h / 2) b.y = br.y - BALL_R;
-            else b.y = br.y + br.h + BALL_R;
-            b.vy = -b.vy;
+            if (pu.color === 'verde') soundPowerupGood();
+            else soundPowerupBad();
+            applyPowerup(pu);
           }
+          powerups.splice(i, 1);
+          powerupsInAir--;
+          paddleWidth = PADDLE_W_BASE * paddleSizeMultiplier;
+          continue;
+        }
 
-          const damage = ballDurability;
-          br.hits -= damage;
-          if (br.hits <= 0) {
-            soundBrick();
-            br.alive = false;
-            if (br.isGolden && goldenBrickRef === br) goldenBrickRef = null;
-            comboCount++;
-            const comboMult = 1 + Math.min(comboCount * COMBO_BONUS_PER_HIT, COMBO_BONUS_CAP);
-            const basePoints = br.isGolden ? br.playerPoints * 3 : br.playerPoints;
-            playerScore += Math.round(basePoints * comboMult);
-            gamePoints -= br.value;
-            ladrillosRotos++;
-            if (uiCounter % 2 === 0) updateUI();
-            spawnPowerup(br);
-            if (gamePoints <= REGEN_THRESHOLD) requestRegeneration();
-          }
-          break;
+        if (pu.y - pu.size / 2 > STAGE_H) {
+          powerups.splice(i, 1);
+          powerupsInAir--;
+          if (pu.isBlue) blueBallActive = false;
+          else activePowerupTypes.delete(pu.type);
+          continue;
         }
       }
 
-      if (b.y - BALL_R > STAGE_H) {
-        balls.splice(i, 1);
-        if (balls.length === 0) {
-          loseLife();
-          if (lives <= 0) {
-            draw();
-            animFrameId = requestAnimationFrame(gameLoop);
-            return;
-          }
-        }
-      }
+      checkGoldenExpiry();
+      if (pendingRegeneration) checkAndRegenerate();
+
+      draw();
+      animFrameId = requestAnimationFrame(gameLoop);
+    } catch (e) {
+      console.error('❌ Error en gameLoop:', e);
+      // Intentar continuar el bucle
+      animFrameId = requestAnimationFrame(gameLoop);
     }
-
-    // Actualizar power-ups
-    for (let i = powerups.length - 1; i >= 0; i--) {
-      const pu = powerups[i];
-      pu.y += pu.vy * delta;
-
-      const px = paddle.x;
-      const py2 = STAGE_H - 14 - PADDLE_H / 2;
-      if (pu.y + pu.size / 2 > py2 - PADDLE_H / 2 &&
-          pu.y - pu.size / 2 < py2 + PADDLE_H / 2 &&
-          pu.x + pu.size / 2 > px &&
-          pu.x - pu.size / 2 < px + paddleWidth) {
-        if (pu.isBlue) {
-          applyBlueBall();
-        } else {
-          if (pu.color === 'verde') soundPowerupGood();
-          else soundPowerupBad();
-          applyPowerup(pu);
-        }
-        powerups.splice(i, 1);
-        powerupsInAir--;
-        paddleWidth = PADDLE_W_BASE * paddleSizeMultiplier;
-        continue;
-      }
-
-      if (pu.y - pu.size / 2 > STAGE_H) {
-        powerups.splice(i, 1);
-        powerupsInAir--;
-        if (pu.isBlue) blueBallActive = false;
-        else activePowerupTypes.delete(pu.type);
-        continue;
-      }
-    }
-
-    checkGoldenExpiry();
-    if (pendingRegeneration) checkAndRegenerate();
-
-    draw();
-    animFrameId = requestAnimationFrame(gameLoop);
   }
 
   function applyPowerup(pu) {
     const type = pu.type;
     switch (type) {
       case 'PALA_GRANDE':
-        // Si ya es grande, no cambia; si es mini, vuelve a normal; si es normal, se vuelve grande
         if (paddleSizeMultiplier === 0.65) {
-          paddleSizeMultiplier = 1; // mini + grande = normal
+          paddleSizeMultiplier = 1;
         } else if (paddleSizeMultiplier === 1) {
-          paddleSizeMultiplier = 1.35; // normal + grande = grande
+          paddleSizeMultiplier = 1.35;
         }
-        // si ya es 1.35, se queda igual
         break;
       case 'PALA_MINI':
         if (paddleSizeMultiplier === 1.35) {
-          paddleSizeMultiplier = 1; // grande + mini = normal
+          paddleSizeMultiplier = 1;
         } else if (paddleSizeMultiplier === 1) {
-          paddleSizeMultiplier = 0.65; // normal + mini = mini
+          paddleSizeMultiplier = 0.65;
         }
-        // si ya es 0.65, se queda igual
         break;
       case 'MULTIBOLA': {
         const count = balls.length;
