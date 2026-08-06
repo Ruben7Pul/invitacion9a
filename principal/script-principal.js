@@ -344,6 +344,7 @@ var collageElementos = [];
 var collageHistorialImagenes = [];
 var collageUltimaRotacion = 0;
 var collageIntervaloMs = 3000;
+var MAX_IMAGENES_SIMULTANEAS = 6;
 
 // Carpeta donde viven las imágenes del collage (raíz del proyecto).
 var CARPETA_IMGCOLL = '../imgcoll/';
@@ -485,28 +486,33 @@ function renderCollage(container) {
 
   // Zonas del contenedor (centro en % de x,y) para repartir las imágenes en
   // toda el área de trabajo en vez de que caigan amontonadas al centro.
+  // 7 zonas para hasta 6 imágenes simultáneas: así siempre queda al menos
+  // una zona libre y una imagen nueva nunca tiene que caer exactamente
+  // donde ya hay otra visible (esa coincidencia era la causa del
+  // parpadeo/aparición-desaparición constante).
   var ZONAS_COLLAGE = [
-    { x: 22, y: 24 },
-    { x: 78, y: 24 },
-    { x: 50, y: 50 },
-    { x: 22, y: 76 },
-    { x: 78, y: 76 }
+    { x: 15, y: 20 },
+    { x: 50, y: 14 },
+    { x: 85, y: 20 },
+    { x: 15, y: 52 },
+    { x: 85, y: 52 },
+    { x: 30, y: 84 },
+    { x: 70, y: 84 }
   ];
-  var collageHistorialZonas = [];
 
+  // Elige una zona que NO esté ocupada por ninguna imagen actualmente
+  // visible (en vez de solo mirar un historial corto), para evitar
+  // superposiciones exactas.
   function elegirZona() {
+    var ocupadas = collageElementos.map(function(el) { return el.zona; });
     var disponibles = [];
     for (var i = 0; i < ZONAS_COLLAGE.length; i++) {
-      if (collageHistorialZonas.indexOf(i) === -1) disponibles.push(i);
+      if (ocupadas.indexOf(i) === -1) disponibles.push(i);
     }
     if (disponibles.length === 0) {
-      collageHistorialZonas = [];
       disponibles = Array.from({length: ZONAS_COLLAGE.length}, (_, i) => i);
     }
-    var elegida = disponibles[Math.floor(Math.random() * disponibles.length)];
-    collageHistorialZonas.push(elegida);
-    if (collageHistorialZonas.length > 2) collageHistorialZonas.shift();
-    return ZONAS_COLLAGE[elegida];
+    return disponibles[Math.floor(Math.random() * disponibles.length)];
   }
 
   function mostrarSiguienteImagen() {
@@ -524,8 +530,9 @@ function renderCollage(container) {
       w = TAMANIO_BASE * ratio;
     }
 
-    var zona = elegirZona();
-    var jitter = 8;
+    var indiceZona = elegirZona();
+    var zona = ZONAS_COLLAGE[indiceZona];
+    var jitter = 6;
     var centroX = zona.x + (Math.random() * jitter * 2 - jitter);
     var centroY = zona.y + (Math.random() * jitter * 2 - jitter);
 
@@ -544,8 +551,8 @@ function renderCollage(container) {
       'left:' + x + '%;' +
       'top:' + y + '%;' +
       'z-index:' + collageZIndex + ';' +
-      'opacity: 1;' +
-      'transform: rotate(' + rot + 'deg);';
+      'opacity: 0;' +
+      'transform: rotate(' + rot + 'deg) scale(0.92);';
 
     var img = document.createElement('img');
     img.src = src;
@@ -555,16 +562,34 @@ function renderCollage(container) {
     div.appendChild(img);
     container.appendChild(div);
 
-    collageElementos.push(div);
+    // Fundido de entrada: se dispara un frame después de insertar el
+    // elemento para que la transición CSS sí se ejecute (si se pusiera
+    // opacity:1 de una vez, el navegador no anima el cambio).
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        div.style.opacity = '1';
+        div.style.transform = 'rotate(' + rot + 'deg) scale(1)';
+      });
+    });
 
-    if (collageElementos.length > 4) {
-      var antiguoDiv = collageElementos.shift();
-      if (antiguoDiv.parentNode) {
-        antiguoDiv.parentNode.removeChild(antiguoDiv);
-      }
-    }
-
+    collageElementos.push({ div: div, zona: indiceZona });
     collageZIndex++;
+
+    // La imagen más antigua se retira SIEMPRE después de que la nueva ya
+    // apareció (nunca en el mismo instante) y con fundido de salida, para
+    // que nunca se vea un intercambio brusco tipo "parpadeo".
+    if (collageElementos.length > MAX_IMAGENES_SIMULTANEAS) {
+      var antiguo = collageElementos.shift();
+      setTimeout(function() {
+        var antiguoDiv = antiguo.div;
+        antiguoDiv.style.opacity = '0';
+        setTimeout(function() {
+          if (antiguoDiv.parentNode) {
+            antiguoDiv.parentNode.removeChild(antiguoDiv);
+          }
+        }, 650);
+      }, 550);
+    }
   }
 
   mostrarSiguienteImagen();
