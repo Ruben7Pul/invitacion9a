@@ -68,7 +68,6 @@ function rellenarDatos(config) {
   if (firmaNombre) {
     firmaNombre.textContent = config.nombre;
   }
-
   const linkLibro = document.getElementById('link-libro-firmas');
   if (linkLibro) {
     linkLibro.href = 'https://docs.google.com/forms/d/e/1FAIpQLSd9CtYaj-_JR6s5MhZQXrxQPPPBfFTjmB-2FoBk6lvA8PWAIg/viewform';
@@ -732,9 +731,14 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
   var nombreEl = document.getElementById('nombre-hero');
-  nombreEl.addEventListener('click', function() {
+  var firmaNombreEl = document.getElementById('firma-nombre');
+
+  function irAlJuego() {
     window.location.href = '../juego1/';
-  });
+  }
+
+  if (nombreEl) nombreEl.addEventListener('click', irAlJuego);
+  if (firmaNombreEl) firmaNombreEl.addEventListener('click', irAlJuego);
 
   var app = document.getElementById('app');
   var backBtn = document.getElementById('back-link');
