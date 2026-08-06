@@ -43,6 +43,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
   const FADE_IN_MS = 1300;
+  const FADE_OUT_ANTES_DEL_FINAL_S = 2; // el volumen empieza a bajar 2s antes del final
+  const FADE_OUT_MS = 2000;
+  const FADE_VISUAL_MS = 600; // debe coincidir con la transición CSS de #transition-video.saliendo
 
   function abrirReja(e) {
     if (e) e.stopPropagation();
@@ -56,18 +59,37 @@ document.addEventListener('DOMContentLoaded', async function() {
     iniciarMedicionFPS();
 
     let finalizado = false;
+    let salidaIniciada = false;
     let timeoutId = null;
+
+    // Arranca el fundido de audio (2s antes del final) y el fundido visual
+    // que revela bella.jpg detrás del video, para que nunca se vea un
+    // corte brusco de golpe.
+    const iniciarSalidaSuave = () => {
+      if (salidaIniciada) return;
+      salidaIniciada = true;
+      if (video) {
+        fadeVolumen(video, 0, FADE_OUT_MS);
+        video.classList.add('saliendo');
+      }
+    };
 
     const finalizar = () => {
       if (finalizado) return;
       finalizado = true;
+      iniciarSalidaSuave();
       if (timeoutId) clearTimeout(timeoutId);
 
       const frames = detenerMedicion();
       const nivel = clasificarNivel(frames);
       guardarNivel(nivel);
 
-      window.location.href = 'principal/index.html';
+      // Espera a que se note el fundido hacia bella.jpg antes de cambiar
+      // de página, para que la transición a la página principal no se
+      // vea cortada.
+      setTimeout(() => {
+        window.location.href = 'principal/index.html';
+      }, FADE_VISUAL_MS);
     };
 
     const onError = (err) => {
@@ -96,6 +118,16 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (video) {
       video.addEventListener('ended', finalizar);
       video.addEventListener('error', onError);
+
+      // A los 2 segundos del final, empieza a bajar el volumen y a
+      // desvanecer el video hacia bella.jpg (así al llegar al final ya
+      // no se corta de golpe, sino que "abre paso" suavemente).
+      video.addEventListener('timeupdate', function() {
+        if (!video.duration || !isFinite(video.duration)) return;
+        if (video.duration - video.currentTime <= FADE_OUT_ANTES_DEL_FINAL_S) {
+          iniciarSalidaSuave();
+        }
+      });
 
       video.muted = false;
       video.volume = 0;
