@@ -276,7 +276,7 @@ body {
   pointer-events: auto;
 }
 
-/* ===== OVERLAY DE TRANSICIÓN (con degradado vertical) ===== */
+/* ===== OVERLAY DE TRANSICIÓN ===== */
 #transition-overlay {
   position: fixed;
   inset: 0;
@@ -668,10 +668,65 @@ h1#nombre-hero {
   text-align: center;
   animation: pulseHint 2s ease-in-out infinite;
   will-change: opacity, transform;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
 }
 @keyframes pulseHint {
   0%, 100% { opacity: 0.7; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.02); }
+}
+
+/* ===== INDICADOR DE RENDIMIENTO (pelota + etiqueta) ===== */
+.perf-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-family: var(--serif-body);
+  font-size: 0.65rem;
+  opacity: 0.9;
+  padding: 0.05rem 0.4rem;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: help;
+  line-height: 1;
+}
+
+.perf-indicator .dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.perf-indicator .label {
+  font-size: 0.6rem;
+  letter-spacing: 0.04em;
+  color: #e0d0b0;
+  text-shadow: none;
+}
+
+@media (max-width: 400px) {
+  .hint-final {
+    gap: 0.2rem;
+    flex-wrap: wrap;
+  }
+  .perf-indicator {
+    font-size: 0.55rem;
+    padding: 0.02rem 0.3rem;
+  }
+  .perf-indicator .dot {
+    width: 10px;
+    height: 10px;
+  }
+  .perf-indicator .label {
+    font-size: 0.5rem;
+  }
 }
 
 .advertencia {
