@@ -1,4 +1,4 @@
-console.log('🎵 goga música 23 (con monitor de salud y reinicio automático)');
+console.log('🎵 goga música 23 (con autoplay persistente y reinicio)');
 
 let audio = null;
 let fadeInterval = null;
@@ -6,7 +6,8 @@ let isMuted = false;
 let autoplayPending = false;
 let autoplayListenerAdded = false;
 let healthCheckInterval = null;
-let currentSrc = '../archivos/cancion.mp3';
+let retryTimeout = null;
+let retryCount = 0;
 
 const DEFAULT_AUDIO_SRC = '../archivos/cancion.mp3';
 let audioSrc = DEFAULT_AUDIO_SRC;
@@ -70,30 +71,30 @@ function tryPlay() {
   return audio.play().then(() => true).catch(() => false);
 }
 
-function setupAutoplayListener() {
+// Listener persistente de autoplay: se activa con cualquier clic/toque
+function setupPersistentAutoplayListener() {
   if (autoplayListenerAdded) return;
   autoplayListenerAdded = true;
 
   const handler = () => {
-    if (autoplayPending) {
+    // Si el audio está pausado (por autoplay bloqueado) o pending, intentar reproducir
+    if (audio && audio.paused && !isMuted) {
       const ok = tryPlay();
       if (ok) {
         fadeVolume(0.6, 800);
         isMuted = false;
         updateIcon(true);
         autoplayPending = false;
-        document.removeEventListener('click', handler);
-        document.removeEventListener('touchstart', handler);
-        console.log('🎵 Música activada por interacción del usuario');
-        // Iniciar el monitor de salud después de que la música comience
+        console.log('🎵 Música activada por interacción del usuario (persistente)');
         startHealthCheck();
+        // No remover el listener, para que siga funcionando si hay otros fallos
       }
     }
   };
 
   document.addEventListener('click', handler);
   document.addEventListener('touchstart', handler);
-  console.log('🔊 Listener de autoplay configurado');
+  console.log('🔊 Listener de autoplay persistente configurado');
 }
 
 function createAudio(src) {
@@ -104,7 +105,7 @@ function createAudio(src) {
   return el;
 }
 
-// ========== MONITOR DE SALUD DEL AUDIO ==========
+// ========== MONITOR DE SALUD ==========
 let lastCheckTime = 0;
 let lastCurrentTime = 0;
 let consecutiveFailures = 0;
@@ -118,7 +119,6 @@ function startHealthCheck() {
 
   healthCheckInterval = setInterval(() => {
     if (!audio) return;
-    // Solo verificar si no está pausado por el usuario (pausa manual)
     if (audio.paused && !autoplayPending) return;
 
     const now = performance.now();
@@ -126,14 +126,11 @@ function startHealthCheck() {
     const currentTime = audio.currentTime || 0;
     const timeDiff = currentTime - lastCurrentTime;
 
-    // Si el tiempo no avanza en más de 2 segundos (y el audio no está pausado),
-    // o si el audio está en error o se ha detenido inesperadamente
     if (!audio.paused && timeSinceLastCheck > 2 && timeDiff < 0.01) {
       consecutiveFailures++;
-      console.warn(`⚠️ Audio estancado (${consecutiveFailures})`, { currentTime, lastCurrentTime, timeSinceLastCheck });
+      console.warn(`⚠️ Audio estancado (${consecutiveFailures})`);
       if (consecutiveFailures >= 2) {
-        // Reiniciar reproducción limpia
-        console.log('🔄 Reiniciando audio por corte o estancamiento');
+        console.log('🔄 Reiniciando audio por corte');
         restartAudio();
         consecutiveFailures = 0;
       }
@@ -143,7 +140,7 @@ function startHealthCheck() {
 
     lastCheckTime = now;
     lastCurrentTime = currentTime;
-  }, 3000); // revisar cada 3 segundos
+  }, 3000);
 }
 
 function stopHealthCheck() {
@@ -156,20 +153,15 @@ function stopHealthCheck() {
 function restartAudio() {
   if (!audio) return;
   try {
-    // Guardar el estado de muted
     const wasMuted = isMuted || audio.volume === 0;
-    // Detener fade actual
     if (fadeInterval) {
       clearInterval(fadeInterval);
       fadeInterval = null;
     }
-    // Pausar y resetear
     audio.pause();
     audio.currentTime = 0;
     audio.volume = 0;
-    // Recargar el elemento
     audio.load();
-    // Intentar reproducir nuevamente
     const ok = tryPlay();
     if (ok) {
       if (!wasMuted) {
@@ -177,21 +169,50 @@ function restartAudio() {
         isMuted = false;
         updateIcon(true);
       } else {
-        // Si estaba silenciado, mantener silencio
         audio.volume = 0;
         isMuted = true;
         updateIcon(false);
       }
       console.log('🎵 Audio reiniciado exitosamente');
+      startHealthCheck();
     } else {
-      // Si falla, poner en espera de autoplay
+      // Si falla, esperar un poco y reintentar
       autoplayPending = true;
-      setupAutoplayListener();
-      console.log('⏳ Reinicio fallido, esperando interacción del usuario');
+      setupPersistentAutoplayListener();
+      console.log('⏳ Reinicio fallido, en espera de interacción');
     }
   } catch (e) {
     console.error('❌ Error al reiniciar audio:', e);
   }
+}
+
+// ========== REINTENTOS CON BACKOFF ==========
+function scheduleRetry() {
+  if (retryTimeout) clearTimeout(retryTimeout);
+  if (retryCount >= 5) {
+    console.log('⚠️ Demasiados reintentos, activando listener persistente');
+    setupPersistentAutoplayListener();
+    return;
+  }
+  retryCount++;
+  const delay = retryCount * 1000; // 1s, 2s, 3s, 4s, 5s
+  console.log(`⏳ Reintento ${retryCount} en ${delay}ms...`);
+  retryTimeout = setTimeout(() => {
+    if (audio && audio.paused && !isMuted) {
+      const ok = tryPlay();
+      if (ok) {
+        fadeVolume(0.6, 800);
+        isMuted = false;
+        updateIcon(true);
+        autoplayPending = false;
+        console.log('🎵 Música iniciada en reintento');
+        startHealthCheck();
+        retryCount = 0;
+      } else {
+        scheduleRetry();
+      }
+    }
+  }, delay);
 }
 
 // ========== EXPORTADAS ==========
@@ -210,10 +231,8 @@ export function initMusica(src) {
     audio.loop = true;
   }
 
-  // Manejar errores de carga
   audio.addEventListener('error', (e) => {
     console.warn('⚠️ Error en audio:', e);
-    // Intentar recargar después de un breve retraso
     setTimeout(() => {
       if (audio) {
         audio.load();
@@ -228,9 +247,7 @@ export function initMusica(src) {
     }, 1000);
   });
 
-  // Si el audio se detiene inesperadamente (no por pausa)
   audio.addEventListener('ended', () => {
-    // No debería ocurrir porque loop=true, pero por si acaso
     if (audio && audio.loop) {
       audio.currentTime = 0;
       audio.play().catch(() => {});
@@ -240,9 +257,9 @@ export function initMusica(src) {
   audio.volume = 0;
   isMuted = false;
   updateIcon(true);
-  // Detener cualquier health check previo
   stopHealthCheck();
-  // No iniciar health check hasta que la música comience a sonar (se inicia en playMusic o en el listener)
+  retryCount = 0;
+  // El listener persistente se activa al primer fallo
 }
 
 export function playMusic() {
@@ -265,10 +282,12 @@ export function playMusic() {
     autoplayPending = false;
     console.log('🎵 Música iniciada correctamente');
     startHealthCheck();
+    retryCount = 0;
   } else {
-    console.log('⏳ Autoplay bloqueado, esperando interacción del usuario');
+    console.log('⏳ Autoplay bloqueado, activando listener persistente y reintentos');
     autoplayPending = true;
-    setupAutoplayListener();
+    setupPersistentAutoplayListener();
+    scheduleRetry(); // reintentos automáticos con backoff
   }
 }
 
@@ -276,12 +295,14 @@ export function resetMusic() {
   if (!audio) return;
   fadeVolume(0, 600);
   stopHealthCheck();
+  if (retryTimeout) clearTimeout(retryTimeout);
   setTimeout(() => {
     audio.pause();
     audio.currentTime = 0;
   }, 700);
   isMuted = false;
   updateIcon(true);
+  retryCount = 0;
 }
 
 export function toggleMusic() {
@@ -296,7 +317,8 @@ export function toggleMusic() {
         startHealthCheck();
       } else {
         autoplayPending = true;
-        setupAutoplayListener();
+        setupPersistentAutoplayListener();
+        scheduleRetry();
       }
       return;
     }
@@ -305,7 +327,7 @@ export function toggleMusic() {
       fadeVolume(0, 600);
       isMuted = true;
       updateIcon(false);
-      stopHealthCheck(); // no hace falta revisar si está silenciado
+      stopHealthCheck();
       return;
     }
 
@@ -318,7 +340,8 @@ export function toggleMusic() {
         startHealthCheck();
       } else {
         autoplayPending = true;
-        setupAutoplayListener();
+        setupPersistentAutoplayListener();
+        scheduleRetry();
       }
       return;
     }
