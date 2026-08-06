@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – VERSIÓN CANVAS CORREGIDA (todas las mejoras)
+// juego.js – VERSIÓN CANVAS CORREGIDA (sin modal, con 3 botones)
 // ============================================================
-console.log('📦 juego.js (canvas corregido final)');
+console.log('📦 juego.js (canvas sin modal, botones directos)');
 
 import {
   soundBrick,
@@ -129,7 +129,7 @@ function isHighScore(score) {
 
 // ========== FUNCIÓN PRINCIPAL ==========
 export function initJuego(config, mobile = false) {
-  console.log('🎮 Iniciando juego (Canvas corregido final)');
+  console.log('🎮 Iniciando juego (sin modal, con botones directos)');
 
   // ========== ELEMENTOS ==========
   const overlay = document.getElementById('game-overlay');
@@ -156,6 +156,8 @@ export function initJuego(config, mobile = false) {
   const livesEl = document.getElementById('lives');
   const scoreEl = document.getElementById('game-score');
   const pauseBtn = document.getElementById('pause-btn');
+  const muteBtn = document.getElementById('mute-btn');
+  const exitBtn = document.getElementById('exit-btn');
   const menuEl = document.getElementById('game-menu');
   const menuGameover = document.getElementById('menu-gameover');
   const gameoverScore = document.getElementById('gameover-score');
@@ -244,71 +246,14 @@ export function initJuego(config, mobile = false) {
     });
   }
 
-  // ========== MODAL DE PAUSA (CORREGIDO) ==========
-  let pauseModal = null;
-  let pauseModalOverlay = null;
-
-  function createPauseModal() {
-    if (document.querySelector('.pause-modal-overlay')) return;
-    const overlayEl = document.createElement('div');
-    overlayEl.className = 'pause-modal-overlay';
-    overlayEl.id = 'pause-modal-overlay';
-    const card = document.createElement('div');
-    card.className = 'pause-modal-card';
-    card.innerHTML = `
-      <h2>⏸ Pausa</h2>
-      <div class="pause-ranking" id="pause-ranking">
-        <div style="text-align:center; margin-bottom:0.5rem; font-size:0.8rem; color:#d4af37;">🏆 MEJORES PUNTUACIONES</div>
-        <div id="pause-rank-list"></div>
-      </div>
-      <div class="pause-buttons">
-        <button class="game-btn" id="pause-resume-btn">▶ Reanudar</button>
-        <button class="game-btn mute-btn pause-mute-btn" id="pause-mute-btn">🔊 Silenciar</button>
-        <button class="game-btn exit-btn" id="pause-exit-btn">🚪 Salir</button>
-      </div>
-    `;
-    overlayEl.appendChild(card);
-    const stageEl = document.getElementById('game-stage');
-    if (stageEl) stageEl.appendChild(overlayEl);
-    pauseModalOverlay = overlayEl;
-    pauseModal = card;
-
-    // Listener para reanudar
-    document.getElementById('pause-resume-btn').addEventListener('click', closePauseModal);
-    // Listener para silenciar/activar música (SOLO llama a toggleMusic, SIN modificar innerHTML manualmente)
-    document.getElementById('pause-mute-btn').addEventListener('click', () => {
-      if (window.toggleMusic) window.toggleMusic();
-    });
-    // Listener para salir
-    document.getElementById('pause-exit-btn').addEventListener('click', () => {
-      closePauseModal();
-      if (animFrameId) cancelAnimationFrame(animFrameId);
-      running = false;
-      gameOver = true;
-      window.location.href = '../principal/index.html?volver=1';
-    });
-  }
-
-  function openPauseModal() {
-    if (!pauseModalOverlay) createPauseModal();
-    updatePauseModal();
-    // Sincronizar el ícono del botón de silencio al abrir el modal
-    if (window.updateIcon && window.isMusicMuted !== undefined) {
-      window.updateIcon(!window.isMusicMuted());
-    }
-    pauseModalOverlay.classList.add('open');
-    if (!paused) {
-      paused = true;
-      pauseBtn.textContent = '▶️';
-      gameTimeActive = false;
-    }
-  }
-
-  function closePauseModal() {
-    if (pauseModalOverlay) pauseModalOverlay.classList.remove('open');
+  // ========== FUNCIONES DE INTERFAZ (SIN MODAL) ==========
+  function togglePause() {
+    if (!running || gameOver) return;
+    paused = !paused;
+    pauseBtn.textContent = paused ? '▶️' : '⏸️';
     if (paused) {
-      paused = false;
-      pauseBtn.textContent = '⏸️';
+      gameTimeActive = false;
+    } else {
       if (launched) {
         gameTimeActive = true;
         lastDifficultyUpdate = performance.now();
@@ -317,28 +262,19 @@ export function initJuego(config, mobile = false) {
     }
   }
 
-  function updatePauseModal() {
-    const rankList = document.getElementById('pause-rank-list');
-    if (rankList) {
-      const scores = getHighScores();
-      const displayScores = [];
-      for (let i = 0; i < 3; i++) {
-        if (i < scores.length) {
-          displayScores.push(scores[i]);
-        } else {
-          displayScores.push({ name: '--', score: '--' });
-        }
-      }
-      rankList.innerHTML = '';
-      displayScores.forEach((s, i) => {
-        const div = document.createElement('div');
-        div.className = 'rank-item';
-        div.innerHTML = `
-          <span><span class="pos">#${i+1}</span> ${s.name}</span>
-          <span>${s.score} pts</span>
-        `;
-        rankList.appendChild(div);
-      });
+  function salir() {
+    if (animFrameId) cancelAnimationFrame(animFrameId);
+    running = false;
+    gameOver = true;
+    window.location.href = '../principal/index.html?volver=1';
+  }
+
+  // Sincronizar el ícono del mute con el estado actual
+  function syncMuteIcon() {
+    if (window.isMusicMuted !== undefined) {
+      const muted = window.isMusicMuted();
+      muteBtn.textContent = muted ? '🔇' : '🔊';
+      muteBtn.title = muted ? 'Activar música' : 'Silenciar música';
     }
   }
 
@@ -781,6 +717,7 @@ export function initJuego(config, mobile = false) {
     scoreEl.style.display = 'block';
     lastTime = 0;
     updateUI();
+    syncMuteIcon();
   }
 
   function resetGameState() {
@@ -828,6 +765,7 @@ export function initJuego(config, mobile = false) {
 
     launched = false;
     updateUI();
+    syncMuteIcon();
   }
 
   // UI optimizada
@@ -934,7 +872,10 @@ export function initJuego(config, mobile = false) {
     }
     livesEl.style.display = 'none';
     scoreEl.style.display = 'none';
+    // Ocultar botones de control al game over
     pauseBtn.style.display = 'none';
+    muteBtn.style.display = 'none';
+    exitBtn.style.display = 'none';
   }
 
   // ========== INICIO DE PARTIDA ==========
@@ -960,7 +901,11 @@ export function initJuego(config, mobile = false) {
     layoutStage();
     livesEl.style.display = 'block';
     scoreEl.style.display = 'block';
-    pauseBtn.style.display = 'block';
+    pauseBtn.style.display = 'flex';
+    muteBtn.style.display = 'flex';
+    exitBtn.style.display = 'flex';
+    pauseBtn.textContent = '⏸️';
+    syncMuteIcon();
     updateUI();
     lastTime = 0;
     uiCounter = 0;
@@ -1468,6 +1413,16 @@ export function initJuego(config, mobile = false) {
     if (!running || paused || gameOver) return;
     if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') { keys.left = true; e.preventDefault(); }
     else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') { keys.right = true; e.preventDefault(); }
+    // Tecla espacio para pausa
+    if (e.key === ' ' || e.key === 'Space') {
+      e.preventDefault();
+      if (!running || gameOver) return;
+      if (!launched) {
+        launchBall();
+        return;
+      }
+      togglePause();
+    }
   });
   document.addEventListener('keyup', (e) => {
     if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') { keys.left = false; e.preventDefault(); }
@@ -1500,38 +1455,21 @@ export function initJuego(config, mobile = false) {
   stage.addEventListener('touchend', () => { touchActive = false; }, { passive: true });
   stage.addEventListener('touchcancel', () => { touchActive = false; }, { passive: true });
 
-  // ========== BOTÓN DE PAUSA ==========
-  pauseBtn.addEventListener('click', () => {
-    if (!running || gameOver) return;
-    if (paused) {
-      closePauseModal();
-    } else {
-      openPauseModal();
-    }
+  // ========== EVENTOS DE BOTONES ==========
+  pauseBtn.addEventListener('click', togglePause);
+
+  muteBtn.addEventListener('click', () => {
+    if (window.toggleMusic) window.toggleMusic();
+    // Actualizar ícono después de un breve delay para que el estado cambie
+    setTimeout(syncMuteIcon, 100);
   });
 
-  function handleSpacePause(e) {
-    if (e.key === ' ' || e.key === 'Space') {
-      e.preventDefault();
-      if (!running || gameOver) return;
-      if (!launched) {
-        launchBall();
-        return;
-      }
-      if (paused) {
-        closePauseModal();
-      } else {
-        openPauseModal();
-      }
-    }
-  }
-  document.addEventListener('keydown', handleSpacePause);
+  exitBtn.addEventListener('click', salir);
 
+  // Sincronizar mute cada vez que se abra o se reanude (por si acaso)
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      if (running && !paused && !gameOver && launched) {
-        openPauseModal();
-      }
+    if (!document.hidden && running && !gameOver) {
+      syncMuteIcon();
     }
   });
 
@@ -1557,9 +1495,8 @@ export function initJuego(config, mobile = false) {
 
   // ========== INICIO ==========
   loadCrackImages(() => {
-    createPauseModal();
     startGame();
     layoutStage();
-    console.log('✅ Juego canvas corregido final iniciado correctamente');
+    console.log('✅ Juego sin modal iniciado correctamente');
   });
 }
