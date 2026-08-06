@@ -459,9 +459,17 @@ function renderCollage(container) {
     
     collageElementos.push(div);
     
+    // Forzar reflow antes de animar: en varios navegadores de celular,
+    // un solo requestAnimationFrame no basta para que el navegador "vea"
+    // el estado inicial (opacity:0) antes de aplicar el final, y la
+    // transición se salta (la foto solo aparece de golpe). Con la
+    // lectura de offsetHeight + doble rAF se garantiza el reflow real.
+    void div.offsetHeight;
     requestAnimationFrame(function() {
-      div.style.opacity = '1';
-      div.style.transform = 'rotate(' + rot + 'deg) scaleX(' + scaleX + ') scale(1)';
+      requestAnimationFrame(function() {
+        div.style.opacity = '1';
+        div.style.transform = 'rotate(' + rot + 'deg) scaleX(' + scaleX + ') scale(1)';
+      });
     });
     
     if (collageElementos.length > 4) {
