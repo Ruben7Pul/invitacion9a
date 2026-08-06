@@ -13,5 +13,5 @@
   "madre": "Beatriz Pulido Martinez",
   "padrino": "Rodrigo Nava Vega",
   "madrina": "Irma Lopez Villasana",
-  "audioFile": "archivos/cancion.mp3"
+  "audioFile": "../archivos/cancion.mp3"
 }
