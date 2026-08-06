@@ -528,7 +528,6 @@ function aplicarAjustesRendimiento(nivel) {
 
   // Desactivar parallax en bajo
   if (nivel === 'bajo') {
-    // Se desactivará en la lógica de parallax más abajo
     window.__parallaxDesactivado = true;
   }
 
@@ -537,6 +536,50 @@ function aplicarAjustesRendimiento(nivel) {
     document.querySelectorAll('.seccion.visible').forEach(sec => {
       sec.style.transitionDuration = '0.4s';
     });
+  }
+
+  // ===== AÑADIR INDICADOR DE RENDIMIENTO AL MENSAJE FINAL =====
+  const hint = document.getElementById('hint-juego');
+  if (hint) {
+    // Limpiar contenido previo
+    hint.innerHTML = '';
+    
+    // Mensaje principal
+    const msgSpan = document.createElement('span');
+    msgSpan.textContent = '👆 Toca el nombre para jugar';
+    
+    // Indicador de rendimiento
+    const perfSpan = document.createElement('span');
+    perfSpan.className = 'perf-indicator';
+    
+    const levelNames = {
+      'alto': 'Alto',
+      'medio': 'Medio',
+      'bajo': 'Bajo'
+    };
+    const levelColors = {
+      'alto': '#4caf50',
+      'medio': '#ffeb3b',
+      'bajo': '#f44336'
+    };
+    const levelDescriptions = {
+      'alto': 'Rendimiento alto: todas las animaciones activas.',
+      'medio': 'Rendimiento medio: algunas animaciones reducidas.',
+      'bajo': 'Rendimiento bajo: animaciones básicas (máxima fluidez).'
+    };
+    
+    const color = levelColors[nivel] || '#888';
+    const name = levelNames[nivel] || 'Desconocido';
+    const desc = levelDescriptions[nivel] || 'Rendimiento no detectado.';
+    
+    perfSpan.title = `${desc}`;
+    perfSpan.innerHTML = `
+      <span class="dot" style="background:${color};"></span>
+      <span class="label">${name}</span>
+    `;
+    
+    hint.appendChild(msgSpan);
+    hint.appendChild(perfSpan);
   }
 }
 
