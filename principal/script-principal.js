@@ -482,7 +482,33 @@ function renderCollage(container) {
   // contenedor cuadrado. El otro lado se calcula con la relación de aspecto
   // real de la imagen, así que una imagen grande se achica y una chica se
   // agranda, pero nunca se deforma.
-  var TAMANIO_BASE = 62;
+  var TAMANIO_BASE = 80;
+
+  // Zonas del contenedor (centro en % de x,y) para repartir las imágenes en
+  // toda el área de trabajo en vez de que caigan amontonadas al centro.
+  var ZONAS_COLLAGE = [
+    { x: 22, y: 24 },
+    { x: 78, y: 24 },
+    { x: 50, y: 50 },
+    { x: 22, y: 76 },
+    { x: 78, y: 76 }
+  ];
+  var collageHistorialZonas = [];
+
+  function elegirZona() {
+    var disponibles = [];
+    for (var i = 0; i < ZONAS_COLLAGE.length; i++) {
+      if (collageHistorialZonas.indexOf(i) === -1) disponibles.push(i);
+    }
+    if (disponibles.length === 0) {
+      collageHistorialZonas = [];
+      disponibles = Array.from({length: ZONAS_COLLAGE.length}, (_, i) => i);
+    }
+    var elegida = disponibles[Math.floor(Math.random() * disponibles.length)];
+    collageHistorialZonas.push(elegida);
+    if (collageHistorialZonas.length > 2) collageHistorialZonas.shift();
+    return ZONAS_COLLAGE[elegida];
+  }
 
   function mostrarSiguienteImagen() {
     var indiceEnImagen = elegirImagenAleatoria();
@@ -499,8 +525,16 @@ function renderCollage(container) {
       w = TAMANIO_BASE * ratio;
     }
 
-    var x = Math.random() * (100 - w);
-    var y = Math.random() * (100 - h);
+    var zona = elegirZona();
+    var jitter = 8;
+    var centroX = zona.x + (Math.random() * jitter * 2 - jitter);
+    var centroY = zona.y + (Math.random() * jitter * 2 - jitter);
+
+    var maxX = Math.max(0, 100 - w);
+    var maxY = Math.max(0, 100 - h);
+    var x = Math.min(maxX, Math.max(0, centroX - w / 2));
+    var y = Math.min(maxY, Math.max(0, centroY - h / 2));
+
     var rot = elegirRotacionContraria();
     var scaleX = Math.random() > 0.5 ? 1 : -1;
 
@@ -512,9 +546,8 @@ function renderCollage(container) {
       'left:' + x + '%;' +
       'top:' + y + '%;' +
       'z-index:' + collageZIndex + ';' +
-      'opacity: 0;' +
-      'transform: rotate(' + rot + 'deg) scaleX(' + scaleX + ') scale(0.92);' +
-      'transition: opacity 0.4s ease-out, transform 0.4s ease-out;';
+      'opacity: 1;' +
+      'transform: rotate(' + rot + 'deg) scaleX(' + scaleX + ');';
 
     var img = document.createElement('img');
     img.src = src;
@@ -525,14 +558,6 @@ function renderCollage(container) {
     container.appendChild(div);
 
     collageElementos.push(div);
-
-    void div.offsetHeight;
-    requestAnimationFrame(function() {
-      requestAnimationFrame(function() {
-        div.style.opacity = '1';
-        div.style.transform = 'rotate(' + rot + 'deg) scaleX(' + scaleX + ') scale(1)';
-      });
-    });
 
     if (collageElementos.length > 4) {
       var antiguoDiv = collageElementos.shift();
