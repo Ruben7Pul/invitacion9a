@@ -512,7 +512,7 @@ function limpiarCollage() {
   }
 }
 
-// ===== AJUSTES POR RENDIMIENTO =====
+// ===== AJUSTES POR RENDIMIENTO (INDICADOR SIN ETIQUETA) =====
 function aplicarAjustesRendimiento(nivel) {
   const nivelNormalizado = (nivel === 'alto' || nivel === 'medio' || nivel === 'bajo') ? nivel : 'desconocido';
 
@@ -550,47 +550,33 @@ function aplicarAjustesRendimiento(nivel) {
     });
   }
 
+  // ===== INDICADOR DE RENDIMIENTO: SOLO LA BOLITA (SIN ETIQUETA, SIN TOOLTIP) =====
   const hint = document.getElementById('hint-juego');
   if (hint) {
+    // Limpiar contenido previo
     hint.innerHTML = '';
 
+    // Mensaje principal
     const msgSpan = document.createElement('span');
     msgSpan.textContent = '👆 Toca el nombre para jugar';
 
-    const perfSpan = document.createElement('span');
-    perfSpan.className = 'perf-indicator';
+    // Bolita de rendimiento (sin texto, sin title)
+    const dotSpan = document.createElement('span');
+    dotSpan.className = 'perf-indicator';
 
-    const levelNames = {
-      'alto': 'Alto',
-      'medio': 'Medio',
-      'bajo': 'Bajo',
-      'desconocido': '?'
-    };
     const levelColors = {
       'alto': '#4caf50',
       'medio': '#ffeb3b',
       'bajo': '#f44336',
       'desconocido': '#aaaaaa'
     };
-    const levelDescriptions = {
-      'alto': 'Rendimiento alto: todas las animaciones activas.',
-      'medio': 'Rendimiento medio: algunas animaciones reducidas.',
-      'bajo': 'Rendimiento bajo: animaciones básicas (máxima fluidez).',
-      'desconocido': 'No se pudo detectar el rendimiento. Se usan ajustes por defecto.'
-    };
 
     const color = levelColors[nivelNormalizado] || '#888';
-    const name = levelNames[nivelNormalizado] || '?';
-    const desc = levelDescriptions[nivelNormalizado] || 'Rendimiento no detectado.';
-
-    perfSpan.title = desc;
-    perfSpan.innerHTML = `
-      <span class="dot" style="background:${color};"></span>
-      <span class="label">${name}</span>
-    `;
+    dotSpan.innerHTML = `<span class="dot" style="background:${color};"></span>`;
+    // No se añade title (tooltip)
 
     hint.appendChild(msgSpan);
-    hint.appendChild(perfSpan);
+    hint.appendChild(dotSpan);
   }
 }
 
@@ -657,7 +643,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   try {
     var { initMusica, playMusic, toggleMusic, resetMusic } = await import('../modules/musica.js');
-    initMusica(); // usa cancion.mp3 por defecto
+    initMusica();
     window.playMusic = playMusic;
     window.toggleMusic = toggleMusic;
     window.resetMusic = resetMusic;
