@@ -22,8 +22,10 @@ const iconMute = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 </svg>`;
 
 function getMuteBtn() {
-  const btn = document.getElementById('music-toggle');
+  const btn = document.getElementById('mute-btn');
   if (btn) return btn;
+  const btn2 = document.getElementById('music-toggle');
+  if (btn2) return btn2;
   return document.querySelector('.pause-mute-btn');
 }
 
@@ -31,10 +33,10 @@ export function updateIcon(soundOn) {
   const btn = getMuteBtn();
   if (!btn) return;
   if (soundOn) {
-    btn.innerHTML = iconSound;
+    btn.innerHTML = '🔊';
     btn.title = 'Silenciar música';
   } else {
-    btn.innerHTML = iconMute;
+    btn.innerHTML = '🔇';
     btn.title = 'Activar música';
   }
 }
