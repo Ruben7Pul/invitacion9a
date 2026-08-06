@@ -1,28 +1,15 @@
-console.log('🎵 goga música 23 (con autoplay persistente y reinicio)');
+console.log('🎵 goga música 24 (autoplay muteado + desmute en primer gesto)');
 
 let audio = null;
 let fadeInterval = null;
 let isMuted = false;
-let autoplayPending = false;
-let autoplayListenerAdded = false;
+let sonidoActivado = false; // true en cuanto el usuario ya desmuteó una vez
+let gestureListenerAdded = false;
 let healthCheckInterval = null;
-let retryTimeout = null;
-let retryCount = 0;
 
+const VOLUMEN_OBJETIVO = 0.6;
 const DEFAULT_AUDIO_SRC = '../archivos/cancion.mp3';
 let audioSrc = DEFAULT_AUDIO_SRC;
-
-const iconSound = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-  <path d="M4 9 L4 15 L8 15 L13 20 L13 4 L8 9 Z"/>
-  <path d="M16.5 8.5 a6 6 0 0 1 0 7"/>
-  <path d="M19 6 a10 10 0 0 1 0 12"/>
-</svg>`;
-const iconMute = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-  <path d="M4 9 L4 15 L8 15 L13 20 L13 4 L8 9 Z"/>
-  <line x1="17" y1="7" x2="22" y2="12"/>
-  <line x1="22" y1="7" x2="17" y2="12"/>
-  <line x1="2" y1="2" x2="22" y2="22" stroke="currentColor" stroke-width="1.2"/>
-</svg>`;
 
 function getMuteBtn() {
   const btn = document.getElementById('mute-btn');
@@ -65,41 +52,64 @@ function fadeVolume(targetVolume, duration = 800) {
   }, 16);
 }
 
-function tryPlay() {
-  if (!audio) return false;
-  if (!audio.paused) return true;
-  return audio.play().then(() => true).catch(() => false);
+function createAudio(src) {
+  const el = new Audio(src);
+  el.loop = true;
+  el.volume = VOLUMEN_OBJETIVO;
+  el.muted = true; // el autoplay MUTEADO siempre está permitido por el navegador
+  el.preload = 'auto';
+  return el;
 }
 
-function setupPersistentAutoplayListener() {
-  if (autoplayListenerAdded) return;
-  autoplayListenerAdded = true;
+// Intenta que el audio quede sonando (aunque sea muteado) desde ya, para que
+// en cuanto haya un gesto del usuario solo haya que quitar el mute (instantáneo,
+// sin esperar a una promesa de play() que puede fallar).
+function intentarAutoplayMuteado() {
+  if (!audio) return;
+  audio.muted = true;
+  const p = audio.play();
+  if (p && p.catch) p.catch(() => {});
+}
+
+// Se llama SIEMPRE dentro de un handler de gesto real del usuario (click,
+// touchstart, keydown...), que es la única forma en que el navegador permite
+// que el sonido se escuche de verdad.
+function activarSonidoReal() {
+  if (!audio) return false;
+  sonidoActivado = true;
+  audio.muted = false;
+  if (audio.paused) {
+    const p = audio.play();
+    if (p && p.catch) p.catch(() => {});
+  }
+  if (!isMuted) {
+    fadeVolume(VOLUMEN_OBJETIVO, 800);
+  }
+  startHealthCheck();
+  return true;
+}
+
+function setupGestureListener() {
+  if (gestureListenerAdded) return;
+  gestureListenerAdded = true;
 
   const handler = () => {
-    if (audio && audio.paused && !isMuted) {
-      const ok = tryPlay();
-      if (ok) {
-        fadeVolume(0.6, 800);
-        isMuted = false;
-        updateIcon(true);
-        autoplayPending = false;
-        console.log('🎵 Música activada por interacción del usuario (persistente)');
-        startHealthCheck();
-      }
+    if (sonidoActivado) return; // ya no hace falta seguir escuchando
+    if (!isMuted) {
+      activarSonidoReal();
+      updateIcon(true);
+      console.log('🎵 Música activada por gesto del usuario');
+    } else {
+      // El usuario había mutado antes de interactuar: solo dejamos listo
+      // el audio (ya está sonando muteado) para cuando la active.
+      sonidoActivado = true;
     }
   };
 
   document.addEventListener('click', handler);
-  document.addEventListener('touchstart', handler);
-  console.log('🔊 Listener de autoplay persistente configurado');
-}
-
-function createAudio(src) {
-  const el = new Audio(src);
-  el.loop = true;
-  el.volume = 0;
-  el.preload = 'auto';
-  return el;
+  document.addEventListener('touchstart', handler, { passive: true });
+  document.addEventListener('keydown', handler);
+  console.log('🔊 Escuchando el primer gesto del usuario para activar el sonido');
 }
 
 // ========== MONITOR DE SALUD ==========
@@ -116,14 +126,14 @@ function startHealthCheck() {
 
   healthCheckInterval = setInterval(() => {
     if (!audio) return;
-    if (audio.paused && !autoplayPending) return;
+    if (audio.paused || audio.muted) return;
 
     const now = performance.now();
     const timeSinceLastCheck = (now - lastCheckTime) / 1000;
     const currentTime = audio.currentTime || 0;
     const timeDiff = currentTime - lastCurrentTime;
 
-    if (!audio.paused && timeSinceLastCheck > 2 && timeDiff < 0.01) {
+    if (timeSinceLastCheck > 2 && timeDiff < 0.01) {
       consecutiveFailures++;
       console.warn(`⚠️ Audio estancado (${consecutiveFailures})`);
       if (consecutiveFailures >= 2) {
@@ -150,64 +160,28 @@ function stopHealthCheck() {
 function restartAudio() {
   if (!audio) return;
   try {
-    const wasMuted = isMuted || audio.volume === 0;
+    const mutedAntes = audio.muted;
+    const volumenAntes = audio.volume;
     if (fadeInterval) {
       clearInterval(fadeInterval);
       fadeInterval = null;
     }
     audio.pause();
     audio.currentTime = 0;
-    audio.volume = 0;
+    audio.muted = true;
     audio.load();
-    const ok = tryPlay();
-    if (ok) {
-      if (!wasMuted) {
-        fadeVolume(0.6, 800);
-        isMuted = false;
-        updateIcon(true);
-      } else {
-        audio.volume = 0;
-        isMuted = true;
-        updateIcon(false);
-      }
+    const p = audio.play();
+    const finalizar = () => {
+      audio.muted = mutedAntes;
+      audio.volume = volumenAntes;
       console.log('🎵 Audio reiniciado exitosamente');
-      startHealthCheck();
-    } else {
-      autoplayPending = true;
-      setupPersistentAutoplayListener();
-      console.log('⏳ Reinicio fallido, en espera de interacción');
-    }
+      if (!audio.muted) startHealthCheck();
+    };
+    if (p && p.then) p.then(finalizar).catch(finalizar);
+    else finalizar();
   } catch (e) {
     console.error('❌ Error al reiniciar audio:', e);
   }
-}
-
-function scheduleRetry() {
-  if (retryTimeout) clearTimeout(retryTimeout);
-  if (retryCount >= 5) {
-    console.log('⚠️ Demasiados reintentos, activando listener persistente');
-    setupPersistentAutoplayListener();
-    return;
-  }
-  retryCount++;
-  const delay = retryCount * 1000;
-  console.log(`⏳ Reintento ${retryCount} en ${delay}ms...`);
-  retryTimeout = setTimeout(() => {
-    if (audio && audio.paused && !isMuted) {
-      const ok = tryPlay();
-      if (ok) {
-        fadeVolume(0.6, 800);
-        isMuted = false;
-        updateIcon(true);
-        autoplayPending = false;
-        console.log('🎵 Música iniciada en reintento');
-        startHealthCheck();
-        retryCount = 0;
-      } else {
-        scheduleRetry();
-      }
-    }
-  }, delay);
 }
 
 // ========== EXPORTADAS ==========
@@ -220,10 +194,11 @@ export function initMusica(src) {
     audio = createAudio(audioSrc);
     document.body.appendChild(audio);
   } else {
-    console.log('🎵 Elemento <audio> encontrado. Forzando actualización a:', audioSrc);
     audio.src = audioSrc;
     audio.load();
     audio.loop = true;
+    audio.volume = VOLUMEN_OBJETIVO;
+    audio.muted = true;
   }
 
   audio.addEventListener('error', (e) => {
@@ -231,13 +206,7 @@ export function initMusica(src) {
     setTimeout(() => {
       if (audio) {
         audio.load();
-        const ok = tryPlay();
-        if (ok) {
-          fadeVolume(0.6, 800);
-          isMuted = false;
-          updateIcon(true);
-          startHealthCheck();
-        }
+        intentarAutoplayMuteado();
       }
     }, 1000);
   });
@@ -249,11 +218,15 @@ export function initMusica(src) {
     }
   });
 
-  audio.volume = 0;
   isMuted = false;
+  sonidoActivado = false;
   updateIcon(true);
   stopHealthCheck();
-  retryCount = 0;
+
+  // Arranca ya mismo, muteado (siempre permitido), listo para desmutear
+  // en cuanto haya el primer click/touch/tecla del usuario.
+  intentarAutoplayMuteado();
+  setupGestureListener();
 }
 
 export function playMusic() {
@@ -262,97 +235,56 @@ export function playMusic() {
     console.warn('⚠️ audio no disponible');
     return;
   }
-  if (!audio.paused) {
-    console.log('🎵 El audio ya está sonando');
-    startHealthCheck();
-    return;
-  }
-
-  const ok = tryPlay();
-  if (ok) {
-    fadeVolume(0.6, 800);
-    isMuted = false;
-    updateIcon(true);
-    autoplayPending = false;
-    console.log('🎵 Música iniciada correctamente');
-    startHealthCheck();
-    retryCount = 0;
-  } else {
-    console.log('⏳ Autoplay bloqueado, activando listener persistente y reintentos');
-    autoplayPending = true;
-    setupPersistentAutoplayListener();
-    scheduleRetry();
-  }
+  intentarAutoplayMuteado();
+  setupGestureListener();
 }
 
 export function resetMusic() {
   if (!audio) return;
   fadeVolume(0, 600);
   stopHealthCheck();
-  if (retryTimeout) clearTimeout(retryTimeout);
   setTimeout(() => {
     audio.pause();
     audio.currentTime = 0;
   }, 700);
   isMuted = false;
   updateIcon(true);
-  retryCount = 0;
 }
 
 export function toggleMusic() {
   if (!audio) return;
   try {
-    if (audio.paused) {
-      const ok = tryPlay();
-      if (ok) {
-        fadeVolume(0.6, 600);
-        isMuted = false;
-        updateIcon(true);
+    if (isMuted) {
+      // Reactivar
+      isMuted = false;
+      if (sonidoActivado) {
+        audio.muted = false;
+        if (audio.paused) {
+          const p = audio.play();
+          if (p && p.catch) p.catch(() => {});
+        }
+        fadeVolume(VOLUMEN_OBJETIVO, 600);
         startHealthCheck();
-      } else {
-        autoplayPending = true;
-        setupPersistentAutoplayListener();
-        scheduleRetry();
       }
+      updateIcon(true);
       return;
     }
 
-    if (!isMuted && audio.volume > 0) {
+    // Silenciar
+    isMuted = true;
+    if (sonidoActivado) {
       fadeVolume(0, 600);
-      isMuted = true;
-      updateIcon(false);
+      setTimeout(() => { if (audio && isMuted) audio.muted = true; }, 650);
       stopHealthCheck();
-      return;
     }
-
-    if (isMuted || audio.volume === 0) {
-      const ok = tryPlay();
-      if (ok) {
-        fadeVolume(0.6, 600);
-        isMuted = false;
-        updateIcon(true);
-        startHealthCheck();
-      } else {
-        autoplayPending = true;
-        setupPersistentAutoplayListener();
-        scheduleRetry();
-      }
-      return;
-    }
-
-    isMuted = !isMuted;
-    const targetVol = isMuted ? 0 : 0.6;
-    fadeVolume(targetVol, 600);
-    updateIcon(!isMuted);
-    if (isMuted) stopHealthCheck();
-    else startHealthCheck();
+    updateIcon(false);
   } catch (e) {
     console.error('❌ Error en toggleMusic:', e);
   }
 }
 
 export function isMusicMuted() {
-  return isMuted || (audio && audio.volume === 0);
+  return isMuted;
 }
 
 export function setMusicMute(muted) {
