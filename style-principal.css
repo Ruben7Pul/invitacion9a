@@ -679,7 +679,7 @@ h1#nombre-hero {
   50% { opacity: 1; transform: scale(1.02); }
 }
 
-/* ===== INDICADOR DE RENDIMIENTO (pelota + etiqueta) ===== */
+/* ===== INDICADOR DE RENDIMIENTO ===== */
 .perf-indicator {
   display: inline-flex;
   align-items: center;
@@ -1242,7 +1242,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   MODAL COLLAGE (GUSTOS) - SIN SCROLL
+   MODAL COLLAGE (GUSTOS)
    ============================================================ */
 .modal-overlay {
   position: fixed;
@@ -1347,8 +1347,9 @@ h1#nombre-hero {
   color: #d4af37;
 }
 .modal-subtitle {
-  font-family: var(--script);
-  font-size: clamp(1rem, 2.8vw, 1.3rem);
+  font-family: var(--serif-body);
+  font-size: clamp(1.3rem, 3vw, 1.8rem);
+  font-weight: 500;
   text-align: center;
   color: #e0cfa0;
   margin: -0.2rem 0 1rem;
@@ -1449,7 +1450,6 @@ h1#nombre-hero {
 ::-webkit-scrollbar-thumb { background: rgba(201, 162, 77, 0.3); border-radius: 3px; }
 
 @media (hover: none) and (pointer: coarse) {
-  /* Ajustes de animaciones para móviles (más rápidas) */
   .gate-wrapper.active .gate-leaf svg { animation-duration: 1.8s; }
   #oval-wrap { animation-duration: 4s; }
   h1#nombre-hero { animation-duration: 2.5s; }
@@ -1460,10 +1460,8 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   AJUSTES POR RENDIMIENTO (perf-bajo, perf-medio)
+   AJUSTES POR RENDIMIENTO
    ============================================================ */
-
-/* Nivel bajo: desactivar animaciones pesadas */
 .perf-bajo #nombre-hero {
   animation: none !important;
   background: linear-gradient(90deg, #d4af37, #fae3a0) !important;
@@ -1471,45 +1469,17 @@ h1#nombre-hero {
   background-clip: text !important;
   color: transparent !important;
 }
+.perf-bajo .collage-item { transition-duration: 0.3s !important; }
+.perf-bajo .seccion { transition-duration: 0.3s !important; }
+.perf-bajo #oval-wrap { animation: none !important; }
+.perf-bajo .hint-final { animation: none !important; }
+.perf-bajo .calendario-container .dia.dia-10 { animation: none !important; }
+.perf-bajo .calendario-container .dia.hoy { animation: none !important; }
 
-.perf-bajo .collage-item {
-  transition-duration: 0.3s !important;
-}
+.perf-medio #nombre-hero { animation-duration: 2s !important; }
+.perf-medio .collage-item { transition-duration: 0.3s !important; }
 
-.perf-bajo .seccion {
-  transition-duration: 0.3s !important;
-}
-
-.perf-bajo #oval-wrap {
-  animation: none !important;
-}
-
-.perf-bajo .hint-final {
-  animation: none !important;
-}
-
-.perf-bajo .calendario-container .dia.dia-10 {
-  animation: none !important;
-}
-
-.perf-bajo .calendario-container .dia.hoy {
-  animation: none !important;
-}
-
-.perf-medio #nombre-hero {
-  animation-duration: 2s !important; /* más rápida para consumir menos */
-}
-
-.perf-medio .collage-item {
-  transition-duration: 0.3s !important;
-}
-
-/* Si el dispositivo es móvil y además bajo, reducir aún más */
 @media (hover: none) and (pointer: coarse) {
-  .perf-bajo .seccion {
-    transition-duration: 0.15s !important;
-  }
-  .perf-bajo .collage-item {
-    transition-duration: 0.2s !important;
-  }
+  .perf-bajo .seccion { transition-duration: 0.15s !important; }
+  .perf-bajo .collage-item { transition-duration: 0.2s !important; }
 }
