@@ -1,4 +1,4 @@
-console.log('🚀 script-principal.js (sin detección de día/noche)');
+console.log('🚀 script-principal.js (con reproducción de video mejorada)');
 
 async function cargarConfig() {
   try {
@@ -601,45 +601,79 @@ document.addEventListener('DOMContentLoaded', async function() {
     }, 2000);
   }
 
-  // ===== NUEVA FUNCIÓN ABRIR REJA CON TRANSICIÓN =====
+  // ===== FUNCIÓN ABRIR REJA CON TRANSICIÓN MEJORADA =====
   function abrirReja(e) {
     if (e) e.stopPropagation();
 
+    // 1. Abrir la reja (animación)
     gateWrapper.classList.add('open');
 
-    setTimeout(() => {
-      const overlay = document.getElementById('transition-overlay');
-      const video = document.getElementById('transition-video');
+    // 2. Obtener el video y el overlay
+    const overlay = document.getElementById('transition-overlay');
+    const video = document.getElementById('transition-video');
 
+    // 3. Intentar reproducir el video inmediatamente (dentro del gesto del usuario)
+    if (video) {
+      // Asegurar que el video está cargado
+      if (video.readyState < 2) {
+        video.load();
+      }
+      // Intentar reproducir
+      video.play().catch(err => {
+        console.warn('No se pudo reproducir el video automáticamente:', err);
+        // Si falla, mostraremos el overlay y esperaremos el timeout
+      });
+    }
+
+    // 4. Después de que termine la animación de la reja, mostrar el overlay
+    setTimeout(() => {
       if (overlay) {
         overlay.classList.add('show');
       }
 
-      if (video) {
-        video.currentTime = 0;
+      // Si el video no se está reproduciendo, intentar de nuevo
+      if (video && video.paused) {
         video.play().catch(() => {});
+      }
 
-        const finalizar = () => {
-          if (overlay) overlay.classList.remove('show');
-          portal.classList.add('hide');
-          app.classList.add('show');
-          cargarContador();
-          if (window.playMusic) window.playMusic();
-          video.removeEventListener('ended', finalizar);
-          overlay.removeEventListener('click', finalizar);
-          clearTimeout(timeout);
-        };
-
-        const timeout = setTimeout(finalizar, 6000);
-        video.addEventListener('ended', finalizar);
-        overlay.addEventListener('click', finalizar);
-      } else {
+      // Función para finalizar la transición
+      const finalizar = () => {
+        if (overlay) overlay.classList.remove('show');
         portal.classList.add('hide');
         app.classList.add('show');
         cargarContador();
         if (window.playMusic) window.playMusic();
+        // Limpiar eventos
+        if (video) {
+          video.removeEventListener('ended', finalizar);
+          video.removeEventListener('error', onError);
+        }
+        overlay.removeEventListener('click', finalizar);
+        clearTimeout(timeout);
+      };
+
+      // Si el video tiene un error, finalizar después de un tiempo
+      const onError = (err) => {
+        console.warn('Error en el video:', err);
+        // Esperar un poco y finalizar
+        setTimeout(finalizar, 1000);
+      };
+
+      if (video) {
+        video.addEventListener('ended', finalizar);
+        video.addEventListener('error', onError);
       }
-    }, 650);
+
+      // Fallback: si el video no termina en 8 segundos, forzar finalización
+      const timeout = setTimeout(() => {
+        console.warn('Timeout de video, forzando finalización');
+        finalizar();
+      }, 8000);
+
+      // También permitir cerrar haciendo clic en el overlay (opcional)
+      overlay.addEventListener('click', finalizar);
+
+    }, 650); // tiempo de la animación de apertura
   }
 
   function cerrarReja(e) {
