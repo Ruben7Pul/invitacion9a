@@ -1,5 +1,7 @@
 console.log('🚀 principal/script-principal.js (sin reja, página aparte)');
 
+import { obtenerNivel } from '../modules/perf.js';
+
 async function cargarConfig() {
   try {
     const res = await fetch(`../config.json?t=${Date.now()}`);
@@ -135,7 +137,7 @@ function marcarDiaActualEnCalendario() {
   }
 }
 
-// ===== GENERAR EVENTOS DEL CALENDARIO (sin 11 de octubre) =====
+// ===== GENERAR EVENTOS DEL CALENDARIO =====
 function generarEventosCalendario(config) {
   const container = document.getElementById('calendario-eventos');
   if (!container) return;
@@ -184,7 +186,7 @@ function agregarACalendario(evento, config) {
   window.open(url, '_blank');
 }
 
-// ===== RESALTAR ACTIVIDAD ACTUAL EN ITINERARIO (solo 10 de octubre) =====
+// ===== RESALTAR ACTIVIDAD ACTUAL EN ITINERARIO =====
 function iniciarBrilloItinerario() {
   const ahora = new Date();
   const año = ahora.getFullYear();
@@ -330,6 +332,7 @@ var collageZIndex = 1;
 var collageElementos = [];
 var collageHistorialImagenes = [];
 var collageUltimaRotacion = 0;
+var collageIntervaloMs = 3000; // se ajustará según rendimiento
 
 function iniciarCollage() {
   var container = document.getElementById('collage-container');
@@ -459,11 +462,6 @@ function renderCollage(container) {
     
     collageElementos.push(div);
     
-    // Forzar reflow antes de animar: en varios navegadores de celular,
-    // un solo requestAnimationFrame no basta para que el navegador "vea"
-    // el estado inicial (opacity:0) antes de aplicar el final, y la
-    // transición se salta (la foto solo aparece de golpe). Con la
-    // lectura de offsetHeight + doble rAF se garantiza el reflow real.
     void div.offsetHeight;
     requestAnimationFrame(function() {
       requestAnimationFrame(function() {
@@ -487,7 +485,7 @@ function renderCollage(container) {
   if (collageTimer) clearInterval(collageTimer);
   collageTimer = setInterval(function() {
     mostrarSiguienteImagen();
-  }, 3000);
+  }, collageIntervaloMs);
 }
 
 function limpiarCollage() {
@@ -502,7 +500,52 @@ function limpiarCollage() {
   }
 }
 
+// ===== AJUSTES POR RENDIMIENTO =====
+function aplicarAjustesRendimiento(nivel) {
+  const html = document.documentElement;
+  html.classList.add('perf-' + nivel);
+
+  // Desactivar animación del nombre (rainbowMove) en niveles bajo y medio
+  if (nivel === 'bajo' || nivel === 'medio') {
+    const nombre = document.getElementById('nombre-hero');
+    if (nombre) {
+      nombre.style.animation = 'none';
+      nombre.style.background = 'linear-gradient(90deg, #d4af37, #fae3a0)';
+      nombre.style.webkitBackgroundClip = 'text';
+      nombre.style.backgroundClip = 'text';
+      nombre.style.color = 'transparent';
+    }
+  }
+
+  // Reducir intervalo del collage en bajo
+  if (nivel === 'bajo') {
+    collageIntervaloMs = 5000; // más lento
+  } else if (nivel === 'medio') {
+    collageIntervaloMs = 4000;
+  } else {
+    collageIntervaloMs = 3000;
+  }
+
+  // Desactivar parallax en bajo
+  if (nivel === 'bajo') {
+    // Se desactivará en la lógica de parallax más abajo
+    window.__parallaxDesactivado = true;
+  }
+
+  // Ajustar duración de animaciones de aparición de secciones
+  if (nivel === 'bajo') {
+    document.querySelectorAll('.seccion.visible').forEach(sec => {
+      sec.style.transitionDuration = '0.4s';
+    });
+  }
+}
+
 document.addEventListener('DOMContentLoaded', async function() {
+  // Leer nivel de rendimiento guardado
+  const nivel = obtenerNivel();
+  console.log('📊 Nivel de rendimiento detectado:', nivel);
+  aplicarAjustesRendimiento(nivel);
+
   var config = await cargarConfig();
   rellenarDatos(config);
   generarCalendario();
@@ -589,7 +632,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     window.location.href = '../index.html';
   });
 
-
   // ===== PARALLAX =====
   var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   var hasGyro = typeof DeviceOrientationEvent !== 'undefined';
@@ -615,68 +657,73 @@ document.addEventListener('DOMContentLoaded', async function() {
     app.appendChild(appInner);
   }
 
-  function applyParallax(x, y) {
-    var invertX = -x;
-    var invertY = -y;
-    var maxOffset = 18;
-    var offsetX = Math.min(Math.max(invertX, -maxOffset), maxOffset);
-    var offsetY = Math.min(Math.max(invertY, -maxOffset), maxOffset);
+  // Si el nivel es bajo, desactivar parallax completamente
+  if (window.__parallaxDesactivado) {
+    console.log('Parallax desactivado por rendimiento bajo');
+  } else {
+    function applyParallax(x, y) {
+      var invertX = -x;
+      var invertY = -y;
+      var maxOffset = 18;
+      var offsetX = Math.min(Math.max(invertX, -maxOffset), maxOffset);
+      var offsetY = Math.min(Math.max(invertY, -maxOffset), maxOffset);
 
-    if (appInner) {
-      appInner.style.transform = 'translate(' + (offsetX * 0.45) + 'px, ' + (offsetY * 0.45) + 'px)';
-    }
-  }
-
-  var currentX = 0, currentY = 0;
-  var targetX = 0, targetY = 0;
-
-  function smoothParallax() {
-    currentX += (targetX - currentX) * 0.1;
-    currentY += (targetY - currentY) * 0.1;
-    if (Math.abs(currentX - targetX) > 0.05 || Math.abs(currentY - targetY) > 0.05) {
-      applyParallax(currentX, currentY);
-      requestAnimationFrame(smoothParallax);
-    } else {
-      applyParallax(targetX, targetY);
-    }
-  }
-
-  document.addEventListener('mousemove', function(e) {
-    if (isMobile) return;
-    var x = (e.clientX / window.innerWidth - 0.5) * 30;
-    var y = (e.clientY / window.innerHeight - 0.5) * 30;
-    targetX = x;
-    targetY = y;
-    if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
-      requestAnimationFrame(smoothParallax);
-    }
-  });
-
-  if (isMobile && hasGyro) {
-    var gyroTest = function(e) {
-      if (e.gamma !== null || e.beta !== null) {
-        gyroWorking = true;
-        window.removeEventListener('deviceorientation', gyroTest);
-        window.addEventListener('deviceorientation', handleOrientation);
+      if (appInner) {
+        appInner.style.transform = 'translate(' + (offsetX * 0.45) + 'px, ' + (offsetY * 0.45) + 'px)';
       }
-    };
-    window.addEventListener('deviceorientation', gyroTest);
-    setTimeout(function() {
-      if (!gyroWorking) {
-        window.removeEventListener('deviceorientation', gyroTest);
-      }
-    }, 3000);
-  }
+    }
 
-  function handleOrientation(e) {
-    var gamma = e.gamma || 0;
-    var beta = e.beta || 0;
-    var x = (gamma / 90) * 30;
-    var y = ((beta - 45) / 90) * 30;
-    targetX = x;
-    targetY = y;
-    if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
-      requestAnimationFrame(smoothParallax);
+    var currentX = 0, currentY = 0;
+    var targetX = 0, targetY = 0;
+
+    function smoothParallax() {
+      currentX += (targetX - currentX) * 0.1;
+      currentY += (targetY - currentY) * 0.1;
+      if (Math.abs(currentX - targetX) > 0.05 || Math.abs(currentY - targetY) > 0.05) {
+        applyParallax(currentX, currentY);
+        requestAnimationFrame(smoothParallax);
+      } else {
+        applyParallax(targetX, targetY);
+      }
+    }
+
+    document.addEventListener('mousemove', function(e) {
+      if (isMobile) return;
+      var x = (e.clientX / window.innerWidth - 0.5) * 30;
+      var y = (e.clientY / window.innerHeight - 0.5) * 30;
+      targetX = x;
+      targetY = y;
+      if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
+        requestAnimationFrame(smoothParallax);
+      }
+    });
+
+    if (isMobile && hasGyro) {
+      var gyroTest = function(e) {
+        if (e.gamma !== null || e.beta !== null) {
+          gyroWorking = true;
+          window.removeEventListener('deviceorientation', gyroTest);
+          window.addEventListener('deviceorientation', handleOrientation);
+        }
+      };
+      window.addEventListener('deviceorientation', gyroTest);
+      setTimeout(function() {
+        if (!gyroWorking) {
+          window.removeEventListener('deviceorientation', gyroTest);
+        }
+      }, 3000);
+    }
+
+    function handleOrientation(e) {
+      var gamma = e.gamma || 0;
+      var beta = e.beta || 0;
+      var x = (gamma / 90) * 30;
+      var y = ((beta - 45) / 90) * 30;
+      targetX = x;
+      targetY = y;
+      if (Math.abs(currentX - targetX) > 0.1 || Math.abs(currentY - targetY) > 0.1) {
+        requestAnimationFrame(smoothParallax);
+      }
     }
   }
 
