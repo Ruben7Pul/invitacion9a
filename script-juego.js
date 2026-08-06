@@ -40,9 +40,10 @@ async function cargarConfig() {
     window.toggleMusic = toggleMusic;
     window.isMusicMuted = isMusicMuted;
 
+    // Intentar reproducir lo antes posible
     setTimeout(() => {
       if (playMusic) playMusic();
-    }, 300);
+    }, 100);
 
     // Cargar juego
     const { initJuego } = await import('./modules/juego.js');
