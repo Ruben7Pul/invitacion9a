@@ -53,13 +53,11 @@ export function initMusica(cfg) {
   audio.addEventListener('error', (e) => {
     console.warn('⚠️ Error audio:', e);
   });
+  // Solo se prepara/precarga aquí. NO se reproduce todavía:
+  // reproducirlo desde el inicio hacía que a veces sonara al mismo
+  // tiempo que el audio del video de transición. playMusic() es quien
+  // lo arranca, y ya se llama justo cuando el video termina.
   audio.load();
-  audio.play().catch(() => {});
-  setTimeout(() => {
-    if (audio.paused) audio.play().catch(() => {});
-    fadeVolume(0.6, 1000);
-    isMuted = false;
-  }, 300);
   const btn = getMuteBtn();
   if (btn) {
     btn.innerHTML = iconSound;
