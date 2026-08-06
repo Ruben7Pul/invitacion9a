@@ -1,8 +1,12 @@
-console.log('📦 música rr (con fade y mute corregido)');
+console.log('🎵 goga música 23 (con fade y mute corregido)');
 
 let audio = null;
 let fadeInterval = null;
 let isMuted = false;
+let autoplayPending = false;
+let autoplayListenerAdded = false;
+
+const AUDIO_SRC = '../archivos/cancion.mp3';
 
 const iconSound = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
   <path d="M4 9 L4 15 L8 15 L13 20 L13 4 L8 9 Z"/>
@@ -20,6 +24,18 @@ function getMuteBtn() {
   const btn = document.getElementById('music-toggle');
   if (btn) return btn;
   return document.querySelector('.pause-mute-btn');
+}
+
+function updateIcon(soundOn) {
+  const btn = getMuteBtn();
+  if (!btn) return;
+  if (soundOn) {
+    btn.innerHTML = iconSound;
+    btn.title = 'Silenciar música';
+  } else {
+    btn.innerHTML = iconMute;
+    btn.title = 'Activar música';
+  }
 }
 
 function fadeVolume(targetVolume, duration = 800) {
@@ -42,38 +58,88 @@ function fadeVolume(targetVolume, duration = 800) {
   }, 16);
 }
 
-export function initMusica(cfg) {
+function tryPlay() {
+  if (!audio) return false;
+  if (!audio.paused) return true;
+  return audio.play().then(() => true).catch(() => false);
+}
+
+function setupAutoplayListener() {
+  if (autoplayListenerAdded) return;
+  autoplayListenerAdded = true;
+
+  const handler = () => {
+    if (autoplayPending) {
+      const ok = tryPlay();
+      if (ok) {
+        fadeVolume(0.6, 800);
+        isMuted = false;
+        updateIcon(true);
+        autoplayPending = false;
+        document.removeEventListener('click', handler);
+        document.removeEventListener('touchstart', handler);
+        console.log('🎵 Música activada por interacción del usuario');
+      }
+    }
+  };
+
+  document.addEventListener('click', handler);
+  document.addEventListener('touchstart', handler);
+  console.log('🔊 Listener de autoplay configurado');
+}
+
+function createAudio(src) {
+  const el = new Audio(src);
+  el.loop = true;
+  el.volume = 0;
+  el.preload = 'auto';
+  return el;
+}
+
+export function initMusica() {
+  console.log('🎵 Iniciando música con ruta fija:', AUDIO_SRC);
   audio = document.getElementById('bg-music');
   if (!audio) {
-    audio = new Audio(cfg.audioFile || '../archivos/cancion1.mp3');
-    audio.loop = true;
+    audio = createAudio(AUDIO_SRC);
+    audio.addEventListener('error', (e) => {
+      console.warn('⚠️ Error cargando audio:', AUDIO_SRC, e);
+    });
     document.body.appendChild(audio);
+  } else {
+    console.log('🎵 Usando elemento <audio> existente en el DOM');
+    if (audio.src !== window.location.origin + '/' + AUDIO_SRC.replace(/^\.\.\//, '')) {
+      audio.src = AUDIO_SRC;
+      audio.load();
+    }
   }
   audio.volume = 0;
-  audio.addEventListener('error', (e) => {
-    console.warn('⚠️ Error audio:', e);
-  });
-  audio.load();
-  const btn = getMuteBtn();
-  if (btn) {
-    btn.innerHTML = iconSound;
-    btn.title = 'Silenciar música';
-  }
   isMuted = false;
+  updateIcon(true);
 }
 
 export function playMusic() {
-  if (!audio) return;
-  if (audio.paused) {
-    audio.play().catch(() => {});
+  console.log('🎵 playMusic() llamado');
+  if (!audio) {
+    console.warn('⚠️ audio no disponible');
+    return;
+  }
+  if (!audio.paused) {
+    console.log('🎵 El audio ya está sonando');
+    return;
+  }
+
+  const ok = tryPlay();
+  if (ok) {
     fadeVolume(0.6, 800);
+    isMuted = false;
+    updateIcon(true);
+    autoplayPending = false;
+    console.log('🎵 Música iniciada correctamente');
+  } else {
+    console.log('⏳ Autoplay bloqueado, esperando interacción del usuario');
+    autoplayPending = true;
+    setupAutoplayListener();
   }
-  const btn = getMuteBtn();
-  if (btn) {
-    btn.innerHTML = iconSound;
-    btn.title = 'Silenciar música';
-  }
-  isMuted = false;
 }
 
 export function resetMusic() {
@@ -83,61 +149,50 @@ export function resetMusic() {
     audio.pause();
     audio.currentTime = 0;
   }, 700);
-  const btn = getMuteBtn();
-  if (btn) {
-    btn.innerHTML = iconSound;
-    btn.title = 'Silenciar música';
-  }
   isMuted = false;
+  updateIcon(true);
 }
 
 export function toggleMusic() {
   if (!audio) return;
-  const btn = getMuteBtn();
 
-  // Si el audio está pausado, lo reproducimos (no lo silenciamos)
   if (audio.paused) {
-    audio.play().catch(() => {});
-    fadeVolume(0.6, 600);
-    isMuted = false;
-    if (btn) {
-      btn.innerHTML = iconSound;
-      btn.title = 'Silenciar música';
+    const ok = tryPlay();
+    if (ok) {
+      fadeVolume(0.6, 600);
+      isMuted = false;
+      updateIcon(true);
+    } else {
+      autoplayPending = true;
+      setupAutoplayListener();
     }
     return;
   }
 
-  // Si está sonando y no muteado, lo silenciamos
   if (!isMuted && audio.volume > 0) {
     fadeVolume(0, 600);
     isMuted = true;
-    if (btn) {
-      btn.innerHTML = iconMute;
-      btn.title = 'Activar música';
-    }
+    updateIcon(false);
     return;
   }
 
-  // Si está muteado (volumen 0 o isMuted true), lo reactivamos
   if (isMuted || audio.volume === 0) {
-    audio.play().catch(() => {});
-    fadeVolume(0.6, 600);
-    isMuted = false;
-    if (btn) {
-      btn.innerHTML = iconSound;
-      btn.title = 'Silenciar música';
+    const ok = tryPlay();
+    if (ok) {
+      fadeVolume(0.6, 600);
+      isMuted = false;
+      updateIcon(true);
+    } else {
+      autoplayPending = true;
+      setupAutoplayListener();
     }
     return;
   }
 
-  // Fallback: alternar
   isMuted = !isMuted;
   const targetVol = isMuted ? 0 : 0.6;
   fadeVolume(targetVol, 600);
-  if (btn) {
-    btn.innerHTML = isMuted ? iconMute : iconSound;
-    btn.title = isMuted ? 'Activar música' : 'Silenciar música';
-  }
+  updateIcon(!isMuted);
 }
 
 export function isMusicMuted() {
@@ -148,5 +203,3 @@ export function setMusicMute(muted) {
   if (muted === isMuted) return;
   toggleMusic();
 }
-
-
