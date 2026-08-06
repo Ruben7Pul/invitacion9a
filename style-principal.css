@@ -1389,18 +1389,13 @@ html.perf-bajo .collage-container {
 
 .collage-container .collage-item {
   position: absolute;
+  display: block;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-.collage-container .collage-item img {
-  width: 100%;
-  height: 100%;
   object-fit: contain;
-  display: block;
   -webkit-user-select: none;
   user-select: none;
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
 .modal-gustos-card::-webkit-scrollbar {
