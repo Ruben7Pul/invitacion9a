@@ -3,9 +3,9 @@
 // ============================================================
 console.log('📦 juego.js (canvas corregido final)');
 
-import { 
-  soundBrick, 
-  soundLose, 
+import {
+  soundBrick,
+  soundLose,
   soundGameOver,
   soundExtraLife,
   soundPowerupGood,
@@ -135,7 +135,7 @@ export function initJuego(config, mobile = false) {
   const overlay = document.getElementById('game-overlay');
   const stage = document.getElementById('game-stage');
   const inner = document.getElementById('game-inner');
-  
+
   const canvas = document.createElement('canvas');
   canvas.width = STAGE_W;
   canvas.height = STAGE_H;
@@ -143,7 +143,7 @@ export function initJuego(config, mobile = false) {
   canvas.style.height = '100%';
   canvas.style.display = 'block';
   canvas.style.imageRendering = 'pixelated';
-  
+
   if (inner) {
     inner.innerHTML = '';
     inner.appendChild(canvas);
@@ -244,7 +244,7 @@ export function initJuego(config, mobile = false) {
     });
   }
 
-  // ========== MODAL DE PAUSA ==========
+  // ========== MODAL DE PAUSA (CORREGIDO) ==========
   let pauseModal = null;
   let pauseModalOverlay = null;
 
@@ -273,18 +273,13 @@ export function initJuego(config, mobile = false) {
     pauseModalOverlay = overlayEl;
     pauseModal = card;
 
+    // Listener para reanudar
     document.getElementById('pause-resume-btn').addEventListener('click', closePauseModal);
+    // Listener para silenciar/activar música (SOLO llama a toggleMusic, SIN modificar innerHTML manualmente)
     document.getElementById('pause-mute-btn').addEventListener('click', () => {
       if (window.toggleMusic) window.toggleMusic();
-      const btn = document.getElementById('pause-mute-btn');
-      if (btn) {
-        if (window.isMusicMuted && window.isMusicMuted()) {
-          btn.innerHTML = '🔇 Silenciado';
-        } else {
-          btn.innerHTML = '🔊 Silenciar';
-        }
-      }
     });
+    // Listener para salir
     document.getElementById('pause-exit-btn').addEventListener('click', () => {
       closePauseModal();
       if (animFrameId) cancelAnimationFrame(animFrameId);
@@ -297,13 +292,9 @@ export function initJuego(config, mobile = false) {
   function openPauseModal() {
     if (!pauseModalOverlay) createPauseModal();
     updatePauseModal();
-    const muteBtn = document.getElementById('pause-mute-btn');
-    if (muteBtn) {
-      if (window.isMusicMuted && window.isMusicMuted()) {
-        muteBtn.innerHTML = '🔇 Silenciado';
-      } else {
-        muteBtn.innerHTML = '🔊 Silenciar';
-      }
+    // Sincronizar el ícono del botón de silencio al abrir el modal
+    if (window.updateIcon && window.isMusicMuted !== undefined) {
+      window.updateIcon(!window.isMusicMuted());
     }
     pauseModalOverlay.classList.add('open');
     if (!paused) {
@@ -1055,7 +1046,6 @@ export function initJuego(config, mobile = false) {
       ctx.fillStyle = grad;
       ctx.fill();
       ctx.shadowBlur = 0;
-      // Borde brillante
       ctx.strokeStyle = br.isGolden ? '#ffd700' : 'rgba(255,255,255,0.15)';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
@@ -1197,7 +1187,7 @@ export function initJuego(config, mobile = false) {
     drawFloatingMessages(ctx);
   }
 
-  // ========== BUCLE PRINCIPAL (con try-catch para evitar congelación) ==========
+  // ========== BUCLE PRINCIPAL CON TRY/CATCH ==========
   function gameLoop(timestamp) {
     try {
       if (!running) {
@@ -1368,7 +1358,6 @@ export function initJuego(config, mobile = false) {
       animFrameId = requestAnimationFrame(gameLoop);
     } catch (e) {
       console.error('❌ Error en gameLoop:', e);
-      // Intentar continuar el bucle
       animFrameId = requestAnimationFrame(gameLoop);
     }
   }
