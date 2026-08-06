@@ -346,6 +346,41 @@ var collageHistorialImagenes = [];
 var collageUltimaRotacion = 0;
 var collageIntervaloMs = 3000;
 
+// Carpeta donde viven las imágenes del collage (raíz del proyecto).
+var CARPETA_IMGCOLL = '../imgcoll/';
+
+// Detecta automáticamente cuántas imágenes hay. Requisito: los archivos
+// deben llamarse imgcoll1.jpg, imgcoll2.jpg, imgcoll3.jpg... sin saltarse
+// números. Para agregar o quitar imágenes, solo sube/borra el archivo y
+// renumera los demás si hace falta (sin dejar huecos). No hay que tocar
+// código ni correr nada.
+function detectarImagenesCollage(callback) {
+  var fallosSeguidosParaParar = 3; // tolera hasta 2 huecos seguidos, por si acaso
+  var encontradas = [];
+  var fallosSeguidos = 0;
+
+  function probar(i) {
+    var src = CARPETA_IMGCOLL + 'imgcoll' + i + '.jpg';
+    var img = new Image();
+    img.onload = function() {
+      encontradas.push(src);
+      fallosSeguidos = 0;
+      probar(i + 1);
+    };
+    img.onerror = function() {
+      fallosSeguidos++;
+      if (fallosSeguidos >= fallosSeguidosParaParar) {
+        callback(encontradas);
+        return;
+      }
+      probar(i + 1);
+    };
+    img.src = src;
+  }
+
+  probar(1);
+}
+
 function iniciarCollage() {
   var container = document.getElementById('collage-container');
   if (!container) return;
@@ -355,37 +390,39 @@ function iniciarCollage() {
   container.style.aspectRatio = '1 / 1';
   container.style.width = '100%';
 
-  var maxImages = 9;
-  var imagenes = [];
-  var cargadas = 0;
-  var totalIntentos = maxImages;
+  detectarImagenesCollage(function(rutas) {
+    if (!rutas || rutas.length === 0) {
+      container.innerHTML = '<div style="text-align:center; padding:2rem; color:#fae3a0; font-family:var(--script); font-size:1.2rem;">No se encontraron imágenes.</div>';
+      return;
+    }
 
-  function verificarYRenderizar() {
-    cargadas++;
-    if (cargadas === totalIntentos) {
-      imagenesCollage = imagenes;
-      if (imagenes.length > 0) {
+    var datos = [];
+    var restantes = rutas.length;
+
+    function terminar() {
+      imagenesCollage = datos;
+      if (datos.length > 0) {
         renderCollage(container);
       } else {
         container.innerHTML = '<div style="text-align:center; padding:2rem; color:#fae3a0; font-family:var(--script); font-size:1.2rem;">No se encontraron imágenes.</div>';
       }
     }
-  }
 
-  for (var i = 1; i <= maxImages; i++) {
-    (function(indice) {
-      var src = '../archivos/imgcoll' + indice + '.jpg';
+    rutas.forEach(function(src) {
       var img = new Image();
       img.onload = function() {
-        imagenes.push(src);
-        verificarYRenderizar();
+        var ratio = (img.naturalWidth && img.naturalHeight) ? (img.naturalWidth / img.naturalHeight) : 1;
+        datos.push({ src: src, ratio: ratio });
+        restantes--;
+        if (restantes === 0) terminar();
       };
       img.onerror = function() {
-        verificarYRenderizar();
+        restantes--;
+        if (restantes === 0) terminar();
       };
       img.src = src;
-    })(i);
-  }
+    });
+  });
 }
 
 function shuffleArray(arr) {
@@ -441,12 +478,27 @@ function renderCollage(container) {
   collageHistorialImagenes = [];
   collageUltimaRotacion = 0;
 
+  // Tamaño de referencia (%) para el lado MAYOR de cada imagen dentro del
+  // contenedor cuadrado. El otro lado se calcula con la relación de aspecto
+  // real de la imagen, así que una imagen grande se achica y una chica se
+  // agranda, pero nunca se deforma.
+  var TAMANIO_BASE = 62;
+
   function mostrarSiguienteImagen() {
     var indiceEnImagen = elegirImagenAleatoria();
-    var src = imagenesCollage[indiceEnImagen];
+    var dato = imagenesCollage[indiceEnImagen];
+    var src = dato.src;
+    var ratio = dato.ratio || 1;
 
-    var w = 75;
-    var h = 75;
+    var w, h;
+    if (ratio >= 1) {
+      w = TAMANIO_BASE;
+      h = TAMANIO_BASE / ratio;
+    } else {
+      h = TAMANIO_BASE;
+      w = TAMANIO_BASE * ratio;
+    }
+
     var x = Math.random() * (100 - w);
     var y = Math.random() * (100 - h);
     var rot = elegirRotacionContraria();
@@ -468,7 +520,7 @@ function renderCollage(container) {
     img.src = src;
     img.alt = 'Gusto';
     img.loading = 'lazy';
-    img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+    img.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;';
     div.appendChild(img);
     container.appendChild(div);
 
