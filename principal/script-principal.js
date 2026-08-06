@@ -173,7 +173,6 @@ function generarEventosCalendario(config) {
   });
 }
 
-// ===== AGREGAR A CALENDARIO (sin ubicación para cumpleaños) =====
 function agregarACalendario(evento, config) {
   const fecha = new Date(evento.fechaISO);
   const inicio = fecha.toISOString().replace(/-|:|\.\d+/g, '');
@@ -182,7 +181,6 @@ function agregarACalendario(evento, config) {
   const titulo = encodeURIComponent(`${evento.desc} · ${config.nombre}`);
   const descripcion = encodeURIComponent(`Invitación a los XV años de ${config.nombre}. ${evento.desc}`);
 
-  // Para cumpleaños no se incluye ubicación
   let ubicacion = '';
   if (!evento.desc.includes('Cumpleaños')) {
     if (evento.desc.includes('Misa')) {
@@ -347,7 +345,7 @@ var collageZIndex = 1;
 var collageElementos = [];
 var collageHistorialImagenes = [];
 var collageUltimaRotacion = 0;
-var collageIntervaloMs = 3000; // se ajustará según rendimiento
+var collageIntervaloMs = 3000;
 
 function iniciarCollage() {
   var container = document.getElementById('collage-container');
@@ -665,6 +663,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     window.playMusic = playMusic;
     window.toggleMusic = toggleMusic;
     window.resetMusic = resetMusic;
+    
+    // Iniciar la música automáticamente al cargar la app
+    setTimeout(() => {
+      if (window.playMusic) window.playMusic();
+    }, 300); // pequeño retraso para asegurar que el audio esté listo
   } catch (e) { console.error('❌ Música:', e); }
 
   var appIniciada = false;
@@ -683,7 +686,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   app.classList.add('show');
   cargarContador();
-  if (window.playMusic) window.playMusic();
 
   backBtn.addEventListener('click', function() {
     window.location.href = '../index.html';
