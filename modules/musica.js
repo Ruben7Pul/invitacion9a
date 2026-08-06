@@ -1,4 +1,4 @@
-console.log('🎵 goga música 24 (autoplay muteado + desmute en primer gesto)');
+console.log('🎵 musica23');
 
 let audio = null;
 let fadeInterval = null;
