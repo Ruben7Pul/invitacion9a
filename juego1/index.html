@@ -106,9 +106,21 @@
       text-transform:uppercase;
       font-size:clamp(0.7rem,2vw,0.9rem);
       padding:0 0.1rem;
-      gap:0.05rem;
+      gap:0.1rem;
       color:#fae3a0;
       text-shadow:0 0 15px rgba(212,175,55,0.3);
+    }
+    #game-header .left {
+      display:flex;
+      align-items:center;
+      gap:0.5rem;
+      flex:1;
+    }
+    #game-header .right {
+      display:flex;
+      align-items:center;
+      gap:0.3rem;
+      flex-shrink:0;
     }
     #game-header span { white-space:nowrap; }
     #game-score {
@@ -126,26 +138,56 @@
       animation:rainbowScore 3s linear infinite;
       text-shadow:none;
     }
-    #pause-btn {
-      flex-shrink:0;
+    /* Botones pequeños */
+    .game-btn-sm {
       background:rgba(201,162,77,0.12);
       border:1.5px solid #c9a24d;
       color:#f0d9a3;
-      font-size:1.4rem;
+      font-size:1.2rem;
       cursor:pointer;
-      padding:0.2rem 0.5rem;
+      padding:0.15rem 0.4rem;
       display:flex;
       align-items:center;
       justify-content:center;
       border-radius:30px;
       box-shadow:0 0 12px rgba(201,162,77,0.15);
       transition:all 0.3s ease;
-      min-width:40px;
-      height:40px;
+      min-width:36px;
+      height:36px;
+      line-height:1;
+      font-family:'Cinzel',serif;
+      font-weight:600;
     }
-    #pause-btn:hover {
+    .game-btn-sm:hover {
       background:rgba(201,162,77,0.25);
       box-shadow:0 0 20px rgba(201,162,77,0.3);
+    }
+    .game-btn-sm.exit-btn {
+      border-color:#b8860b;
+      color:#f0d9a3;
+      background:rgba(201,162,77,0.08);
+    }
+    .game-btn-sm.exit-btn:hover {
+      background:rgba(201,162,77,0.2);
+      border-color:rgba(201,162,77,0.6);
+    }
+    .game-btn-sm.mute-btn {
+      border-color:#4d96ff;
+      color:#aac8ff;
+      background:rgba(77,150,255,0.08);
+    }
+    .game-btn-sm.mute-btn:hover {
+      background:rgba(77,150,255,0.2);
+      border-color:rgba(77,150,255,0.6);
+    }
+    .game-btn-sm.pause-btn {
+      border-color:#ffaa33;
+      color:#ffcc88;
+      background:rgba(255,170,51,0.08);
+    }
+    .game-btn-sm.pause-btn:hover {
+      background:rgba(255,170,51,0.2);
+      border-color:rgba(255,170,51,0.6);
     }
 
     #game-stage {
@@ -232,7 +274,6 @@
       overflow:hidden;
       text-align:center;
     }
-    #menu-content { display:none; }
     #menu-gameover {
       display:none;
       text-align:center;
@@ -285,105 +326,6 @@
       font-weight:bold;
     }
 
-    .pause-modal-overlay {
-      position:absolute;
-      inset:0;
-      z-index:200;
-      background:rgba(6,10,25,0.7);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:1rem;
-      opacity:0;
-      visibility:hidden;
-      transition:opacity 0.25s ease, visibility 0.25s ease;
-      backdrop-filter:blur(4px);
-      -webkit-backdrop-filter:blur(4px);
-      border-radius:16px;
-    }
-    .pause-modal-overlay.open {
-      opacity:1;
-      visibility:visible;
-    }
-    .pause-modal-card {
-      width:100%;
-      max-width:380px;
-      max-height:85vh;
-      overflow-y:auto;
-      background:radial-gradient(ellipse at 50% 30%, #1c2a44, #0d1424 80%);
-      border:3px solid #b8860b;
-      border-radius:30px;
-      padding:2rem 1.5rem;
-      position:relative;
-      transform:scale(0.95);
-      opacity:0;
-      transition:transform 0.2s ease, opacity 0.2s ease;
-      box-shadow:0 0 0 2px rgba(184,134,11,0.2), 0 0 0 6px rgba(26,42,70,0.5), 0 0 50px rgba(184,134,11,0.12), inset 0 0 60px rgba(25,50,100,0.15);
-      -webkit-overflow-scrolling:touch;
-    }
-    .pause-modal-overlay.open .pause-modal-card {
-      transform:scale(1);
-      opacity:1;
-    }
-    .pause-modal-card h2 {
-      font-family:'Cinzel',serif;
-      text-align:center;
-      font-size:clamp(1.2rem,3vw,1.6rem);
-      letter-spacing:0.15em;
-      text-transform:uppercase;
-      color:#fae3a0;
-      text-shadow:0 0 25px rgba(212,175,55,0.3);
-      margin:0 0 0.8rem;
-      padding-bottom:0.5rem;
-      border-bottom:2px solid rgba(212,175,55,0.2);
-      position:relative;
-    }
-    .pause-modal-card .pause-ranking {
-      margin:1rem 0;
-      font-family:'Press Start 2P',monospace;
-      font-size:0.7rem;
-      color:#fae3a0;
-    }
-    .pause-modal-card .pause-ranking .rank-item {
-      display:flex;
-      justify-content:space-between;
-      padding:0.3rem 0.2rem;
-      border-bottom:1px solid rgba(212,175,55,0.15);
-    }
-    .pause-modal-card .pause-ranking .rank-item .pos {
-      color:#d4af37;
-      margin-right:0.5rem;
-    }
-    .pause-modal-card .pause-buttons {
-      display:flex;
-      flex-direction:column;
-      gap:0.6rem;
-      margin-top:1.2rem;
-    }
-    .pause-modal-card .pause-buttons .game-btn {
-      width:100%;
-      padding:0.6rem;
-      font-size:clamp(0.8rem,1.8vw,1rem);
-    }
-    .pause-modal-card .pause-buttons .game-btn.exit-btn {
-      border-color:#b8860b;
-      color:#f0d9a3;
-      background:rgba(201,162,77,0.08);
-    }
-    .pause-modal-card .pause-buttons .game-btn.exit-btn:hover {
-      background:rgba(201,162,77,0.2);
-      border-color:rgba(201,162,77,0.6);
-    }
-    .pause-modal-card .pause-buttons .game-btn.mute-btn {
-      border-color:#4d96ff;
-      color:#aac8ff;
-      background:rgba(77,150,255,0.08);
-    }
-    .pause-modal-card .pause-buttons .game-btn.mute-btn:hover {
-      background:rgba(77,150,255,0.2);
-      border-color:rgba(77,150,255,0.6);
-    }
-
     #loading-tips {
       position:absolute;
       bottom:10px;
@@ -408,8 +350,7 @@
 
     @media (max-width:400px) {
       #game-panel { max-width:98vw; }
-      .game-btn { font-size:0.7rem; padding:0.3rem 0.8rem; }
-      .pause-modal-card { padding:1rem 0.8rem; }
+      .game-btn-sm { font-size:1rem; min-width:32px; height:32px; padding:0.1rem 0.3rem; }
       .game-help { font-size:0.6rem; }
       #loading-tips { font-size:0.55rem; padding:0.2rem 0.6rem; }
     }
@@ -442,10 +383,17 @@
 
   <div id="game-overlay" class="open">
     <div id="game-panel">
+      <!-- HEADER CON TRES BOTONES -->
       <div id="game-header">
-        <span id="lives">♥ ♥ ♥</span>
-        <span id="game-score">0</span>
-        <button id="pause-btn">⏸️</button>
+        <div class="left">
+          <span id="lives">♥ ♥ ♥</span>
+          <span id="game-score">0</span>
+        </div>
+        <div class="right">
+          <button class="game-btn-sm mute-btn" id="mute-btn" title="Silenciar/Activar música">🔊</button>
+          <button class="game-btn-sm pause-btn" id="pause-btn" title="Pausar/Reanudar">⏸️</button>
+          <button class="game-btn-sm exit-btn" id="exit-btn" title="Salir">🚪</button>
+        </div>
       </div>
 
       <div id="game-stage">
@@ -477,8 +425,7 @@
       </div>
 
       <p class="game-help">
-        Mueve con dedo, A/D o flechas · <span class="highlight">Pulsa pausa ⏸️</span> para menú<br>
-        <span style="font-size:0.7rem; opacity:0.7;">Power-ups: ↑ dureza, ↓ flaqueza, <> pala grande, >< pala mini, x3 multibola, 🌫️ niebla</span>
+        Mueve con dedo, A/D o flechas · <span class="highlight">Botones arriba a la derecha</span>: 🔇 silencio, ⏸️ pausa, 🚪 salir
       </p>
     </div>
   </div>
