@@ -36,7 +36,8 @@ async function cargarConfig() {
     const config = await cargarConfig();
     // Cargar música con ruta específica para el juego
     const { initMusica, playMusic, toggleMusic, isMusicMuted } = await import('./modules/musica.js');
-    initMusica('../archivos/juegcan.mp3'); // Ruta a juegcan.mp3
+    // Forzar ruta a juegcan.mp3
+    initMusica('../archivos/juegcan.mp3');
     window.toggleMusic = toggleMusic;
     window.isMusicMuted = isMusicMuted;
 
