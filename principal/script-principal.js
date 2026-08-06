@@ -502,11 +502,16 @@ function limpiarCollage() {
 
 // ===== AJUSTES POR RENDIMIENTO =====
 function aplicarAjustesRendimiento(nivel) {
+  // Si nivel es null, undefined o 'desconocido', lo tratamos como desconocido
+  const nivelNormalizado = (nivel === 'alto' || nivel === 'medio' || nivel === 'bajo') ? nivel : 'desconocido';
+  
   const html = document.documentElement;
-  html.classList.add('perf-' + nivel);
+  if (nivelNormalizado !== 'desconocido') {
+    html.classList.add('perf-' + nivelNormalizado);
+  }
 
   // Desactivar animación del nombre (rainbowMove) en niveles bajo y medio
-  if (nivel === 'bajo' || nivel === 'medio') {
+  if (nivelNormalizado === 'bajo' || nivelNormalizado === 'medio') {
     const nombre = document.getElementById('nombre-hero');
     if (nombre) {
       nombre.style.animation = 'none';
@@ -518,21 +523,21 @@ function aplicarAjustesRendimiento(nivel) {
   }
 
   // Reducir intervalo del collage en bajo
-  if (nivel === 'bajo') {
+  if (nivelNormalizado === 'bajo') {
     collageIntervaloMs = 5000; // más lento
-  } else if (nivel === 'medio') {
+  } else if (nivelNormalizado === 'medio') {
     collageIntervaloMs = 4000;
   } else {
     collageIntervaloMs = 3000;
   }
 
   // Desactivar parallax en bajo
-  if (nivel === 'bajo') {
+  if (nivelNormalizado === 'bajo') {
     window.__parallaxDesactivado = true;
   }
 
   // Ajustar duración de animaciones de aparición de secciones
-  if (nivel === 'bajo') {
+  if (nivelNormalizado === 'bajo') {
     document.querySelectorAll('.seccion.visible').forEach(sec => {
       sec.style.transitionDuration = '0.4s';
     });
@@ -555,24 +560,27 @@ function aplicarAjustesRendimiento(nivel) {
     const levelNames = {
       'alto': 'Alto',
       'medio': 'Medio',
-      'bajo': 'Bajo'
+      'bajo': 'Bajo',
+      'desconocido': '?'
     };
     const levelColors = {
       'alto': '#4caf50',
       'medio': '#ffeb3b',
-      'bajo': '#f44336'
+      'bajo': '#f44336',
+      'desconocido': '#aaaaaa'
     };
     const levelDescriptions = {
       'alto': 'Rendimiento alto: todas las animaciones activas.',
       'medio': 'Rendimiento medio: algunas animaciones reducidas.',
-      'bajo': 'Rendimiento bajo: animaciones básicas (máxima fluidez).'
+      'bajo': 'Rendimiento bajo: animaciones básicas (máxima fluidez).',
+      'desconocido': 'No se pudo detectar el rendimiento. Se usan ajustes por defecto.'
     };
     
-    const color = levelColors[nivel] || '#888';
-    const name = levelNames[nivel] || 'Desconocido';
-    const desc = levelDescriptions[nivel] || 'Rendimiento no detectado.';
+    const color = levelColors[nivelNormalizado] || '#888';
+    const name = levelNames[nivelNormalizado] || '?';
+    const desc = levelDescriptions[nivelNormalizado] || 'Rendimiento no detectado.';
     
-    perfSpan.title = `${desc}`;
+    perfSpan.title = desc;
     perfSpan.innerHTML = `
       <span class="dot" style="background:${color};"></span>
       <span class="label">${name}</span>
