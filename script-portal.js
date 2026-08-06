@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (overlay) overlay.classList.add('show');
     gateWrapper.classList.add('open');
 
-    // Iniciar medición de FPS justo al empezar la transición
+    // Iniciar medición de FPS
     iniciarMedicionFPS();
 
     let finalizado = false;
@@ -102,10 +102,12 @@ document.addEventListener('DOMContentLoaded', async function() {
       video.addEventListener('ended', finalizar);
       video.addEventListener('error', onError);
 
+      // Reiniciar y asegurar audio
       video.muted = false;
       video.volume = 0;
       try { video.currentTime = 0; } catch (err) {}
 
+      // Reproducir con audio (la interacción del usuario ya ocurrió)
       video.play().then(() => {
         fadeVolumen(video, 1, FADE_IN_MS);
       }).catch((err) => {
