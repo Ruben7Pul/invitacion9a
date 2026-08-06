@@ -1,7 +1,7 @@
 // ============================================================
 // script-juego.js – SCRIPT DEL JUEGO (independiente)
 // ============================================================
-console.log('🎮 script-juego 22.js cargado');
+console.log('🎮 script-juego.js cargado');
 
 async function cargarConfig() {
   try {
@@ -34,16 +34,16 @@ async function cargarConfig() {
 (async function init() {
   try {
     const config = await cargarConfig();
-    // Cargar música
+    // Cargar música con ruta específica para el juego
     const { initMusica, playMusic, toggleMusic, isMusicMuted } = await import('./modules/musica.js');
-    initMusica();
+    initMusica('../archivos/juegcan.mp3'); // Ruta a juegcan.mp3
     window.toggleMusic = toggleMusic;
     window.isMusicMuted = isMusicMuted;
-    
+
     setTimeout(() => {
       if (playMusic) playMusic();
     }, 300);
-    
+
     // Cargar juego
     const { initJuego } = await import('./modules/juego.js');
     initJuego(config, false);
