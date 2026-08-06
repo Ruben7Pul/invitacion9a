@@ -601,7 +601,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }, 2000);
   }
 
-  // ===== FUNCIÓN ABRIR REJA CON TIMEOUT FIJO =====
+  // ===== FUNCIÓN ABRIR REJA: reproduce el video completo y luego muestra la app =====
   function abrirReja(e) {
     if (e) e.stopPropagation();
 
@@ -611,27 +611,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     // 1. Mostrar overlay inmediatamente
     if (overlay) overlay.classList.add('show');
 
-    // 2. Intentar reproducir el video (si falla, se ve el poster o el primer frame)
-    if (video) {
-      if (video.readyState < 2) video.load();
-      video.currentTime = 0;
-      video.play().catch(() => {
-        // Si falla, no importa, se verá el poster o el fondo
-      });
-    }
-
-    // 3. Abrir la reja (animación)
+    // 2. Abrir la reja (animación)
     gateWrapper.classList.add('open');
 
-    // 4. Determinar la duración del clip
-    let duracionSegundos = 4.5; // valor por defecto (ajusta según tu clip)
-    if (video && video.duration && video.duration > 0 && isFinite(video.duration)) {
-      duracionSegundos = Math.min(video.duration, 8); // máximo 8s
-    }
-    console.log(`⏱️ Transición de ${duracionSegundos}s`);
-
-    // 5. Finalizar después de la duración del video + pequeño margen
     let finalizado = false;
+    let timeoutId = null;
+
+    // Termina la transición: oculta overlay y muestra la app principal
     const finalizar = () => {
       if (finalizado) return;
       finalizado = true;
@@ -640,32 +626,62 @@ document.addEventListener('DOMContentLoaded', async function() {
       app.classList.add('show');
       cargarContador();
       if (window.playMusic) window.playMusic();
-      // Limpiar eventos
       if (video) {
         video.removeEventListener('ended', finalizar);
         video.removeEventListener('error', onError);
+        video.removeEventListener('loadedmetadata', iniciarReproduccion);
       }
-      overlay.removeEventListener('click', finalizar);
-      clearTimeout(timeoutId);
+      if (overlay) overlay.removeEventListener('click', finalizar);
+      if (timeoutId) clearTimeout(timeoutId);
     };
 
     const onError = (err) => {
       console.warn('Error en video:', err);
-      // No hacemos nada, el timeout se encarga
+      finalizar();
     };
+
+    // Red de seguridad por si el video nunca reproduce/termina.
+    // Se reprograma con la duración real en cuanto la conocemos.
+    const programarSeguridad = (segundos) => {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        console.warn('⏰ Timeout de seguridad, finalizando transición');
+        finalizar();
+      }, segundos * 1000 + 500);
+    };
+    programarSeguridad(30); // tope amplio inicial mientras carga metadata
+
+    function iniciarReproduccion() {
+      // Ahora sí conocemos la duración real del clip: ajustamos la red de seguridad
+      if (video.duration && isFinite(video.duration)) {
+        console.log(`⏱️ Duración real del video: ${video.duration.toFixed(1)}s`);
+        programarSeguridad(video.duration);
+      }
+      video.currentTime = 0;
+      video.play().catch((err) => {
+        console.warn('No se pudo reproducir el video:', err);
+        finalizar();
+      });
+    }
 
     if (video) {
       video.addEventListener('ended', finalizar);
       video.addEventListener('error', onError);
+
+      if (video.readyState >= 1) {
+        // Metadata (duración) ya disponible
+        iniciarReproduccion();
+      } else {
+        video.addEventListener('loadedmetadata', iniciarReproduccion, { once: true });
+        video.load();
+      }
+    } else {
+      // No existe el elemento de video: pasar directo tras un breve instante
+      programarSeguridad(1);
     }
 
-    const timeoutId = setTimeout(() => {
-      console.warn('⏰ Timeout de transición, finalizando');
-      finalizar();
-    }, duracionSegundos * 1000 + 300);
-
-    // Permitir que el usuario haga clic en el overlay para saltar
-    overlay.addEventListener('click', finalizar);
+    // Permitir que el usuario haga clic en el overlay para saltar la transición
+    if (overlay) overlay.addEventListener('click', finalizar);
   }
 
   function cerrarReja(e) {
