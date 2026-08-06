@@ -173,6 +173,7 @@ function generarEventosCalendario(config) {
   });
 }
 
+// ===== AGREGAR A CALENDARIO (sin ubicación para cumpleaños) =====
 function agregarACalendario(evento, config) {
   const fecha = new Date(evento.fechaISO);
   const inicio = fecha.toISOString().replace(/-|:|\.\d+/g, '');
@@ -180,9 +181,23 @@ function agregarACalendario(evento, config) {
 
   const titulo = encodeURIComponent(`${evento.desc} · ${config.nombre}`);
   const descripcion = encodeURIComponent(`Invitación a los XV años de ${config.nombre}. ${evento.desc}`);
-  const ubicacion = encodeURIComponent('Iglesia de Tianguistenco de Galeana / Auditorio');
 
-  const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${titulo}&dates=${inicio}/${fin}&details=${descripcion}&location=${ubicacion}&sf=true&output=xml`;
+  // Para cumpleaños no se incluye ubicación
+  let ubicacion = '';
+  if (!evento.desc.includes('Cumpleaños')) {
+    if (evento.desc.includes('Misa')) {
+      ubicacion = encodeURIComponent('Capilla del Puente, Rayon 164, Tianguistenco de Galeana, 52603 Guadalupe Yancuictlalpan, Méx., México');
+    } else if (evento.desc.includes('Recepción')) {
+      ubicacion = encodeURIComponent('Auditorio Gualupita Yancuictlalpan, Allende 2, Tianguistenco de Galeana, 52603 Guadalupe Yancuictlalpan, Méx., México');
+    }
+  }
+
+  let url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${titulo}&dates=${inicio}/${fin}&details=${descripcion}`;
+  if (ubicacion) {
+    url += `&location=${ubicacion}`;
+  }
+  url += '&sf=true&output=xml';
+
   window.open(url, '_blank');
 }
 
@@ -502,7 +517,6 @@ function limpiarCollage() {
 
 // ===== AJUSTES POR RENDIMIENTO =====
 function aplicarAjustesRendimiento(nivel) {
-  // Si nivel es null, undefined o 'desconocido', lo tratamos como desconocido
   const nivelNormalizado = (nivel === 'alto' || nivel === 'medio' || nivel === 'bajo') ? nivel : 'desconocido';
   
   const html = document.documentElement;
@@ -510,7 +524,6 @@ function aplicarAjustesRendimiento(nivel) {
     html.classList.add('perf-' + nivelNormalizado);
   }
 
-  // Desactivar animación del nombre (rainbowMove) en niveles bajo y medio
   if (nivelNormalizado === 'bajo' || nivelNormalizado === 'medio') {
     const nombre = document.getElementById('nombre-hero');
     if (nombre) {
@@ -522,38 +535,32 @@ function aplicarAjustesRendimiento(nivel) {
     }
   }
 
-  // Reducir intervalo del collage en bajo
   if (nivelNormalizado === 'bajo') {
-    collageIntervaloMs = 5000; // más lento
+    collageIntervaloMs = 5000;
   } else if (nivelNormalizado === 'medio') {
     collageIntervaloMs = 4000;
   } else {
     collageIntervaloMs = 3000;
   }
 
-  // Desactivar parallax en bajo
   if (nivelNormalizado === 'bajo') {
     window.__parallaxDesactivado = true;
   }
 
-  // Ajustar duración de animaciones de aparición de secciones
   if (nivelNormalizado === 'bajo') {
     document.querySelectorAll('.seccion.visible').forEach(sec => {
       sec.style.transitionDuration = '0.4s';
     });
   }
 
-  // ===== AÑADIR INDICADOR DE RENDIMIENTO AL MENSAJE FINAL =====
+  // ===== INDICADOR DE RENDIMIENTO =====
   const hint = document.getElementById('hint-juego');
   if (hint) {
-    // Limpiar contenido previo
     hint.innerHTML = '';
     
-    // Mensaje principal
     const msgSpan = document.createElement('span');
     msgSpan.textContent = '👆 Toca el nombre para jugar';
     
-    // Indicador de rendimiento
     const perfSpan = document.createElement('span');
     perfSpan.className = 'perf-indicator';
     
@@ -592,7 +599,6 @@ function aplicarAjustesRendimiento(nivel) {
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
-  // Leer nivel de rendimiento guardado
   const nivel = obtenerNivel();
   console.log('📊 Nivel de rendimiento detectado:', nivel);
   aplicarAjustesRendimiento(nivel);
@@ -708,7 +714,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     app.appendChild(appInner);
   }
 
-  // Si el nivel es bajo, desactivar parallax completamente
   if (window.__parallaxDesactivado) {
     console.log('Parallax desactivado por rendimiento bajo');
   } else {
