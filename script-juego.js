@@ -1,7 +1,7 @@
 // ============================================================
 // script-juego.js – SCRIPT DEL JUEGO (independiente)
 // ============================================================
-console.log('🎮 script-juego.js cargado');
+console.log('🎮 script-juego tt.js cargado');
 
 async function cargarConfig() {
   try {
