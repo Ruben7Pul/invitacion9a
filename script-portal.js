@@ -1,8 +1,9 @@
 console.log('🚪 script-portal.js');
 
+import { iniciarMedicionFPS, detenerMedicion, clasificarNivel, guardarNivel } from './modules/perf.js';
+
 document.addEventListener('DOMContentLoaded', async function() {
   // Título / og:title con el nombre real, si config.json está disponible.
-  // No es indispensable para que la reja funcione, así que si falla no bloquea nada.
   try {
     const res = await fetch(`config.json?t=${Date.now()}`);
     if (res.ok) {
@@ -26,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     gateWrapper.classList.add('active');
   }, 2000);
 
-  // ===== Utilidad: fade suave de volumen (para que el audio no se sienta cortado) =====
+  // ===== Utilidad: fade suave de volumen =====
   function fadeVolumen(video, destino, duracionMs, onDone) {
     if (!video) { if (onDone) onDone(); return; }
     const inicio = video.volume;
@@ -43,34 +44,34 @@ document.addEventListener('DOMContentLoaded', async function() {
     requestAnimationFrame(paso);
   }
 
-  const FADE_IN_MS = 1300;     // fundido de entrada del audio (más largo = más seguro)
-  const FADE_OUT_SKIP_MS = 400; // fundido si el usuario salta la transición
+  const FADE_IN_MS = 1300;
 
-  // ===== FUNCIÓN ABRIR REJA: reproduce el video completo (con audio) y luego navega a principal/ =====
+  // ===== FUNCIÓN ABRIR REJA =====
   function abrirReja(e) {
     if (e) e.stopPropagation();
 
     const overlay = document.getElementById('transition-overlay');
     const video = document.getElementById('transition-video');
 
-    // 1. Mostrar overlay inmediatamente
     if (overlay) overlay.classList.add('show');
-
-    // 2. Abrir la reja (animación)
     gateWrapper.classList.add('open');
+
+    // Iniciar medición de FPS justo al empezar la transición
+    iniciarMedicionFPS();
 
     let finalizado = false;
     let timeoutId = null;
 
-    // Termina la transición: navega a la app principal (página aparte).
-    // Al ser una navegación real, el navegador destruye por completo este
-    // video/audio antes de que exista la página principal — así nunca
-    // pueden sonar/pisarse entre sí, y esa página solo carga UN video
-    // (el de fondo, mar1.mp4) en vez de tres a la vez.
     const finalizar = () => {
       if (finalizado) return;
       finalizado = true;
       if (timeoutId) clearTimeout(timeoutId);
+
+      // Detener medición y guardar nivel
+      const frames = detenerMedicion();
+      const nivel = clasificarNivel(frames);
+      guardarNivel(nivel);
+
       window.location.href = 'principal/index.html';
     };
 
@@ -79,7 +80,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       finalizar();
     };
 
-    // Red de seguridad por si el video nunca reproduce/termina.
     const programarSeguridad = (segundos) => {
       if (timeoutId) clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         finalizar();
       }, segundos * 1000 + 500);
     };
-    programarSeguridad(30); // tope amplio inicial mientras carga metadata
+    programarSeguridad(30);
 
     const programarConDuracion = () => {
       if (video.duration && isFinite(video.duration)) {
@@ -102,11 +102,9 @@ document.addEventListener('DOMContentLoaded', async function() {
       video.addEventListener('ended', finalizar);
       video.addEventListener('error', onError);
 
-      // IMPORTANTE: play() se llama de inmediato, dentro del mismo gesto de clic del usuario,
-      // si no el navegador deja de considerarlo una acción iniciada por el usuario y bloquea el audio.
       video.muted = false;
       video.volume = 0;
-      try { video.currentTime = 0; } catch (err) { /* puede fallar si aún no hay metadata, no pasa nada */ }
+      try { video.currentTime = 0; } catch (err) {}
 
       video.play().then(() => {
         fadeVolumen(video, 1, FADE_IN_MS);
@@ -128,7 +126,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       programarSeguridad(1);
     }
 
-    // Permitir que el usuario haga clic en el overlay para saltar la transición
     if (overlay) overlay.addEventListener('click', finalizar);
   }
 
@@ -137,7 +134,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirReja(e); }
   });
 
-  // ===== PARALLAX (solo portal) =====
+  // ===== PARALLAX (portal) =====
   var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   var hasGyro = typeof DeviceOrientationEvent !== 'undefined';
   var gyroWorking = false;
@@ -150,7 +147,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     var maxOffset = 18;
     var offsetX = Math.min(Math.max(invertX, -maxOffset), maxOffset);
     var offsetY = Math.min(Math.max(invertY, -maxOffset), maxOffset);
-
     if (portalInner) {
       portalInner.style.transform = 'translate(' + (offsetX * 0.6) + 'px, ' + (offsetY * 0.6) + 'px)';
     }
