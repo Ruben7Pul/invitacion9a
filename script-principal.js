@@ -601,7 +601,28 @@ document.addEventListener('DOMContentLoaded', async function() {
     }, 2000);
   }
 
-  // ===== FUNCIÓN ABRIR REJA: reproduce el video completo y luego muestra la app =====
+  // ===== Utilidad: fade suave de volumen (para que el audio no se sienta cortado) =====
+  function fadeVolumen(video, destino, duracionMs, onDone) {
+    if (!video) { if (onDone) onDone(); return; }
+    const inicio = video.volume;
+    const t0 = performance.now();
+    function paso(ahora) {
+      const t = Math.min((ahora - t0) / duracionMs, 1);
+      video.volume = inicio + (destino - inicio) * t;
+      if (t < 1) {
+        requestAnimationFrame(paso);
+      } else if (onDone) {
+        onDone();
+      }
+    }
+    requestAnimationFrame(paso);
+  }
+
+  const FADE_IN_MS = 500;   // fundido de entrada del audio
+  const FADE_OUT_SEC = 0.9; // fundido de salida, en segundos, antes de que acabe el clip
+  const FADE_OUT_SKIP_MS = 250; // fundido rápido si el usuario salta la transición
+
+  // ===== FUNCIÓN ABRIR REJA: reproduce el video completo (con audio) y luego muestra la app =====
   function abrirReja(e) {
     if (e) e.stopPropagation();
 
@@ -616,6 +637,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     let finalizado = false;
     let timeoutId = null;
+    let fadeOutTimeoutId = null;
 
     // Termina la transición: oculta overlay y muestra la app principal
     const finalizar = () => {
@@ -630,6 +652,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         video.removeEventListener('ended', finalizar);
         video.removeEventListener('error', onError);
         video.removeEventListener('loadedmetadata', iniciarReproduccion);
+        if (fadeOutTimeoutId) clearTimeout(fadeOutTimeoutId);
+        // Fundido rápido por si se corta antes de tiempo (skip / timeout de seguridad),
+        // y detener el video para que no siga sonando bajo la app principal.
+        fadeVolumen(video, 0, FADE_OUT_SKIP_MS, () => {
+          video.pause();
+        });
       }
       if (overlay) overlay.removeEventListener('click', finalizar);
       if (timeoutId) clearTimeout(timeoutId);
@@ -653,14 +681,32 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     function iniciarReproduccion() {
       // Ahora sí conocemos la duración real del clip: ajustamos la red de seguridad
+      // y programamos el fundido de salida para que termine justo al acabar el clip.
       if (video.duration && isFinite(video.duration)) {
         console.log(`⏱️ Duración real del video: ${video.duration.toFixed(1)}s`);
         programarSeguridad(video.duration);
+
+        const inicioFadeOutMs = Math.max(0, (video.duration - FADE_OUT_SEC)) * 1000;
+        if (fadeOutTimeoutId) clearTimeout(fadeOutTimeoutId);
+        fadeOutTimeoutId = setTimeout(() => {
+          fadeVolumen(video, 0, FADE_OUT_SEC * 1000);
+        }, inicioFadeOutMs);
       }
+
+      video.muted = false;
+      video.volume = 0;
       video.currentTime = 0;
-      video.play().catch((err) => {
-        console.warn('No se pudo reproducir el video:', err);
-        finalizar();
+      video.play().then(() => {
+        fadeVolumen(video, 1, FADE_IN_MS);
+      }).catch((err) => {
+        // Si el navegador bloquea el audio (política de autoplay), reintentar en silencio
+        // para que al menos se vea el video en vez de quedarnos sin nada.
+        console.warn('No se pudo reproducir con audio, reintentando en silencio:', err);
+        video.muted = true;
+        video.play().catch((err2) => {
+          console.warn('No se pudo reproducir el video:', err2);
+          finalizar();
+        });
       });
     }
 
