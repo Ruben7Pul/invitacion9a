@@ -295,6 +295,10 @@ body {
   visibility: hidden;
   transition: opacity 0.8s ease, visibility 0.8s ease;
   pointer-events: none;
+  /* Aceleración por GPU: promueve el overlay a su propia capa de composición */
+  transform: translateZ(0);
+  will-change: opacity;
+  backface-visibility: hidden;
 }
 #transition-overlay.show {
   opacity: 1;
@@ -312,6 +316,7 @@ body {
   justify-content: center;
   overflow: hidden;
   background: transparent;
+  transform: translateZ(0);
 }
 
 #transition-video {
@@ -323,25 +328,16 @@ body {
   object-fit: cover;
   object-position: center;
   background: #0a1f3a; /* color de fondo mientras carga */
+  /* Aceleración por GPU para que la decodificación/composición del video vaya fluida */
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
+/* Texto "Abriendo el castillo..." desactivado: ahora solo se ve el video */
 .transition-text {
-  position: relative;
-  z-index: 2;
-  font-family: var(--script);
-  font-size: clamp(1.8rem, 5vw, 3.5rem);
-  color: #fae3a0;
-  text-shadow: 0 0 30px rgba(212, 175, 55, 0.8);
-  animation: pulseText 2.5s ease-in-out infinite;
-  background: rgba(0, 0, 0, 0.25);
-  padding: 0.6rem 2.5rem;
-  border-radius: 60px;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  border: 1.5px solid rgba(212, 175, 55, 0.35);
-  box-shadow: 0 0 60px rgba(212, 175, 55, 0.15);
-  letter-spacing: 0.1em;
-  margin-top: 1rem;
+  display: none;
 }
 
 @keyframes pulseText {
