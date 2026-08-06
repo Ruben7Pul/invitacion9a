@@ -1400,9 +1400,13 @@ h1#nombre-hero {
 ::-webkit-scrollbar-thumb { background: rgba(201, 162, 77, 0.3); border-radius: 3px; }
 
 @media (hover: none) and (pointer: coarse) {
-  * {
-    animation-duration: 0.6s !important;
-  }
+  /* Antes esto forzaba animation-duration: 0.6s en TODO (*),
+     sin importar la duración original de cada animación.
+     Eso hacía que cada una acelerara en una proporción distinta
+     (una de 6s pasaba a ser 10x más rápida, una de 1.2s casi no cambiaba),
+     y se veía como que "unas van muy rápido y otras lento".
+     Ahora se ajusta cada animación por separado, más corta que en
+     PC (por rendimiento) pero manteniendo su velocidad relativa. */
   #glow, #glow2 {
     filter: none !important;
   }
@@ -1416,4 +1420,12 @@ h1#nombre-hero {
   video {
     opacity: 0.95;
   }
+
+  .gate-wrapper.active .gate-leaf svg { animation-duration: 1.8s; } /* antes 2.6s */
+  #oval-wrap { animation-duration: 4s; } /* antes 6s */
+  h1#nombre-hero { animation-duration: 2.5s; } /* antes 4s (rainbowMove) */
+  .hint-final { animation-duration: 1.3s; } /* antes 2s (pulseHint) */
+  .calendario-container .dia.dia-10 { animation-duration: 1s; } /* antes 1.5s (brilloRosa) */
+  .calendario-container .dia.dia-10 .rosa { animation-duration: 1.3s; } /* antes 2s (flotarRosa) */
+  .calendario-container .dia.hoy { animation-duration: 1.2s; } /* antes 1.8s (brilloDiaActual) */
 }
