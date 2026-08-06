@@ -808,3 +808,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.querySelectorAll('.seccion').forEach(function(sec) { sec.classList.add('visible'); });
   }
 });
+
+
+//
