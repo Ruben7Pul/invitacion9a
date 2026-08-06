@@ -84,47 +84,53 @@
       display:flex;
       flex-direction:column;
       align-items:center;
-      gap:0.4rem;
+      gap:0.3rem;
       transform:scale(0.9);
       opacity:0;
       transition:transform 0.3s ease, opacity 0.3s ease;
       max-width:96vw;
       z-index:10;
       position:relative;
+      width:100%;
+      max-width:500px;
     }
     #game-overlay.open #game-panel {
       transform:scale(1);
       opacity:1;
     }
 
-    /* HEADER: solo vidas y puntuación */
+    /* HEADER: vidas, puntuación y botones */
     #game-header {
       display:flex;
       align-items:center;
       justify-content:space-between;
       width:100%;
       font-family:'Cinzel',serif;
-      text-transform:uppercase;
-      font-size:clamp(0.7rem,2vw,0.9rem);
-      padding:0 0.1rem;
+      font-size:clamp(0.7rem,1.8vw,0.9rem);
+      padding:0.2rem 0.1rem;
       color:#fae3a0;
       text-shadow:0 0 15px rgba(212,175,55,0.3);
+      gap:0.3rem;
+      flex-wrap:nowrap;
     }
     #game-header .left {
       display:flex;
       align-items:center;
-      gap:0.5rem;
+      gap:0.4rem;
+      flex:1;
+      min-width:0;
     }
     #game-header .right {
-      flex:1;
-      text-align:right;
+      display:flex;
+      align-items:center;
+      gap:0.2rem;
+      flex-shrink:0;
     }
     #game-score {
       display:none;
-      font-size:clamp(0.7rem,2vw,0.9rem);
-      min-width:80px;
+      font-size:clamp(0.7rem,1.8vw,0.9rem);
+      min-width:60px;
       text-align:center;
-      flex-shrink:0;
       font-family:'Press Start 2P',monospace;
       background:linear-gradient(90deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#9b59b6);
       background-size:300% 100%;
@@ -133,64 +139,37 @@
       color:transparent;
       animation:rainbowScore 3s linear infinite;
       text-shadow:none;
+      flex-shrink:0;
+    }
+    #lives {
+      display:none;
+      letter-spacing:0.1em;
+      font-size:clamp(0.9rem,2.2vw,1.2rem);
+      color:#ff6b6b;
+      text-shadow:0 0 15px #ff6b6b;
+      flex-shrink:0;
     }
 
-    #game-stage {
-      position:relative;
-      background:#0e0a18;
-      border:2px solid #b8860b;
-      border-radius:16px;
-      overflow:hidden;
-      touch-action:none;
-      box-shadow:0 0 30px rgba(212,175,55,0.15), inset 0 0 40px rgba(25,60,120,0.2);
-      width:100%;
-      max-width:450px;
-      aspect-ratio:300/420;
-    }
-    #game-inner {
-      position:absolute;
-      top:0;
-      left:0;
-      width:100%;
-      height:100%;
-      z-index:2;
-    }
-
-    /* ===== FOOTER: BOTONES Y AYUDA ===== */
-    #game-footer {
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:0.3rem;
-      width:100%;
-      max-width:450px;
-      margin-top:0.2rem;
-    }
-    .footer-buttons {
-      display:flex;
-      align-items:center;
-      gap:0.5rem;
-      flex-wrap:wrap;
-      justify-content:center;
-    }
+    /* Botones pequeños pero legibles */
     .game-btn-sm {
       background:rgba(201,162,77,0.12);
       border:1.5px solid #c9a24d;
       color:#f0d9a3;
-      font-size:1.4rem;
+      font-size:clamp(1rem,2.2vw,1.3rem);
       cursor:pointer;
-      padding:0.2rem 0.6rem;
+      padding:0.1rem 0.35rem;
       display:flex;
       align-items:center;
       justify-content:center;
       border-radius:30px;
       box-shadow:0 0 12px rgba(201,162,77,0.15);
       transition:all 0.3s ease;
-      min-width:44px;
-      height:44px;
+      min-width:32px;
+      height:32px;
       line-height:1;
       font-family:'Cinzel',serif;
       font-weight:600;
+      flex-shrink:0;
     }
     .game-btn-sm:hover {
       background:rgba(201,162,77,0.25);
@@ -228,19 +207,50 @@
       border-color:rgba(255,170,51,0.6);
     }
 
+    #game-stage {
+      position:relative;
+      background:#0e0a18;
+      border:2px solid #b8860b;
+      border-radius:16px;
+      overflow:hidden;
+      touch-action:none;
+      box-shadow:0 0 30px rgba(212,175,55,0.15), inset 0 0 40px rgba(25,60,120,0.2);
+      width:100%;
+      aspect-ratio:300/420;
+      max-width:450px;
+    }
+    #game-inner {
+      position:absolute;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      z-index:2;
+    }
+
+    /* FOOTER: texto de ayuda más pequeño */
+    #game-footer {
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:0.1rem;
+      width:100%;
+      max-width:450px;
+      padding:0.1rem 0.2rem;
+    }
     .game-help {
-      font-size:clamp(0.8rem,2vw,1rem);
+      font-size:clamp(0.55rem,1.4vw,0.75rem);
       opacity:0.95;
       font-family:'Cinzel',serif;
       color:#fae3a0;
       text-shadow:0 0 10px rgba(212,175,55,0.2);
       text-align:center;
-      line-height:1.6;
+      line-height:1.5;
       margin:0;
-      padding:0.2rem 0.5rem;
-      background:rgba(0,0,0,0.3);
-      border-radius:12px;
-      border:1px solid rgba(212,175,55,0.15);
+      padding:0.15rem 0.4rem;
+      background:rgba(0,0,0,0.25);
+      border-radius:10px;
+      border:1px solid rgba(212,175,55,0.1);
       width:100%;
     }
     .game-help .highlight {
@@ -302,13 +312,6 @@
     }
     #name-error { color:#ff6b6b; font-size:0.6rem; }
 
-    #lives {
-      display:none;
-      letter-spacing:0.15em;
-      font-size:clamp(1rem,3vw,1.3rem);
-      color:#ff6b6b;
-      text-shadow:0 0 15px #ff6b6b;
-    }
     .heart-fade { animation:heartFade 0.6s ease forwards; }
 
     .game-btn {
@@ -380,15 +383,17 @@
     #loading-tips.hidden { opacity:0; }
 
     @media (max-width:400px) {
-      #game-panel { max-width:98vw; }
-      .game-btn-sm { font-size:1.1rem; min-width:38px; height:38px; padding:0.1rem 0.4rem; }
-      .game-help { font-size:0.7rem; line-height:1.4; }
-      .game-help br { display:block; }
+      .game-btn-sm { font-size:0.9rem; min-width:28px; height:28px; padding:0.05rem 0.25rem; }
+      .game-help { font-size:0.5rem; line-height:1.3; padding:0.1rem 0.3rem; }
+      #game-header { gap:0.15rem; }
+      #lives { font-size:0.8rem; }
+      #game-score { font-size:0.65rem; min-width:50px; }
+      #game-panel { gap:0.2rem; }
     }
     @media (min-width:768px) {
-      #game-stage { max-width:450px; }
-      .game-btn-sm { font-size:1.6rem; min-width:50px; height:50px; }
-      .game-help { font-size:1.1rem; }
+      .game-btn-sm { font-size:1.4rem; min-width:40px; height:40px; }
+      .game-help { font-size:0.85rem; }
+      #game-header { font-size:1rem; }
     }
   </style>
 </head>
@@ -416,13 +421,17 @@
 
   <div id="game-overlay" class="open">
     <div id="game-panel">
-      <!-- HEADER: solo vidas y puntuación -->
+      <!-- HEADER: vidas, puntuación y botones -->
       <div id="game-header">
         <div class="left">
           <span id="lives">♥ ♥ ♥</span>
           <span id="game-score">0</span>
         </div>
-        <div class="right"></div>
+        <div class="right">
+          <button class="game-btn-sm mute-btn" id="mute-btn" title="Silenciar/Activar música">🔊</button>
+          <button class="game-btn-sm pause-btn" id="pause-btn" title="Pausar/Reanudar">⏸️</button>
+          <button class="game-btn-sm exit-btn" id="exit-btn" title="Salir">🚪</button>
+        </div>
       </div>
 
       <!-- Área de juego -->
@@ -449,13 +458,8 @@
         <div id="loading-tips" class="hidden"></div>
       </div>
 
-      <!-- FOOTER: BOTONES Y AYUDA -->
+      <!-- FOOTER: texto de ayuda más pequeño -->
       <div id="game-footer">
-        <div class="footer-buttons">
-          <button class="game-btn-sm mute-btn" id="mute-btn" title="Silenciar/Activar música">🔊</button>
-          <button class="game-btn-sm pause-btn" id="pause-btn" title="Pausar/Reanudar">⏸️</button>
-          <button class="game-btn-sm exit-btn" id="exit-btn" title="Salir">🚪</button>
-        </div>
         <p class="game-help">
           🎮 <span class="highlight">Mueve con dedo, A/D o flechas</span><br>
           💡 <span class="gold">Esferas doradas</span> y <span class="good">verdes</span> son <span class="good">buenas</span>, 
