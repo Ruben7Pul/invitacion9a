@@ -1,7 +1,7 @@
 // ============================================================
 // script-juego.js – SCRIPT DEL JUEGO (independiente)
 // ============================================================
-console.log('🎮 script-juego tt.js cargado');
+console.log('🎮 script-juego 22.js cargado');
 
 async function cargarConfig() {
   try {
@@ -26,8 +26,7 @@ async function cargarConfig() {
       padre: 'Papá',
       madre: 'Mamá',
       padrino: 'Padrino',
-      madrina: 'Madrina',
-      audioFile: '../archivos/cancion1.mp3'
+      madrina: 'Madrina'
     };
   }
 }
@@ -37,11 +36,10 @@ async function cargarConfig() {
     const config = await cargarConfig();
     // Cargar música
     const { initMusica, playMusic, toggleMusic, isMusicMuted } = await import('./modules/musica.js');
-    initMusica(config);
+    initMusica();
     window.toggleMusic = toggleMusic;
     window.isMusicMuted = isMusicMuted;
     
-    // Iniciar la música automáticamente al cargar el juego
     setTimeout(() => {
       if (playMusic) playMusic();
     }, 300);
@@ -65,6 +63,3 @@ async function cargarConfig() {
     `;
   }
 })();
-
-
-//
