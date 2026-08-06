@@ -1,4 +1,4 @@
-console.log('📦 música (con fade y mute corregido)');
+console.log('📦 música 23 (con fade y mute corregido)');
 
 let audio = null;
 let fadeInterval = null;
