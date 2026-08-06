@@ -148,3 +148,5 @@ export function setMusicMute(muted) {
   if (muted === isMuted) return;
   toggleMusic();
 }
+
+
