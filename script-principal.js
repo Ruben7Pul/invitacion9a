@@ -1,19 +1,4 @@
-console.log('🚀 script-principal gg.js');
-
-// Detección de hora del día
-function detectarPeriodoDia() {
-  const ahora = new Date();
-  const hora = ahora.getHours();
-  let periodo = 'day';
-  if (hora >= 6 && hora < 8) periodo = 'sunrise';
-  else if (hora >= 8 && hora < 17) periodo = 'day';
-  else if (hora >= 17 && hora < 19) periodo = 'sunset';
-  else if (hora >= 19 || hora < 6) periodo = 'night';
-  document.documentElement.setAttribute('data-time-period', periodo);
-  return periodo;
-}
-detectarPeriodoDia();
-setInterval(detectarPeriodoDia, 60000);
+console.log('🚀 script-principal.js (sin detección de día/noche)');
 
 async function cargarConfig() {
   try {
@@ -133,7 +118,6 @@ function generarCalendario() {
   }
 }
 
-// ===== MARCAR DÍA ACTUAL EN CALENDARIO =====
 function marcarDiaActualEnCalendario() {
   const ahora = new Date();
   const año = ahora.getFullYear();
@@ -160,7 +144,6 @@ function generarEventosCalendario(config) {
     { fecha: '8 de octubre', desc: '🎂 Cumpleaños', fechaISO: '2026-10-08T09:00:00', duracion: 2 },
     { fecha: '10 de octubre', desc: '⛪ Misa', fechaISO: '2026-10-10T13:00:00', duracion: 2 },
     { fecha: '10 de octubre', desc: '🎉 Recepción', fechaISO: '2026-10-10T15:00:00', duracion: 5 },
-    // Evento del 11 de octubre eliminado
   ];
 
   container.innerHTML = '';
@@ -211,7 +194,7 @@ function iniciarBrilloItinerario() {
   const minutos = ahora.getMinutes();
   const totalMinutos = hora * 60 + minutos;
 
-  if (año === 2026 && mes === 9 && dia === 10) { // solo 10 de octubre
+  if (año === 2026 && mes === 9 && dia === 10) {
     const items = document.querySelectorAll('.itinerario-item');
     let activo = null;
     let anterior = null;
@@ -338,16 +321,15 @@ function initContadorCircular(config) {
   setInterval(actualizarContador, 200);
 }
 
-// ===== COLLAGE DE GUSTOS (PRESENTACIÓN CON EFECTO COLLAGE) =====
+// ===== COLLAGE DE GUSTOS =====
 var collageTimer = null;
 var imagenesCollage = [];
 var collageInicializado = false;
 var collageIndiceActual = 0;
 var collageZIndex = 1;
 var collageElementos = [];
-var collageIndices = [];
-var collageHistorialImagenes = [];  // Últimas 5 imágenes mostradas
-var collageUltimaRotacion = 0;  // Rotación anterior (positiva o negativa)
+var collageHistorialImagenes = [];
+var collageUltimaRotacion = 0;
 
 function iniciarCollage() {
   var container = document.getElementById('collage-container');
@@ -403,46 +385,32 @@ function shuffleArray(arr) {
 }
 
 function elegirImagenAleatoria() {
-  // Obtener imágenes disponibles (no en historial reciente)
   var disponibles = [];
   for (var i = 0; i < imagenesCollage.length; i++) {
     if (collageHistorialImagenes.indexOf(i) === -1) {
       disponibles.push(i);
     }
   }
-  
-  // Si no hay disponibles, limpiar historial
   if (disponibles.length === 0) {
     collageHistorialImagenes = [];
     disponibles = Array.from({length: imagenesCollage.length}, (_, i) => i);
   }
-  
-  // Elegir aleatoriamente de disponibles
   var indiceElegido = disponibles[Math.floor(Math.random() * disponibles.length)];
-  
-  // Agregar al historial (máx 5)
   collageHistorialImagenes.push(indiceElegido);
   if (collageHistorialImagenes.length > 5) {
     collageHistorialImagenes.shift();
   }
-  
   return indiceElegido;
 }
 
 function elegirRotacionContraria() {
-  // Si última rotación fue positiva, elegir negativa
-  // Si última rotación fue negativa, elegir positiva
   var esPositivaAnterior = collageUltimaRotacion > 0;
   var nuevaRotacion;
-  
   if (esPositivaAnterior) {
-    // Rotación negativa: -25 a 0
     nuevaRotacion = -25 + Math.random() * 25;
   } else {
-    // Rotación positiva: 0 a 25
     nuevaRotacion = Math.random() * 25;
   }
-  
   collageUltimaRotacion = nuevaRotacion;
   return nuevaRotacion;
 }
@@ -491,7 +459,6 @@ function renderCollage(container) {
     
     collageElementos.push(div);
     
-    // Triggear animación de entrada
     requestAnimationFrame(function() {
       div.style.opacity = '1';
       div.style.transform = 'rotate(' + rot + 'deg) scaleX(' + scaleX + ') scale(1)';
@@ -637,45 +604,36 @@ document.addEventListener('DOMContentLoaded', async function() {
   // ===== NUEVA FUNCIÓN ABRIR REJA CON TRANSICIÓN =====
   function abrirReja(e) {
     if (e) e.stopPropagation();
-    
-    // 1. Cierra la reja (animación visual)
+
     gateWrapper.classList.add('open');
-    
-    // 2. Espera a que termine la animación de apertura (~0.65s)
+
     setTimeout(() => {
       const overlay = document.getElementById('transition-overlay');
       const video = document.getElementById('transition-video');
-      
-      // Mostrar overlay
+
       if (overlay) {
         overlay.classList.add('show');
       }
-      
-      // Reproducir video si existe
+
       if (video) {
         video.currentTime = 0;
         video.play().catch(() => {});
-        
-        // Función que finaliza la transición
+
         const finalizar = () => {
           if (overlay) overlay.classList.remove('show');
-          // Ocultar portal y mostrar app
           portal.classList.add('hide');
           app.classList.add('show');
           cargarContador();
           if (window.playMusic) window.playMusic();
-          // Limpiar eventos
           video.removeEventListener('ended', finalizar);
-          if (overlay) overlay.removeEventListener('click', finalizar);
+          overlay.removeEventListener('click', finalizar);
           clearTimeout(timeout);
         };
-        
-        // Fallback por si el video no termina (máx 6s)
+
         const timeout = setTimeout(finalizar, 6000);
         video.addEventListener('ended', finalizar);
-        if (overlay) overlay.addEventListener('click', finalizar); // opcional: tocar para saltar
+        overlay.addEventListener('click', finalizar);
       } else {
-        // Si no hay video, pasa directamente
         portal.classList.add('hide');
         app.classList.add('show');
         cargarContador();
@@ -705,7 +663,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     }, 700);
   }
 
-  // Asignar eventos
   gateWrapper.addEventListener('click', abrirReja);
   gateWrapper.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirReja(e); }
@@ -809,7 +766,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   }
 
-  // Música
   var muteBtn = document.getElementById('music-toggle');
   if (muteBtn) {
     muteBtn.addEventListener('click', function() {
@@ -817,7 +773,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
 
-  // Observador para animaciones de secciones
   if ('IntersectionObserver' in window) {
     var secciones = document.querySelectorAll('.seccion');
     var observer = new IntersectionObserver(function(entries) {
