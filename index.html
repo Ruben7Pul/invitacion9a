@@ -220,10 +220,13 @@
 
   <!-- TRANSICIÓN MÁGICA (puerta/castillo) -->
   <div id="transition-overlay" aria-hidden="true">
-    <video id="transition-video" muted playsinline preload="auto">
-      <source src="archivos/transicion.mp4" type="video/mp4">
-    </video>
-    <div class="transition-text">✨ Abriendo el castillo... ✨</div>
+    <div class="transition-video-wrapper">
+      <video id="transition-video" muted playsinline preload="auto">
+        <source src="archivos/incbella.webm" type="video/webm">
+        <source src="archivos/incbella.mp4" type="video/mp4">
+      </video>
+      <div class="transition-text">✨ Abriendo el castillo... ✨</div>
+    </div>
   </div>
 
   <!-- APP PRINCIPAL (scrollable) -->
@@ -378,7 +381,7 @@
         </div>
       </section>
 
-      <!-- SECCIÓN 7: GUSTOS (movida después de Dedicatorias) -->
+      <!-- SECCIÓN 7: GUSTOS (movida aquí) -->
       <section id="seccion-gustos" class="seccion">
         <h2 class="gold-text">🎨 Gustos 🎨</h2>
         <button id="btn-abrir-gustos" class="btn-mapa gold-text" style="margin-top: 0.5rem; border: 2px solid #d4af37; background: rgba(212, 175, 55, 0.15); width: 100%; font-size: clamp(1rem, 2.5vw, 1.3rem); padding: 0.6rem 1rem;">
