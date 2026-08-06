@@ -1,7 +1,7 @@
 // ============================================================
 // perf.js – Medición de FPS durante el video de transición
 // ============================================================
-console.log('📦 perf.js cargado');
+console.log('📦 perf 22.js cargado');
 
 let rafId = null;
 let frames = [];
@@ -28,7 +28,6 @@ export function detenerMedicion() {
   return copia;
 }
 
-// Respaldo cuando no hay suficientes datos (video saltado muy rápido)
 function nivelEstatico() {
   const cores = navigator.hardwareConcurrency || 4;
   const mem = navigator.deviceMemory || 4;
@@ -69,9 +68,7 @@ export function clasificarNivel(frames) {
 export function guardarNivel(nivel) {
   try {
     sessionStorage.setItem('perfTier', nivel);
-  } catch (e) {
-    // sessionStorage no disponible
-  }
+  } catch (e) {}
 }
 
 export function obtenerNivel() {
