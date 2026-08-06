@@ -1,474 +1,281 @@
 <!DOCTYPE html>
-<html lang="es" style="background:#0e0a18;height:100%">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Juego XV</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%23d4af37' stroke='%23b8860b' stroke-width='3'/><circle cx='35' cy='35' r='6' fill='%23fff' opacity='0.6'/><circle cx='65' cy='65' r='4' fill='%23fff' opacity='0.4'/></svg>">
+  <title>Invitación XV</title>
+  <script>
+    if (location.search.indexOf('volver=1') !== -1) {
+      document.documentElement.classList.add('sin-reja');
+    }
+  </script>
+  <meta property="og:title" content="Invitación a mis XV años" />
+  <meta property="og:description" content="Te invitamos a celebrar mis 15 años. ¡No faltes!" />
+  <meta property="og:image" content="https://tudominio.com/archivos/og-image.jpg" />
+  <meta property="og:url" content="https://tudominio.com/invitacion" />
+  <meta name="twitter:card" content="summary_large_image" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&family=Press+Start+2P&display=swap" rel="stylesheet">
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    html, body {
-      height:100%;
-      overflow:hidden;
-      background:#0e0a18;
-      font-family:'Cinzel',serif;
-    }
-
-    #game-bg-video {
-      position:fixed;
-      inset:0;
-      z-index:0;
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      pointer-events:none;
-      opacity:1;
-      mix-blend-mode:normal;
-    }
-
-    @keyframes rainbowScore {
-      0% { background-position:0% 50%; }
-      100% { background-position:300% 50%; }
-    }
-    @keyframes heartFade {
-      0% { opacity:1; transform:scale(1); }
-      50% { opacity:0.5; transform:scale(1.5); color:#ff4444; }
-      100% { opacity:0; transform:scale(0); }
-    }
-    @keyframes floatMsg {
-      0% { opacity:0; transform:translate(-50%,30%) scale(0.5); }
-      20% { opacity:1; transform:translate(-50%,-50%) scale(1.2); }
-      80% { opacity:1; transform:translate(-50%,-60%) scale(1); }
-      100% { opacity:0; transform:translate(-50%,-80%) scale(0.8); }
-    }
-    @keyframes goldenGlow {
-      0% { box-shadow: 0 0 30px rgba(255,215,0,0.6), 0 0 60px rgba(255,215,0,0.3); transform: translate(-50%, -50%) scale(1); }
-      100% { box-shadow: 0 0 60px rgba(255,215,0,1), 0 0 120px rgba(255,215,0,0.5); transform: translate(-50%, -50%) scale(1.1); }
-    }
-
-    #loading-veil {
-      position:fixed;
-      inset:0;
-      z-index:999;
-      background-color:#0e0a18;
-      background-image:url('../archivos/bella.jpg');
-      background-size:cover;
-      background-position:center;
-      opacity:1;
-      transition:opacity 0.45s ease;
-      pointer-events:none;
-    }
-    #loading-veil.hide { opacity:0; }
-
-    #game-overlay {
-      position:fixed;
-      inset:0;
-      z-index:90;
-      background:rgba(6,4,10,0.3);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      opacity:0;
-      visibility:hidden;
-      transition:opacity 0.3s ease, visibility 0.3s ease;
-    }
-    #game-overlay.open {
-      opacity:1;
-      visibility:visible;
-    }
-
-    #game-panel {
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:0.3rem;
-      transform:scale(0.9);
-      opacity:0;
-      transition:transform 0.3s ease, opacity 0.3s ease;
-      max-width:96vw;
-      z-index:10;
-      position:relative;
-      width:100%;
-      max-width:500px;
-    }
-    #game-overlay.open #game-panel {
-      transform:scale(1);
-      opacity:1;
-    }
-
-    /* HEADER: vidas, puntuación y botones */
-    #game-header {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      width:100%;
-      font-family:'Cinzel',serif;
-      font-size:clamp(0.7rem,1.8vw,0.9rem);
-      padding:0.2rem 0.1rem;
-      color:#fae3a0;
-      text-shadow:0 0 15px rgba(212,175,55,0.3);
-      gap:0.3rem;
-      flex-wrap:nowrap;
-    }
-    #game-header .left {
-      display:flex;
-      align-items:center;
-      gap:0.4rem;
-      flex:1;
-      min-width:0;
-    }
-    #game-header .right {
-      display:flex;
-      align-items:center;
-      gap:0.2rem;
-      flex-shrink:0;
-    }
-    #game-score {
-      display:none;
-      font-size:clamp(0.7rem,1.8vw,0.9rem);
-      min-width:60px;
-      text-align:center;
-      font-family:'Press Start 2P',monospace;
-      background:linear-gradient(90deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#9b59b6);
-      background-size:300% 100%;
-      -webkit-background-clip:text;
-      background-clip:text;
-      color:transparent;
-      animation:rainbowScore 3s linear infinite;
-      text-shadow:none;
-      flex-shrink:0;
-    }
-    #lives {
-      display:none;
-      letter-spacing:0.1em;
-      font-size:clamp(0.9rem,2.2vw,1.2rem);
-      color:#ff6b6b;
-      text-shadow:0 0 15px #ff6b6b;
-      flex-shrink:0;
-    }
-
-    /* Botones pequeños pero legibles */
-    .game-btn-sm {
-      background:rgba(201,162,77,0.12);
-      border:1.5px solid #c9a24d;
-      color:#f0d9a3;
-      font-size:clamp(1rem,2.2vw,1.3rem);
-      cursor:pointer;
-      padding:0.1rem 0.35rem;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border-radius:30px;
-      box-shadow:0 0 12px rgba(201,162,77,0.15);
-      transition:all 0.3s ease;
-      min-width:32px;
-      height:32px;
-      line-height:1;
-      font-family:'Cinzel',serif;
-      font-weight:600;
-      flex-shrink:0;
-    }
-    .game-btn-sm:hover {
-      background:rgba(201,162,77,0.25);
-      box-shadow:0 0 20px rgba(201,162,77,0.3);
-      transform:scale(1.05);
-    }
-    .game-btn-sm:active {
-      transform:scale(0.95);
-    }
-    .game-btn-sm.exit-btn {
-      border-color:#b8860b;
-      color:#f0d9a3;
-      background:rgba(201,162,77,0.08);
-    }
-    .game-btn-sm.exit-btn:hover {
-      background:rgba(201,162,77,0.2);
-      border-color:rgba(201,162,77,0.6);
-    }
-    .game-btn-sm.mute-btn {
-      border-color:#4d96ff;
-      color:#aac8ff;
-      background:rgba(77,150,255,0.08);
-    }
-    .game-btn-sm.mute-btn:hover {
-      background:rgba(77,150,255,0.2);
-      border-color:rgba(77,150,255,0.6);
-    }
-    .game-btn-sm.pause-btn {
-      border-color:#ffaa33;
-      color:#ffcc88;
-      background:rgba(255,170,51,0.08);
-    }
-    .game-btn-sm.pause-btn:hover {
-      background:rgba(255,170,51,0.2);
-      border-color:rgba(255,170,51,0.6);
-    }
-
-    #game-stage {
-      position:relative;
-      background:#0e0a18;
-      border:2px solid #b8860b;
-      border-radius:16px;
-      overflow:hidden;
-      touch-action:none;
-      box-shadow:0 0 30px rgba(212,175,55,0.15), inset 0 0 40px rgba(25,60,120,0.2);
-      width:100%;
-      aspect-ratio:300/420;
-      max-width:450px;
-    }
-    #game-inner {
-      position:absolute;
-      top:0;
-      left:0;
-      width:100%;
-      height:100%;
-      z-index:2;
-    }
-
-    /* FOOTER: texto de ayuda más pequeño */
-    #game-footer {
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:0.1rem;
-      width:100%;
-      max-width:450px;
-      padding:0.1rem 0.2rem;
-    }
-    .game-help {
-      font-size:clamp(0.55rem,1.4vw,0.75rem);
-      opacity:0.95;
-      font-family:'Cinzel',serif;
-      color:#fae3a0;
-      text-shadow:0 0 10px rgba(212,175,55,0.2);
-      text-align:center;
-      line-height:1.5;
-      margin:0;
-      padding:0.15rem 0.4rem;
-      background:rgba(0,0,0,0.25);
-      border-radius:10px;
-      border:1px solid rgba(212,175,55,0.1);
-      width:100%;
-    }
-    .game-help .highlight {
-      color:#ffd700;
-      font-weight:bold;
-    }
-    .game-help .good {
-      color:#4caf50;
-    }
-    .game-help .bad {
-      color:#ff6b6b;
-    }
-    .game-help .gold {
-      color:#ffd700;
-    }
-
-    /* GAME OVER */
-    #game-menu {
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:0.8rem;
-      border-radius:16px;
-      padding:1rem;
-      position:absolute;
-      inset:0;
-      z-index:50;
-      background:rgba(10,7,16,0.9);
-      border:2px solid #b8860b;
-      box-shadow:inset 0 0 60px rgba(25,60,120,0.3);
-      overflow:hidden;
-      text-align:center;
-    }
-    #menu-gameover {
-      display:none;
-      text-align:center;
-      width:100%;
-    }
-    #menu-gameover p { font-family:'Cinzel',serif; }
-    #gameover-score { font-size:1.1rem; color:#fae3a0; }
-    #gameover-theme-msg {
-      font-family:'Cormorant Garamond','Cinzel',serif;
-      font-style:italic;
-      font-size:clamp(0.8rem,2.4vw,0.95rem);
-      color:#f0d9a3;
-      text-shadow:0 0 10px rgba(212,175,55,0.25);
-      max-width:280px;
-      margin:0.4rem auto 0;
-      line-height:1.4;
-    }
-    #gameover-input-container input {
-      font-family:'Press Start 2P',monospace;
-      background:#1a1a2e;
-      border:2px solid #b8860b;
-      border-radius:8px;
-      color:white;
-      padding:0.4rem;
-    }
-    #name-error { color:#ff6b6b; font-size:0.6rem; }
-
-    .heart-fade { animation:heartFade 0.6s ease forwards; }
-
-    .game-btn {
-      font-family:'Cinzel',serif;
-      font-size:clamp(0.8rem,2vw,1rem);
-      letter-spacing:0.14em;
-      text-transform:uppercase;
-      color:#f0d9a3;
-      background:rgba(201,162,77,0.15);
-      border:1.5px solid rgba(201,162,77,0.4);
-      padding:0.5rem 1.2rem;
-      border-radius:30px;
-      cursor:pointer;
-      transition:all 0.3s ease;
-      box-shadow:0 0 15px rgba(212,175,55,0.15);
-      text-shadow:0 0 8px rgba(201,162,77,0.2);
-      backdrop-filter:blur(4px);
-    }
-    .game-btn:hover {
-      background:rgba(201,162,77,0.25);
-      border-color:rgba(201,162,77,0.6);
-      box-shadow:0 0 25px rgba(212,175,55,0.35);
-      transform:translateY(-2px);
-    }
-    .game-btn:active { transform:translateY(0); background:rgba(201,162,77,0.2); }
-
-    #game-msg {
-      position:absolute;
-      inset:0;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      flex-direction:column;
-      gap:0.5rem;
-      background:rgba(10,7,16,0.85);
-      text-align:center;
-      padding:1rem;
-      z-index:50;
-    }
-    #game-msg.show { display:flex; }
-    #game-msg p {
-      font-family:'Cinzel',serif;
-      color:#fae3a0;
-      font-size:clamp(1rem,3vw,1.3rem);
-      white-space:pre-line;
-      text-shadow:0 0 20px rgba(212,175,55,0.5);
-    }
-
-    #loading-tips {
-      position:absolute;
-      bottom:10px;
-      left:50%;
-      transform:translateX(-50%);
-      z-index:300;
-      color:#fae3a0;
-      font-family:'Cinzel',serif;
-      font-size:0.7rem;
-      text-align:center;
-      opacity:0.8;
-      background:rgba(0,0,0,0.5);
-      padding:0.3rem 1rem;
-      border-radius:20px;
-      backdrop-filter:blur(2px);
-      border:1px solid rgba(212,175,55,0.2);
-      pointer-events:none;
-      transition:opacity 0.5s;
-      max-width:90%;
-    }
-    #loading-tips.hidden { opacity:0; }
-
-    @media (max-width:400px) {
-      .game-btn-sm { font-size:0.9rem; min-width:28px; height:28px; padding:0.05rem 0.25rem; }
-      .game-help { font-size:0.5rem; line-height:1.3; padding:0.1rem 0.3rem; }
-      #game-header { gap:0.15rem; }
-      #lives { font-size:0.8rem; }
-      #game-score { font-size:0.65rem; min-width:50px; }
-      #game-panel { gap:0.2rem; }
-    }
-    @media (min-width:768px) {
-      .game-btn-sm { font-size:1.4rem; min-width:40px; height:40px; }
-      .game-help { font-size:0.85rem; }
-      #game-header { font-size:1rem; }
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style-principal.css?v=20260815">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌹</text></svg>">
 </head>
-<body style="background:#0e0a18">
-  <!-- Video de fondo -->
-  <video id="game-bg-video" autoplay loop muted playsinline>
-    <source src="../archivos/juegvideo.webm" type="video/webm">
-    <source src="../archivos/juegvideo.mp4" type="video/mp4">
-  </video>
-
-  <!-- Música de fondo (juegcan.mp3) -->
-  <audio id="bg-music" src="../archivos/juegcan.mp3" loop preload="auto"></audio>
-
-  <div id="loading-veil" aria-hidden="true"></div>
+<body>
+  <!-- ===== APLICAR CLASE DE RENDIMIENTO TEMPRANO ===== -->
   <script>
-    setTimeout(function () {
-      var veil = document.getElementById('loading-veil');
-      if (!veil) return;
-      veil.classList.add('hide');
-      veil.addEventListener('transitionend', function () {
-        veil.style.display = 'none';
-      }, { once: true });
-    }, 750);
+    (function() {
+      let nivel = null;
+      try { nivel = sessionStorage.getItem('perfTier'); } catch(e) {}
+      if (nivel) {
+        document.documentElement.classList.add('perf-' + nivel);
+      }
+    })();
   </script>
 
-  <div id="game-overlay" class="open">
-    <div id="game-panel">
-      <!-- HEADER: vidas, puntuación y botones -->
-      <div id="game-header">
-        <div class="left">
-          <span id="lives">♥ ♥ ♥</span>
-          <span id="game-score">0</span>
-        </div>
-        <div class="right">
-          <button class="game-btn-sm mute-btn" id="mute-btn" title="Silenciar/Activar música">🔊</button>
-          <button class="game-btn-sm pause-btn" id="pause-btn" title="Pausar/Reanudar">⏸️</button>
-          <button class="game-btn-sm exit-btn" id="exit-btn" title="Salir">🚪</button>
-        </div>
-      </div>
+  <!-- Cortina de carga -->
+  <div id="loading-veil-main" style="position:fixed; inset:0; z-index:9999; background-color:#0e0a18; background-image:url('../archivos/bella.jpg'); background-size:cover; background-position:center; opacity:1; transition:opacity 0.6s ease; pointer-events:none;"></div>
 
-      <!-- Área de juego -->
-      <div id="game-stage">
-        <div id="game-inner"></div>
-        <div id="game-menu" style="display:none;">
-          <div id="menu-gameover">
-            <p style="font-size:1.2rem; color:#ff6b6b;">GAME OVER</p>
-            <p id="gameover-score">Puntuación: 0</p>
-            <p id="gameover-theme-msg"></p>
-            <div id="gameover-stats"></div>
-            <div id="gameover-input-container">
-              <p style="color:#ffd700;">¡Top 3!</p>
-              <input type="text" id="player-name-input" maxlength="12" placeholder="Tu nombre" pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+">
-              <button id="gameover-save" class="game-btn" style="font-size:0.7rem; margin-top:0.3rem;">Guardar</button>
-              <p id="name-error" style="color:#ff6b6b; font-size:0.6rem; display:none;">Por favor, ingresa un nombre válido (solo letras).</p>
+  <div id="bg"></div>
+
+  <!-- VIDEO APP PRINCIPAL (mar1) -->
+  <video id="video-app" autoplay loop muted playsinline>
+    <source src="../archivos/mar1.mp4" type="video/mp4">
+    <source src="../archivos/mar1.webm" type="video/webm">
+  </video>
+
+  <!-- ===== AUDIO DE FONDO ===== -->
+  <audio id="bg-music" src="../archivos/cancion.mp3" loop preload="auto"></audio>
+
+  <!-- APP PRINCIPAL (scrollable) -->
+  <div id="app" role="main">
+    <div id="app-inner">
+      <!-- SECCIÓN 0: INICIO -->
+      <section id="seccion-inicio" class="seccion">
+        <div id="app-top">
+          <button type="button" id="back-link" class="top-btn gold-btn" aria-label="Volver a la reja">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <span class="eyebrow gold-text">Te invito a mis XV años</span>
+          <button id="music-toggle" aria-label="Silenciar o activar música" class="top-btn gold-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path d="M4 9 L4 15 L8 15 L13 20 L13 4 L8 9 Z"/>
+              <path d="M16.5 8.5 a6 6 0 0 1 0 7"/>
+              <path d="M19 6 a10 10 0 0 1 0 12"/>
+            </svg>
+          </button>
+        </div>
+        <div id="app-mid">
+          <div id="oval-wrap">
+            <div class="oval-frame">
+              <div class="oval-mask">
+                <img src="../archivos/centro.gif" alt="Imagen central" class="gif-central" loading="lazy">
+              </div>
             </div>
-            <button id="gameover-menu-btn" class="game-btn" style="font-size:0.8rem; margin-top:0.5rem; display:none; margin-left:auto; margin-right:auto; text-align:center;">🔄 Nueva partida</button>
+          </div>
+          <div class="name-wrap">
+            <h1 id="nombre-hero">X</h1>
+          </div>
+          <p class="frase-inline gold-text" id="frase-texto">Cargando...</p>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 1: FAMILIA -->
+      <section id="seccion-familia" class="seccion">
+        <h2 class="gold-text">👑 Mi familia 👑</h2>
+        <p class="seccion-subtitulo gold-text">La corte que me acompaña</p>
+        <div class="familia-grupo">
+          <div class="familia-titulo">
+            <span class="corona">⚜️</span>
+            <h3 class="gold-text">Mis padres</h3>
+            <span class="corona">⚜️</span>
+          </div>
+          <div class="familia-nombres">
+            <p class="gold-text"><span class="tratamiento">Sr.</span> <span id="padre1">--</span></p>
+            <p class="gold-text"><span class="tratamiento">Sra.</span> <span id="padre2">--</span></p>
+          </div>
+          <p class="familia-detalle gold-text">"Su amor me ha dado alas"</p>
+        </div>
+        <div class="divider-thin" aria-hidden="true"></div>
+        <div class="familia-grupo">
+          <div class="familia-titulo">
+            <span class="corona">🌹</span>
+            <h3 class="gold-text">Padrinos de honor</h3>
+            <span class="corona">🌹</span>
+          </div>
+          <div class="familia-nombres">
+            <p class="gold-text"><span class="tratamiento">Sr.</span> <span id="padrino1">--</span></p>
+            <p class="gold-text"><span class="tratamiento">Sra.</span> <span id="padrino2">--</span></p>
+          </div>
+          <p class="familia-detalle gold-text">"Su guía ilumina mi camino"</p>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 2: CALENDARIO -->
+      <section id="seccion-calendario" class="seccion">
+        <h2 class="gold-text">📅 Fecha 📅</h2>
+        <p class="seccion-subtitulo gold-text" style="font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 700;">Octubre 2026</p>
+        <div class="calendario-container" id="calendario-container"></div>
+        <div class="calendario-eventos" id="calendario-eventos"></div>
+      </section>
+
+      <!-- SECCIÓN 3: CONTADOR -->
+      <section id="seccion-contador" class="seccion">
+        <h2 class="gold-text">⏳ El reloj ⏳</h2>
+        <p class="seccion-subtitulo gold-text">Faltan para el gran día</p>
+        <div class="clock calendar-style" id="clock">
+          <div class="unit"><span class="num" id="d">00</span><span class="lbl gold-text">Días</span></div>
+          <div class="unit"><span class="num" id="h">00</span><span class="lbl gold-text">Horas</span></div>
+          <div class="unit"><span class="num" id="m">00</span><span class="lbl gold-text">Min</span></div>
+          <div class="unit"><span class="num" id="s">00</span><span class="lbl gold-text">Seg</span></div>
+        </div>
+        <p id="contador-mensaje" class="gold-text" style="font-family:var(--script); font-size:clamp(1.2rem,3vw,1.6rem); margin-top:0.6rem;">Cargando...</p>
+      </section>
+
+      <!-- SECCIÓN 4: DÓNDE (LUGARES) -->
+      <section id="seccion-lugares" class="seccion">
+        <h2 class="gold-text">🏰 Donde 🏰</h2>
+        <div class="detalle-card">
+          <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2 L12 8 M8 6 L16 6 M6 22 L18 22 L18 12 L6 12 Z M9 22 L9 16 L15 16 L15 22"/></svg>
+          <h3 class="gold-text">Misa</h3>
+          <div class="detalle-info">
+            <p class="hora gold-text" id="hora-misa">--</p>
+            <p class="lugar gold-text" id="lugar-misa">--</p>
+          </div>
+          <div class="detalle-botones">
+            <a class="btn-mapa gold-text" id="mapa-misa" href="#" target="_blank" rel="noopener">📍 Ver en el mapa</a>
+            <a class="btn-mapa gold-text" href="https://www.google.com/maps/dir/?api=1&destination=Capilla+del+Puente,+Rayon+164,+Tianguistenco+de+Galeana,+52603+Guadalupe+Yancuictlalpan,+Méx.,+México" target="_blank" rel="noopener">🚗 Cómo llegar</a>
+          </div>
+          <p class="advertencia gold-text">⚠️ El puente está cerrado, tome precauciones.</p>
+        </div>
+        <div class="divider-thin" aria-hidden="true"></div>
+        <div class="detalle-card">
+          <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 21 C12 21 4 14.5 4 9 C4 5 7.5 2 12 2 C16.5 2 20 5 20 9 C20 14.5 12 21 12 21 Z"/><circle cx="12" cy="9" r="2.4"/></svg>
+          <h3 class="gold-text">Recepción</h3>
+          <div class="detalle-info">
+            <p class="hora gold-text" id="hora-fiesta">--</p>
+            <p class="lugar gold-text" id="lugar-fiesta">--</p>
+          </div>
+          <div class="detalle-botones">
+            <a class="btn-mapa gold-text" id="mapa-fiesta" href="#" target="_blank" rel="noopener">📍 Ver en el mapa</a>
+            <a class="btn-mapa gold-text" href="https://www.google.com/maps/dir/?api=1&destination=Auditorio+Gualupita+Yancuictlalpan,+Allende+2,+Tianguistenco+de+Galeana,+52603+Guadalupe+Yancuictlalpan,+Méx.,+México" target="_blank" rel="noopener">🚗 Cómo llegar</a>
+          </div>
+          <p class="advertencia gold-text">⚠️ Considere que no habrá estacionamiento privado.</p>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 5: ITINERARIO -->
+      <section id="seccion-itinerario" class="seccion">
+        <h2 class="gold-text">📋 Itinerario 📋</h2>
+        <div class="itinerario-dia">
+          <div class="itinerario-lista" id="itinerario-10">
+            <div class="itinerario-item" data-hora="780"><span class="itinerario-hora">1:00 PM</span><span class="itinerario-evento">Misa</span></div>
+            <div class="itinerario-item" data-hora="900"><span class="itinerario-hora">3:00 PM</span><span class="itinerario-evento">Recepción</span></div>
+            <div class="itinerario-item" data-hora="1020"><span class="itinerario-hora">5:00 PM</span><span class="itinerario-evento">Payaso</span></div>
+            <div class="itinerario-item" data-hora="1140"><span class="itinerario-hora">7:00 PM</span><span class="itinerario-evento">Vals</span></div>
           </div>
         </div>
-        <div id="game-msg">
-          <p id="game-msg-text">¡Game Over!</p>
-        </div>
-        <div id="loading-tips" class="hidden"></div>
-      </div>
+        <p class="itinerario-nota gold-text">📌 Los horarios pueden variar.</p>
+      </section>
 
-      <!-- FOOTER: texto de ayuda más pequeño -->
-      <div id="game-footer">
-        <p class="game-help">
-          🎮 <span class="highlight">Mueve con dedo, A/D o flechas</span><br>
-          💡 <span class="gold">Esferas doradas</span> y <span class="good">verdes</span> son <span class="good">buenas</span>, 
-          <span class="bad">rojas son malas</span>. ¡Intenta obtener el mayor puntaje!
+      <!-- SECCIÓN 6: DEDICATORIAS -->
+      <section id="seccion-libro-firmas" class="seccion">
+        <h2 class="gold-text">📖 Dedicatorias 📖</h2>
+        <div class="libro-firmas-contenido">
+          <p class="libro-firmas-texto">
+            Queremos que seas parte de este día especial. Déjanos un mensaje, una bendición o un consejo en nuestro libro de dedicatorias digital.
+          </p>
+          <a href="https://docs.google.com/forms/d/e/1FAIpQLSd9CtYaj-_JR6s5MhZQXrxQPPPBfFTjmB-2FoBk6lvA8PWAIg/viewform" id="link-libro-firmas" class="btn-mapa gold-text" target="_blank" rel="noopener" style="margin-top: 0.8rem; font-size: clamp(0.9rem, 2vw, 1rem); padding: 0.5rem 2rem;">
+            ✍️ Escribir dedicatoria
+          </a>
+          <p class="libro-firmas-nota gold-text" style="font-size: clamp(0.8rem, 1.8vw, 1rem); margin-top: 0.6rem; opacity: 0.8; font-style: italic;">
+            📌 El día del evento se tendrá también un libro de firmas físico.
+          </p>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 7: GUSTOS -->
+      <section id="seccion-gustos" class="seccion">
+        <h2 class="gold-text">🎨 Gustos 🎨</h2>
+        <button id="btn-abrir-gustos" class="btn-mapa gold-text" style="margin-top: 0.5rem; border: 2px solid #d4af37; background: rgba(212, 175, 55, 0.15); width: 100%; font-size: clamp(1rem, 2.5vw, 1.3rem); padding: 0.6rem 1rem;">
+          🖼️ Conoce mis gustos
+        </button>
+      </section>
+
+      <!-- SECCIÓN 8: AGRADECIMIENTOS (texto actualizado) -->
+      <section id="seccion-agradecimientos" class="seccion">
+        <h2 class="gold-text">🙏 Gracias 🙏</h2>
+        <div class="agradecimientos-contenido">
+          <p class="agradecimientos-texto">
+            Quiero expresar mi más profundo agradecimiento a todos los que han hecho posible este sueño. Agradezco por su apoyo y gran amor incondicional a toda mi familia, a todos y cada uno de mis padrinos, y a cada uno de ustedes, gracias por formar parte de este día tan especial.
+          </p>
+          <p class="agradecimientos-texto" style="font-family: var(--script); font-size: 1.4rem; color: #d4af37;">
+            ¡Los llevamos en el corazón!
+          </p>
+          <div class="agradecimientos-firma">
+            <span class="firma-nombre" id="firma-nombre">---</span>
+            <span class="firma-rol">y familia</span>
+          </div>
+        </div>
+        <div class="divider-thin" aria-hidden="true"></div>
+        <p class="agradecimientos-no-faltes gold-text">
+          🌹 No faltes 🌹
         </p>
-      </div>
+      </section>
+
+      <!-- MENSAJE FINAL -->
+      <p class="hint-final gold-text" id="hint-juego">👆 Toca el nombre para jugar</p>
     </div>
   </div>
 
-  <script src="../script-juego.js" type="module"></script>
+  <!-- ===== MODAL GUSTOS (COLLAGE) ===== -->
+  <div id="modal-gustos" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-gustos-title">
+    <div class="modal-card modal-gustos-card">
+      <button class="modal-close" data-close-gustos aria-label="Cerrar gustos">&times;</button>
+      <h2 id="modal-gustos-title" class="gold-text">🎨 Mis gustos 🎨</h2>
+      <p class="modal-subtitle gold-text" style="font-size: clamp(1.3rem, 3vw, 1.8rem); font-family: 'Cormorant Garamond', serif; font-weight: 500;">Un poco de lo que me inspira</p>
+      <div id="collage-container" class="collage-container">
+        <div id="collage-loading" style="text-align:center; padding:2rem; color:#fae3a0; font-family:var(--script); font-size:1.2rem;">Cargando collage...</div>
+      </div>
+      <button class="btn-mapa gold-text btn-cerrar-collage" data-close-gustos style="margin: 1rem auto 0; display: block;">Salir</button>
+    </div>
+  </div>
+  <!-- ===== FIN MODAL GUSTOS ===== -->
+
+  <script type="module" src="script-principal.js"></script>
+
+  <script>
+    const volviendoDelJuego = location.search.indexOf('volver=1') !== -1;
+    const veilMain = document.getElementById('loading-veil-main');
+    function todoListo() {
+      const videoApp = document.getElementById('video-app');
+      const videoAppReady = videoApp && (videoApp.readyState >= 2 || videoApp.duration > 0);
+      const nombreEl = document.getElementById('nombre-hero');
+      const configCargado = nombreEl && nombreEl.textContent !== 'X' && nombreEl.textContent.trim() !== '';
+      return videoAppReady && configCargado;
+    }
+    if (veilMain) {
+      let intentos = 0;
+      const maxIntentos = 50;
+      const verificarCarga = setInterval(() => {
+        intentos++;
+        if (todoListo() || intentos >= maxIntentos) {
+          clearInterval(verificarCarga);
+          veilMain.style.opacity = '0';
+          veilMain.style.pointerEvents = 'none';
+          setTimeout(() => { veilMain.style.display = 'none'; }, 600);
+        }
+      }, 100);
+      window.addEventListener('load', () => {
+        clearInterval(verificarCarga);
+        if (veilMain.style.opacity !== '0') {
+          veilMain.style.opacity = '0';
+          veilMain.style.pointerEvents = 'none';
+          setTimeout(() => { veilMain.style.display = 'none'; }, 600);
+        }
+      }, { once: true });
+    }
+  </script>
 </body>
 </html>
