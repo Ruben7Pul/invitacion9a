@@ -607,7 +607,14 @@ html.sin-reja #app {
   width: clamp(150px, 26cqw, 200px);
   height: clamp(210px, 38cqw, 290px);
   margin-bottom: 0.1rem;
+  margin-top: 0.9rem; /* bajado un poco respecto al borde superior */
   position: relative;
+  animation: ovalFlotar 6s ease-in-out infinite;
+  will-change: transform;
+}
+@keyframes ovalFlotar {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(10px); }
 }
 .oval-mask {
   width: 100%;
