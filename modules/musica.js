@@ -71,13 +71,11 @@ function tryPlay() {
   return audio.play().then(() => true).catch(() => false);
 }
 
-// Listener persistente de autoplay: se activa con cualquier clic/toque
 function setupPersistentAutoplayListener() {
   if (autoplayListenerAdded) return;
   autoplayListenerAdded = true;
 
   const handler = () => {
-    // Si el audio está pausado (por autoplay bloqueado) o pending, intentar reproducir
     if (audio && audio.paused && !isMuted) {
       const ok = tryPlay();
       if (ok) {
@@ -87,7 +85,6 @@ function setupPersistentAutoplayListener() {
         autoplayPending = false;
         console.log('🎵 Música activada por interacción del usuario (persistente)');
         startHealthCheck();
-        // No remover el listener, para que siga funcionando si hay otros fallos
       }
     }
   };
@@ -176,7 +173,6 @@ function restartAudio() {
       console.log('🎵 Audio reiniciado exitosamente');
       startHealthCheck();
     } else {
-      // Si falla, esperar un poco y reintentar
       autoplayPending = true;
       setupPersistentAutoplayListener();
       console.log('⏳ Reinicio fallido, en espera de interacción');
@@ -186,7 +182,6 @@ function restartAudio() {
   }
 }
 
-// ========== REINTENTOS CON BACKOFF ==========
 function scheduleRetry() {
   if (retryTimeout) clearTimeout(retryTimeout);
   if (retryCount >= 5) {
@@ -195,7 +190,7 @@ function scheduleRetry() {
     return;
   }
   retryCount++;
-  const delay = retryCount * 1000; // 1s, 2s, 3s, 4s, 5s
+  const delay = retryCount * 1000;
   console.log(`⏳ Reintento ${retryCount} en ${delay}ms...`);
   retryTimeout = setTimeout(() => {
     if (audio && audio.paused && !isMuted) {
@@ -259,7 +254,6 @@ export function initMusica(src) {
   updateIcon(true);
   stopHealthCheck();
   retryCount = 0;
-  // El listener persistente se activa al primer fallo
 }
 
 export function playMusic() {
@@ -287,7 +281,7 @@ export function playMusic() {
     console.log('⏳ Autoplay bloqueado, activando listener persistente y reintentos');
     autoplayPending = true;
     setupPersistentAutoplayListener();
-    scheduleRetry(); // reintentos automáticos con backoff
+    scheduleRetry();
   }
 }
 
