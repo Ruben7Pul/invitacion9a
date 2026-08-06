@@ -36,10 +36,16 @@ async function cargarConfig() {
   try {
     const config = await cargarConfig();
     // Cargar música
-    const { initMusica, toggleMusic, isMusicMuted } = await import('./modules/musica.js');
+    const { initMusica, playMusic, toggleMusic, isMusicMuted } = await import('./modules/musica.js');
     initMusica(config);
     window.toggleMusic = toggleMusic;
     window.isMusicMuted = isMusicMuted;
+    
+    // Iniciar la música automáticamente al cargar el juego
+    setTimeout(() => {
+      if (playMusic) playMusic();
+    }, 300);
+    
     // Cargar juego
     const { initJuego } = await import('./modules/juego.js');
     initJuego(config, false);
