@@ -318,6 +318,14 @@ body {
   transform: translateZ(0);
 }
 
+.transition-fondo-salida {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-size: cover;
+  background-position: center;
+}
+
 #transition-video {
   position: absolute;
   top: 0;
@@ -328,9 +336,20 @@ body {
   object-position: center;
   background: #0a1f3a;
   transform: translateZ(0);
-  will-change: transform;
+  will-change: transform, opacity;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  z-index: 1;
+  opacity: 1;
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+
+/* Al terminar el video, en vez de cortar seco a la siguiente página, se
+   desvanece suavemente dejando ver el fondo bella.jpg de abajo (el mismo
+   que usa la página principal al cargar), como si "abriera paso". */
+#transition-video.saliendo {
+  opacity: 0;
+  transform: translateZ(0) scale(1.04);
 }
 
 .transition-text {
@@ -1368,23 +1387,10 @@ h1#nombre-hero {
   aspect-ratio: 1 / 1;
   width: 100%;
   position: relative;
-  background: linear-gradient(135deg, #16234a 0%, #1c3564 30%, #234a86 50%, #1c3564 70%, #16234a 100%);
-  background-size: 260% 260%;
-  animation: collageDegradado 20s ease-in-out infinite;
+  background: #12203f;
   border-radius: 16px;
   overflow: hidden;
   margin: 0.5rem 0;
-}
-
-@keyframes collageDegradado {
-  0%   { background-position: 0% 30%; }
-  50%  { background-position: 100% 70%; }
-  100% { background-position: 0% 30%; }
-}
-
-html.perf-bajo .collage-container {
-  animation: none;
-  background-position: 30% 40%;
 }
 
 .collage-container .collage-item {
@@ -1393,6 +1399,9 @@ html.perf-bajo .collage-container {
   pointer-events: none;
   opacity: 0;
   object-fit: contain;
+  border-radius: 10px;
+  border: 2px solid rgba(212, 175, 55, 0.75);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.25);
   -webkit-user-select: none;
   user-select: none;
   transition: opacity 0.6s ease, transform 0.6s ease;
