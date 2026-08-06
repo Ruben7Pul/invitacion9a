@@ -881,22 +881,24 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   if ('IntersectionObserver' in window) {
     var secciones = document.querySelectorAll('.seccion');
+    // La animación de aparición/desaparición se queda igual que antes
+    // (se agrega Y se quita "visible" al entrar/salir de la pantalla).
+    // Lo que causaba el parpadeo era que ambas cosas pasaban en el MISMO
+    // umbral (15%): si el scroll se quedaba justo ahí, entraba y salía sin
+    // parar. La solución es un "colchón": se hace visible al pasar el 15%,
+    // pero solo se vuelve a ocultar si baja de verdad, del 4%, así el punto
+    // de aparecer y el de desaparecer ya no coinciden.
+    var UMBRAL_APARECER = 0.15;
+    var UMBRAL_DESAPARECER = 0.04;
     var observer = new IntersectionObserver(function(entries) {
       entries.forEach(function(entry) {
-        // Antes se agregaba/quitaba "visible" cada vez que se cruzaba el
-        // umbral, así que si el scroll se quedaba justo en el punto exacto
-        // (algo muy común en secciones más altas que la pantalla) la clase
-        // entraba y salía sin parar y la sección parpadeaba (aparecía y
-        // desaparecía). Ahora la animación se dispara una sola vez: en
-        // cuanto la sección se hace visible se queda así para siempre y
-        // dejamos de observarla, sin importar hacia dónde se siga
-        // scrolleando.
-        if (entry.isIntersecting) {
+        if (entry.intersectionRatio >= UMBRAL_APARECER) {
           entry.target.classList.add('visible');
-          observer.unobserve(entry.target);
+        } else if (entry.intersectionRatio <= UMBRAL_DESAPARECER) {
+          entry.target.classList.remove('visible');
         }
       });
-    }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
+    }, { threshold: [0, 0.02, 0.04, 0.08, 0.15, 0.25, 0.4] });
     secciones.forEach(function(sec) { observer.observe(sec); });
   } else {
     document.querySelectorAll('.seccion').forEach(function(sec) { sec.classList.add('visible'); });
