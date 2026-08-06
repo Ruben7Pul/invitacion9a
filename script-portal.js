@@ -3,7 +3,6 @@ console.log('🚪 script-portal 22.js');
 import { iniciarMedicionFPS, detenerMedicion, clasificarNivel, guardarNivel } from './modules/perf.js';
 
 document.addEventListener('DOMContentLoaded', async function() {
-  // Título / og:title con el nombre real, si config.json está disponible.
   try {
     const res = await fetch(`config.json?t=${Date.now()}`);
     if (res.ok) {
@@ -27,7 +26,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     gateWrapper.classList.add('active');
   }, 2000);
 
-  // ===== Utilidad: fade suave de volumen =====
   function fadeVolumen(video, destino, duracionMs, onDone) {
     if (!video) { if (onDone) onDone(); return; }
     const inicio = video.volume;
@@ -46,7 +44,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   const FADE_IN_MS = 1300;
 
-  // ===== FUNCIÓN ABRIR REJA =====
   function abrirReja(e) {
     if (e) e.stopPropagation();
 
@@ -56,7 +53,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (overlay) overlay.classList.add('show');
     gateWrapper.classList.add('open');
 
-    // Iniciar medición de FPS
     iniciarMedicionFPS();
 
     let finalizado = false;
@@ -67,7 +63,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       finalizado = true;
       if (timeoutId) clearTimeout(timeoutId);
 
-      // Detener medición y guardar nivel
       const frames = detenerMedicion();
       const nivel = clasificarNivel(frames);
       guardarNivel(nivel);
@@ -102,12 +97,10 @@ document.addEventListener('DOMContentLoaded', async function() {
       video.addEventListener('ended', finalizar);
       video.addEventListener('error', onError);
 
-      // Reiniciar y asegurar audio
       video.muted = false;
       video.volume = 0;
       try { video.currentTime = 0; } catch (err) {}
 
-      // Reproducir con audio (la interacción del usuario ya ocurrió)
       video.play().then(() => {
         fadeVolumen(video, 1, FADE_IN_MS);
       }).catch((err) => {
