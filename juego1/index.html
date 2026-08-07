@@ -35,16 +35,6 @@
       50% { opacity:0.5; transform:scale(1.5); color:#ff4444; }
       100% { opacity:0; transform:scale(0); }
     }
-    @keyframes floatMsg {
-      0% { opacity:0; transform:translate(-50%,30%) scale(0.5); }
-      20% { opacity:1; transform:translate(-50%,-50%) scale(1.2); }
-      80% { opacity:1; transform:translate(-50%,-60%) scale(1); }
-      100% { opacity:0; transform:translate(-50%,-80%) scale(0.8); }
-    }
-    @keyframes goldenGlow {
-      0% { box-shadow: 0 0 30px rgba(255,215,0,0.6), 0 0 60px rgba(255,215,0,0.3); transform: translate(-50%, -50%) scale(1); }
-      100% { box-shadow: 0 0 60px rgba(255,215,0,1), 0 0 120px rgba(255,215,0,0.5); transform: translate(-50%, -50%) scale(1.1); }
-    }
 
     #loading-veil {
       position:fixed;
@@ -167,6 +157,8 @@
       font-family:'Cinzel',serif;
       font-weight:600;
       flex-shrink:0;
+      gap:0.2rem;
+      white-space:nowrap;
     }
     .game-btn-sm:hover {
       background:rgba(201,162,77,0.25);
@@ -180,6 +172,8 @@
       border-color:#b8860b;
       color:#f0d9a3;
       background:rgba(201,162,77,0.08);
+      padding:0.1rem 0.7rem;
+      font-size:clamp(0.7rem,1.6vw,0.9rem);
     }
     .game-btn-sm.exit-btn:hover {
       background:rgba(201,162,77,0.2);
@@ -202,6 +196,15 @@
     .game-btn-sm.pause-btn:hover {
       background:rgba(255,170,51,0.2);
       border-color:rgba(255,170,51,0.6);
+    }
+    .game-btn-sm.rank-btn {
+      border-color:#ffd700;
+      color:#ffd700;
+      background:rgba(255,215,0,0.08);
+    }
+    .game-btn-sm.rank-btn:hover {
+      background:rgba(255,215,0,0.2);
+      border-color:rgba(255,215,0,0.6);
     }
 
     #game-stage {
@@ -379,8 +382,100 @@
     }
     #loading-tips.hidden { opacity:0; }
 
+    /* ===== MODAL RANKINGS ===== */
+    .modal-rank {
+      position:fixed;
+      inset:0;
+      z-index:200;
+      background:rgba(0,0,0,0.7);
+      backdrop-filter:blur(4px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      opacity:0;
+      visibility:hidden;
+      transition:opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .modal-rank.open {
+      opacity:1;
+      visibility:visible;
+    }
+    .modal-rank-content {
+      background: radial-gradient(ellipse at 50% 30%, #1c2a44, #0d1424 80%);
+      border:3px solid #b8860b;
+      border-radius:30px;
+      padding:2rem 1.5rem;
+      max-width:400px;
+      width:90%;
+      box-shadow:0 0 40px rgba(184,134,11,0.2);
+      transform:scale(0.9);
+      transition:transform 0.3s ease;
+      color:#fae3a0;
+      text-align:center;
+      position:relative;
+    }
+    .modal-rank.open .modal-rank-content {
+      transform:scale(1);
+    }
+    .modal-rank-content h2 {
+      font-family:'Cinzel',serif;
+      font-size:1.4rem;
+      letter-spacing:0.15em;
+      margin-bottom:1.2rem;
+      border-bottom:1px solid rgba(212,175,55,0.2);
+      padding-bottom:0.5rem;
+    }
+    .rank-list {
+      list-style:none;
+      padding:0;
+      margin:0 0 1.5rem;
+    }
+    .rank-list li {
+      display:flex;
+      justify-content:space-between;
+      font-size:1.1rem;
+      padding:0.5rem 0.8rem;
+      border-bottom:1px solid rgba(212,175,55,0.1);
+      font-family:'Cormorant Garamond',serif;
+    }
+    .rank-list li .pos {
+      color:#d4af37;
+      font-weight:bold;
+      margin-right:0.8rem;
+    }
+    .rank-list li .name {
+      color:#f0e0c0;
+      flex:1;
+      text-align:left;
+    }
+    .rank-list li .score {
+      color:#ffd700;
+      font-weight:bold;
+    }
+    .rank-empty {
+      color:#aaa;
+      font-style:italic;
+      padding:0.8rem 0;
+    }
+    .modal-rank-close {
+      background:rgba(201,162,77,0.15);
+      border:1.5px solid #b8860b;
+      color:#f0d9a3;
+      padding:0.4rem 2rem;
+      border-radius:30px;
+      cursor:pointer;
+      font-family:'Cinzel',serif;
+      font-size:0.9rem;
+      transition:all 0.3s;
+    }
+    .modal-rank-close:hover {
+      background:rgba(201,162,77,0.3);
+      border-color:#d4af37;
+    }
+
     @media (max-width:400px) {
       .game-btn-sm { font-size:0.9rem; min-width:28px; height:28px; padding:0.05rem 0.25rem; }
+      .game-btn-sm.exit-btn { font-size:0.6rem; padding:0.05rem 0.4rem; }
       .game-help { font-size:0.5rem; line-height:1.3; padding:0.1rem 0.3rem; }
       #game-header { gap:0.15rem; }
       #lives { font-size:0.8rem; }
@@ -389,16 +484,17 @@
     }
     @media (min-width:768px) {
       .game-btn-sm { font-size:1.4rem; min-width:40px; height:40px; }
+      .game-btn-sm.exit-btn { font-size:1rem; padding:0.1rem 1rem; }
       .game-help { font-size:0.85rem; }
       #game-header { font-size:1rem; }
     }
   </style>
 </head>
 <body style="background:#0e0a18">
-  <!-- FONDO AZUL DEGRADADO EN VEZ DEL VIDEO -->
+  <!-- FONDO AZUL DEGRADADO -->
   <div id="game-bg"></div>
 
-  <!-- Música de fondo (juegcan.mp3) -->
+  <!-- Música de fondo -->
   <audio id="bg-music" src="../archivos/juegcan.mp3" loop preload="auto"></audio>
 
   <div id="loading-veil" aria-hidden="true"></div>
@@ -424,7 +520,8 @@
         <div class="right">
           <button class="game-btn-sm mute-btn" id="mute-btn" title="Silenciar/Activar música">🔊</button>
           <button class="game-btn-sm pause-btn" id="pause-btn" title="Pausar/Reanudar">⏸️</button>
-          <button class="game-btn-sm exit-btn" id="exit-btn" title="Salir">🚪</button>
+          <button class="game-btn-sm rank-btn" id="rank-btn" title="Ver mejores puntuaciones">🏆</button>
+          <button class="game-btn-sm exit-btn" id="exit-btn" title="Regresar">🚪 Regresar</button>
         </div>
       </div>
 
@@ -452,7 +549,7 @@
         <div id="loading-tips" class="hidden"></div>
       </div>
 
-      <!-- FOOTER: texto de ayuda más pequeño -->
+      <!-- FOOTER: texto de ayuda -->
       <div id="game-footer">
         <p class="game-help">
           🎮 <span class="highlight">Mueve con dedo, A/D o flechas</span><br>
@@ -460,6 +557,17 @@
           <span class="bad">rojas son malas</span>. ¡Intenta obtener el mayor puntaje!
         </p>
       </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL RANKINGS ===== -->
+  <div id="rank-modal" class="modal-rank">
+    <div class="modal-rank-content">
+      <h2>🏆 Mejores puntuaciones</h2>
+      <ul id="rank-list" class="rank-list">
+        <li class="rank-empty">No hay puntuaciones aún.</li>
+      </ul>
+      <button class="modal-rank-close" id="rank-close">Cerrar</button>
     </div>
   </div>
 
