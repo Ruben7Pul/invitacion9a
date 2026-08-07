@@ -6,10 +6,11 @@
 // - Botones "Nueva partida" y "Regresar" en Game Over
 // - Placeholder "Pon aquí tu nombre"
 // - Sin vidas extra, estrella dorada cada 10k puntos
-// - Bloqueo de botón de rankings durante partida
+// - BLOQUES DORADOS: solo borde dorado, 10 segundos de duración
+// - BOTÓN RANKINGS: siempre activo, pausa al abrir, NO reanuda al cerrar
 // - Pausa automática al cambiar de pestaña
 // ============================================================
-console.log('📦 juego.js (Top 5, medallas, nuevos botones, placeholder)');
+console.log('📦 juego.js (Top 5, medallas, borde dorado, botón rankings pausa)');
 
 import {
   soundBrick,
@@ -40,7 +41,10 @@ const NIEBLA_HEIGHTS = [0, Math.round(170 * 1.15), Math.round(STAGE_H * 0.60), M
 const NIEBLA_FEATHER = 26;
 const MAX_LIVES = 3;
 const SCORE_PER_LIFE = 10000; // Cada 10k puntos
-const TOP_SCORES_COUNT = 5; // Top 5 (cambiado de 3 a 5)
+const TOP_SCORES_COUNT = 5; // Top 5
+
+// ========== DURACIÓN DEL LADRILLO DORADO (10 segundos) ==========
+const GOLDEN_BRICK_DURATION_MS = 10000; // antes 5000
 
 // ========== TIPOS DE LADRILLOS CON PUNTAJES FIJOS ==========
 const BRICK_TYPES = {
@@ -96,9 +100,8 @@ function buildPatternCells(predicate) {
   return cells;
 }
 
-// ========== LADRILLO DORADO ==========
+// ========== LADRILLO DORADO (chance) ==========
 const GOLDEN_BRICK_CHANCE = 0.08;
-const GOLDEN_BRICK_DURATION_MS = 5000;
 
 // ========== PROBABILIDAD POWER-UP VERDE ==========
 const GREEN_PROB_TABLE = [
@@ -319,18 +322,16 @@ function generateRandomName() {
   for (let i = 0; i < 3; i++) {
     result += letters.charAt(Math.floor(Math.random() * letters.length));
   }
-  // Convertir a "Abc" (primera mayúscula, resto minúsculas)
   return result.charAt(0) + result.slice(1).toLowerCase();
 }
 
 function filterNameInput(value) {
-  // Solo permite letras (incluyendo acentos y ñ), sin espacios, números ni símbolos
   return value.replace(/[^A-Za-záéíóúÁÉÍÓÚñÑ]/g, '').slice(0, MAX_NAME_LENGTH);
 }
 
 // ========== FUNCIÓN PRINCIPAL ==========
 export function initJuego(config, mobile = false) {
-  console.log('🎮 Iniciando juego (Top 5, medallas, nuevos botones)');
+  console.log('🎮 Iniciando juego (borde dorado, rankings pausa)');
 
   // ========== ELEMENTOS ==========
   const overlay = document.getElementById('game-overlay');
@@ -367,7 +368,6 @@ export function initJuego(config, mobile = false) {
   const gameoverInputContainer = document.getElementById('gameover-input-container');
   const playerNameInput = document.getElementById('player-name-input');
   const nameError = document.getElementById('name-error');
-  // Nuevos botones
   const gameoverNewGameBtn = document.getElementById('gameover-newgame-btn');
   const gameoverExitBtn = document.getElementById('gameover-exit-btn');
 
@@ -377,7 +377,7 @@ export function initJuego(config, mobile = false) {
   scoreEl.style.fontFamily = "'Press Start 2P', monospace";
   scoreEl.style.fontSize = 'clamp(0.7rem,1.8vw,0.9rem)';
 
-  // ========== FILTRAR INPUT DEL NOMBRE (sin espacios) ==========
+  // ========== FILTRAR INPUT DEL NOMBRE ==========
   if (playerNameInput) {
     playerNameInput.placeholder = 'Pon aquí tu nombre';
     playerNameInput.addEventListener('input', function(e) {
@@ -484,20 +484,18 @@ export function initJuego(config, mobile = false) {
     }
   }
 
-  // ===== CONTROL DEL BOTÓN DE RANKINGS =====
-  function setRankButtonState(disabled) {
-    if (!rankBtn) return;
-    rankBtn.disabled = disabled;
-    rankBtn.style.opacity = disabled ? '0.5' : '1';
-    rankBtn.style.pointerEvents = disabled ? 'none' : 'auto';
-    rankBtn.style.cursor = disabled ? 'default' : 'pointer';
-  }
-
-  // ===== MODAL RANKINGS (con medallas y Top 5) =====
+  // ===== BOTÓN DE RANKINGS (siempre activo, pausa al abrir, no reanuda al cerrar) =====
   function mostrarRankings() {
     const modal = document.getElementById('rank-modal');
     const list = document.getElementById('rank-list');
     if (!modal || !list) return;
+
+    // Pausar el juego si está corriendo y no está pausado
+    if (running && !paused && !gameOver) {
+      togglePause();
+      console.log('⏸️ Juego pausado al abrir rankings');
+    }
+
     const scores = getHighScores();
     list.innerHTML = '';
     if (scores.length === 0) {
@@ -522,6 +520,8 @@ export function initJuego(config, mobile = false) {
   function ocultarRankings() {
     const modal = document.getElementById('rank-modal');
     if (modal) modal.classList.remove('open');
+    // NO reanudamos el juego; queda en pausa hasta que el usuario lo decida
+    console.log('⏸️ Rankings cerrados, el juego sigue en pausa');
   }
 
   // ========== FUNCIONES DEL JUEGO ==========
@@ -961,7 +961,6 @@ export function initJuego(config, mobile = false) {
     livesEl.style.display = 'block';
     scoreEl.style.display = 'block';
     lastTime = 0;
-    setRankButtonState(false);
     updateUI();
     syncMuteIcon();
   }
@@ -1003,7 +1002,6 @@ export function initJuego(config, mobile = false) {
     mouseX = 0;
     lastTime = 0;
     floatingMessages = [];
-    setRankButtonState(false);
 
     const initialX = paddle.x + paddleWidth / 2;
     const initialY = STAGE_H - 14 - BALL_R;
@@ -1085,7 +1083,6 @@ export function initJuego(config, mobile = false) {
     gameTimeActive = false;
     if (animFrameId) cancelAnimationFrame(animFrameId);
     soundGameOver();
-    setRankButtonState(false);
     if (menuGameover) {
       gameoverScore.textContent = `Puntuación: ${playerScore}`;
       if (gameoverThemeMsg) {
@@ -1112,12 +1109,11 @@ export function initJuego(config, mobile = false) {
     pauseBtn.style.display = 'none';
     muteBtn.style.display = 'none';
     exitBtn.style.display = 'none';
-    rankBtn.style.display = 'none';
+    rankBtn.style.display = 'flex'; // Siempre visible
   }
 
   // ========== FUNCIÓN PARA GUARDAR Y REINICIAR ==========
   function handleNewGame() {
-    // Si es puntaje alto, guardar nombre (o generar aleatorio)
     if (pendingHighScore && playerNameInput) {
       let name = playerNameInput.value.trim();
       if (!isValidName(name)) {
@@ -1129,7 +1125,6 @@ export function initJuego(config, mobile = false) {
       pendingHighScore = false;
       gameoverInputContainer.style.display = 'none';
     }
-    // Reiniciar juego
     menuEl.style.display = 'none';
     cleanGameState();
     startGame();
@@ -1155,14 +1150,13 @@ export function initJuego(config, mobile = false) {
 
     running = true;
     gameOver = false;
-    setRankButtonState(true);
     layoutStage();
     livesEl.style.display = 'block';
     scoreEl.style.display = 'block';
     pauseBtn.style.display = 'flex';
     muteBtn.style.display = 'flex';
     exitBtn.style.display = 'flex';
-    rankBtn.style.display = 'flex';
+    rankBtn.style.display = 'flex'; // Siempre visible
     pauseBtn.textContent = '⏸️';
     syncMuteIcon();
     updateUI();
@@ -1223,13 +1217,14 @@ export function initJuego(config, mobile = false) {
       ctx.fillRect(0, 0, STAGE_W, STAGE_H);
     }
 
-    // Ladrillos
+    // Ladrillos (con borde dorado y color interior según tipo)
     for (const br of bricks) {
       if (!br.alive) continue;
       const x = br.x, y = br.y, w = br.w, h = br.h;
       const radius = 4;
+
+      // Color interior: el del tipo (o el dorado si no quisiéramos, pero usamos el tipo)
       let color = br.type.color;
-      if (br.isGolden) color = '#ffd700';
       const grad = ctx.createLinearGradient(x, y, x + w, y + h);
       const darker = adjustColor(color, -20);
       const lighter = adjustColor(color, 30);
@@ -1237,6 +1232,7 @@ export function initJuego(config, mobile = false) {
       grad.addColorStop(0.4, color);
       grad.addColorStop(0.8, darker);
       grad.addColorStop(1, adjustColor(color, -10));
+
       ctx.shadowColor = 'rgba(0,0,0,0.3)';
       ctx.shadowBlur = 6;
       ctx.beginPath();
@@ -1244,28 +1240,41 @@ export function initJuego(config, mobile = false) {
       ctx.fillStyle = grad;
       ctx.fill();
       ctx.shadowBlur = 0;
-      ctx.strokeStyle = br.isGolden ? '#ffd700' : 'rgba(255,255,255,0.15)';
+
+      // Borde normal
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.roundRect(x + 2, y + 2, w - 4, h - 4, radius - 1);
       ctx.stroke();
 
+      // Si es dorado, dibujar un borde dorado resplandeciente (sin tapar el interior)
       if (br.isGolden) {
         ctx.strokeStyle = '#ffd700';
-        ctx.lineWidth = 2;
-        ctx.shadowColor = 'rgba(255,215,0,0.8)';
-        ctx.shadowBlur = 15;
+        ctx.lineWidth = 3;
+        ctx.shadowColor = 'rgba(255,215,0,0.9)';
+        ctx.shadowBlur = 18;
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, h, radius);
+        ctx.stroke();
+        // Sombra adicional para resplandor
+        ctx.shadowBlur = 30;
+        ctx.strokeStyle = 'rgba(255,215,0,0.4)';
+        ctx.lineWidth = 5;
         ctx.beginPath();
         ctx.roundRect(x, y, w, h, radius);
         ctx.stroke();
         ctx.shadowBlur = 0;
       } else {
+        // Borde fino normal
         ctx.strokeStyle = 'rgba(0,0,0,0.25)';
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.roundRect(x, y, w, h, radius);
         ctx.stroke();
       }
+
+      // Grietas
       const crackSrc = getCrackImageSrc(br);
       if (crackSrc) {
         const img = crackImages[crackSrc.split('/').pop()];
@@ -1520,13 +1529,10 @@ export function initJuego(config, mobile = false) {
 
         const px = paddle.x;
         const py2 = STAGE_H - 14;
-        // Solo activar si el centro X está dentro de la paleta
-        // y el borde inferior del power toca la mitad superior de la paleta
         if (pu.vy > 0 &&
             pu.x >= px && pu.x <= px + paddleWidth &&
             pu.y + pu.size/2 >= py2 - PADDLE_H/2 &&
             pu.y + pu.size/2 <= py2) {
-          // Activación por impacto superior
           if (pu.isBlue) {
             applyBlueBall();
           } else {
@@ -1540,7 +1546,6 @@ export function initJuego(config, mobile = false) {
           continue;
         }
 
-        // Si el power-up se pierde por abajo
         if (pu.y - pu.size/2 > STAGE_H) {
           powerups.splice(i, 1);
           powerupsInAir--;
@@ -1640,7 +1645,6 @@ export function initJuego(config, mobile = false) {
     if (running && !launched && !paused && !gameOver) launchBall();
   });
 
-  // ===== MANEJO DE TECLADO =====
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       e.preventDefault();
@@ -1680,7 +1684,6 @@ export function initJuego(config, mobile = false) {
     }
   });
 
-  // Eventos táctiles
   stage.addEventListener('touchstart', (e) => {
     if (e.target.closest('#game-menu')) return;
     if (!running || paused || gameOver) return;
@@ -1715,13 +1718,10 @@ export function initJuego(config, mobile = false) {
     if (window.toggleMusic) window.toggleMusic();
     setTimeout(syncMuteIcon, 100);
   });
-  // Botón "Regresar" de la interfaz superior (fuera del menú)
   exitBtn.addEventListener('click', salir);
-  // Botón "Regresar" del menú Game Over
   if (gameoverExitBtn) {
     gameoverExitBtn.addEventListener('click', salir);
   }
-  // Botón "Nueva partida" del menú Game Over
   if (gameoverNewGameBtn) {
     gameoverNewGameBtn.addEventListener('click', handleNewGame);
   }
@@ -1750,6 +1750,6 @@ export function initJuego(config, mobile = false) {
   loadCrackImages(() => {
     startGame();
     layoutStage();
-    console.log('✅ Juego con Top 5, medallas, nuevos botones y placeholder');
+    console.log('✅ Juego con borde dorado, 10s, rankings con pausa y sin reanudar');
   });
 }
