@@ -349,6 +349,69 @@ var MAX_IMAGENES_SIMULTANEAS = 6;
 // Carpeta donde viven las imágenes del collage (raíz del proyecto).
 var CARPETA_IMGCOLL = '../imgcoll/';
 
+// Carpeta opcional con sonidos para el collage. Requisito: los archivos
+// deben llamarse igual que su imagen pero con el prefijo "musicoll" en vez
+// de "imgcoll" (ej: la imagen imgcoll5.jpg puede tener musicoll5.mp3). Si
+// para una imagen no existe su archivo de sonido, simplemente no suena
+// nada, sin marcar ningún error.
+var CARPETA_MUSICOLLAGE = '../musicollage/';
+var collageAudioActual = null;
+
+function detenerAudioCollage() {
+  var saliente = collageAudioActual;
+  collageAudioActual = null;
+  if (!saliente) return;
+  var vol = saliente.volume;
+  var fadeOut = setInterval(function() {
+    vol -= 0.15;
+    if (vol <= 0) {
+      vol = 0;
+      clearInterval(fadeOut);
+      saliente.pause();
+    }
+    saliente.volume = vol;
+  }, 40);
+}
+
+// Busca (por número, no por índice del array, que no está garantizado)
+// el sonido que corresponde a la imagen que se acaba de mostrar, y si
+// existe lo reproduce con un fundido de entrada suave. Si no existe,
+// no pasa nada: no hay ningún aviso ni error visible.
+function intentarReproducirSonidoCollage(srcImagen) {
+  var match = /imgcoll(\d+)\./i.exec(srcImagen || '');
+  if (!match) return;
+  var numero = match[1];
+
+  var audio = new Audio();
+  audio.preload = 'auto';
+  audio.volume = 0;
+
+  audio.addEventListener('error', function() {
+    // No existe el archivo (o no se pudo cargar): no se hace nada más.
+  });
+
+  audio.addEventListener('canplaythrough', function alListo() {
+    audio.removeEventListener('canplaythrough', alListo);
+    collageAudioActual = audio;
+    var promesa = audio.play();
+    if (promesa && promesa.catch) {
+      promesa.catch(function() { /* autoplay bloqueado: no se hace nada */ });
+    }
+    var vol = 0;
+    var fadeIn = setInterval(function() {
+      vol += 0.12;
+      if (vol >= 0.85) {
+        vol = 0.85;
+        clearInterval(fadeIn);
+      }
+      if (audio === collageAudioActual) audio.volume = vol;
+      else clearInterval(fadeIn);
+    }, 40);
+  });
+
+  audio.src = CARPETA_MUSICOLLAGE + 'musicoll' + numero + '.mp3';
+}
+
 // Detecta automáticamente cuántas imágenes hay. Requisito: los archivos
 // deben llamarse imgcoll1.jpg, imgcoll2.jpg, imgcoll3.jpg... sin saltarse
 // números. Para agregar o quitar imágenes, solo sube/borra el archivo y
@@ -521,6 +584,11 @@ function renderCollage(container) {
     var src = dato.src;
     var ratio = dato.ratio || 1;
 
+    // La imagen nueva pasa a ser la que está al frente, así que el sonido
+    // de la anterior (si tenía) se apaga y se intenta el de esta.
+    detenerAudioCollage();
+    intentarReproducirSonidoCollage(src);
+
     var w, h;
     if (ratio >= 1) {
       w = TAMANIO_BASE;
@@ -607,6 +675,7 @@ function limpiarCollage() {
     clearInterval(collageTimer);
     collageTimer = null;
   }
+  detenerAudioCollage();
   var container = document.getElementById('collage-container');
   if (container) {
     container.innerHTML = '<div id="collage-loading" style="text-align:center; padding:2rem; color:#fae3a0; font-family:var(--script); font-size:1.2rem;">Cargando collage...</div>';
