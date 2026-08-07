@@ -1311,7 +1311,16 @@ h1#nombre-hero {
   transform: scale(0.95) translateY(20px);
   opacity: 0;
   transition: transform 0.3s ease, opacity 0.3s ease;
-  box-shadow: 0 0 0 2px rgba(184, 134, 11, 0.2), 0 0 0 6px rgba(26, 42, 70, 0.5), 0 0 50px rgba(184, 134, 11, 0.12), inset 0 0 60px rgba(25, 50, 100, 0.15);
+}
+/* El halo dorado suavizado (varios anillos de box-shadow encimados) se ve
+   con artefactos en PC, pero en celular se ve bien. Como la mayoría de las
+   personas abrirán el link desde el celular, se deja solo en pantallas
+   táctiles (pointer: coarse) y en PC (pointer: fine, con mouse) se queda
+   nada más con el borde simple de arriba, sin el halo. */
+@media (pointer: coarse) {
+  .modal-card {
+    box-shadow: 0 0 0 2px rgba(184, 134, 11, 0.2), 0 0 0 6px rgba(26, 42, 70, 0.5), 0 0 50px rgba(184, 134, 11, 0.12), inset 0 0 60px rgba(25, 50, 100, 0.15);
+  }
 }
 .modal-overlay.open .modal-card {
   transform: scale(1) translateY(0);
@@ -1387,7 +1396,7 @@ h1#nombre-hero {
   aspect-ratio: 1 / 1;
   width: 100%;
   position: relative;
-  background: #12203f;
+  background: transparent;
   border-radius: 16px;
   overflow: hidden;
   margin: 0.5rem 0;
@@ -1399,9 +1408,6 @@ h1#nombre-hero {
   pointer-events: none;
   opacity: 0;
   object-fit: contain;
-  border-radius: 10px;
-  border: 2px solid rgba(212, 175, 55, 0.75);
-  box-shadow: 0 0 10px rgba(212, 175, 55, 0.25);
   -webkit-user-select: none;
   user-select: none;
   transition: opacity 0.6s ease, transform 0.6s ease;
