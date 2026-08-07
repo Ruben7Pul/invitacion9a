@@ -1,8 +1,10 @@
 // ============================================================
-// juego.js – VERSIÓN SIMPLIFICADA (SIN COMBOS, PUNTAJES FIJOS)
-// DIFICULTAD REDUCIDA AL 50% DEL TIEMPO + MENSAJES ALEATORIOS CON HISTORIAL 9
+// juego.js – VERSIÓN CON:
+// - Sin vidas extra, estrella dorada cada 10k puntos
+// - Bloqueo de botón de rankings durante partida
+// - Pausa automática al cambiar de pestaña
 // ============================================================
-console.log('📦 juego.js (sin combos, dificultad acelerada, mensajes aleatorios, historial 9)');
+console.log('📦 juego.js (estrellas 10k, botón bloqueado, auto-pausa)');
 
 import {
   soundBrick,
@@ -32,7 +34,7 @@ const MAX_NIEBLA = 3;
 const NIEBLA_HEIGHTS = [0, Math.round(170 * 1.15), Math.round(STAGE_H * 0.60), Math.round(STAGE_H * 0.90)];
 const NIEBLA_FEATHER = 26;
 const MAX_LIVES = 3;
-const SCORE_PER_LIFE = 10000;
+const SCORE_PER_LIFE = 10000; // Cada 10k puntos
 const TOP_SCORES_COUNT = 3;
 
 // ========== TIPOS DE LADRILLOS CON PUNTAJES FIJOS ==========
@@ -156,7 +158,7 @@ const THEME_MESSAGES = [
 
 // Historial de los últimos 9 mensajes usados (evita repeticiones)
 let messageHistory = [];
-const MAX_HISTORY = 9; // <--- Cambiado de 10 a 9
+const MAX_HISTORY = 9;
 
 function getRandomThemeMessage() {
   const available = THEME_MESSAGES.filter(msg => !messageHistory.includes(msg));
@@ -176,7 +178,7 @@ function getRandomThemeMessage() {
 
 // ========== FUNCIÓN PRINCIPAL ==========
 export function initJuego(config, mobile = false) {
-  console.log('🎮 Iniciando juego (versión con historial 9, niebla corregida y teclas)');
+  console.log('🎮 Iniciando juego (versión con estrellas 10k, botón bloqueado, auto-pausa)');
 
   // ========== ELEMENTOS ==========
   const overlay = document.getElementById('game-overlay');
@@ -316,6 +318,15 @@ export function initJuego(config, mobile = false) {
       muteBtn.textContent = muted ? '🔇' : '🔊';
       muteBtn.title = muted ? 'Activar música' : 'Silenciar música';
     }
+  }
+
+  // ===== CONTROL DEL BOTÓN DE RANKINGS =====
+  function setRankButtonState(disabled) {
+    if (!rankBtn) return;
+    rankBtn.disabled = disabled;
+    rankBtn.style.opacity = disabled ? '0.5' : '1';
+    rankBtn.style.pointerEvents = disabled ? 'none' : 'auto';
+    rankBtn.style.cursor = disabled ? 'default' : 'pointer';
   }
 
   // ===== MODAL RANKINGS =====
@@ -642,7 +653,7 @@ export function initJuego(config, mobile = false) {
   function applyBlueBall() {
     playerScore += 2000;
     soundPowerupGood();
-    showFloatingMessage('+2000', '#ffd700', 1500);
+    showFloatingMessage('🌟 +2000', '#ffd700', 1500);
     nieblaLevel = 0;
     if (paddleSizeMultiplier < 1) paddleSizeMultiplier = 1;
     if (ballDurability < 1) ballDurability = 1;
@@ -779,6 +790,7 @@ export function initJuego(config, mobile = false) {
     livesEl.style.display = 'block';
     scoreEl.style.display = 'block';
     lastTime = 0;
+    setRankButtonState(false); // Desbloquear botón al limpiar
     updateUI();
     syncMuteIcon();
   }
@@ -820,6 +832,7 @@ export function initJuego(config, mobile = false) {
     mouseX = 0;
     lastTime = 0;
     floatingMessages = [];
+    setRankButtonState(false); // Desbloquear botón al resetear
 
     const initialX = paddle.x + paddleWidth / 2;
     const initialY = STAGE_H - 14 - BALL_R;
@@ -901,6 +914,7 @@ export function initJuego(config, mobile = false) {
     gameTimeActive = false;
     if (animFrameId) cancelAnimationFrame(animFrameId);
     soundGameOver();
+    setRankButtonState(false); // Desbloquear al terminar partida
     if (menuGameover) {
       gameoverScore.textContent = `Puntuación: ${playerScore}`;
       if (gameoverThemeMsg) {
@@ -961,6 +975,7 @@ export function initJuego(config, mobile = false) {
 
     running = true;
     gameOver = false;
+    setRankButtonState(true); // Bloquear botón durante la partida
     layoutStage();
     livesEl.style.display = 'block';
     scoreEl.style.display = 'block';
@@ -984,16 +999,13 @@ export function initJuego(config, mobile = false) {
       lastScoreValue = playerScore;
     }
 
+    // === CAMBIO AQUÍ: Cada 10,000 puntos → Estrella Dorada (sin vidas extra) ===
     const milestone = Math.floor(playerScore / SCORE_PER_LIFE);
     if (milestone > lastScoreMilestone && milestone > 0) {
       lastScoreMilestone = milestone;
-      if (lives < MAX_LIVES) {
-        lives++;
-        soundExtraLife();
-        showFloatingMessage('+1 VIDA ❤️', '#ff4444', 1500);
-        updateLivesUI();
-      } else {
-        if (!blueBallActive) pendingBlueBall = true;
+      // Siempre aparece la estrella dorada, sin importar las vidas
+      if (!blueBallActive) {
+        pendingBlueBall = true;
       }
     }
 
@@ -1110,12 +1122,12 @@ export function initJuego(config, mobile = false) {
       ctx.textBaseline = 'middle';
       ctx.shadowColor = 'rgba(0,0,0,0.8)';
       ctx.shadowBlur = 6;
-      let symbol = isBlue ? '★' : POWERUP_SYMBOLS[pu.type] || '?';
+      let symbol = isBlue ? '🌟' : POWERUP_SYMBOLS[pu.type] || '?';
       ctx.fillText(symbol, x, y);
       ctx.shadowBlur = 0;
     }
 
-    // ===== NIEBLA: se dibuja ANTES de las bolas para que éstas queden encima =====
+    // Niebla (debajo de las bolas)
     const boundary = NIEBLA_HEIGHTS[nieblaLevel] || 0;
     if (boundary > 0) {
       const gradNiebla = ctx.createLinearGradient(0, 0, 0, boundary);
@@ -1132,7 +1144,7 @@ export function initJuego(config, mobile = false) {
       ctx.fillRect(0, boundary - feather, STAGE_W, feather);
     }
 
-    // Bolas (ahora se dibujan después de la niebla, por lo que están encima)
+    // Bolas (encima de la niebla)
     for (const b of balls) {
       const x = b.x, y = b.y;
       let grad;
@@ -1447,19 +1459,18 @@ export function initJuego(config, mobile = false) {
     if (running && !launched && !paused && !gameOver) launchBall();
   });
 
-  // ===== MANEJO DE TECLADO MEJORADO =====
+  // ===== MANEJO DE TECLADO =====
   document.addEventListener('keydown', (e) => {
-    // Tecla ESC: salir siempre (incluso si está pausado o game over)
+    // ESC: salir siempre
     if (e.key === 'Escape') {
       e.preventDefault();
       salir();
       return;
     }
 
-    // Si el juego no está corriendo o está en game over, ignorar el resto de teclas
     if (!running || gameOver) return;
 
-    // Movimiento (A/D, flechas) – solo si no está pausado
+    // Movimiento (solo si no está pausado)
     if (!paused) {
       if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
         keys.left = true;
@@ -1470,7 +1481,7 @@ export function initJuego(config, mobile = false) {
       }
     }
 
-    // Barra espaciadora: siempre funciona (incluso si pausado) para pausar/reanudar o lanzar
+    // Barra espaciadora: lanzar o pausar/reanudar (siempre funcional)
     if (e.key === ' ' || e.key === 'Space') {
       e.preventDefault();
       if (!launched) {
@@ -1491,7 +1502,7 @@ export function initJuego(config, mobile = false) {
     }
   });
 
-  // Eventos táctiles (sin cambios)
+  // Eventos táctiles
   stage.addEventListener('touchstart', (e) => {
     if (e.target.closest('#game-menu')) return;
     if (!running || paused || gameOver) return;
@@ -1533,12 +1544,23 @@ export function initJuego(config, mobile = false) {
     if (e.target === e.currentTarget) ocultarRankings();
   });
 
+  // ===== AUTO-PAUSA AL CAMBIAR DE PESTAÑA =====
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && running && !gameOver) {
-      syncMuteIcon();
+    // Si la pestaña se oculta, pausar automáticamente
+    if (document.hidden) {
+      if (running && !paused && !gameOver) {
+        togglePause();
+        console.log('⏸️ Juego pausado automáticamente al cambiar de pestaña');
+      }
+    } else {
+      // Al volver, sincronizar ícono de música
+      if (running && !gameOver) {
+        syncMuteIcon();
+      }
     }
   });
 
+  // ===== GUARDAR PUNTAJE =====
   gameoverSave.addEventListener('click', (e) => {
     e.stopPropagation();
     const name = playerNameInput.value.trim();
@@ -1563,6 +1585,6 @@ export function initJuego(config, mobile = false) {
   loadCrackImages(() => {
     startGame();
     layoutStage();
-    console.log('✅ Juego simplificado con todas las correcciones aplicadas');
+    console.log('✅ Juego con todas las correcciones aplicadas (10k estrellas, bloqueo, auto-pausa)');
   });
 }
