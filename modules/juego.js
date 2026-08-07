@@ -1,7 +1,8 @@
 // ============================================================
 // juego.js – VERSIÓN SIMPLIFICADA (SIN COMBOS, PUNTAJES FIJOS)
+// DIFICULTAD REDUCIDA AL 50% DEL TIEMPO + RESETEO DE PUNTUACIONES POR VERSIÓN
 // ============================================================
-console.log('📦 juego.js (sin combos, puntajes fijos)');
+console.log('📦 juego.js (sin combos, dificultad 50% más rápida)');
 
 import {
   soundBrick,
@@ -135,7 +136,7 @@ export function isHighScore(score) {
 
 // ========== FUNCIÓN PRINCIPAL ==========
 export function initJuego(config, mobile = false) {
-  console.log('🎮 Iniciando juego (sin combos, puntajes fijos)');
+  console.log('🎮 Iniciando juego (sin combos, dificultad acelerada)');
 
   // ========== ELEMENTOS ==========
   const overlay = document.getElementById('game-overlay');
@@ -485,7 +486,8 @@ export function initJuego(config, mobile = false) {
     return difficultyTime / 60;
   }
 
-  const BALL_SPEED_RAMP_MINUTES = 14;
+  // Velocidad máxima en 7 minutos (era 14)
+  const BALL_SPEED_RAMP_MINUTES = 7;
   const BALL_SPEED_MAX_MULT = 2.7;
   function getSpeedMultiplier(minutes) {
     const t = Math.min(minutes, BALL_SPEED_RAMP_MINUTES) / BALL_SPEED_RAMP_MINUTES;
@@ -498,7 +500,8 @@ export function initJuego(config, mobile = false) {
   }
 
   function getGreenProbability(minutes) {
-    const step = minutes * 2;
+    // La tabla se agota en 4 minutos (multiplicador x4 en lugar de x2)
+    const step = minutes * 4;
     if (step <= 0) return GREEN_PROB_TABLE[0];
     if (step >= GREEN_PROB_TABLE.length - 1) return GREEN_PROB_TABLE[GREEN_PROB_TABLE.length - 1];
     const idx = Math.floor(step);
@@ -1518,6 +1521,6 @@ export function initJuego(config, mobile = false) {
   loadCrackImages(() => {
     startGame();
     layoutStage();
-    console.log('✅ Juego simplificado iniciado correctamente');
+    console.log('✅ Juego simplificado con dificultad acelerada iniciado correctamente');
   });
 }
