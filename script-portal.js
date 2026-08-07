@@ -1,4 +1,4 @@
-console.log('🚪 script-portal 22.js');
+console.log('🚪 script-portal 33.js');
 
 import { iniciarMedicionFPS, detenerMedicion, clasificarNivel, guardarNivel } from './modules/perf.js';
 
@@ -52,6 +52,15 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     const overlay = document.getElementById('transition-overlay');
     const video = document.getElementById('transition-video');
+    const portalFlash = document.getElementById('portal-flash');
+
+    // Activar flash de reja
+    if (portalFlash) {
+      portalFlash.classList.add('active');
+      setTimeout(() => {
+        portalFlash.classList.remove('active');
+      }, 600);
+    }
 
     if (overlay) overlay.classList.add('show');
     gateWrapper.classList.add('open');
@@ -83,6 +92,12 @@ document.addEventListener('DOMContentLoaded', async function() {
       const frames = detenerMedicion();
       const nivel = clasificarNivel(frames);
       guardarNivel(nivel);
+
+      // Activar flash de bella.jpg
+      const bellaFlash = document.getElementById('bella-flash');
+      if (bellaFlash) {
+        bellaFlash.classList.add('active');
+      }
 
       // Espera a que se note el fundido hacia bella.jpg antes de cambiar
       // de página, para que la transición a la página principal no se
