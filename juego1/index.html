@@ -295,6 +295,9 @@
       border-radius:8px;
       color:white;
       padding:0.4rem;
+      width:100%;
+      max-width:200px;
+      text-align:center;
     }
     #name-error { color:#ff6b6b; font-size:0.6rem; }
 
@@ -515,13 +518,16 @@
             <p id="gameover-score">Puntuación: 0</p>
             <p id="gameover-theme-msg"></p>
             <div id="gameover-stats"></div>
-            <div id="gameover-input-container">
-              <p style="color:#ffd700;">¡Top 3!</p>
-              <input type="text" id="player-name-input" maxlength="12" placeholder="Tu nombre" pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+">
-              <button id="gameover-save" class="game-btn" style="font-size:0.7rem; margin-top:0.3rem;">Guardar</button>
-              <p id="name-error" style="color:#ff6b6b; font-size:0.6rem; display:none;">Por favor, ingresa un nombre válido (solo letras).</p>
+            <!-- Contenedor para input de nombre (solo si es Top 5) -->
+            <div id="gameover-input-container" style="display:none; margin:0.5rem 0;">
+              <input type="text" id="player-name-input" maxlength="12" placeholder="Pon aquí tu nombre" pattern="[A-Za-záéíóúÁÉÍÓÚñÑ]+">
+              <p id="name-error" style="color:#ff6b6b; font-size:0.6rem; display:none;">Nombre inválido</p>
             </div>
-            <button id="gameover-menu-btn" class="game-btn" style="font-size:0.8rem; margin-top:0.5rem; display:none; margin-left:auto; margin-right:auto; text-align:center;">🔄 Nueva partida</button>
+            <!-- Botones siempre visibles -->
+            <div style="display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap; margin-top:0.5rem;">
+              <button id="gameover-newgame-btn" class="game-btn" style="font-size:0.8rem;">🔄 Nueva partida</button>
+              <button id="gameover-exit-btn" class="game-btn" style="font-size:0.8rem;">🚪 Regresar</button>
+            </div>
           </div>
         </div>
         <div id="game-msg">
