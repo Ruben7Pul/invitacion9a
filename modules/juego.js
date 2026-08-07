@@ -1,7 +1,7 @@
 // ============================================================
-// juego.js – VERSIÓN CANVAS CORREGIDA (sin modal, con 3 botones)
+// juego.js – VERSIÓN SIMPLIFICADA (SIN COMBOS, PUNTAJES FIJOS)
 // ============================================================
-console.log('📦 juego.js (canvas sin modal, botones en header)');
+console.log('📦 juego.js (sin combos, puntajes fijos)');
 
 import {
   soundBrick,
@@ -34,12 +34,20 @@ const MAX_LIVES = 3;
 const SCORE_PER_LIFE = 10000;
 const TOP_SCORES_COUNT = 3;
 
-// ========== TIPOS DE LADRILLOS ==========
+// ========== TIPOS DE LADRILLOS CON PUNTAJES FIJOS ==========
 const BRICK_TYPES = {
   CLAY:   { value: 1, playerPoints: 100, hits: 1, color: '#d9534f', label: 'CLAY' },
   WOOD:   { value: 2, playerPoints: 200, hits: 2, color: '#8b5a2b', label: 'WOOD' },
   IRON:   { value: 3, playerPoints: 300, hits: 3, color: '#7a8a9a', label: 'IRON' }
 };
+
+// Puntajes dorados (multiplicados por 3)
+const GOLDEN_MULTIPLIER = 3;
+
+function getBrickPoints(brick) {
+  const base = brick.type.playerPoints;
+  return brick.isGolden ? base * GOLDEN_MULTIPLIER : base;
+}
 
 function getCrackImageSrc(brick) {
   if (brick.hits >= brick.maxHits) return null;
@@ -80,11 +88,9 @@ function buildPatternCells(predicate) {
   return cells;
 }
 
-// ========== LADRILLO DORADO Y COMBO ==========
+// ========== LADRILLO DORADO ==========
 const GOLDEN_BRICK_CHANCE = 0.08;
 const GOLDEN_BRICK_DURATION_MS = 5000;
-const COMBO_BONUS_PER_HIT = 0.02;
-const COMBO_BONUS_CAP = 0.5;
 
 // ========== PROBABILIDAD POWER-UP VERDE ==========
 const GREEN_PROB_TABLE = [
@@ -105,23 +111,23 @@ const POWERUP_SYMBOLS = {
 };
 
 // ========== PUNTUACIONES (TOP 3) ==========
-function getHighScores() {
+export function getHighScores() {
   try {
     const data = localStorage.getItem('highscores');
     return data ? JSON.parse(data) : [];
   } catch { return []; }
 }
-function saveHighScores(scores) {
+export function saveHighScores(scores) {
   localStorage.setItem('highscores', JSON.stringify(scores));
 }
-function addHighScore(name, score) {
+export function addHighScore(name, score) {
   let scores = getHighScores();
   scores.push({ name: name || 'Jugador', score });
   scores.sort((a, b) => b.score - a.score);
   if (scores.length > TOP_SCORES_COUNT) scores = scores.slice(0, TOP_SCORES_COUNT);
   saveHighScores(scores);
 }
-function isHighScore(score) {
+export function isHighScore(score) {
   const scores = getHighScores();
   if (scores.length < TOP_SCORES_COUNT) return true;
   return score > scores[scores.length - 1].score;
@@ -129,7 +135,7 @@ function isHighScore(score) {
 
 // ========== FUNCIÓN PRINCIPAL ==========
 export function initJuego(config, mobile = false) {
-  console.log('🎮 Iniciando juego (sin modal, botones en header)');
+  console.log('🎮 Iniciando juego (sin combos, puntajes fijos)');
 
   // ========== ELEMENTOS ==========
   const overlay = document.getElementById('game-overlay');
@@ -158,6 +164,7 @@ export function initJuego(config, mobile = false) {
   const pauseBtn = document.getElementById('pause-btn');
   const muteBtn = document.getElementById('mute-btn');
   const exitBtn = document.getElementById('exit-btn');
+  const rankBtn = document.getElementById('rank-btn');
   const menuEl = document.getElementById('game-menu');
   const menuGameover = document.getElementById('menu-gameover');
   const gameoverScore = document.getElementById('gameover-score');
@@ -192,7 +199,6 @@ export function initJuego(config, mobile = false) {
   let ladrillosRotos = 0;
   let lastPowerupTime = 0;
   let pendingBlueBall = false;
-  let comboCount = 0;
   let goldenBrickRef = null;
   let lastScoreMilestone = 0;
   let blueBallActive = false;
@@ -240,7 +246,7 @@ export function initJuego(config, mobile = false) {
     });
   }
 
-  // ========== FUNCIONES DE INTERFAZ (SIN MODAL) ==========
+  // ========== FUNCIONES DE INTERFAZ ==========
   function togglePause() {
     if (!running || gameOver) return;
     paused = !paused;
@@ -263,13 +269,36 @@ export function initJuego(config, mobile = false) {
     window.location.href = '../principal/index.html?volver=1';
   }
 
-  // Sincronizar el ícono del mute con el estado actual
   function syncMuteIcon() {
     if (window.isMusicMuted !== undefined) {
       const muted = window.isMusicMuted();
       muteBtn.textContent = muted ? '🔇' : '🔊';
       muteBtn.title = muted ? 'Activar música' : 'Silenciar música';
     }
+  }
+
+  // ===== MODAL RANKINGS =====
+  function mostrarRankings() {
+    const modal = document.getElementById('rank-modal');
+    const list = document.getElementById('rank-list');
+    if (!modal || !list) return;
+    const scores = getHighScores();
+    list.innerHTML = '';
+    if (scores.length === 0) {
+      list.innerHTML = '<li class="rank-empty">No hay puntuaciones aún.</li>';
+    } else {
+      scores.forEach((item, idx) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="pos">#${idx+1}</span><span class="name">${item.name}</span><span class="score">${item.score}</span>`;
+        list.appendChild(li);
+      });
+    }
+    modal.classList.add('open');
+  }
+
+  function ocultarRankings() {
+    const modal = document.getElementById('rank-modal');
+    if (modal) modal.classList.remove('open');
   }
 
   // ========== FUNCIONES DEL JUEGO ==========
@@ -696,7 +725,6 @@ export function initJuego(config, mobile = false) {
     ladrillosRotos = 0;
     lastPowerupTime = 0;
     pendingBlueBall = false;
-    comboCount = 0;
     goldenBrickRef = null;
     lastScoreMilestone = 0;
     blueBallActive = false;
@@ -741,7 +769,6 @@ export function initJuego(config, mobile = false) {
     ladrillosRotos = 0;
     lastPowerupTime = 0;
     pendingBlueBall = false;
-    comboCount = 0;
     goldenBrickRef = null;
     lastScoreMilestone = 0;
     blueBallActive = false;
@@ -794,7 +821,6 @@ export function initJuego(config, mobile = false) {
     soundLose();
     animateHeartLoss();
     gameTimeActive = false;
-    comboCount = 0;
 
     launched = false;
     balls = [];
@@ -869,6 +895,7 @@ export function initJuego(config, mobile = false) {
     pauseBtn.style.display = 'none';
     muteBtn.style.display = 'none';
     exitBtn.style.display = 'none';
+    rankBtn.style.display = 'none';
   }
 
   // ========== INICIO DE PARTIDA ==========
@@ -897,6 +924,7 @@ export function initJuego(config, mobile = false) {
     pauseBtn.style.display = 'flex';
     muteBtn.style.display = 'flex';
     exitBtn.style.display = 'flex';
+    rankBtn.style.display = 'flex';
     pauseBtn.textContent = '⏸️';
     syncMuteIcon();
     updateUI();
@@ -963,7 +991,7 @@ export function initJuego(config, mobile = false) {
       ctx.fillRect(0, 0, STAGE_W, STAGE_H);
     }
 
-    // Ladrillos con brillo
+    // Ladrillos
     for (const br of bricks) {
       if (!br.alive) continue;
       const x = br.x, y = br.y, w = br.w, h = br.h;
@@ -1088,7 +1116,7 @@ export function initJuego(config, mobile = false) {
       }
     }
 
-    // Paleta redondeada
+    // Paleta
     const px = paddle.x, py = STAGE_H - 14;
     const pw = paddleWidth, ph = PADDLE_H;
     const radiusP = 8;
@@ -1105,7 +1133,7 @@ export function initJuego(config, mobile = false) {
     ctx.roundRect(px, py, pw, ph, radiusP);
     ctx.stroke();
 
-    // Niebla opaca
+    // Niebla
     const boundary = NIEBLA_HEIGHTS[nieblaLevel] || 0;
     if (boundary > 0) {
       const gradNiebla = ctx.createLinearGradient(0, 0, 0, boundary);
@@ -1125,7 +1153,7 @@ export function initJuego(config, mobile = false) {
     drawFloatingMessages(ctx);
   }
 
-  // ========== BUCLE PRINCIPAL CON TRY/CATCH ==========
+  // ========== BUCLE PRINCIPAL ==========
   function gameLoop(timestamp) {
     try {
       if (!running) {
@@ -1203,9 +1231,9 @@ export function initJuego(config, mobile = false) {
           const speed = getCurrentBallSpeed();
           b.vx = Math.sin(angle) * speed;
           b.vy = -Math.cos(angle) * speed;
-          comboCount = 0;
         }
 
+        // Colisión con ladrillos
         for (const br of bricks) {
           if (!br.alive) continue;
           if (b.x + BALL_R > br.x && b.x - BALL_R < br.x + br.w &&
@@ -1229,10 +1257,10 @@ export function initJuego(config, mobile = false) {
               soundBrick();
               br.alive = false;
               if (br.isGolden && goldenBrickRef === br) goldenBrickRef = null;
-              comboCount++;
-              const comboMult = 1 + Math.min(comboCount * COMBO_BONUS_PER_HIT, COMBO_BONUS_CAP);
-              const basePoints = br.isGolden ? br.playerPoints * 3 : br.playerPoints;
-              playerScore += Math.round(basePoints * comboMult);
+
+              // Puntaje fijo (sin combo)
+              const puntos = getBrickPoints(br);
+              playerScore += puntos;
               gamePoints -= br.value;
               ladrillosRotos++;
               if (uiCounter % 2 === 0) updateUI();
@@ -1454,6 +1482,11 @@ export function initJuego(config, mobile = false) {
     setTimeout(syncMuteIcon, 100);
   });
   exitBtn.addEventListener('click', salir);
+  rankBtn.addEventListener('click', mostrarRankings);
+  document.getElementById('rank-close')?.addEventListener('click', ocultarRankings);
+  document.getElementById('rank-modal')?.addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) ocultarRankings();
+  });
 
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden && running && !gameOver) {
@@ -1485,6 +1518,6 @@ export function initJuego(config, mobile = false) {
   loadCrackImages(() => {
     startGame();
     layoutStage();
-    console.log('✅ Juego sin modal iniciado correctamente');
+    console.log('✅ Juego simplificado iniciado correctamente');
   });
 }
