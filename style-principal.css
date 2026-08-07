@@ -1452,6 +1452,15 @@ h1#nombre-hero {
   .modal-gustos-card { padding: 1.2rem 0.8rem; }
   .collage-container { aspect-ratio: 4/3; }
 }
+
+/* Borde redondeado y esquinas SOLO en celular. En PC (fuera de este
+   media query) las imágenes del collage se quedan tal cual, sin nada. */
+@media (max-width: 768px), (pointer: coarse) {
+  .collage-container .collage-item {
+    border-radius: 14px;
+    border: 1px solid rgba(212, 175, 55, 0.35);
+  }
+}
 @media (min-width: 768px) {
   #app { padding: 0.6rem 2rem 0; }
   #app-inner { max-width: 640px; gap: 1rem; padding: 0 0.5rem 3rem; }
