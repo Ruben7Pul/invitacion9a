@@ -1,4 +1,4 @@
-console.log('🚀 principal/script-principal.js (sin reja, página aparte)');
+console.log('🚀 22 principal/script-principal.js (sin reja, página aparte)');
 
 import { obtenerNivel } from '../modules/perf.js';
 
@@ -341,7 +341,7 @@ var collageInicializado = false;
 var collageIndiceActual = 0;
 var collageZIndex = 1;
 var collageElementos = [];
-var collageHistorialImagenes = [];
+var collageOrdenFijo = [];
 var collageUltimaRotacion = 0;
 var collageIntervaloMs = 3000;
 var MAX_IMAGENES_SIMULTANEAS = 6;
@@ -499,22 +499,20 @@ function shuffleArray(arr) {
   return copied;
 }
 
+// Elige la siguiente imagen por CICLOS, no al azar puro:
+// - Ciclo 1: se arma un orden aleatorio (barajado una sola vez) con TODAS
+//   las imágenes. Mientras dura este primer ciclo, ninguna imagen se repite.
+// - Ciclo 2 en adelante: se repite EXACTAMENTE ese mismo orden (ya no se
+//   vuelve a barajar), así que el patrón queda fijo para siempre.
+// Esto evita el problema de antes (mismo array de "no repetir" muy corto,
+// de solo 5) que dejaba que una imagen volviera a salir demasiado pronto.
 function elegirImagenAleatoria() {
-  var disponibles = [];
-  for (var i = 0; i < imagenesCollage.length; i++) {
-    if (collageHistorialImagenes.indexOf(i) === -1) {
-      disponibles.push(i);
-    }
+  if (collageOrdenFijo.length !== imagenesCollage.length) {
+    var indices = Array.from({length: imagenesCollage.length}, (_, i) => i);
+    collageOrdenFijo = shuffleArray(indices);
   }
-  if (disponibles.length === 0) {
-    collageHistorialImagenes = [];
-    disponibles = Array.from({length: imagenesCollage.length}, (_, i) => i);
-  }
-  var indiceElegido = disponibles[Math.floor(Math.random() * disponibles.length)];
-  collageHistorialImagenes.push(indiceElegido);
-  if (collageHistorialImagenes.length > 5) {
-    collageHistorialImagenes.shift();
-  }
+  var indiceElegido = collageOrdenFijo[collageIndiceActual % collageOrdenFijo.length];
+  collageIndiceActual++;
   return indiceElegido;
 }
 
@@ -538,7 +536,7 @@ function renderCollage(container) {
   collageIndiceActual = 0;
   collageZIndex = 1;
   collageElementos = [];
-  collageHistorialImagenes = [];
+  collageOrdenFijo = [];
   collageUltimaRotacion = 0;
 
   // Tamaño de referencia (%) para el lado MAYOR de cada imagen dentro del
