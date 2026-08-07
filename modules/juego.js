@@ -1,8 +1,8 @@
 // ============================================================
 // juego.js – VERSIÓN SIMPLIFICADA (SIN COMBOS, PUNTAJES FIJOS)
-// DIFICULTAD REDUCIDA AL 50% DEL TIEMPO + RESETEO DE PUNTUACIONES POR VERSIÓN
+// DIFICULTAD REDUCIDA AL 50% DEL TIEMPO + MENSAJES ALEATORIOS CON HISTORIAL
 // ============================================================
-console.log('📦 juego.js (sin combos, dificultad 50% más rápida)');
+console.log('📦 juego.js (sin combos, dificultad acelerada, mensajes aleatorios)');
 
 import {
   soundBrick,
@@ -134,9 +134,56 @@ export function isHighScore(score) {
   return score > scores[scores.length - 1].score;
 }
 
+// ========== MENSAJES DE ÁNIMO ALEATORIOS ==========
+const THEME_MESSAGES = [
+  'La rosa apenas empieza a florecer... ¡vuelve a intentarlo!',
+  'Como Bella cruzando el portón por primera vez: buen comienzo, sigue así.',
+  'El hechizo comienza a ceder ante ti. ¡Vas por buen camino!',
+  'Los candelabros del salón se encienden para acompañarte. ¡Bien hecho!',
+  'Bailas con la gracia de una quinceañera en su vals. ¡Sigue brillando!',
+  'La Bestia sonríe al ver tu talento. ¡Vas a medio camino!',
+  'Todo el castillo murmura tu nombre. ¡Vas impresionando!',
+  'Tu corona de XV brilla un poco más con cada punto. ¡Adelante!',
+  'Como en el cuento, la magia está de tu lado. ¡Vas muy arriba!',
+  'Los pétalos de la rosa encantada aún no caen: tu magia sigue viva.',
+  '¡Cien mil puntos! Dignos de una noche de gala en el gran salón.',
+  'Bailas como la propia Bella con su vestido dorado. ¡Espectacular!',
+  'El hechizo se rompe gracias a ti: puntaje digno de leyenda.',
+  'Toda la corte del castillo aplaude de pie. ¡Ya casi al tope!',
+  'A un paso de la perfección... una quinceañera legendaria.',
+  '🌹 ¡Puntaje máximo! Un final de cuento de hadas — fuiste el alma de esta fiesta encantada. ¡Feliz XV!'
+];
+
+// Historial de los últimos 10 mensajes usados (para evitar repeticiones)
+let messageHistory = [];
+const MAX_HISTORY = 10;
+
+function getRandomThemeMessage() {
+  // Filtrar mensajes que no estén en el historial
+  const available = THEME_MESSAGES.filter(msg => !messageHistory.includes(msg));
+  
+  // Si todos los mensajes están en el historial (caso extremo), limpiar historial y permitir cualquiera
+  let chosen;
+  if (available.length === 0) {
+    // Reiniciamos historial para evitar bloqueo
+    messageHistory = [];
+    chosen = THEME_MESSAGES[Math.floor(Math.random() * THEME_MESSAGES.length)];
+  } else {
+    chosen = available[Math.floor(Math.random() * available.length)];
+  }
+  
+  // Agregar al historial y mantener tamaño máximo
+  messageHistory.push(chosen);
+  if (messageHistory.length > MAX_HISTORY) {
+    messageHistory.shift();
+  }
+  
+  return chosen;
+}
+
 // ========== FUNCIÓN PRINCIPAL ==========
 export function initJuego(config, mobile = false) {
-  console.log('🎮 Iniciando juego (sin combos, dificultad acelerada)');
+  console.log('🎮 Iniciando juego (sin combos, dificultad acelerada, mensajes aleatorios)');
 
   // ========== ELEMENTOS ==========
   const overlay = document.getElementById('game-overlay');
@@ -865,7 +912,10 @@ export function initJuego(config, mobile = false) {
     soundGameOver();
     if (menuGameover) {
       gameoverScore.textContent = `Puntuación: ${playerScore}`;
-      if (gameoverThemeMsg) gameoverThemeMsg.textContent = getThemeMessage(playerScore);
+      // Mensaje de ánimo aleatorio (evitando repeticiones recientes)
+      if (gameoverThemeMsg) {
+        gameoverThemeMsg.textContent = getRandomThemeMessage();
+      }
       const isTop = isHighScore(playerScore) && playerScore > 0;
       if (isTop) {
         pendingHighScore = true;
@@ -1378,29 +1428,6 @@ export function initJuego(config, mobile = false) {
     paddleWidth = PADDLE_W_BASE * paddleSizeMultiplier;
   }
 
-  function getThemeMessage(score) {
-    const THEME_MESSAGES = [
-      'La rosa apenas empieza a florecer... ¡vuelve a intentarlo!',
-      'Como Bella cruzando el portón por primera vez: buen comienzo, sigue así.',
-      'El hechizo comienza a ceder ante ti. ¡Vas por buen camino!',
-      'Los candelabros del salón se encienden para acompañarte. ¡Bien hecho!',
-      'Bailas con la gracia de una quinceañera en su vals. ¡Sigue brillando!',
-      'La Bestia sonríe al ver tu talento. ¡Vas a medio camino!',
-      'Todo el castillo murmura tu nombre. ¡Vas impresionando!',
-      'Tu corona de XV brilla un poco más con cada punto. ¡Adelante!',
-      'Como en el cuento, la magia está de tu lado. ¡Vas muy arriba!',
-      'Los pétalos de la rosa encantada aún no caen: tu magia sigue viva.',
-      '¡Cien mil puntos! Dignos de una noche de gala en el gran salón.',
-      'Bailas como la propia Bella con su vestido dorado. ¡Espectacular!',
-      'El hechizo se rompe gracias a ti: puntaje digno de leyenda.',
-      'Toda la corte del castillo aplaude de pie. ¡Ya casi al tope!',
-      'A un paso de la perfección... una quinceañera legendaria.',
-      '🌹 ¡Puntaje máximo! Un final de cuento de hadas — fuiste el alma de esta fiesta encantada. ¡Feliz XV!'
-    ];
-    const tier = Math.min(Math.floor(Math.max(score, 0) / 10000), THEME_MESSAGES.length - 1);
-    return THEME_MESSAGES[tier];
-  }
-
   function layoutStage() {
     const availW = Math.min(window.innerWidth * 0.92, 450);
     const availH = Math.min(window.innerHeight * 0.72, 560);
@@ -1521,6 +1548,6 @@ export function initJuego(config, mobile = false) {
   loadCrackImages(() => {
     startGame();
     layoutStage();
-    console.log('✅ Juego simplificado con dificultad acelerada iniciado correctamente');
+    console.log('✅ Juego simplificado con dificultad acelerada y mensajes aleatorios iniciado correctamente');
   });
 }
