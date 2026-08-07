@@ -1,10 +1,15 @@
 // ============================================================
 // juego.js – VERSIÓN CON:
+// - Activación de power-ups solo por impacto superior
+// - Validación de nombre SIN ESPACIOS, con filtro de groserías EXTENSO
+// - Top 5 con medallas 🥇🥈🥉 en el modal
+// - Botones "Nueva partida" y "Regresar" en Game Over
+// - Placeholder "Pon aquí tu nombre"
 // - Sin vidas extra, estrella dorada cada 10k puntos
 // - Bloqueo de botón de rankings durante partida
 // - Pausa automática al cambiar de pestaña
 // ============================================================
-console.log('📦 juego.js (estrellas 10k, botón bloqueado, auto-pausa)');
+console.log('📦 juego.js (Top 5, medallas, nuevos botones, placeholder)');
 
 import {
   soundBrick,
@@ -35,7 +40,7 @@ const NIEBLA_HEIGHTS = [0, Math.round(170 * 1.15), Math.round(STAGE_H * 0.60), M
 const NIEBLA_FEATHER = 26;
 const MAX_LIVES = 3;
 const SCORE_PER_LIFE = 10000; // Cada 10k puntos
-const TOP_SCORES_COUNT = 3;
+const TOP_SCORES_COUNT = 5; // Top 5 (cambiado de 3 a 5)
 
 // ========== TIPOS DE LADRILLOS CON PUNTAJES FIJOS ==========
 const BRICK_TYPES = {
@@ -113,7 +118,7 @@ const POWERUP_SYMBOLS = {
   FLAQUESA: '↓'
 };
 
-// ========== PUNTUACIONES (TOP 3) ==========
+// ========== PUNTUACIONES (TOP 5) ==========
 export function getHighScores() {
   try {
     const data = localStorage.getItem('highscores');
@@ -176,9 +181,156 @@ function getRandomThemeMessage() {
   return chosen;
 }
 
+// ========== FILTRO DE GROSERÍAS EXTENSO ==========
+const BAD_WORDS = [
+  // ===== ESPAÑOL (masculino / femenino / plurales / derivados) =====
+  'puta', 'puto', 'putas', 'putos', 'putita', 'putito', 'putitas', 'putitos',
+  'pendejo', 'pendeja', 'pendejos', 'pendejas', 'pendejada', 'pendejadas',
+  'cabron', 'cabrona', 'cabrones', 'cabronas', 'cabroncito', 'cabroncita',
+  'mierda', 'mierdas', 'mierdoso', 'mierdosa', 'mierdosos', 'mierdosas',
+  'coño', 'coños', 'coñazo', 'coñazos',
+  'culo', 'culos', 'culero', 'culera', 'culeros', 'culeras',
+  'verga', 'vergas', 'vergon', 'vergona',
+  'chota', 'chotas', 'choto', 'chotos',
+  'joto', 'jota', 'jotos', 'jotas', 'jotazo', 'jotazos',
+  'maricon', 'maricona', 'maricones', 'mariconas', 'mariconcito', 'mariconcita',
+  'mariquita', 'mariquitas', 'mariquito', 'mariquitos',
+  'zorra', 'zorras', 'zorro', 'zorros',
+  'perra', 'perras', 'perro', 'perros',
+  'bastardo', 'bastarda', 'bastardos', 'bastardas',
+  'malsin', 'malsina', 'malsines', 'malsinas',
+  'polla', 'pollas', 'pollon', 'pollona',
+  'gilipollas',
+  'capullo', 'capulla', 'capullos', 'capullas',
+  'hijodeputa', 'hijueputa', 'hijueputas', 'hijodeputas',
+  'malparido', 'malparida', 'malparidos', 'malparidas',
+  'malnacido', 'malnacida', 'malnacidos', 'malnacidas',
+  'gonorrea', 'gonorreas',
+  'careverga', 'carevergas', 'careculo', 'careculos',
+  'chingada', 'chingado', 'chingadas', 'chingados', 'chingon', 'chingona',
+  'pinche', 'pinches',
+  'desgraciado', 'desgraciada', 'desgraciados', 'desgraciadas',
+  'mamon', 'mamona', 'mamones', 'mamonas', 'mamada', 'mamadas',
+  'cagada', 'cagadas', 'cagado', 'cagada',
+  'imbecil', 'imbeciles', 'imbécil', 'imbéciles',
+  'soquete', 'soquetes',
+  'tonto', 'tonta', 'tontos', 'tontas', 'tontito', 'tontita',
+  'bobo', 'boba', 'bobos', 'bobas', 'bobito', 'bobita',
+  'idiota', 'idiotas', 'idiotiza',
+  'estupido', 'estupida', 'estupidos', 'estupidas', 'estupidez',
+  'tarado', 'tarada', 'tarados', 'taradas',
+  'retrasado', 'retrasada', 'retrasados', 'retrasadas',
+  'subnormal', 'subnormales',
+  'anormal', 'anormales',
+  'basura', 'basuras',
+  'escoria', 'escorias',
+  'caca', 'cacas',
+  'pipi', 'popo',
+  'moco', 'mocos', 'mocoso', 'mocosa',
+  'vejiga', 'vejigas',
+  'huevada', 'huevadas', 'huevon', 'huevona', 'huevones', 'huevonas',
+  'weon', 'weona', 'weones', 'weonas', 'wn',
+  'pico', 'picos', 'picante',
+  'loca', 'locas', 'loco', 'locos',
+  'travieso', 'traviesa',
+  'sapo', 'sapa', 'sapos', 'sapas',
+  'chupamedias', 'chupapijas', 'chupaverga',
+  'comepene', 'comepijas',
+  'soplon', 'soplona', 'soplones', 'soplonas',
+  'delator', 'delatora', 'delatores',
+
+  // ===== INGLÉS (y variaciones comunes) =====
+  'fuck', 'fucking', 'fucker', 'fuckers', 'fuckin',
+  'motherfucker', 'motherfuckers', 'mofo',
+  'shit', 'shits', 'shitty', 'shitting', 'shithead', 'shitheads',
+  'bitch', 'bitches', 'bitchy', 'bitching',
+  'bastard', 'bastards',
+  'asshole', 'assholes', 'ass', 'asses',
+  'dick', 'dicks', 'dickhead', 'dickheads',
+  'cunt', 'cunts', 'cunty',
+  'pussy', 'pussies', 'puss', 'pussies',
+  'whore', 'whores',
+  'slut', 'sluts', 'slutty',
+  'twat', 'twats',
+  'cock', 'cocks', 'cocksucker', 'cocksuckers',
+  'ballsack', 'ballsacks', 'ballbag',
+  'wanker', 'wankers', 'wank',
+  'prick', 'pricks',
+  'douche', 'douches', 'douchebag', 'douchebags',
+  'arse', 'arses', 'arsehole', 'arseholes',
+  'bugger', 'buggers',
+  'sod', 'sods',
+  'tosser', 'tossers',
+  'knob', 'knobs', 'knobhead', 'knobheads',
+  'git', 'gits',
+  'minge', 'minges',
+  'clunge', 'clunges',
+  'cum', 'cums', 'cumming',
+  'jizz', 'jizzed',
+  'sperm', 'sperms',
+  'tits', 'titties', 'titty',
+  'boobs', 'boobies', 'boob',
+  'bollocks', 'bollock',
+  'nigger', 'nigga', 'niggas', 'niggers',
+  'spic', 'spics',
+  'chink', 'chinks',
+  'wetback',
+  'retard', 'retards', 'retarded',
+  'mong', 'mongoloid',
+  'faggot', 'faggots', 'fag', 'fags',
+  'dyke', 'dykes',
+  'tranny', 'trannies',
+  'queer', 'queers',
+  'homo', 'homos',
+  'lesbo', 'lesbos',
+  'shemale', 'shemales',
+  'hell', 'hells',
+  'damn', 'damns', 'damned',
+  'crap', 'craps', 'crappy',
+  'piss', 'pissed', 'pissing', 'piss off',
+  'suck', 'sucks', 'sucking',
+  'screw', 'screwed', 'screwing',
+];
+
+// ========== VALIDACIÓN DE NOMBRE (SIN ESPACIOS) ==========
+const MAX_NAME_LENGTH = 12;
+const NAME_REGEX = /^[A-Za-záéíóúÁÉÍÓÚñÑ]+$/;
+
+function isValidName(name) {
+  const trimmed = name.trim();
+  if (trimmed.length === 0) return false;
+  if (trimmed.length > MAX_NAME_LENGTH) return false;
+  if (!NAME_REGEX.test(trimmed)) return false;
+  const lower = trimmed.toLowerCase();
+  for (const bad of BAD_WORDS) {
+    if (lower.includes(bad)) return false;
+  }
+  return true;
+}
+
+function capitalizeName(name) {
+  if (!name) return '';
+  return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+}
+
+function generateRandomName() {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let result = '';
+  for (let i = 0; i < 3; i++) {
+    result += letters.charAt(Math.floor(Math.random() * letters.length));
+  }
+  // Convertir a "Abc" (primera mayúscula, resto minúsculas)
+  return result.charAt(0) + result.slice(1).toLowerCase();
+}
+
+function filterNameInput(value) {
+  // Solo permite letras (incluyendo acentos y ñ), sin espacios, números ni símbolos
+  return value.replace(/[^A-Za-záéíóúÁÉÍÓÚñÑ]/g, '').slice(0, MAX_NAME_LENGTH);
+}
+
 // ========== FUNCIÓN PRINCIPAL ==========
 export function initJuego(config, mobile = false) {
-  console.log('🎮 Iniciando juego (versión con estrellas 10k, botón bloqueado, auto-pausa)');
+  console.log('🎮 Iniciando juego (Top 5, medallas, nuevos botones)');
 
   // ========== ELEMENTOS ==========
   const overlay = document.getElementById('game-overlay');
@@ -214,15 +366,27 @@ export function initJuego(config, mobile = false) {
   const gameoverThemeMsg = document.getElementById('gameover-theme-msg');
   const gameoverInputContainer = document.getElementById('gameover-input-container');
   const playerNameInput = document.getElementById('player-name-input');
-  const gameoverSave = document.getElementById('gameover-save');
-  const gameoverMenuBtn = document.getElementById('gameover-menu-btn');
   const nameError = document.getElementById('name-error');
+  // Nuevos botones
+  const gameoverNewGameBtn = document.getElementById('gameover-newgame-btn');
+  const gameoverExitBtn = document.getElementById('gameover-exit-btn');
 
   livesEl.style.fontFamily = "'Press Start 2P', monospace";
   livesEl.style.fontSize = 'clamp(0.9rem,2.2vw,1.2rem)';
   livesEl.style.letterSpacing = '0.1em';
   scoreEl.style.fontFamily = "'Press Start 2P', monospace";
   scoreEl.style.fontSize = 'clamp(0.7rem,1.8vw,0.9rem)';
+
+  // ========== FILTRAR INPUT DEL NOMBRE (sin espacios) ==========
+  if (playerNameInput) {
+    playerNameInput.placeholder = 'Pon aquí tu nombre';
+    playerNameInput.addEventListener('input', function(e) {
+      const filtered = filterNameInput(this.value);
+      if (filtered !== this.value) {
+        this.value = filtered;
+      }
+    });
+  }
 
   // ========== VARIABLES DE ESTADO ==========
   let scale = 1;
@@ -329,7 +493,7 @@ export function initJuego(config, mobile = false) {
     rankBtn.style.cursor = disabled ? 'default' : 'pointer';
   }
 
-  // ===== MODAL RANKINGS =====
+  // ===== MODAL RANKINGS (con medallas y Top 5) =====
   function mostrarRankings() {
     const modal = document.getElementById('rank-modal');
     const list = document.getElementById('rank-list');
@@ -339,9 +503,16 @@ export function initJuego(config, mobile = false) {
     if (scores.length === 0) {
       list.innerHTML = '<li class="rank-empty">No hay puntuaciones aún.</li>';
     } else {
+      const medals = ['🥇', '🥈', '🥉'];
       scores.forEach((item, idx) => {
         const li = document.createElement('li');
-        li.innerHTML = `<span class="pos">#${idx+1}</span><span class="name">${item.name}</span><span class="score">${item.score}</span>`;
+        let posHtml = '';
+        if (idx < 3) {
+          posHtml = `<span class="pos">${medals[idx]}</span>`;
+        } else {
+          posHtml = `<span class="pos">#${idx+1}</span>`;
+        }
+        li.innerHTML = `${posHtml}<span class="name">${item.name}</span><span class="score">${item.score}</span>`;
         list.appendChild(li);
       });
     }
@@ -790,7 +961,7 @@ export function initJuego(config, mobile = false) {
     livesEl.style.display = 'block';
     scoreEl.style.display = 'block';
     lastTime = 0;
-    setRankButtonState(false); // Desbloquear botón al limpiar
+    setRankButtonState(false);
     updateUI();
     syncMuteIcon();
   }
@@ -832,7 +1003,7 @@ export function initJuego(config, mobile = false) {
     mouseX = 0;
     lastTime = 0;
     floatingMessages = [];
-    setRankButtonState(false); // Desbloquear botón al resetear
+    setRankButtonState(false);
 
     const initialX = paddle.x + paddleWidth / 2;
     const initialY = STAGE_H - 14 - BALL_R;
@@ -914,7 +1085,7 @@ export function initJuego(config, mobile = false) {
     gameTimeActive = false;
     if (animFrameId) cancelAnimationFrame(animFrameId);
     soundGameOver();
-    setRankButtonState(false); // Desbloquear al terminar partida
+    setRankButtonState(false);
     if (menuGameover) {
       gameoverScore.textContent = `Puntuación: ${playerScore}`;
       if (gameoverThemeMsg) {
@@ -924,25 +1095,14 @@ export function initJuego(config, mobile = false) {
       if (isTop) {
         pendingHighScore = true;
         gameoverInputContainer.style.display = 'block';
-        const label = gameoverInputContainer.querySelector('p');
-        if (label) label.textContent = '¡Top 3!';
-        playerNameInput.value = '';
-        playerNameInput.focus();
-        gameoverMenuBtn.style.display = 'none';
+        if (playerNameInput) {
+          playerNameInput.value = '';
+          playerNameInput.focus();
+        }
         nameError.style.display = 'none';
       } else {
         pendingHighScore = false;
         gameoverInputContainer.style.display = 'none';
-        gameoverMenuBtn.style.display = 'block';
-        gameoverMenuBtn.textContent = '🔄 Nueva partida';
-        gameoverMenuBtn.style.marginLeft = 'auto';
-        gameoverMenuBtn.style.marginRight = 'auto';
-        gameoverMenuBtn.style.display = 'block';
-        gameoverMenuBtn.onclick = () => {
-          menuEl.style.display = 'none';
-          cleanGameState();
-          startGame();
-        };
       }
       menuEl.style.display = 'flex';
       menuGameover.style.display = 'block';
@@ -953,6 +1113,26 @@ export function initJuego(config, mobile = false) {
     muteBtn.style.display = 'none';
     exitBtn.style.display = 'none';
     rankBtn.style.display = 'none';
+  }
+
+  // ========== FUNCIÓN PARA GUARDAR Y REINICIAR ==========
+  function handleNewGame() {
+    // Si es puntaje alto, guardar nombre (o generar aleatorio)
+    if (pendingHighScore && playerNameInput) {
+      let name = playerNameInput.value.trim();
+      if (!isValidName(name)) {
+        name = generateRandomName();
+      } else {
+        name = capitalizeName(name);
+      }
+      addHighScore(name, playerScore);
+      pendingHighScore = false;
+      gameoverInputContainer.style.display = 'none';
+    }
+    // Reiniciar juego
+    menuEl.style.display = 'none';
+    cleanGameState();
+    startGame();
   }
 
   // ========== INICIO DE PARTIDA ==========
@@ -975,7 +1155,7 @@ export function initJuego(config, mobile = false) {
 
     running = true;
     gameOver = false;
-    setRankButtonState(true); // Bloquear botón durante la partida
+    setRankButtonState(true);
     layoutStage();
     livesEl.style.display = 'block';
     scoreEl.style.display = 'block';
@@ -999,11 +1179,9 @@ export function initJuego(config, mobile = false) {
       lastScoreValue = playerScore;
     }
 
-    // === CAMBIO AQUÍ: Cada 10,000 puntos → Estrella Dorada (sin vidas extra) ===
     const milestone = Math.floor(playerScore / SCORE_PER_LIFE);
     if (milestone > lastScoreMilestone && milestone > 0) {
       lastScoreMilestone = milestone;
-      // Siempre aparece la estrella dorada, sin importar las vidas
       if (!blueBallActive) {
         pendingBlueBall = true;
       }
@@ -1019,7 +1197,6 @@ export function initJuego(config, mobile = false) {
   function draw() {
     ctx.clearRect(0, 0, STAGE_W, STAGE_H);
 
-    // Fondo
     if (!draw.bgImage) {
       draw.bgImage = new Image();
       draw.bgImage.src = '../archivos/jueg1.png';
@@ -1127,7 +1304,7 @@ export function initJuego(config, mobile = false) {
       ctx.shadowBlur = 0;
     }
 
-    // Niebla (debajo de las bolas)
+    // Niebla
     const boundary = NIEBLA_HEIGHTS[nieblaLevel] || 0;
     if (boundary > 0) {
       const gradNiebla = ctx.createLinearGradient(0, 0, 0, boundary);
@@ -1336,17 +1513,20 @@ export function initJuego(config, mobile = false) {
         }
       }
 
-      // Actualizar power-ups
+      // Actualizar power-ups (activación solo por impacto superior)
       for (let i = powerups.length - 1; i >= 0; i--) {
         const pu = powerups[i];
         pu.y += pu.vy * delta;
 
         const px = paddle.x;
-        const py2 = STAGE_H - 14 - PADDLE_H / 2;
-        if (pu.y + pu.size / 2 > py2 - PADDLE_H / 2 &&
-            pu.y - pu.size / 2 < py2 + PADDLE_H / 2 &&
-            pu.x + pu.size / 2 > px &&
-            pu.x - pu.size / 2 < px + paddleWidth) {
+        const py2 = STAGE_H - 14;
+        // Solo activar si el centro X está dentro de la paleta
+        // y el borde inferior del power toca la mitad superior de la paleta
+        if (pu.vy > 0 &&
+            pu.x >= px && pu.x <= px + paddleWidth &&
+            pu.y + pu.size/2 >= py2 - PADDLE_H/2 &&
+            pu.y + pu.size/2 <= py2) {
+          // Activación por impacto superior
           if (pu.isBlue) {
             applyBlueBall();
           } else {
@@ -1360,7 +1540,8 @@ export function initJuego(config, mobile = false) {
           continue;
         }
 
-        if (pu.y - pu.size / 2 > STAGE_H) {
+        // Si el power-up se pierde por abajo
+        if (pu.y - pu.size/2 > STAGE_H) {
           powerups.splice(i, 1);
           powerupsInAir--;
           if (pu.isBlue) blueBallActive = false;
@@ -1461,7 +1642,6 @@ export function initJuego(config, mobile = false) {
 
   // ===== MANEJO DE TECLADO =====
   document.addEventListener('keydown', (e) => {
-    // ESC: salir siempre
     if (e.key === 'Escape') {
       e.preventDefault();
       salir();
@@ -1470,7 +1650,6 @@ export function initJuego(config, mobile = false) {
 
     if (!running || gameOver) return;
 
-    // Movimiento (solo si no está pausado)
     if (!paused) {
       if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
         keys.left = true;
@@ -1481,7 +1660,6 @@ export function initJuego(config, mobile = false) {
       }
     }
 
-    // Barra espaciadora: lanzar o pausar/reanudar (siempre funcional)
     if (e.key === ' ' || e.key === 'Space') {
       e.preventDefault();
       if (!launched) {
@@ -1537,7 +1715,17 @@ export function initJuego(config, mobile = false) {
     if (window.toggleMusic) window.toggleMusic();
     setTimeout(syncMuteIcon, 100);
   });
+  // Botón "Regresar" de la interfaz superior (fuera del menú)
   exitBtn.addEventListener('click', salir);
+  // Botón "Regresar" del menú Game Over
+  if (gameoverExitBtn) {
+    gameoverExitBtn.addEventListener('click', salir);
+  }
+  // Botón "Nueva partida" del menú Game Over
+  if (gameoverNewGameBtn) {
+    gameoverNewGameBtn.addEventListener('click', handleNewGame);
+  }
+
   rankBtn.addEventListener('click', mostrarRankings);
   document.getElementById('rank-close')?.addEventListener('click', ocultarRankings);
   document.getElementById('rank-modal')?.addEventListener('click', (e) => {
@@ -1546,45 +1734,22 @@ export function initJuego(config, mobile = false) {
 
   // ===== AUTO-PAUSA AL CAMBIAR DE PESTAÑA =====
   document.addEventListener('visibilitychange', () => {
-    // Si la pestaña se oculta, pausar automáticamente
     if (document.hidden) {
       if (running && !paused && !gameOver) {
         togglePause();
         console.log('⏸️ Juego pausado automáticamente al cambiar de pestaña');
       }
     } else {
-      // Al volver, sincronizar ícono de música
       if (running && !gameOver) {
         syncMuteIcon();
       }
     }
   });
 
-  // ===== GUARDAR PUNTAJE =====
-  gameoverSave.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const name = playerNameInput.value.trim();
-    if (!isValidName(name) || name === '') {
-      nameError.style.display = 'block';
-      return;
-    }
-    nameError.style.display = 'none';
-    addHighScore(name, playerScore);
-    pendingHighScore = false;
-    gameoverInputContainer.style.display = 'none';
-    menuEl.style.display = 'none';
-    cleanGameState();
-    startGame();
-  });
-
-  function isValidName(name) {
-    return /^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/.test(name);
-  }
-
   // ========== INICIO ==========
   loadCrackImages(() => {
     startGame();
     layoutStage();
-    console.log('✅ Juego con todas las correcciones aplicadas (10k estrellas, bloqueo, auto-pausa)');
+    console.log('✅ Juego con Top 5, medallas, nuevos botones y placeholder');
   });
 }
