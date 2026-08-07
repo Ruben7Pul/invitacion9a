@@ -1,8 +1,8 @@
 // ============================================================
 // juego.js – VERSIÓN SIMPLIFICADA (SIN COMBOS, PUNTAJES FIJOS)
-// DIFICULTAD REDUCIDA AL 50% DEL TIEMPO + MENSAJES ALEATORIOS CON HISTORIAL
+// DIFICULTAD REDUCIDA AL 50% DEL TIEMPO + MENSAJES ALEATORIOS CON HISTORIAL 9
 // ============================================================
-console.log('📦 juego.js (sin combos, dificultad acelerada, mensajes aleatorios)');
+console.log('📦 juego.js (sin combos, dificultad acelerada, mensajes aleatorios, historial 9)');
 
 import {
   soundBrick,
@@ -154,36 +154,29 @@ const THEME_MESSAGES = [
   '🌹 ¡Puntaje máximo! Un final de cuento de hadas — fuiste el alma de esta fiesta encantada. ¡Feliz XV!'
 ];
 
-// Historial de los últimos 10 mensajes usados (para evitar repeticiones)
+// Historial de los últimos 9 mensajes usados (evita repeticiones)
 let messageHistory = [];
-const MAX_HISTORY = 10;
+const MAX_HISTORY = 9; // <--- Cambiado de 10 a 9
 
 function getRandomThemeMessage() {
-  // Filtrar mensajes que no estén en el historial
   const available = THEME_MESSAGES.filter(msg => !messageHistory.includes(msg));
-  
-  // Si todos los mensajes están en el historial (caso extremo), limpiar historial y permitir cualquiera
   let chosen;
   if (available.length === 0) {
-    // Reiniciamos historial para evitar bloqueo
     messageHistory = [];
     chosen = THEME_MESSAGES[Math.floor(Math.random() * THEME_MESSAGES.length)];
   } else {
     chosen = available[Math.floor(Math.random() * available.length)];
   }
-  
-  // Agregar al historial y mantener tamaño máximo
   messageHistory.push(chosen);
   if (messageHistory.length > MAX_HISTORY) {
     messageHistory.shift();
   }
-  
   return chosen;
 }
 
 // ========== FUNCIÓN PRINCIPAL ==========
 export function initJuego(config, mobile = false) {
-  console.log('🎮 Iniciando juego (sin combos, dificultad acelerada, mensajes aleatorios)');
+  console.log('🎮 Iniciando juego (versión con historial 9, niebla corregida y teclas)');
 
   // ========== ELEMENTOS ==========
   const overlay = document.getElementById('game-overlay');
@@ -533,7 +526,6 @@ export function initJuego(config, mobile = false) {
     return difficultyTime / 60;
   }
 
-  // Velocidad máxima en 7 minutos (era 14)
   const BALL_SPEED_RAMP_MINUTES = 7;
   const BALL_SPEED_MAX_MULT = 2.7;
   function getSpeedMultiplier(minutes) {
@@ -547,7 +539,6 @@ export function initJuego(config, mobile = false) {
   }
 
   function getGreenProbability(minutes) {
-    // La tabla se agota en 4 minutos (multiplicador x4 en lugar de x2)
     const step = minutes * 4;
     if (step <= 0) return GREEN_PROB_TABLE[0];
     if (step >= GREEN_PROB_TABLE.length - 1) return GREEN_PROB_TABLE[GREEN_PROB_TABLE.length - 1];
@@ -912,7 +903,6 @@ export function initJuego(config, mobile = false) {
     soundGameOver();
     if (menuGameover) {
       gameoverScore.textContent = `Puntuación: ${playerScore}`;
-      // Mensaje de ánimo aleatorio (evitando repeticiones recientes)
       if (gameoverThemeMsg) {
         gameoverThemeMsg.textContent = getRandomThemeMessage();
       }
@@ -1087,7 +1077,6 @@ export function initJuego(config, mobile = false) {
         ctx.roundRect(x, y, w, h, radius);
         ctx.stroke();
       }
-      // Grietas
       const crackSrc = getCrackImageSrc(br);
       if (crackSrc) {
         const img = crackImages[crackSrc.split('/').pop()];
@@ -1126,7 +1115,24 @@ export function initJuego(config, mobile = false) {
       ctx.shadowBlur = 0;
     }
 
-    // Bolas
+    // ===== NIEBLA: se dibuja ANTES de las bolas para que éstas queden encima =====
+    const boundary = NIEBLA_HEIGHTS[nieblaLevel] || 0;
+    if (boundary > 0) {
+      const gradNiebla = ctx.createLinearGradient(0, 0, 0, boundary);
+      gradNiebla.addColorStop(0, 'rgba(240, 245, 255, 0.98)');
+      gradNiebla.addColorStop(0.6, 'rgba(220, 230, 250, 0.95)');
+      gradNiebla.addColorStop(1, 'rgba(200, 210, 230, 0.92)');
+      ctx.fillStyle = gradNiebla;
+      ctx.fillRect(0, 0, STAGE_W, boundary);
+      const feather = NIEBLA_FEATHER;
+      const gradFeather = ctx.createLinearGradient(0, boundary - feather, 0, boundary);
+      gradFeather.addColorStop(0, 'rgba(255,255,255,0)');
+      gradFeather.addColorStop(1, 'rgba(255,255,255,0.2)');
+      ctx.fillStyle = gradFeather;
+      ctx.fillRect(0, boundary - feather, STAGE_W, feather);
+    }
+
+    // Bolas (ahora se dibujan después de la niebla, por lo que están encima)
     for (const b of balls) {
       const x = b.x, y = b.y;
       let grad;
@@ -1185,23 +1191,6 @@ export function initJuego(config, mobile = false) {
     ctx.beginPath();
     ctx.roundRect(px, py, pw, ph, radiusP);
     ctx.stroke();
-
-    // Niebla
-    const boundary = NIEBLA_HEIGHTS[nieblaLevel] || 0;
-    if (boundary > 0) {
-      const gradNiebla = ctx.createLinearGradient(0, 0, 0, boundary);
-      gradNiebla.addColorStop(0, 'rgba(240, 245, 255, 0.98)');
-      gradNiebla.addColorStop(0.6, 'rgba(220, 230, 250, 0.95)');
-      gradNiebla.addColorStop(1, 'rgba(200, 210, 230, 0.92)');
-      ctx.fillStyle = gradNiebla;
-      ctx.fillRect(0, 0, STAGE_W, boundary);
-      const feather = NIEBLA_FEATHER;
-      const gradFeather = ctx.createLinearGradient(0, boundary - feather, 0, boundary);
-      gradFeather.addColorStop(0, 'rgba(255,255,255,0)');
-      gradFeather.addColorStop(1, 'rgba(255,255,255,0.2)');
-      ctx.fillStyle = gradFeather;
-      ctx.fillRect(0, boundary - feather, STAGE_W, feather);
-    }
 
     drawFloatingMessages(ctx);
   }
@@ -1286,7 +1275,6 @@ export function initJuego(config, mobile = false) {
           b.vy = -Math.cos(angle) * speed;
         }
 
-        // Colisión con ladrillos
         for (const br of bricks) {
           if (!br.alive) continue;
           if (b.x + BALL_R > br.x && b.x - BALL_R < br.x + br.w &&
@@ -1311,7 +1299,6 @@ export function initJuego(config, mobile = false) {
               br.alive = false;
               if (br.isGolden && goldenBrickRef === br) goldenBrickRef = null;
 
-              // Puntaje fijo (sin combo)
               const puntos = getBrickPoints(br);
               playerScore += puntos;
               gamePoints -= br.value;
@@ -1460,25 +1447,51 @@ export function initJuego(config, mobile = false) {
     if (running && !launched && !paused && !gameOver) launchBall();
   });
 
+  // ===== MANEJO DE TECLADO MEJORADO =====
   document.addEventListener('keydown', (e) => {
-    if (!running || paused || gameOver) return;
-    if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') { keys.left = true; e.preventDefault(); }
-    else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') { keys.right = true; e.preventDefault(); }
+    // Tecla ESC: salir siempre (incluso si está pausado o game over)
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      salir();
+      return;
+    }
+
+    // Si el juego no está corriendo o está en game over, ignorar el resto de teclas
+    if (!running || gameOver) return;
+
+    // Movimiento (A/D, flechas) – solo si no está pausado
+    if (!paused) {
+      if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
+        keys.left = true;
+        e.preventDefault();
+      } else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') {
+        keys.right = true;
+        e.preventDefault();
+      }
+    }
+
+    // Barra espaciadora: siempre funciona (incluso si pausado) para pausar/reanudar o lanzar
     if (e.key === ' ' || e.key === 'Space') {
       e.preventDefault();
-      if (!running || gameOver) return;
       if (!launched) {
         launchBall();
-        return;
+      } else {
+        togglePause();
       }
-      togglePause();
     }
   });
+
   document.addEventListener('keyup', (e) => {
-    if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') { keys.left = false; e.preventDefault(); }
-    else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') { keys.right = false; e.preventDefault(); }
+    if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
+      keys.left = false;
+      e.preventDefault();
+    } else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') {
+      keys.right = false;
+      e.preventDefault();
+    }
   });
 
+  // Eventos táctiles (sin cambios)
   stage.addEventListener('touchstart', (e) => {
     if (e.target.closest('#game-menu')) return;
     if (!running || paused || gameOver) return;
@@ -1491,6 +1504,7 @@ export function initJuego(config, mobile = false) {
       if (!launched) launchBall();
     }
   }, { passive: true });
+
   stage.addEventListener('touchmove', (e) => {
     if (!running || paused || gameOver) return;
     e.preventDefault();
@@ -1502,6 +1516,7 @@ export function initJuego(config, mobile = false) {
       touchActive = true;
     }
   }, { passive: false });
+
   stage.addEventListener('touchend', () => { touchActive = false; }, { passive: true });
   stage.addEventListener('touchcancel', () => { touchActive = false; }, { passive: true });
 
@@ -1548,6 +1563,6 @@ export function initJuego(config, mobile = false) {
   loadCrackImages(() => {
     startGame();
     layoutStage();
-    console.log('✅ Juego simplificado con dificultad acelerada y mensajes aleatorios iniciado correctamente');
+    console.log('✅ Juego simplificado con todas las correcciones aplicadas');
   });
 }
