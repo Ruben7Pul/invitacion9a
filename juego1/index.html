@@ -17,7 +17,6 @@
       font-family:'Cinzel',serif;
     }
 
-    /* FONDO AZUL DEGRADADO (MISMO QUE LA REJA) */
     #game-bg {
       position:fixed;
       inset:0;
@@ -86,7 +85,6 @@
       opacity:1;
     }
 
-    /* HEADER: vidas, puntuación y botones */
     #game-header {
       display:flex;
       align-items:center;
@@ -137,7 +135,6 @@
       flex-shrink:0;
     }
 
-    /* Botones pequeños pero legibles */
     .game-btn-sm {
       background:rgba(201,162,77,0.12);
       border:1.5px solid #c9a24d;
@@ -228,7 +225,6 @@
       z-index:2;
     }
 
-    /* FOOTER: texto de ayuda más pequeño */
     #game-footer {
       display:flex;
       flex-direction:column;
@@ -253,21 +249,11 @@
       border:1px solid rgba(212,175,55,0.1);
       width:100%;
     }
-    .game-help .highlight {
-      color:#ffd700;
-      font-weight:bold;
-    }
-    .game-help .good {
-      color:#4caf50;
-    }
-    .game-help .bad {
-      color:#ff6b6b;
-    }
-    .game-help .gold {
-      color:#ffd700;
-    }
+    .game-help .highlight { color:#ffd700; font-weight:bold; }
+    .game-help .good { color:#4caf50; }
+    .game-help .bad { color:#ff6b6b; }
+    .game-help .gold { color:#ffd700; }
 
-    /* GAME OVER */
     #game-menu {
       display:flex;
       flex-direction:column;
@@ -382,7 +368,6 @@
     }
     #loading-tips.hidden { opacity:0; }
 
-    /* ===== MODAL RANKINGS ===== */
     .modal-rank {
       position:fixed;
       inset:0;
@@ -491,10 +476,8 @@
   </style>
 </head>
 <body style="background:#0e0a18">
-  <!-- FONDO AZUL DEGRADADO -->
   <div id="game-bg"></div>
 
-  <!-- Música de fondo -->
   <audio id="bg-music" src="../archivos/juegcan.mp3" loop preload="auto"></audio>
 
   <div id="loading-veil" aria-hidden="true"></div>
@@ -511,7 +494,6 @@
 
   <div id="game-overlay" class="open">
     <div id="game-panel">
-      <!-- HEADER: vidas, puntuación y botones -->
       <div id="game-header">
         <div class="left">
           <span id="lives">♥ ♥ ♥</span>
@@ -525,7 +507,6 @@
         </div>
       </div>
 
-      <!-- Área de juego -->
       <div id="game-stage">
         <div id="game-inner"></div>
         <div id="game-menu" style="display:none;">
@@ -549,7 +530,6 @@
         <div id="loading-tips" class="hidden"></div>
       </div>
 
-      <!-- FOOTER: texto de ayuda -->
       <div id="game-footer">
         <p class="game-help">
           🎮 <span class="highlight">Mueve con dedo, A/D o flechas</span><br>
@@ -571,6 +551,7 @@
     </div>
   </div>
 
-  <script src="../script-juego.js" type="module"></script>
+  <!-- ===== SCRIPT CON VERSIÓN MANUAL (cambia el número cuando subas cambios) ===== -->
+  <script src="../script-juego.js?v=1" type="module"></script>
 </body>
 </html>
