@@ -1,10 +1,31 @@
 // ============================================================
-// script-juego.js – SCRIPT DEL JUEGO (independiente)
+// script-juego.js – SCRIPT DEL JUEGO (con control de versión y reseteo de puntuaciones)
 // ============================================================
 console.log('🎮 script-juego.js cargado');
 
+// ===== VERSIÓN MANUAL: ¡CAMBIA ESTE NÚMERO CON CADA ACTUALIZACIÓN DEL JUEGO! =====
+const VERSION = '1';  // Cambia a '2', '3', etc. para forzar actualización Y resetear puntuaciones
+
+// ===== FUNCIÓN PARA RESETEAR PUNTUACIONES SI LA VERSIÓN CAMBIÓ =====
+function checkAndResetScores() {
+  try {
+    const savedVersion = localStorage.getItem('gameVersion');
+    if (savedVersion !== VERSION) {
+      // La versión cambió: borramos las puntuaciones antiguas
+      localStorage.removeItem('highscores');
+      localStorage.setItem('gameVersion', VERSION);
+      console.log(`🔄 Versión del juego actualizada a ${VERSION}. Puntuaciones reiniciadas.`);
+    } else {
+      console.log(`✅ Versión del juego ${VERSION} coincide. Puntuaciones intactas.`);
+    }
+  } catch (e) {
+    console.warn('⚠️ No se pudo acceder a localStorage:', e);
+  }
+}
+
 async function cargarConfig() {
   try {
+    // config.json siempre se obtiene sin caché (timestamp)
     const res = await fetch(`../config.json?t=${Date.now()}`);
     if (!res.ok) throw new Error('HTTP error ' + res.status);
     const data = await res.json();
@@ -33,9 +54,15 @@ async function cargarConfig() {
 
 (async function init() {
   try {
+    // 1. Verificar versión y resetear puntuaciones si es necesario
+    checkAndResetScores();
+
     const config = await cargarConfig();
-    // Cargar música con ruta específica para el juego
-    const { initMusica, playMusic, toggleMusic, isMusicMuted } = await import('./modules/musica.js');
+    
+    // ===== IMPORTACIONES CON VERSIÓN (para romper caché) =====
+    const { initMusica, playMusic, toggleMusic, isMusicMuted } = 
+      await import(`./modules/musica.js?v=${VERSION}`);
+    
     initMusica('../archivos/juegcan.mp3');
     window.toggleMusic = toggleMusic;
     window.isMusicMuted = isMusicMuted;
@@ -46,9 +73,9 @@ async function cargarConfig() {
     }, 100);
 
     // Cargar juego
-    const { initJuego } = await import('./modules/juego.js');
+    const { initJuego } = await import(`./modules/juego.js?v=${VERSION}`);
     initJuego(config, false);
-    console.log('✅ Juego iniciado correctamente');
+    console.log(`✅ Juego iniciado correctamente (versión ${VERSION})`);
   } catch (e) {
     console.error('❌ Error al iniciar el juego:', e);
     const body = document.body;
