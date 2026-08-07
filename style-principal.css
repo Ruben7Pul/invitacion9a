@@ -116,6 +116,112 @@ body {
   display: none !important;
 }
 
+/* ===== KEYFRAMES PARA BRILLOS (FLASHES) ===== */
+@keyframes flash-pantalla-reja {
+  0% { opacity: 0; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0; }
+}
+
+@keyframes flash-pantalla-bella {
+  0% { opacity: 0; }
+  50% { opacity: 0.75; }
+  100% { opacity: 0; }
+}
+
+@keyframes shine-left {
+  0% { opacity: 0; left: -100%; }
+  50% { opacity: 0.6; left: 50%; }
+  100% { opacity: 0; left: 100%; }
+}
+
+@keyframes shine-right {
+  0% { opacity: 0; right: -100%; }
+  50% { opacity: 0.6; right: 50%; }
+  100% { opacity: 0; right: 100%; }
+}
+
+@keyframes shine-top {
+  0% { opacity: 0; top: -100%; }
+  50% { opacity: 0.5; top: 50%; }
+  100% { opacity: 0; top: 100%; }
+}
+
+@keyframes shine-bottom {
+  0% { opacity: 0; bottom: -100%; }
+  50% { opacity: 0.5; bottom: 50%; }
+  100% { opacity: 0; bottom: 100%; }
+}
+
+/* Flash de pantalla al tocar reja */
+#portal-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.9) 0%, transparent 70%);
+  pointer-events: none;
+  display: none;
+  animation: flash-pantalla-reja 0.6s ease-out forwards;
+}
+
+#portal-flash.active {
+  display: block;
+}
+
+/* Flash de pantalla antes de bella.jpg */
+#bella-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.85) 0%, transparent 75%);
+  pointer-events: none;
+  display: none;
+  animation: flash-pantalla-bella 0.5s ease-out forwards;
+}
+
+#bella-flash.active {
+  display: block;
+}
+
+/* Brillos laterales y superiores del video (no intrusivos) */
+.video-shine-overlay {
+  position: fixed;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.video-shine-overlay.left {
+  top: 0;
+  left: 0;
+  width: 80px;
+  height: 100vh;
+  background: linear-gradient(to right, rgba(212, 175, 55, 0.3) 0%, transparent 100%);
+}
+
+.video-shine-overlay.right {
+  top: 0;
+  right: 0;
+  width: 80px;
+  height: 100vh;
+  background: linear-gradient(to left, rgba(212, 175, 55, 0.3) 0%, transparent 100%);
+}
+
+.video-shine-overlay.top {
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 60px;
+  background: linear-gradient(to bottom, rgba(212, 175, 55, 0.2) 0%, transparent 100%);
+}
+
+.video-shine-overlay.bottom {
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  height: 60px;
+  background: linear-gradient(to top, rgba(212, 175, 55, 0.2) 0%, transparent 100%);
+}
+
 /* ===== PORTAL ===== */
 #portal {
   position: fixed;
@@ -124,7 +230,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(ellipse at 50% 35%, #0d1f4a 0%, #0a122a 75%);
+  background: radial-gradient(ellipse at 50% 35%, #3d2f1f 0%, #2a1f14 75%);
   transition: opacity 0.7s ease, visibility 0.7s ease;
   will-change: opacity, visibility;
   contain: layout style paint;
@@ -1400,6 +1506,8 @@ h1#nombre-hero {
   border-radius: 16px;
   overflow: hidden;
   margin: 0.5rem 0;
+  border: 3px solid #d4af37;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.4), inset 0 0 10px rgba(212, 175, 55, 0.2);
 }
 
 .collage-container .collage-item {
