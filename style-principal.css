@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS OPTIMIZADOS (ADORNOS DORADOS + ARENA)
+   🌹 INVITACIÓN XV – ESTILOS OPTIMIZADOS (ADORNOS DORADOS)
    ============================================================ */
 
 :root {
@@ -1397,6 +1397,7 @@ h1#nombre-hero {
   text-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
 }
 
+/* ===== CONTENEDOR DEL COLLAGE: SIEMPRE BORDE DORADO ===== */
 .collage-container {
   flex: 1;
   min-height: 0;
@@ -1404,19 +1405,14 @@ h1#nombre-hero {
   width: 100%;
   position: relative;
   background: transparent;
-  border-radius: 0;
   overflow: hidden;
   margin: 0.5rem 0;
+  border: 3px solid #b8860b;
+  border-radius: 16px;
+  box-shadow: 0 0 0 2px rgba(184, 134, 11, 0.15), 0 0 30px rgba(184, 134, 11, 0.1);
 }
 
-@media (pointer: coarse) {
-  .collage-container {
-    border: 3px solid #b8860b;
-    border-radius: 16px;
-    box-shadow: 0 0 0 2px rgba(184, 134, 11, 0.15), 0 0 30px rgba(184, 134, 11, 0.1);
-  }
-}
-
+/* ===== IMÁGENES DEL COLLAGE: EN CELULAR CON BORDE Y REDONDEO, EN PC SIN NADA ===== */
 .collage-container .collage-item {
   position: absolute;
   display: block;
@@ -1425,6 +1421,18 @@ h1#nombre-hero {
   object-fit: contain;
   -webkit-user-select: none;
   user-select: none;
+  /* Sin borde ni redondeo por defecto (PC) */
+  border: none;
+  border-radius: 0;
+}
+
+/* En dispositivos táctiles (móviles) se les añade borde dorado y esquinas redondeadas */
+@media (pointer: coarse) {
+  .collage-container .collage-item {
+    border: 2px solid #b8860b;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(184, 134, 11, 0.2);
+  }
 }
 
 .modal-gustos-card::-webkit-scrollbar {
@@ -1438,63 +1446,6 @@ h1#nombre-hero {
 .btn-cerrar-collage {
   margin: 1rem auto 0;
   display: block;
-}
-
-/* ============================================================
-   EFECTO ARENA DINÁMICA (solo móvil)
-   ============================================================ */
-#arena-canvas {
-  position: fixed;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  opacity: 0.8;
-  display: none; /* oculto por defecto */
-  width: 100vw;
-  height: 100vh;
-}
-
-/* Solo en móviles lo mostramos */
-@media (pointer: coarse) {
-  #arena-canvas {
-    display: block;
-  }
-}
-
-#arena-activate-btn {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  padding: 0.6rem 1.5rem;
-  background: rgba(212, 175, 55, 0.2);
-  border: 2px solid #d4af37;
-  border-radius: 30px;
-  color: #fae3a0;
-  font-family: var(--serif-body);
-  font-size: 0.9rem;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  cursor: pointer;
-  display: none;
-  transition: all 0.3s;
-  box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
-}
-#arena-activate-btn:hover {
-  background: rgba(212, 175, 55, 0.35);
-}
-#arena-activate-btn.visible {
-  display: block;
-}
-
-/* Ajustes de responsividad */
-@media (max-width: 400px) {
-  #arena-activate-btn {
-    font-size: 0.7rem;
-    padding: 0.4rem 1rem;
-    bottom: 12px;
-  }
 }
 
 /* ============================================================
