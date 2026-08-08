@@ -1,7 +1,213 @@
-console.log('🚀 principal/script-principal.js (sin reja, página aparte)');
+console.log('🚀 principal/script-principal.js (con efecto arena)');
 
 import { obtenerNivel } from '../modules/perf.js';
 
+// ===== VARIABLES GLOBALES PARA EL EFECTO ARENA =====
+let arenaRunning = false;
+let arenaParticles = [];
+let arenaCanvas, arenaCtx;
+let arenaW, arenaH;
+let arenaGravityX = 0, arenaGravityY = 0.2;
+let arenaAnimId = null;
+let arenaTouchX = 0, arenaTouchY = 0;
+let arenaUseTouch = false;
+
+// ===== FUNCIÓN PARA INICIALIZAR EL EFECTO ARENA =====
+function initArena() {
+  const canvas = document.getElementById('arena-canvas');
+  if (!canvas) return;
+  const isMobile = window.matchMedia('(pointer: coarse)').matches;
+  if (!isMobile) return; // solo en móviles
+
+  arenaCanvas = canvas;
+  arenaCtx = canvas.getContext('2d');
+  resizeArena();
+
+  // Número de partículas (reducido para rendimiento)
+  const numParticles = 180;
+  for (let i = 0; i < numParticles; i++) {
+    arenaParticles.push({
+      x: Math.random() * arenaW,
+      y: Math.random() * arenaH,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
+      size: 3 + Math.random() * 5,
+      color: `hsl(${35 + Math.random() * 20}, 70%, ${50 + Math.random() * 30}%)` // tonos arena
+    });
+  }
+
+  // Detectar acelerómetro si está disponible
+  if (window.DeviceOrientationEvent) {
+    // En iOS 13+ se necesita permiso explícito
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      // Mostrar botón de activación
+      const btn = document.getElementById('arena-activate-btn');
+      if (btn) {
+        btn.classList.add('visible');
+        btn.addEventListener('click', async () => {
+          try {
+            const permissionState = await DeviceOrientationEvent.requestPermission();
+            if (permissionState === 'granted') {
+              window.addEventListener('deviceorientation', handleOrientation);
+              btn.classList.remove('visible');
+              btn.style.display = 'none';
+              console.log('✅ Acelerómetro activado');
+              arenaUseTouch = false;
+            } else {
+              console.warn('⚠️ Permiso denegado para acelerómetro, usando toque');
+              arenaUseTouch = true;
+            }
+          } catch (e) {
+            console.warn('⚠️ Error al solicitar permiso:', e);
+            arenaUseTouch = true;
+          }
+        });
+      }
+    } else {
+      // Android o iOS sin permiso requerido
+      window.addEventListener('deviceorientation', handleOrientation);
+      arenaUseTouch = false;
+    }
+  } else {
+    // Sin acelerómetro, usar toque/mouse como fallback
+    arenaUseTouch = true;
+  }
+
+  // Eventos táctiles para fallback
+  if (arenaUseTouch) {
+    document.addEventListener('touchmove', (e) => {
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        arenaTouchX = (touch.clientX / window.innerWidth - 0.5) * 2;
+        arenaTouchY = (touch.clientY / window.innerHeight - 0.5) * 2;
+      }
+    }, { passive: true });
+    // También con mouse para depuración en escritorio (aunque no se muestre)
+    document.addEventListener('mousemove', (e) => {
+      arenaTouchX = (e.clientX / window.innerWidth - 0.5) * 2;
+      arenaTouchY = (e.clientY / window.innerHeight - 0.5) * 2;
+    });
+  }
+
+  // Iniciar animación
+  if (!arenaAnimId) {
+    arenaRunning = true;
+    arenaAnimId = requestAnimationFrame(arenaLoop);
+  }
+
+  // Redimensionar al cambiar orientación
+  window.addEventListener('resize', resizeArena);
+}
+
+function resizeArena() {
+  if (!arenaCanvas) return;
+  arenaCanvas.width = window.innerWidth;
+  arenaCanvas.height = window.innerHeight;
+  arenaW = arenaCanvas.width;
+  arenaH = arenaCanvas.height;
+}
+
+function handleOrientation(e) {
+  const gamma = e.gamma || 0; // -90 a 90 (inclinación lateral)
+  const beta = e.beta || 0;   // -180 a 180 (inclinación frontal)
+  // Normalizar a valores entre -1 y 1
+  arenaGravityX = Math.max(-1, Math.min(1, gamma / 45));
+  arenaGravityY = Math.max(-1, Math.min(1, (beta - 45) / 45));
+}
+
+function arenaLoop() {
+  if (!arenaRunning) {
+    arenaAnimId = null;
+    return;
+  }
+
+  updateArena();
+  drawArena();
+  arenaAnimId = requestAnimationFrame(arenaLoop);
+}
+
+function updateArena() {
+  const gravityX = arenaUseTouch ? arenaTouchX : arenaGravityX;
+  const gravityY = arenaUseTouch ? arenaTouchY : arenaGravityY;
+
+  // Aplicar gravedad con un poco de inercia
+  const gx = gravityX * 0.15;
+  const gy = gravityY * 0.15 + 0.05; // gravedad base hacia abajo
+
+  for (let p of arenaParticles) {
+    // Aceleración
+    p.vx += gx;
+    p.vy += gy;
+
+    // Rozamiento
+    p.vx *= 0.99;
+    p.vy *= 0.99;
+
+    // Limitar velocidad
+    const maxSpeed = 2;
+    const speed = Math.sqrt(p.vx*p.vx + p.vy*p.vy);
+    if (speed > maxSpeed) {
+      p.vx = (p.vx / speed) * maxSpeed;
+      p.vy = (p.vy / speed) * maxSpeed;
+    }
+
+    // Mover
+    p.x += p.vx;
+    p.y += p.vy;
+
+    // Rebote en bordes con pérdida de energía
+    if (p.x < 0) { p.x = 0; p.vx = -p.vx * 0.8; }
+    if (p.x > arenaW) { p.x = arenaW; p.vx = -p.vx * 0.8; }
+    if (p.y < 0) { p.y = 0; p.vy = -p.vy * 0.8; }
+    if (p.y > arenaH) { p.y = arenaH; p.vy = -p.vy * 0.8; }
+
+    // Cohesión suave entre partículas cercanas (simula líquido/arena)
+    for (let j = 0; j < arenaParticles.length; j++) {
+      if (j === arenaParticles.indexOf(p)) continue;
+      const other = arenaParticles[j];
+      const dx = p.x - other.x;
+      const dy = p.y - other.y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < 40 && dist > 0.1) {
+        const force = 0.002;
+        const angle = Math.atan2(dy, dx);
+        const pull = (40 - dist) / 40;
+        p.vx += Math.cos(angle) * force * pull;
+        p.vy += Math.sin(angle) * force * pull;
+      }
+    }
+  }
+}
+
+function drawArena() {
+  const ctx = arenaCtx;
+  ctx.clearRect(0, 0, arenaW, arenaH);
+  
+  // Fondo sutil
+  const gradient = ctx.createRadialGradient(arenaW/2, arenaH/2, 0, arenaW/2, arenaH/2, Math.max(arenaW, arenaH)*0.7);
+  gradient.addColorStop(0, 'rgba(212, 175, 55, 0.03)');
+  gradient.addColorStop(1, 'rgba(212, 175, 55, 0)');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, arenaW, arenaH);
+
+  // Dibujar partículas con destello
+  for (let p of arenaParticles) {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size * 0.6, 0, Math.PI * 2);
+    ctx.fillStyle = p.color;
+    ctx.shadowColor = 'rgba(212, 175, 55, 0.3)';
+    ctx.shadowBlur = 8;
+    ctx.fill();
+    // Brillo interior
+    ctx.shadowBlur = 0;
+    ctx.beginPath();
+    ctx.arc(p.x - p.size*0.15, p.y - p.size*0.15, p.size * 0.2, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 240, 200, 0.5)';
+    ctx.fill();
+  }
+}
+
+// ===== EL RESTO DEL CÓDIGO PRINCIPAL (sin cambios) =====
 async function cargarConfig() {
   try {
     const res = await fetch(`../config.json?t=${Date.now()}`);
@@ -374,16 +580,13 @@ function intentarReproducirSonidoCollage(srcImagen) {
   audio.preload = 'auto';
   audio.volume = 0;
 
-  audio.addEventListener('error', function() {
-    // No existe el archivo: no se hace nada
-  });
-
+  audio.addEventListener('error', function() {});
   audio.addEventListener('canplaythrough', function alListo() {
     audio.removeEventListener('canplaythrough', alListo);
     collageAudioActual = audio;
     var promesa = audio.play();
     if (promesa && promesa.catch) {
-      promesa.catch(function() { /* autoplay bloqueado */ });
+      promesa.catch(function() {});
     }
     var vol = 0;
     var fadeIn = setInterval(function() {
@@ -525,7 +728,6 @@ function renderCollage(container) {
   collageUltimaRotacion = 0;
 
   var TAMANIO_BASE = 80;
-
   var ZONAS_COLLAGE = [
     { x: 15, y: 20 },
     { x: 50, y: 14 },
@@ -584,7 +786,6 @@ function renderCollage(container) {
     elemento.src = src;
     elemento.alt = 'Gusto';
     elemento.loading = 'lazy';
-    // SIN ANIMACIONES: opacity 1, transform directa
     elemento.style.cssText =
       'width:' + w + '%;' +
       'height:' + h + '%;' +
@@ -598,7 +799,6 @@ function renderCollage(container) {
     collageElementos.push({ div: elemento, zona: indiceZona });
     collageZIndex++;
 
-    // Quitar la imagen más antigua sin animación
     if (collageElementos.length > MAX_IMAGENES_SIMULTANEAS) {
       var antiguo = collageElementos.shift();
       var antiguoDiv = antiguo.div;
@@ -698,6 +898,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   console.log('📊 Nivel de rendimiento detectado:', nivel);
   aplicarAjustesRendimiento(nivel);
 
+  // Iniciar efecto arena (solo móvil)
+  initArena();
+
   var config = await cargarConfig();
   rellenarDatos(config);
   generarCalendario();
@@ -756,7 +959,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   try {
     var { initMusica, playMusic, toggleMusic, resetMusic } = await import('../modules/musica.js');
-    initMusica(); // usa cancion.mp3 por defecto
+    initMusica();
     window.playMusic = playMusic;
     window.toggleMusic = toggleMusic;
     window.resetMusic = resetMusic;
