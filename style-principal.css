@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS OPTIMIZADOS (CON ADORNOS DORADOS)
+   🌹 INVITACIÓN XV – ESTILOS OPTIMIZADOS (ADORNOS DORADOS)
    ============================================================ */
 
 :root {
@@ -369,7 +369,7 @@ body {
   }
 }
 
-/* ===== SECCIONES CON ADORNOS DORADOS ===== */
+/* ===== SECCIONES ===== */
 .seccion {
   width: 100%;
   background: rgba(10, 18, 34, 0.55);
@@ -389,25 +389,6 @@ body {
   backface-visibility: hidden;
   contain: layout style paint;
 }
-
-/* ===== ADORNO DORADO EN LA PARTE SUPERIOR DE CADA SECCIÓN ===== */
-.seccion::before {
-  content: '✧';
-  position: absolute;
-  top: -12px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 1.2rem;
-  color: #d4af37;
-  background: rgba(10, 18, 34, 0.55); /* Fondo de la sección */
-  padding: 0 8px;
-  text-shadow: 0 0 12px rgba(212, 175, 55, 0.6);
-  z-index: 2;
-  border-radius: 0;
-  line-height: 1;
-  pointer-events: none;
-}
-
 .seccion.visible {
   opacity: 1;
   transform: translate3d(0, 0, 0);
@@ -515,6 +496,21 @@ body {
   padding-bottom: 0.5rem;
   border-bottom: 2px solid rgba(212, 175, 55, 0.2);
   position: relative;
+}
+
+/* ===== ADORNO DORADO EN EL TÍTULO (justo debajo de la línea) ===== */
+.seccion h2::after {
+  content: '✧';
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.2rem;
+  background: transparent;
+  padding: 0 8px;
+  color: #d4af37;
+  text-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
+  line-height: 1;
 }
 
 .seccion-subtitulo {
@@ -1260,7 +1256,6 @@ h1#nombre-hero {
   margin-top: 0.2rem;
 }
 
-/* ===== SEPARADORES CON ADORNO DORADO (sin fondo) ===== */
 .divider-thin {
   height: 2px;
   background: linear-gradient(90deg, transparent, #d4af37, #fae3a0, #d4af37, transparent);
@@ -1275,7 +1270,7 @@ h1#nombre-hero {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: transparent; /* Sin fondo sólido */
+  background: transparent;
   padding: 0 8px;
   color: #d4af37;
   font-size: 1.2rem;
@@ -1331,11 +1326,6 @@ h1#nombre-hero {
   opacity: 0;
   transition: transform 0.3s ease, opacity 0.3s ease;
 }
-/* El halo dorado suavizado (varios anillos de box-shadow encimados) se ve
-   con artefactos en PC, pero en celular se ve bien. Como la mayoría de las
-   personas abrirán el link desde el celular, se deja solo en pantallas
-   táctiles (pointer: coarse) y en PC (pointer: fine, con mouse) se queda
-   nada más con el borde simple de arriba, sin el halo. */
 @media (pointer: coarse) {
   .modal-card {
     box-shadow: 0 0 0 2px rgba(184, 134, 11, 0.2), 0 0 0 6px rgba(26, 42, 70, 0.5), 0 0 50px rgba(184, 134, 11, 0.12), inset 0 0 60px rgba(25, 50, 100, 0.15);
@@ -1419,7 +1409,6 @@ h1#nombre-hero {
   border-radius: 16px;
   overflow: hidden;
   margin: 0.5rem 0;
-  /* Borde dorado redondeado en el área del collage */
   border: 3px solid #b8860b;
   box-shadow: 0 0 0 2px rgba(184, 134, 11, 0.15), 0 0 30px rgba(184, 134, 11, 0.1);
 }
