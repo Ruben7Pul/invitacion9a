@@ -1277,7 +1277,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   MODAL COLLAGE (GUSTOS) – SIN AUDIO
+   MODAL COLLAGE (GUSTOS) – BORDE DORADO + ESQUINAS EN MÓVIL
    ============================================================ */
 .modal-overlay {
   position: fixed;
@@ -1397,7 +1397,7 @@ h1#nombre-hero {
   text-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
 }
 
-/* ===== COLLAGE ===== */
+/* ===== COLLAGE – BORDE DORADO + ESQUINAS EN MÓVIL ===== */
 .collage-container {
   flex: 1;
   min-height: 0;
@@ -1406,12 +1406,12 @@ h1#nombre-hero {
   position: relative;
   overflow: hidden;
   margin: 0.5rem 0;
-  background: rgba(184, 134, 11, 0.15); /* fondo dorado suave */
-  border-radius: 0; /* Sin bordes por defecto (PC) */
-  border: none;
+  background: transparent; /* fondo transparente para que se vea el azul del modal */
+  border: 3px solid #b8860b; /* BORDE DORADO */
+  border-radius: 0; /* sin redondeo en PC */
 }
 
-/* En celular (táctil) solo esquinas redondeadas, sin borde */
+/* En celular (táctil) añadimos esquinas redondeadas */
 @media (pointer: coarse) {
   .collage-container {
     border-radius: 16px;
@@ -1426,7 +1426,6 @@ h1#nombre-hero {
   object-fit: contain;
   -webkit-user-select: none;
   user-select: none;
-  /* Sin transiciones ni animaciones */
 }
 
 .modal-gustos-card::-webkit-scrollbar {
