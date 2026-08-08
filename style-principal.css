@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS OPTIMIZADOS (ADORNOS DORADOS)
+   🌹 INVITACIÓN XV – ESTILOS OPTIMIZADOS (SIN BORDES COLLAGE + GPU)
    ============================================================ */
 
 :root {
@@ -18,6 +18,7 @@
 html, body {
   transform: translate3d(0, 0, 0);
   will-change: auto;
+  contain: layout style;
 }
 
 *:focus {
@@ -96,6 +97,13 @@ body {
   z-index: 1;
   opacity: 0.7;
   mix-blend-mode: screen;
+  /* EFECTO ESPEJO ALTERNADO */
+  animation: mirrorEffect 24s infinite alternate ease-in-out;
+}
+@keyframes mirrorEffect {
+  0% { transform: translate3d(0, 0, 0) scaleX(1); }
+  50% { transform: translate3d(0, 0, 0) scaleX(-1); }
+  100% { transform: translate3d(0, 0, 0) scaleX(1); }
 }
 #video-portal {
   z-index: 0;
@@ -1277,7 +1285,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   MODAL COLLAGE (GUSTOS)
+   MODAL COLLAGE (GUSTOS) – SIN BORDES Y OPTIMIZADO
    ============================================================ */
 .modal-overlay {
   position: fixed;
@@ -1397,7 +1405,7 @@ h1#nombre-hero {
   text-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
 }
 
-/* ===== CONTENEDOR DEL COLLAGE: SIEMPRE BORDE DORADO ===== */
+/* ===== CONTENEDOR DEL COLLAGE: SIN BORDES, ACELERADO POR GPU ===== */
 .collage-container {
   flex: 1;
   min-height: 0;
@@ -1407,12 +1415,17 @@ h1#nombre-hero {
   background: transparent;
   overflow: hidden;
   margin: 0.5rem 0;
-  border: 3px solid #b8860b;
-  border-radius: 16px;
-  box-shadow: 0 0 0 2px rgba(184, 134, 11, 0.15), 0 0 30px rgba(184, 134, 11, 0.1);
+  /* SIN BORDES NI SOMBRAS */
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  /* ACELERACIÓN GPU */
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
-/* ===== IMÁGENES DEL COLLAGE: borde suave solo en móvil ===== */
+/* ===== IMÁGENES DEL COLLAGE: SIN BORDES, ACELERADAS ===== */
 .collage-container .collage-item {
   position: absolute;
   display: block;
@@ -1421,19 +1434,14 @@ h1#nombre-hero {
   object-fit: contain;
   -webkit-user-select: none;
   user-select: none;
-  /* sin borde en PC */
+  /* SIN BORDES */
   border: none;
   border-radius: 0;
   box-shadow: none;
-}
-
-/* En dispositivos táctiles (móviles) se añade borde dorado suave y sutil */
-@media (pointer: coarse) {
-  .collage-container .collage-item {
-    border: 1px solid rgba(184, 134, 11, 0.4);
-    border-radius: 6px;
-    box-shadow: 0 0 8px rgba(184, 134, 11, 0.15);
-  }
+  /* ACELERACIÓN GPU */
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .modal-gustos-card::-webkit-scrollbar {
