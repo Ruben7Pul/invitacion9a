@@ -334,7 +334,7 @@ function initContadorCircular(config) {
   setInterval(actualizarContador, 200);
 }
 
-// ===== COLLAGE DE GUSTOS (SIN ANIMACIONES) =====
+// ===== COLLAGE DE GUSTOS (SIN AUDIO) =====
 var collageTimer = null;
 var imagenesCollage = [];
 var collageInicializado = false;
@@ -346,59 +346,6 @@ var collageUltimaRotacion = 0;
 var collageIntervaloMs = 3000;
 var MAX_IMAGENES_SIMULTANEAS = 6;
 var CARPETA_IMGCOLL = '../imgcoll/';
-var CARPETA_MUSICOLLAGE = '../musicollage/';
-var collageAudioActual = null;
-
-function detenerAudioCollage() {
-  var saliente = collageAudioActual;
-  collageAudioActual = null;
-  if (!saliente) return;
-  var vol = saliente.volume;
-  var fadeOut = setInterval(function() {
-    vol -= 0.15;
-    if (vol <= 0) {
-      vol = 0;
-      clearInterval(fadeOut);
-      saliente.pause();
-    }
-    saliente.volume = vol;
-  }, 40);
-}
-
-function intentarReproducirSonidoCollage(srcImagen) {
-  var match = /imgcoll(\d+)\./i.exec(srcImagen || '');
-  if (!match) return;
-  var numero = match[1];
-
-  var audio = new Audio();
-  audio.preload = 'auto';
-  audio.volume = 0;
-
-  audio.addEventListener('error', function() {
-    // No existe el archivo: no se hace nada
-  });
-
-  audio.addEventListener('canplaythrough', function alListo() {
-    audio.removeEventListener('canplaythrough', alListo);
-    collageAudioActual = audio;
-    var promesa = audio.play();
-    if (promesa && promesa.catch) {
-      promesa.catch(function() { /* autoplay bloqueado */ });
-    }
-    var vol = 0;
-    var fadeIn = setInterval(function() {
-      vol += 0.12;
-      if (vol >= 0.85) {
-        vol = 0.85;
-        clearInterval(fadeIn);
-      }
-      if (audio === collageAudioActual) audio.volume = vol;
-      else clearInterval(fadeIn);
-    }, 40);
-  });
-
-  audio.src = CARPETA_MUSICOLLAGE + 'musicoll' + numero + '.mp3';
-}
 
 function detectarImagenesCollage(callback) {
   var fallosSeguidosParaParar = 3;
@@ -423,7 +370,6 @@ function detectarImagenesCollage(callback) {
     };
     img.src = src;
   }
-
   probar(1);
 }
 
@@ -554,9 +500,6 @@ function renderCollage(container) {
     var src = dato.src;
     var ratio = dato.ratio || 1;
 
-    detenerAudioCollage();
-    intentarReproducirSonidoCollage(src);
-
     var w, h;
     if (ratio >= 1) {
       w = TAMANIO_BASE;
@@ -584,7 +527,6 @@ function renderCollage(container) {
     elemento.src = src;
     elemento.alt = 'Gusto';
     elemento.loading = 'lazy';
-    // SIN ANIMACIONES: opacity 1, transform directa
     elemento.style.cssText =
       'width:' + w + '%;' +
       'height:' + h + '%;' +
@@ -624,7 +566,6 @@ function limpiarCollage() {
     clearInterval(collageTimer);
     collageTimer = null;
   }
-  detenerAudioCollage();
   var container = document.getElementById('collage-container');
   if (container) {
     container.innerHTML = '<div id="collage-loading" style="text-align:center; padding:2rem; color:#fae3a0; font-family:var(--script); font-size:1.2rem;">Cargando collage...</div>';
