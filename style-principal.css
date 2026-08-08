@@ -369,7 +369,7 @@ body {
   }
 }
 
-/* ===== SECCIONES ===== */
+/* ===== SECCIONES CON ADORNOS DORADOS ===== */
 .seccion {
   width: 100%;
   background: rgba(10, 18, 34, 0.55);
@@ -389,6 +389,37 @@ body {
   backface-visibility: hidden;
   contain: layout style paint;
 }
+
+/* ===== ADORNO DORADO SUPERIOR (borde superior de la sección) ===== */
+.seccion::before {
+  content: '✧';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.2rem;
+  color: #d4af37;
+  background: transparent;
+  text-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
+  z-index: 2;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* ===== ADORNO DORADO INFERIOR (debajo del título) ===== */
+.seccion h2::after {
+  content: '✧';
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.2rem;
+  color: #d4af37;
+  background: transparent;
+  text-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
+  line-height: 1;
+}
+
 .seccion.visible {
   opacity: 1;
   transform: translate3d(0, 0, 0);
@@ -498,21 +529,6 @@ body {
   position: relative;
 }
 
-/* ===== ADORNO DORADO EN EL TÍTULO (justo debajo de la línea) ===== */
-.seccion h2::after {
-  content: '✧';
-  position: absolute;
-  bottom: -12px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 1.2rem;
-  background: transparent;
-  padding: 0 8px;
-  color: #d4af37;
-  text-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
-  line-height: 1;
-}
-
 .seccion-subtitulo {
   font-family: var(--script);
   font-size: clamp(1rem, 2.8vw, 1.3rem);
@@ -580,7 +596,7 @@ html.sin-reja #app {
   font-family: var(--serif-display);
   letter-spacing: 0.32em;
   text-transform: uppercase;
-  font-size: 0.8rem;
+  font-size: 1.2rem; /* más grande */
   color: #d4af37 !important;
 }
 .top-btn {
@@ -763,14 +779,7 @@ h1#nombre-hero {
 }
 
 .advertencia {
-  font-size: clamp(0.75rem, 1.5vw, 0.9rem);
-  color: #ffcc66;
-  text-align: center;
-  margin-top: 0.5rem;
-  padding: 0.2rem 0.5rem;
-  border-top: 1px dashed rgba(212, 175, 55, 0.2);
-  font-style: italic;
-  opacity: 0.9;
+  display: none !important; /* ocultamos todas las advertencias */
 }
 
 .calendario-container {
@@ -946,15 +955,7 @@ h1#nombre-hero {
   color: #fae3a0;
 }
 .itinerario-nota {
-  font-family: var(--serif-body);
-  font-size: clamp(0.8rem, 1.5vw, 0.95rem);
-  color: #e0cfa0;
-  text-align: center;
-  margin-top: 1rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid rgba(212, 175, 55, 0.2);
-  font-style: italic;
-  opacity: 0.8;
+  display: none !important; /* ocultamos "Los horarios pueden variar" */
 }
 
 .clock {
@@ -1142,12 +1143,9 @@ h1#nombre-hero {
   margin: 0.6rem 0;
 }
 .libro-firmas-nota {
-  font-size: clamp(0.8rem, 1.8vw, 1rem);
-  color: #e0cfa0;
-  margin-top: 0.6rem;
-  opacity: 0.8;
-  font-style: italic;
+  display: none !important; /* ocultamos la nota del libro de firmas */
 }
+
 .libro-firmas-contenido .btn-mapa {
   display: inline-block;
 }
@@ -1224,6 +1222,9 @@ h1#nombre-hero {
   color: #f0e0c0;
   margin: 0.6rem 0;
 }
+.agradecimientos-texto:last-of-type {
+  display: none !important; /* ocultamos "Los llevamos en el corazón" */
+}
 .agradecimientos-firma {
   margin-top: 1.2rem;
   font-family: var(--script);
@@ -1256,6 +1257,7 @@ h1#nombre-hero {
   margin-top: 0.2rem;
 }
 
+/* ===== SEPARADOR CON ADORNO DORADO ===== */
 .divider-thin {
   height: 2px;
   background: linear-gradient(90deg, transparent, #d4af37, #fae3a0, #d4af37, transparent);
@@ -1406,22 +1408,30 @@ h1#nombre-hero {
   width: 100%;
   position: relative;
   background: transparent;
-  border-radius: 16px;
+  border-radius: 0; /* sin borde por defecto en PC */
   overflow: hidden;
   margin: 0.5rem 0;
-  border: 3px solid #b8860b;
-  box-shadow: 0 0 0 2px rgba(184, 134, 11, 0.15), 0 0 30px rgba(184, 134, 11, 0.1);
+  /* En PC no hay borde ni sombra */
+}
+
+/* En celular (táctil) le ponemos borde dorado y esquinas redondeadas */
+@media (pointer: coarse) {
+  .collage-container {
+    border: 3px solid #b8860b;
+    border-radius: 16px;
+    box-shadow: 0 0 0 2px rgba(184, 134, 11, 0.15), 0 0 30px rgba(184, 134, 11, 0.1);
+  }
 }
 
 .collage-container .collage-item {
   position: absolute;
   display: block;
   pointer-events: none;
-  opacity: 0;
+  opacity: 1; /* siempre visible, sin animación */
   object-fit: contain;
   -webkit-user-select: none;
   user-select: none;
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  /* Sin transiciones ni animaciones */
 }
 
 .modal-gustos-card::-webkit-scrollbar {
@@ -1445,7 +1455,7 @@ h1#nombre-hero {
   #app-inner { gap: 0.6rem; padding: 0 0.2rem 2rem; }
   h1#nombre-hero { font-size: clamp(8.1rem, 30cqw, 9.6rem); }
   .frase-inline { font-size: clamp(1.3rem, 3.8cqw, 1.5rem); }
-  #app-top .eyebrow { font-size: 0.7rem; }
+  #app-top .eyebrow { font-size: 1rem; }
   .top-btn { font-size: 1.1rem; min-width: 32px; height: 32px; }
   .seccion { padding: 1rem 0.8rem; }
   .clock .unit .circle-wrap { width: 45px; height: 45px; }
