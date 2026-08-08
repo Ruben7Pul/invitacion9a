@@ -3,14 +3,14 @@
 // - Activación de power-ups solo por impacto superior
 // - Validación de nombre SIN ESPACIOS, con filtro de groserías EXTENSO
 // - Top 5 con medallas 🥇🥈🥉 en el modal
-// - Botones "Nueva partida" y "Regresar" en Game Over
+// - Botón "Nueva partida" en Game Over (eliminado "Regresar")
 // - Placeholder "Pon aquí tu nombre"
 // - Sin vidas extra, estrella dorada cada 10k puntos
 // - BLOQUES DORADOS: solo borde dorado, 10 segundos de duración
 // - BOTÓN RANKINGS: siempre activo, pausa al abrir, NO reanuda al cerrar
 // - Pausa automática al cambiar de pestaña
 // ============================================================
-console.log('📦 juego.js (Top 5, medallas, borde dorado, botón rankings pausa)');
+console.log('📦 juego.js (Top 5, medallas, borde dorado, sin botón regresar en gameover)');
 
 import {
   soundBrick,
@@ -44,7 +44,7 @@ const SCORE_PER_LIFE = 10000; // Cada 10k puntos
 const TOP_SCORES_COUNT = 5; // Top 5
 
 // ========== DURACIÓN DEL LADRILLO DORADO (10 segundos) ==========
-const GOLDEN_BRICK_DURATION_MS = 10000; // antes 5000
+const GOLDEN_BRICK_DURATION_MS = 10000;
 
 // ========== TIPOS DE LADRILLOS CON PUNTAJES FIJOS ==========
 const BRICK_TYPES = {
@@ -331,7 +331,7 @@ function filterNameInput(value) {
 
 // ========== FUNCIÓN PRINCIPAL ==========
 export function initJuego(config, mobile = false) {
-  console.log('🎮 Iniciando juego (borde dorado, rankings pausa)');
+  console.log('🎮 Iniciando juego (sin botón regresar en gameover)');
 
   // ========== ELEMENTOS ==========
   const overlay = document.getElementById('game-overlay');
@@ -369,7 +369,7 @@ export function initJuego(config, mobile = false) {
   const playerNameInput = document.getElementById('player-name-input');
   const nameError = document.getElementById('name-error');
   const gameoverNewGameBtn = document.getElementById('gameover-newgame-btn');
-  const gameoverExitBtn = document.getElementById('gameover-exit-btn');
+  // Nota: gameoverExitBtn ha sido eliminado del HTML
 
   livesEl.style.fontFamily = "'Press Start 2P', monospace";
   livesEl.style.fontSize = 'clamp(0.9rem,2.2vw,1.2rem)';
@@ -490,7 +490,6 @@ export function initJuego(config, mobile = false) {
     const list = document.getElementById('rank-list');
     if (!modal || !list) return;
 
-    // Pausar el juego si está corriendo y no está pausado
     if (running && !paused && !gameOver) {
       togglePause();
       console.log('⏸️ Juego pausado al abrir rankings');
@@ -520,7 +519,6 @@ export function initJuego(config, mobile = false) {
   function ocultarRankings() {
     const modal = document.getElementById('rank-modal');
     if (modal) modal.classList.remove('open');
-    // NO reanudamos el juego; queda en pausa hasta que el usuario lo decida
     console.log('⏸️ Rankings cerrados, el juego sigue en pausa');
   }
 
@@ -1109,7 +1107,7 @@ export function initJuego(config, mobile = false) {
     pauseBtn.style.display = 'none';
     muteBtn.style.display = 'none';
     exitBtn.style.display = 'none';
-    rankBtn.style.display = 'flex'; // Siempre visible
+    rankBtn.style.display = 'flex';
   }
 
   // ========== FUNCIÓN PARA GUARDAR Y REINICIAR ==========
@@ -1156,7 +1154,7 @@ export function initJuego(config, mobile = false) {
     pauseBtn.style.display = 'flex';
     muteBtn.style.display = 'flex';
     exitBtn.style.display = 'flex';
-    rankBtn.style.display = 'flex'; // Siempre visible
+    rankBtn.style.display = 'flex';
     pauseBtn.textContent = '⏸️';
     syncMuteIcon();
     updateUI();
@@ -1223,7 +1221,6 @@ export function initJuego(config, mobile = false) {
       const x = br.x, y = br.y, w = br.w, h = br.h;
       const radius = 4;
 
-      // Color interior: el del tipo (o el dorado si no quisiéramos, pero usamos el tipo)
       let color = br.type.color;
       const grad = ctx.createLinearGradient(x, y, x + w, y + h);
       const darker = adjustColor(color, -20);
@@ -1241,14 +1238,12 @@ export function initJuego(config, mobile = false) {
       ctx.fill();
       ctx.shadowBlur = 0;
 
-      // Borde normal
       ctx.strokeStyle = 'rgba(255,255,255,0.15)';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.roundRect(x + 2, y + 2, w - 4, h - 4, radius - 1);
       ctx.stroke();
 
-      // Si es dorado, dibujar un borde dorado resplandeciente (sin tapar el interior)
       if (br.isGolden) {
         ctx.strokeStyle = '#ffd700';
         ctx.lineWidth = 3;
@@ -1257,7 +1252,6 @@ export function initJuego(config, mobile = false) {
         ctx.beginPath();
         ctx.roundRect(x, y, w, h, radius);
         ctx.stroke();
-        // Sombra adicional para resplandor
         ctx.shadowBlur = 30;
         ctx.strokeStyle = 'rgba(255,215,0,0.4)';
         ctx.lineWidth = 5;
@@ -1266,7 +1260,6 @@ export function initJuego(config, mobile = false) {
         ctx.stroke();
         ctx.shadowBlur = 0;
       } else {
-        // Borde fino normal
         ctx.strokeStyle = 'rgba(0,0,0,0.25)';
         ctx.lineWidth = 1;
         ctx.beginPath();
@@ -1274,7 +1267,6 @@ export function initJuego(config, mobile = false) {
         ctx.stroke();
       }
 
-      // Grietas
       const crackSrc = getCrackImageSrc(br);
       if (crackSrc) {
         const img = crackImages[crackSrc.split('/').pop()];
@@ -1330,7 +1322,7 @@ export function initJuego(config, mobile = false) {
       ctx.fillRect(0, boundary - feather, STAGE_W, feather);
     }
 
-    // Bolas (encima de la niebla)
+    // Bolas
     for (const b of balls) {
       const x = b.x, y = b.y;
       let grad;
@@ -1719,9 +1711,6 @@ export function initJuego(config, mobile = false) {
     setTimeout(syncMuteIcon, 100);
   });
   exitBtn.addEventListener('click', salir);
-  if (gameoverExitBtn) {
-    gameoverExitBtn.addEventListener('click', salir);
-  }
   if (gameoverNewGameBtn) {
     gameoverNewGameBtn.addEventListener('click', handleNewGame);
   }
