@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS OPTIMIZADOS (ADORNOS DORADOS)
+   🌹 INVITACIÓN XV – ESTILOS OPTIMIZADOS (ADORNOS DORADOS + ARENA)
    ============================================================ */
 
 :root {
@@ -779,7 +779,7 @@ h1#nombre-hero {
 }
 
 .advertencia {
-  display: none !important; /* ocultamos todas las advertencias (ya no están en HTML) */
+  display: none !important;
 }
 
 .calendario-container {
@@ -955,7 +955,7 @@ h1#nombre-hero {
   color: #fae3a0;
 }
 .itinerario-nota {
-  display: none !important; /* ocultamos "Los horarios pueden variar" (ya no está en HTML) */
+  display: none !important;
 }
 
 .clock {
@@ -1143,7 +1143,7 @@ h1#nombre-hero {
   margin: 0.6rem 0;
 }
 .libro-firmas-nota {
-  display: none !important; /* ocultamos la nota (ya no está en HTML) */
+  display: none !important;
 }
 .libro-firmas-contenido .btn-mapa {
   display: inline-block;
@@ -1221,7 +1221,6 @@ h1#nombre-hero {
   color: #f0e0c0;
   margin: 0.6rem 0;
 }
-/* el párrafo "Los llevamos en el corazón" ya no existe en el HTML */
 .agradecimientos-firma {
   margin-top: 1.2rem;
   font-family: var(--script);
@@ -1405,12 +1404,11 @@ h1#nombre-hero {
   width: 100%;
   position: relative;
   background: transparent;
-  border-radius: 0; /* sin borde por defecto en PC */
+  border-radius: 0;
   overflow: hidden;
   margin: 0.5rem 0;
 }
 
-/* En celular (táctil) le ponemos borde dorado y esquinas redondeadas */
 @media (pointer: coarse) {
   .collage-container {
     border: 3px solid #b8860b;
@@ -1423,11 +1421,10 @@ h1#nombre-hero {
   position: absolute;
   display: block;
   pointer-events: none;
-  opacity: 1; /* siempre visible, sin animación */
+  opacity: 1;
   object-fit: contain;
   -webkit-user-select: none;
   user-select: none;
-  /* Sin transiciones ni animaciones */
 }
 
 .modal-gustos-card::-webkit-scrollbar {
@@ -1441,6 +1438,63 @@ h1#nombre-hero {
 .btn-cerrar-collage {
   margin: 1rem auto 0;
   display: block;
+}
+
+/* ============================================================
+   EFECTO ARENA DINÁMICA (solo móvil)
+   ============================================================ */
+#arena-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.8;
+  display: none; /* oculto por defecto */
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Solo en móviles lo mostramos */
+@media (pointer: coarse) {
+  #arena-canvas {
+    display: block;
+  }
+}
+
+#arena-activate-btn {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  padding: 0.6rem 1.5rem;
+  background: rgba(212, 175, 55, 0.2);
+  border: 2px solid #d4af37;
+  border-radius: 30px;
+  color: #fae3a0;
+  font-family: var(--serif-body);
+  font-size: 0.9rem;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  cursor: pointer;
+  display: none;
+  transition: all 0.3s;
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
+}
+#arena-activate-btn:hover {
+  background: rgba(212, 175, 55, 0.35);
+}
+#arena-activate-btn.visible {
+  display: block;
+}
+
+/* Ajustes de responsividad */
+@media (max-width: 400px) {
+  #arena-activate-btn {
+    font-size: 0.7rem;
+    padding: 0.4rem 1rem;
+    bottom: 12px;
+  }
 }
 
 /* ============================================================
