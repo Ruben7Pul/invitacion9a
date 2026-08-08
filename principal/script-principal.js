@@ -334,7 +334,7 @@ function initContadorCircular(config) {
   setInterval(actualizarContador, 200);
 }
 
-// ===== COLLAGE DE GUSTOS =====
+// ===== COLLAGE DE GUSTOS (SIN ANIMACIONES) =====
 var collageTimer = null;
 var imagenesCollage = [];
 var collageInicializado = false;
@@ -345,15 +345,7 @@ var collageHistorialImagenes = [];
 var collageUltimaRotacion = 0;
 var collageIntervaloMs = 3000;
 var MAX_IMAGENES_SIMULTANEAS = 6;
-
-// Carpeta donde viven las imágenes del collage (raíz del proyecto).
 var CARPETA_IMGCOLL = '../imgcoll/';
-
-// Carpeta opcional con sonidos para el collage. Requisito: los archivos
-// deben llamarse igual que su imagen pero con el prefijo "musicoll" en vez
-// de "imgcoll" (ej: la imagen imgcoll5.jpg puede tener musicoll5.mp3). Si
-// para una imagen no existe su archivo de sonido, simplemente no suena
-// nada, sin marcar ningún error.
 var CARPETA_MUSICOLLAGE = '../musicollage/';
 var collageAudioActual = null;
 
@@ -373,10 +365,6 @@ function detenerAudioCollage() {
   }, 40);
 }
 
-// Busca (por número, no por índice del array, que no está garantizado)
-// el sonido que corresponde a la imagen que se acaba de mostrar, y si
-// existe lo reproduce con un fundido de entrada suave. Si no existe,
-// no pasa nada: no hay ningún aviso ni error visible.
 function intentarReproducirSonidoCollage(srcImagen) {
   var match = /imgcoll(\d+)\./i.exec(srcImagen || '');
   if (!match) return;
@@ -387,7 +375,7 @@ function intentarReproducirSonidoCollage(srcImagen) {
   audio.volume = 0;
 
   audio.addEventListener('error', function() {
-    // No existe el archivo (o no se pudo cargar): no se hace nada más.
+    // No existe el archivo: no se hace nada
   });
 
   audio.addEventListener('canplaythrough', function alListo() {
@@ -395,7 +383,7 @@ function intentarReproducirSonidoCollage(srcImagen) {
     collageAudioActual = audio;
     var promesa = audio.play();
     if (promesa && promesa.catch) {
-      promesa.catch(function() { /* autoplay bloqueado: no se hace nada */ });
+      promesa.catch(function() { /* autoplay bloqueado */ });
     }
     var vol = 0;
     var fadeIn = setInterval(function() {
@@ -412,13 +400,8 @@ function intentarReproducirSonidoCollage(srcImagen) {
   audio.src = CARPETA_MUSICOLLAGE + 'musicoll' + numero + '.mp3';
 }
 
-// Detecta automáticamente cuántas imágenes hay. Requisito: los archivos
-// deben llamarse imgcoll1.jpg, imgcoll2.jpg, imgcoll3.jpg... sin saltarse
-// números. Para agregar o quitar imágenes, solo sube/borra el archivo y
-// renumera los demás si hace falta (sin dejar huecos). No hay que tocar
-// código ni correr nada.
 function detectarImagenesCollage(callback) {
-  var fallosSeguidosParaParar = 3; // tolera hasta 2 huecos seguidos, por si acaso
+  var fallosSeguidosParaParar = 3;
   var encontradas = [];
   var fallosSeguidos = 0;
 
@@ -541,18 +524,8 @@ function renderCollage(container) {
   collageHistorialImagenes = [];
   collageUltimaRotacion = 0;
 
-  // Tamaño de referencia (%) para el lado MAYOR de cada imagen dentro del
-  // contenedor cuadrado. El otro lado se calcula con la relación de aspecto
-  // real de la imagen, así que una imagen grande se achica y una chica se
-  // agranda, pero nunca se deforma.
   var TAMANIO_BASE = 80;
 
-  // Zonas del contenedor (centro en % de x,y) para repartir las imágenes en
-  // toda el área de trabajo en vez de que caigan amontonadas al centro.
-  // 7 zonas para hasta 6 imágenes simultáneas: así siempre queda al menos
-  // una zona libre y una imagen nueva nunca tiene que caer exactamente
-  // donde ya hay otra visible (esa coincidencia era la causa del
-  // parpadeo/aparición-desaparición constante).
   var ZONAS_COLLAGE = [
     { x: 15, y: 20 },
     { x: 50, y: 14 },
@@ -563,9 +536,6 @@ function renderCollage(container) {
     { x: 70, y: 84 }
   ];
 
-  // Elige una zona que NO esté ocupada por ninguna imagen actualmente
-  // visible (en vez de solo mirar un historial corto), para evitar
-  // superposiciones exactas.
   function elegirZona() {
     var ocupadas = collageElementos.map(function(el) { return el.zona; });
     var disponibles = [];
@@ -584,8 +554,6 @@ function renderCollage(container) {
     var src = dato.src;
     var ratio = dato.ratio || 1;
 
-    // La imagen nueva pasa a ser la que está al frente, así que el sonido
-    // de la anterior (si tenía) se apaga y se intenta el de esta.
     detenerAudioCollage();
     intentarReproducirSonidoCollage(src);
 
@@ -611,54 +579,35 @@ function renderCollage(container) {
 
     var rot = elegirRotacionContraria();
 
-    // Antes había un <div class="collage-item"> envolviendo a la imagen (y
-    // la imagen adentro con width/height:100%). Ese div se calculaba con la
-    // misma relación de aspecto que la imagen, pero al ser un elemento
-    // aparte terminaba comportándose como una "caja" extra que estorbaba a
-    // la hora de agregar cosas encima. Ahora la propia <img> es el
-    // elemento posicionado: no hay contenedor de por medio.
     var elemento = document.createElement('img');
     elemento.className = 'collage-item';
     elemento.src = src;
     elemento.alt = 'Gusto';
     elemento.loading = 'lazy';
+    // SIN ANIMACIONES: opacity 1, transform directa
     elemento.style.cssText =
       'width:' + w + '%;' +
       'height:' + h + '%;' +
       'left:' + x + '%;' +
       'top:' + y + '%;' +
       'z-index:' + collageZIndex + ';' +
-      'opacity: 0;' +
-      'transform: rotate(' + rot + 'deg) scale(0.92);';
+      'opacity: 1;' +
+      'transform: rotate(' + rot + 'deg) scale(1);';
     container.appendChild(elemento);
-
-    // Fundido de entrada: se dispara un frame después de insertar el
-    // elemento para que la transición CSS sí se ejecute (si se pusiera
-    // opacity:1 de una vez, el navegador no anima el cambio).
-    requestAnimationFrame(function() {
-      requestAnimationFrame(function() {
-        elemento.style.opacity = '1';
-        elemento.style.transform = 'rotate(' + rot + 'deg) scale(1)';
-      });
-    });
 
     collageElementos.push({ div: elemento, zona: indiceZona });
     collageZIndex++;
 
-    // La imagen más antigua se retira SIEMPRE después de que la nueva ya
-    // apareció (nunca en el mismo instante) y con fundido de salida, para
-    // que nunca se vea un intercambio brusco tipo "parpadeo".
+    // Quitar la imagen más antigua sin animación
     if (collageElementos.length > MAX_IMAGENES_SIMULTANEAS) {
       var antiguo = collageElementos.shift();
+      var antiguoDiv = antiguo.div;
+      antiguoDiv.style.opacity = '0';
       setTimeout(function() {
-        var antiguoDiv = antiguo.div;
-        antiguoDiv.style.opacity = '0';
-        setTimeout(function() {
-          if (antiguoDiv.parentNode) {
-            antiguoDiv.parentNode.removeChild(antiguoDiv);
-          }
-        }, 650);
-      }, 550);
+        if (antiguoDiv.parentNode) {
+          antiguoDiv.parentNode.removeChild(antiguoDiv);
+        }
+      }, 100);
     }
   }
 
@@ -721,7 +670,6 @@ function aplicarAjustesRendimiento(nivel) {
     });
   }
 
-  // ===== INDICADOR DE RENDIMIENTO: SOLO BOLITA =====
   const hint = document.getElementById('hint-juego');
   if (hint) {
     hint.innerHTML = '';
@@ -813,7 +761,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     window.toggleMusic = toggleMusic;
     window.resetMusic = resetMusic;
 
-    // Intentar reproducir lo antes posible
     setTimeout(() => {
       if (window.playMusic) window.playMusic();
     }, 100);
@@ -950,13 +897,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   if ('IntersectionObserver' in window) {
     var secciones = document.querySelectorAll('.seccion');
-    // La animación de aparición/desaparición se queda igual que antes
-    // (se agrega Y se quita "visible" al entrar/salir de la pantalla).
-    // Lo que causaba el parpadeo era que ambas cosas pasaban en el MISMO
-    // umbral (15%): si el scroll se quedaba justo ahí, entraba y salía sin
-    // parar. La solución es un "colchón": se hace visible al pasar el 15%,
-    // pero solo se vuelve a ocultar si baja de verdad, del 4%, así el punto
-    // de aparecer y el de desaparecer ya no coinciden.
     var UMBRAL_APARECER = 0.15;
     var UMBRAL_DESAPARECER = 0.04;
     var observer = new IntersectionObserver(function(entries) {
