@@ -596,7 +596,7 @@ html.sin-reja #app {
   font-family: var(--serif-display);
   letter-spacing: 0.32em;
   text-transform: uppercase;
-  font-size: 1.2rem; /* más grande */
+  font-size: 1.2rem;
   color: #d4af37 !important;
 }
 .top-btn {
@@ -779,7 +779,7 @@ h1#nombre-hero {
 }
 
 .advertencia {
-  display: none !important; /* ocultamos todas las advertencias */
+  display: none !important; /* ocultamos todas las advertencias (ya no están en HTML) */
 }
 
 .calendario-container {
@@ -955,7 +955,7 @@ h1#nombre-hero {
   color: #fae3a0;
 }
 .itinerario-nota {
-  display: none !important; /* ocultamos "Los horarios pueden variar" */
+  display: none !important; /* ocultamos "Los horarios pueden variar" (ya no está en HTML) */
 }
 
 .clock {
@@ -1143,9 +1143,8 @@ h1#nombre-hero {
   margin: 0.6rem 0;
 }
 .libro-firmas-nota {
-  display: none !important; /* ocultamos la nota del libro de firmas */
+  display: none !important; /* ocultamos la nota (ya no está en HTML) */
 }
-
 .libro-firmas-contenido .btn-mapa {
   display: inline-block;
 }
@@ -1222,9 +1221,7 @@ h1#nombre-hero {
   color: #f0e0c0;
   margin: 0.6rem 0;
 }
-.agradecimientos-texto:last-of-type {
-  display: none !important; /* ocultamos "Los llevamos en el corazón" */
-}
+/* el párrafo "Los llevamos en el corazón" ya no existe en el HTML */
 .agradecimientos-firma {
   margin-top: 1.2rem;
   font-family: var(--script);
@@ -1411,7 +1408,6 @@ h1#nombre-hero {
   border-radius: 0; /* sin borde por defecto en PC */
   overflow: hidden;
   margin: 0.5rem 0;
-  /* En PC no hay borde ni sombra */
 }
 
 /* En celular (táctil) le ponemos borde dorado y esquinas redondeadas */
