@@ -1,8 +1,340 @@
-console.log('🚀 principal/script-principal.js (sin audio en collage, optimizado)');
+console.log('🚀 principal/script-principal.js (sin reja, página aparte)');
 
 import { obtenerNivel } from '../modules/perf.js';
 
-// ===== VARIABLES DEL COLLAGE (SIN AUDIO) =====
+async function cargarConfig() {
+  try {
+    const res = await fetch(`../config.json?t=${Date.now()}`);
+    if (!res.ok) throw new Error('HTTP error ' + res.status);
+    const data = await res.json();
+    if (!data.nombre) throw new Error('Falta "nombre"');
+    return data;
+  } catch (e) {
+    console.warn('⚠️ Error config:', e);
+    return {
+      nombre: 'Melina',
+      fechaTexto: '10 de octubre de 2026',
+      fechaISO: '2026-10-10T13:00:00',
+      frase: 'Con la bendición de Dios...',
+      horaMisa: '3:00 pm',
+      ubicacionMisa: 'Iglesia',
+      mapaMisa: '#',
+      horaFiesta: '1:00 pm',
+      ubicacionFiesta: 'Salón',
+      mapaFiesta: '#',
+      padre: 'Papá',
+      madre: 'Mamá',
+      padrino: 'Padrino',
+      madrina: 'Madrina'
+    };
+  }
+}
+
+function rellenarDatos(config) {
+  const nombreEl = document.getElementById('nombre-hero');
+  if (nombreEl) {
+    nombreEl.textContent = config.nombre;
+    nombreEl.setAttribute('data-text', config.nombre);
+  }
+  const fraseEl = document.getElementById('frase-texto');
+  if (fraseEl) fraseEl.textContent = config.frase;
+  const horaMisa = document.getElementById('hora-misa');
+  if (horaMisa) horaMisa.textContent = config.horaMisa;
+  const lugarMisa = document.getElementById('lugar-misa');
+  if (lugarMisa) lugarMisa.textContent = config.ubicacionMisa;
+  const mapaMisa = document.getElementById('mapa-misa');
+  if (mapaMisa) mapaMisa.href = config.mapaMisa;
+  const horaFiesta = document.getElementById('hora-fiesta');
+  if (horaFiesta) horaFiesta.textContent = config.horaFiesta;
+  const lugarFiesta = document.getElementById('lugar-fiesta');
+  if (lugarFiesta) lugarFiesta.textContent = config.ubicacionFiesta;
+  const mapaFiesta = document.getElementById('mapa-fiesta');
+  if (mapaFiesta) mapaFiesta.href = config.mapaFiesta;
+  const padre1 = document.getElementById('padre1');
+  if (padre1) padre1.textContent = config.padre;
+  const padre2 = document.getElementById('padre2');
+  if (padre2) padre2.textContent = config.madre;
+  const padrino1 = document.getElementById('padrino1');
+  if (padrino1) padrino1.textContent = config.padrino;
+  const padrino2 = document.getElementById('padrino2');
+  if (padrino2) padrino2.textContent = config.madrina;
+  document.title = `Mis XV años · ${config.nombre}`;
+  const ogTitle = document.querySelector('meta[property="og:title"]');
+  if (ogTitle) ogTitle.content = `Invitación a los XV años de ${config.nombre}`;
+  const ogDesc = document.querySelector('meta[property="og:description"]');
+  if (ogDesc) ogDesc.content = `Te invitamos a celebrar los 15 años de ${config.nombre}. ¡No faltes!`;
+
+  const firmaNombre = document.getElementById('firma-nombre');
+  if (firmaNombre) {
+    firmaNombre.textContent = config.nombre;
+  }
+  const linkLibro = document.getElementById('link-libro-firmas');
+  if (linkLibro) {
+    linkLibro.href = 'https://docs.google.com/forms/d/e/1FAIpQLSd9CtYaj-_JR6s5MhZQXrxQPPPBfFTjmB-2FoBk6lvA8PWAIg/viewform';
+  }
+}
+
+// ===== GENERAR CALENDARIO =====
+function generarCalendario() {
+  const container = document.getElementById('calendario-container');
+  if (!container) return;
+  const year = 2026;
+  const month = 9;
+  const fechaEspecial = 10;
+  const diasEspeciales = [8, 10];
+
+  const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  const primerDia = new Date(year, month, 1).getDay();
+  const diasEnMes = new Date(year, month + 1, 0).getDate();
+
+  container.innerHTML = '';
+  diasSemana.forEach(nombre => {
+    const div = document.createElement('div');
+    div.className = 'dia-nombre';
+    div.textContent = nombre;
+    container.appendChild(div);
+  });
+
+  for (let i = 0; i < primerDia; i++) {
+    const div = document.createElement('div');
+    div.className = 'dia';
+    div.style.visibility = 'hidden';
+    container.appendChild(div);
+  }
+
+  for (let d = 1; d <= diasEnMes; d++) {
+    const div = document.createElement('div');
+    div.className = 'dia';
+    if (d === fechaEspecial) {
+      div.classList.add('especial', 'dia-10');
+      div.innerHTML = `${d}<span class="rosa">🌹</span>`;
+    } else if (diasEspeciales.includes(d)) {
+      div.classList.add('especial');
+      div.textContent = d;
+    } else {
+      div.textContent = d;
+    }
+    container.appendChild(div);
+  }
+}
+
+function marcarDiaActualEnCalendario() {
+  const ahora = new Date();
+  const año = ahora.getFullYear();
+  const mes = ahora.getMonth();
+  const dia = ahora.getDate();
+
+  if (año === 2026 && mes === 9) {
+    const celdas = document.querySelectorAll('.calendario-container .dia');
+    celdas.forEach(celda => {
+      const num = parseInt(celda.textContent);
+      if (num === dia) {
+        celda.classList.add('hoy');
+      }
+    });
+  }
+}
+
+// ===== GENERAR EVENTOS DEL CALENDARIO =====
+function generarEventosCalendario(config) {
+  const container = document.getElementById('calendario-eventos');
+  if (!container) return;
+
+  const eventos = [
+    { fecha: '8 de octubre', desc: '🎂 Mi Cumpleaños', fechaISO: '2026-10-08T09:00:00', duracion: 2 },
+    { fecha: '10 de octubre', desc: '⛪ Misa', fechaISO: '2026-10-10T13:00:00', duracion: 2 },
+    { fecha: '10 de octubre', desc: '🎉 Recepción', fechaISO: '2026-10-10T15:00:00', duracion: 5 },
+  ];
+
+  container.innerHTML = '';
+  eventos.forEach(ev => {
+    const div = document.createElement('div');
+    div.className = 'calendario-evento';
+
+    const info = document.createElement('div');
+    info.className = 'evento-info';
+    info.innerHTML = `
+      <span class="fecha">${ev.fecha}</span>
+      <span class="desc">${ev.desc}</span>
+    `;
+
+    const btn = document.createElement('button');
+    btn.className = 'btn-agregar';
+    btn.textContent = '📅 Añadir';
+    btn.addEventListener('click', () => {
+      agregarACalendario(ev, config);
+    });
+
+    div.appendChild(info);
+    div.appendChild(btn);
+    container.appendChild(div);
+  });
+}
+
+function agregarACalendario(evento, config) {
+  const fecha = new Date(evento.fechaISO);
+  const inicio = fecha.toISOString().replace(/-|:|\.\d+/g, '');
+  const fin = new Date(fecha.getTime() + evento.duracion * 60 * 60 * 1000).toISOString().replace(/-|:|\.\d+/g, '');
+
+  const titulo = encodeURIComponent(`${evento.desc} · ${config.nombre}`);
+  const descripcion = encodeURIComponent(`Invitación a los XV años de ${config.nombre}. ${evento.desc}`);
+
+  let ubicacion = '';
+  if (!evento.desc.includes('Mi Cumpleaños')) {
+    if (evento.desc.includes('Misa')) {
+      ubicacion = encodeURIComponent('Capilla del Puente, Rayon 164, Tianguistenco de Galeana, 52603 Guadalupe Yancuictlalpan, Méx., México');
+    } else if (evento.desc.includes('Recepción')) {
+      ubicacion = encodeURIComponent('Auditorio Gualupita Yancuictlalpan, Allende 2, Tianguistenco de Galeana, 52603 Guadalupe Yancuictlalpan, Méx., México');
+    }
+  }
+
+  let url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${titulo}&dates=${inicio}/${fin}&details=${descripcion}`;
+  if (ubicacion) {
+    url += `&location=${ubicacion}`;
+  }
+  url += '&sf=true&output=xml';
+
+  window.open(url, '_blank');
+}
+
+// ===== RESALTAR ACTIVIDAD ACTUAL EN ITINERARIO =====
+function iniciarBrilloItinerario() {
+  const ahora = new Date();
+  const año = ahora.getFullYear();
+  const mes = ahora.getMonth();
+  const dia = ahora.getDate();
+  const hora = ahora.getHours();
+  const minutos = ahora.getMinutes();
+  const totalMinutos = hora * 60 + minutos;
+
+  if (año === 2026 && mes === 9 && dia === 10) {
+    const items = document.querySelectorAll('.itinerario-item');
+    let activo = null;
+    let anterior = null;
+
+    items.forEach(item => {
+      const horaMin = parseInt(item.dataset.hora);
+      if (totalMinutos >= horaMin) {
+        anterior = item;
+      }
+    });
+
+    if (anterior) {
+      activo = anterior;
+    }
+
+    if (activo) {
+      activo.classList.add('activo');
+    }
+
+    setInterval(() => {
+      const ahora2 = new Date();
+      const hora2 = ahora2.getHours();
+      const min2 = ahora2.getMinutes();
+      const totalMin2 = hora2 * 60 + min2;
+
+      if (ahora2.getDate() === dia && ahora2.getMonth() === mes && ahora2.getFullYear() === año) {
+        const items2 = document.querySelectorAll('.itinerario-item');
+        let nuevoActivo = null;
+        items2.forEach(item => {
+          const horaMin2 = parseInt(item.dataset.hora);
+          if (totalMin2 >= horaMin2) {
+            nuevoActivo = item;
+          }
+        });
+
+        items2.forEach(item => item.classList.remove('activo'));
+        if (nuevoActivo) {
+          nuevoActivo.classList.add('activo');
+        }
+      }
+    }, 60000);
+  }
+}
+
+// ===== CONTADOR CON ANILLO CIRCULAR =====
+function initContadorCircular(config) {
+  const target = new Date(config.fechaISO).getTime();
+  if (isNaN(target)) return;
+
+  const units = document.querySelectorAll('.clock .unit');
+  if (!units.length) return;
+
+  function actualizarContador() {
+    const now = Date.now();
+    const diff = target - now;
+
+    if (diff <= 0) {
+      document.querySelector('.clock').style.display = 'none';
+      document.getElementById('contador-mensaje').textContent = '🎉 ¡El gran día ha llegado! 🎉';
+      return;
+    }
+
+    const days = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+
+    const maxValues = [365, 24, 60, 60];
+    const values = [days, hours, minutes, seconds];
+
+    units.forEach((unit, index) => {
+      const numEl = unit.querySelector('.num');
+      const circle = unit.querySelector('.progress-circle');
+      if (numEl) numEl.textContent = String(values[index]).padStart(2, '0');
+
+      if (circle) {
+        const max = maxValues[index];
+        const val = values[index];
+        const circumference = 2 * Math.PI * 26;
+        const progress = max > 0 ? (max - val) / max : 0;
+        const offset = progress * circumference;
+        circle.style.strokeDasharray = circumference;
+        circle.style.strokeDashoffset = offset;
+      }
+    });
+
+    const msgEl = document.getElementById('contador-mensaje');
+    if (msgEl) {
+      let mensaje = '';
+      if (days > 30) mensaje = 'Falta un poco más de un mes...';
+      else if (days > 7) mensaje = 'La espera se hace corta.';
+      else if (days > 1) mensaje = '¡Ya casi llega!';
+      else if (days === 1) mensaje = '¡Mañana es el gran día!';
+      else if (days === 0 && hours > 6) mensaje = '¡Hoy es el gran día!';
+      else if (days === 0 && hours > 1) mensaje = '¡En unas horas comienza!';
+      else if (days === 0 && hours >= 0) mensaje = '¡El momento está aquí!';
+      msgEl.textContent = mensaje;
+    }
+  }
+
+  units.forEach((unit) => {
+    let circleWrap = unit.querySelector('.circle-wrap');
+    if (!circleWrap) {
+      const wrap = document.createElement('div');
+      wrap.className = 'circle-wrap';
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 60 60');
+      svg.innerHTML = `
+        <circle class="bg-circle" cx="30" cy="30" r="26" />
+        <circle class="progress-circle" cx="30" cy="30" r="26" stroke-dasharray="163.36" stroke-dashoffset="0" />
+      `;
+      wrap.appendChild(svg);
+      const num = unit.querySelector('.num');
+      unit.insertBefore(wrap, num);
+      wrap.appendChild(num);
+      num.style.position = 'absolute';
+      num.style.top = '50%';
+      num.style.left = '50%';
+      num.style.transform = 'translate(-50%, -50%)';
+    }
+  });
+
+  actualizarContador();
+  setInterval(actualizarContador, 200);
+}
+
+// ===== COLLAGE DE GUSTOS (SIN ANIMACIONES) =====
 var collageTimer = null;
 var imagenesCollage = [];
 var collageInicializado = false;
@@ -14,8 +346,60 @@ var collageUltimaRotacion = 0;
 var collageIntervaloMs = 3000;
 var MAX_IMAGENES_SIMULTANEAS = 6;
 var CARPETA_IMGCOLL = '../imgcoll/';
+var CARPETA_MUSICOLLAGE = '../musicollage/';
+var collageAudioActual = null;
 
-// ===== FUNCIONES DEL COLLAGE (SIN AUDIO) =====
+function detenerAudioCollage() {
+  var saliente = collageAudioActual;
+  collageAudioActual = null;
+  if (!saliente) return;
+  var vol = saliente.volume;
+  var fadeOut = setInterval(function() {
+    vol -= 0.15;
+    if (vol <= 0) {
+      vol = 0;
+      clearInterval(fadeOut);
+      saliente.pause();
+    }
+    saliente.volume = vol;
+  }, 40);
+}
+
+function intentarReproducirSonidoCollage(srcImagen) {
+  var match = /imgcoll(\d+)\./i.exec(srcImagen || '');
+  if (!match) return;
+  var numero = match[1];
+
+  var audio = new Audio();
+  audio.preload = 'auto';
+  audio.volume = 0;
+
+  audio.addEventListener('error', function() {
+    // No existe el archivo: no se hace nada
+  });
+
+  audio.addEventListener('canplaythrough', function alListo() {
+    audio.removeEventListener('canplaythrough', alListo);
+    collageAudioActual = audio;
+    var promesa = audio.play();
+    if (promesa && promesa.catch) {
+      promesa.catch(function() { /* autoplay bloqueado */ });
+    }
+    var vol = 0;
+    var fadeIn = setInterval(function() {
+      vol += 0.12;
+      if (vol >= 0.85) {
+        vol = 0.85;
+        clearInterval(fadeIn);
+      }
+      if (audio === collageAudioActual) audio.volume = vol;
+      else clearInterval(fadeIn);
+    }, 40);
+  });
+
+  audio.src = CARPETA_MUSICOLLAGE + 'musicoll' + numero + '.mp3';
+}
+
 function detectarImagenesCollage(callback) {
   var fallosSeguidosParaParar = 3;
   var encontradas = [];
@@ -99,25 +483,21 @@ function shuffleArray(arr) {
 }
 
 function elegirImagenAleatoria() {
-  var total = imagenesCollage.length;
-  if (collageHistorialImagenes.length >= total) {
-    collageHistorialImagenes = [];
-  }
-
   var disponibles = [];
-  for (var i = 0; i < total; i++) {
+  for (var i = 0; i < imagenesCollage.length; i++) {
     if (collageHistorialImagenes.indexOf(i) === -1) {
       disponibles.push(i);
     }
   }
-
   if (disponibles.length === 0) {
     collageHistorialImagenes = [];
-    disponibles = Array.from({length: total}, (_, i) => i);
+    disponibles = Array.from({length: imagenesCollage.length}, (_, i) => i);
   }
-
   var indiceElegido = disponibles[Math.floor(Math.random() * disponibles.length)];
   collageHistorialImagenes.push(indiceElegido);
+  if (collageHistorialImagenes.length > 5) {
+    collageHistorialImagenes.shift();
+  }
   return indiceElegido;
 }
 
@@ -145,6 +525,7 @@ function renderCollage(container) {
   collageUltimaRotacion = 0;
 
   var TAMANIO_BASE = 80;
+
   var ZONAS_COLLAGE = [
     { x: 15, y: 20 },
     { x: 50, y: 14 },
@@ -173,6 +554,9 @@ function renderCollage(container) {
     var src = dato.src;
     var ratio = dato.ratio || 1;
 
+    detenerAudioCollage();
+    intentarReproducirSonidoCollage(src);
+
     var w, h;
     if (ratio >= 1) {
       w = TAMANIO_BASE;
@@ -200,7 +584,7 @@ function renderCollage(container) {
     elemento.src = src;
     elemento.alt = 'Gusto';
     elemento.loading = 'lazy';
-    // Sin transiciones de opacidad, aparece directamente
+    // SIN ANIMACIONES: opacity 1, transform directa
     elemento.style.cssText =
       'width:' + w + '%;' +
       'height:' + h + '%;' +
@@ -208,13 +592,13 @@ function renderCollage(container) {
       'top:' + y + '%;' +
       'z-index:' + collageZIndex + ';' +
       'opacity: 1;' +
-      'transform: rotate(' + rot + 'deg) scale(1) translateZ(0);';
+      'transform: rotate(' + rot + 'deg) scale(1);';
     container.appendChild(elemento);
 
     collageElementos.push({ div: elemento, zona: indiceZona });
     collageZIndex++;
 
-    // Eliminar la imagen más antigua sin animación
+    // Quitar la imagen más antigua sin animación
     if (collageElementos.length > MAX_IMAGENES_SIMULTANEAS) {
       var antiguo = collageElementos.shift();
       var antiguoDiv = antiguo.div;
@@ -240,340 +624,12 @@ function limpiarCollage() {
     clearInterval(collageTimer);
     collageTimer = null;
   }
+  detenerAudioCollage();
   var container = document.getElementById('collage-container');
   if (container) {
     container.innerHTML = '<div id="collage-loading" style="text-align:center; padding:2rem; color:#fae3a0; font-family:var(--script); font-size:1.2rem;">Cargando collage...</div>';
     container.style.overflow = 'hidden';
   }
-}
-
-// ===== RESTO DE FUNCIONES (config, calendario, etc.) =====
-async function cargarConfig() {
-  try {
-    const res = await fetch(`../config.json?t=${Date.now()}`);
-    if (!res.ok) throw new Error('HTTP error ' + res.status);
-    const data = await res.json();
-    if (!data.nombre) throw new Error('Falta "nombre"');
-    return data;
-  } catch (e) {
-    console.warn('⚠️ Error config:', e);
-    return {
-      nombre: 'Melina',
-      fechaTexto: '10 de octubre de 2026',
-      fechaISO: '2026-10-10T13:00:00',
-      frase: 'Con la bendición de Dios...',
-      horaMisa: '3:00 pm',
-      ubicacionMisa: 'Iglesia',
-      mapaMisa: '#',
-      horaFiesta: '1:00 pm',
-      ubicacionFiesta: 'Salón',
-      mapaFiesta: '#',
-      padre: 'Papá',
-      madre: 'Mamá',
-      padrino: 'Padrino',
-      madrina: 'Madrina'
-    };
-  }
-}
-
-function rellenarDatos(config) {
-  const nombreEl = document.getElementById('nombre-hero');
-  if (nombreEl) {
-    nombreEl.textContent = config.nombre;
-    nombreEl.setAttribute('data-text', config.nombre);
-  }
-  const fraseEl = document.getElementById('frase-texto');
-  if (fraseEl) fraseEl.textContent = config.frase;
-  const horaMisa = document.getElementById('hora-misa');
-  if (horaMisa) horaMisa.textContent = config.horaMisa;
-  const lugarMisa = document.getElementById('lugar-misa');
-  if (lugarMisa) lugarMisa.textContent = config.ubicacionMisa;
-  const mapaMisa = document.getElementById('mapa-misa');
-  if (mapaMisa) mapaMisa.href = config.mapaMisa;
-  const horaFiesta = document.getElementById('hora-fiesta');
-  if (horaFiesta) horaFiesta.textContent = config.horaFiesta;
-  const lugarFiesta = document.getElementById('lugar-fiesta');
-  if (lugarFiesta) lugarFiesta.textContent = config.ubicacionFiesta;
-  const mapaFiesta = document.getElementById('mapa-fiesta');
-  if (mapaFiesta) mapaFiesta.href = config.mapaFiesta;
-  const padre1 = document.getElementById('padre1');
-  if (padre1) padre1.textContent = config.padre;
-  const padre2 = document.getElementById('padre2');
-  if (padre2) padre2.textContent = config.madre;
-  const padrino1 = document.getElementById('padrino1');
-  if (padrino1) padrino1.textContent = config.padrino;
-  const padrino2 = document.getElementById('padrino2');
-  if (padrino2) padrino2.textContent = config.madrina;
-  document.title = `Mis XV años · ${config.nombre}`;
-  const ogTitle = document.querySelector('meta[property="og:title"]');
-  if (ogTitle) ogTitle.content = `Invitación a los XV años de ${config.nombre}`;
-  const ogDesc = document.querySelector('meta[property="og:description"]');
-  if (ogDesc) ogDesc.content = `Te invitamos a celebrar los 15 años de ${config.nombre}. ¡No faltes!`;
-
-  const firmaNombre = document.getElementById('firma-nombre');
-  if (firmaNombre) {
-    firmaNombre.textContent = config.nombre;
-  }
-  const linkLibro = document.getElementById('link-libro-firmas');
-  if (linkLibro) {
-    linkLibro.href = 'https://docs.google.com/forms/d/e/1FAIpQLSd9CtYaj-_JR6s5MhZQXrxQPPPBfFTjmB-2FoBk6lvA8PWAIg/viewform';
-  }
-}
-
-function generarCalendario() {
-  const container = document.getElementById('calendario-container');
-  if (!container) return;
-  const year = 2026;
-  const month = 9;
-  const fechaEspecial = 10;
-  const diasEspeciales = [8, 10];
-
-  const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-  const primerDia = new Date(year, month, 1).getDay();
-  const diasEnMes = new Date(year, month + 1, 0).getDate();
-
-  container.innerHTML = '';
-  diasSemana.forEach(nombre => {
-    const div = document.createElement('div');
-    div.className = 'dia-nombre';
-    div.textContent = nombre;
-    container.appendChild(div);
-  });
-
-  for (let i = 0; i < primerDia; i++) {
-    const div = document.createElement('div');
-    div.className = 'dia';
-    div.style.visibility = 'hidden';
-    container.appendChild(div);
-  }
-
-  for (let d = 1; d <= diasEnMes; d++) {
-    const div = document.createElement('div');
-    div.className = 'dia';
-    if (d === fechaEspecial) {
-      div.classList.add('especial', 'dia-10');
-      div.innerHTML = `${d}<span class="rosa">🌹</span>`;
-    } else if (diasEspeciales.includes(d)) {
-      div.classList.add('especial');
-      div.textContent = d;
-    } else {
-      div.textContent = d;
-    }
-    container.appendChild(div);
-  }
-}
-
-function marcarDiaActualEnCalendario() {
-  const ahora = new Date();
-  const año = ahora.getFullYear();
-  const mes = ahora.getMonth();
-  const dia = ahora.getDate();
-
-  if (año === 2026 && mes === 9) {
-    const celdas = document.querySelectorAll('.calendario-container .dia');
-    celdas.forEach(celda => {
-      const num = parseInt(celda.textContent);
-      if (num === dia) {
-        celda.classList.add('hoy');
-      }
-    });
-  }
-}
-
-function generarEventosCalendario(config) {
-  const container = document.getElementById('calendario-eventos');
-  if (!container) return;
-
-  const eventos = [
-    { fecha: '8 de octubre', desc: '🎂 Mi Cumpleaños', fechaISO: '2026-10-08T09:00:00', duracion: 2 },
-    { fecha: '10 de octubre', desc: '⛪ Misa', fechaISO: '2026-10-10T13:00:00', duracion: 2 },
-    { fecha: '10 de octubre', desc: '🎉 Recepción', fechaISO: '2026-10-10T15:00:00', duracion: 5 },
-  ];
-
-  container.innerHTML = '';
-  eventos.forEach(ev => {
-    const div = document.createElement('div');
-    div.className = 'calendario-evento';
-
-    const info = document.createElement('div');
-    info.className = 'evento-info';
-    info.innerHTML = `
-      <span class="fecha">${ev.fecha}</span>
-      <span class="desc">${ev.desc}</span>
-    `;
-
-    const btn = document.createElement('button');
-    btn.className = 'btn-agregar';
-    btn.textContent = '📅 Añadir';
-    btn.addEventListener('click', () => {
-      agregarACalendario(ev, config);
-    });
-
-    div.appendChild(info);
-    div.appendChild(btn);
-    container.appendChild(div);
-  });
-}
-
-function agregarACalendario(evento, config) {
-  const fecha = new Date(evento.fechaISO);
-  const inicio = fecha.toISOString().replace(/-|:|\.\d+/g, '');
-  const fin = new Date(fecha.getTime() + evento.duracion * 60 * 60 * 1000).toISOString().replace(/-|:|\.\d+/g, '');
-
-  const titulo = encodeURIComponent(`${evento.desc} · ${config.nombre}`);
-  const descripcion = encodeURIComponent(`Invitación a los XV años de ${config.nombre}. ${evento.desc}`);
-
-  let ubicacion = '';
-  if (!evento.desc.includes('Mi Cumpleaños')) {
-    if (evento.desc.includes('Misa')) {
-      ubicacion = encodeURIComponent('Capilla del Puente, Rayon 164, Tianguistenco de Galeana, 52603 Guadalupe Yancuictlalpan, Méx., México');
-    } else if (evento.desc.includes('Recepción')) {
-      ubicacion = encodeURIComponent('Auditorio Gualupita Yancuictlalpan, Allende 2, Tianguistenco de Galeana, 52603 Guadalupe Yancuictlalpan, Méx., México');
-    }
-  }
-
-  let url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${titulo}&dates=${inicio}/${fin}&details=${descripcion}`;
-  if (ubicacion) {
-    url += `&location=${ubicacion}`;
-  }
-  url += '&sf=true&output=xml';
-
-  window.open(url, '_blank');
-}
-
-function iniciarBrilloItinerario() {
-  const ahora = new Date();
-  const año = ahora.getFullYear();
-  const mes = ahora.getMonth();
-  const dia = ahora.getDate();
-  const hora = ahora.getHours();
-  const minutos = ahora.getMinutes();
-  const totalMinutos = hora * 60 + minutos;
-
-  if (año === 2026 && mes === 9 && dia === 10) {
-    const items = document.querySelectorAll('.itinerario-item');
-    let activo = null;
-    let anterior = null;
-
-    items.forEach(item => {
-      const horaMin = parseInt(item.dataset.hora);
-      if (totalMinutos >= horaMin) {
-        anterior = item;
-      }
-    });
-
-    if (anterior) {
-      activo = anterior;
-    }
-
-    if (activo) {
-      activo.classList.add('activo');
-    }
-
-    setInterval(() => {
-      const ahora2 = new Date();
-      const hora2 = ahora2.getHours();
-      const min2 = ahora2.getMinutes();
-      const totalMin2 = hora2 * 60 + min2;
-
-      if (ahora2.getDate() === dia && ahora2.getMonth() === mes && ahora2.getFullYear() === año) {
-        const items2 = document.querySelectorAll('.itinerario-item');
-        let nuevoActivo = null;
-        items2.forEach(item => {
-          const horaMin2 = parseInt(item.dataset.hora);
-          if (totalMin2 >= horaMin2) {
-            nuevoActivo = item;
-          }
-        });
-
-        items2.forEach(item => item.classList.remove('activo'));
-        if (nuevoActivo) {
-          nuevoActivo.classList.add('activo');
-        }
-      }
-    }, 60000);
-  }
-}
-
-function initContadorCircular(config) {
-  const target = new Date(config.fechaISO).getTime();
-  if (isNaN(target)) return;
-
-  const units = document.querySelectorAll('.clock .unit');
-  if (!units.length) return;
-
-  function actualizarContador() {
-    const now = Date.now();
-    const diff = target - now;
-
-    if (diff <= 0) {
-      document.querySelector('.clock').style.display = 'none';
-      document.getElementById('contador-mensaje').textContent = '🎉 ¡El gran día ha llegado! 🎉';
-      return;
-    }
-
-    const days = Math.floor(diff / 86400000);
-    const hours = Math.floor((diff % 86400000) / 3600000);
-    const minutes = Math.floor((diff % 3600000) / 60000);
-    const seconds = Math.floor((diff % 60000) / 1000);
-
-    const maxValues = [365, 24, 60, 60];
-    const values = [days, hours, minutes, seconds];
-
-    units.forEach((unit, index) => {
-      const numEl = unit.querySelector('.num');
-      const circle = unit.querySelector('.progress-circle');
-      if (numEl) numEl.textContent = String(values[index]).padStart(2, '0');
-
-      if (circle) {
-        const max = maxValues[index];
-        const val = values[index];
-        const circumference = 2 * Math.PI * 26;
-        const progress = max > 0 ? (max - val) / max : 0;
-        const offset = progress * circumference;
-        circle.style.strokeDasharray = circumference;
-        circle.style.strokeDashoffset = offset;
-      }
-    });
-
-    const msgEl = document.getElementById('contador-mensaje');
-    if (msgEl) {
-      let mensaje = '';
-      if (days > 30) mensaje = 'Falta un poco más de un mes...';
-      else if (days > 7) mensaje = 'La espera se hace corta.';
-      else if (days > 1) mensaje = '¡Ya casi llega!';
-      else if (days === 1) mensaje = '¡Mañana es el gran día!';
-      else if (days === 0 && hours > 6) mensaje = '¡Hoy es el gran día!';
-      else if (days === 0 && hours > 1) mensaje = '¡En unas horas comienza!';
-      else if (days === 0 && hours >= 0) mensaje = '¡El momento está aquí!';
-      msgEl.textContent = mensaje;
-    }
-  }
-
-  units.forEach((unit) => {
-    let circleWrap = unit.querySelector('.circle-wrap');
-    if (!circleWrap) {
-      const wrap = document.createElement('div');
-      wrap.className = 'circle-wrap';
-      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      svg.setAttribute('viewBox', '0 0 60 60');
-      svg.innerHTML = `
-        <circle class="bg-circle" cx="30" cy="30" r="26" />
-        <circle class="progress-circle" cx="30" cy="30" r="26" stroke-dasharray="163.36" stroke-dashoffset="0" />
-      `;
-      wrap.appendChild(svg);
-      const num = unit.querySelector('.num');
-      unit.insertBefore(wrap, num);
-      wrap.appendChild(num);
-      num.style.position = 'absolute';
-      num.style.top = '50%';
-      num.style.left = '50%';
-      num.style.transform = 'translate(-50%, -50%)';
-    }
-  });
-
-  actualizarContador();
-  setInterval(actualizarContador, 200);
 }
 
 // ===== AJUSTES POR RENDIMIENTO =====
@@ -637,7 +693,6 @@ function aplicarAjustesRendimiento(nivel) {
   }
 }
 
-// ===== INICIO =====
 document.addEventListener('DOMContentLoaded', async function() {
   const nivel = obtenerNivel();
   console.log('📊 Nivel de rendimiento detectado:', nivel);
@@ -701,7 +756,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   try {
     var { initMusica, playMusic, toggleMusic, resetMusic } = await import('../modules/musica.js');
-    initMusica();
+    initMusica(); // usa cancion.mp3 por defecto
     window.playMusic = playMusic;
     window.toggleMusic = toggleMusic;
     window.resetMusic = resetMusic;
@@ -710,14 +765,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       if (window.playMusic) window.playMusic();
     }, 100);
   } catch (e) { console.error('❌ Música:', e); }
-
-  // ---- ESC en la página principal ----
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      e.preventDefault();
-      window.location.href = '../index.html';
-    }
-  });
 
   var appIniciada = false;
   async function cargarContador() {
