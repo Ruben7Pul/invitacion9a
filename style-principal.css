@@ -1258,7 +1258,8 @@ h1#nombre-hero {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: #0d1424;
+  /* === QUITAMOS EL FONDO SÓLIDO para que el emoji sea transparente === */
+  background: transparent;
   padding: 0 8px;
   color: #d4af37;
   font-size: 0.9rem;
@@ -1400,7 +1401,7 @@ h1#nombre-hero {
   border-radius: 16px;
   overflow: hidden;
   margin: 0.5rem 0;
-  /* ===== BORDE DORADO REDONDEADO EN EL ÁREA DEL COLLAGE ===== */
+  /* Borde dorado redondeado en el área del collage */
   border: 3px solid #b8860b;
   box-shadow: 0 0 0 2px rgba(184, 134, 11, 0.15), 0 0 30px rgba(184, 134, 11, 0.1);
 }
