@@ -1,71 +1,21 @@
-console.log('🚀 principal/script-principal.js (ESC + historial collage completo)');
+console.log('🚀 principal/script-principal.js (sin audio en collage, optimizado)');
 
 import { obtenerNivel } from '../modules/perf.js';
 
-// ===== VARIABLES DEL COLLAGE =====
+// ===== VARIABLES DEL COLLAGE (SIN AUDIO) =====
 var collageTimer = null;
 var imagenesCollage = [];
 var collageInicializado = false;
 var collageIndiceActual = 0;
 var collageZIndex = 1;
 var collageElementos = [];
-var collageHistorialImagenes = []; // historial de índices ya mostrados
+var collageHistorialImagenes = [];
 var collageUltimaRotacion = 0;
 var collageIntervaloMs = 3000;
 var MAX_IMAGENES_SIMULTANEAS = 6;
 var CARPETA_IMGCOLL = '../imgcoll/';
-var CARPETA_MUSICOLLAGE = '../musicollage/';
-var collageAudioActual = null;
 
-// ===== FUNCIONES DEL COLLAGE =====
-function detenerAudioCollage() {
-  var saliente = collageAudioActual;
-  collageAudioActual = null;
-  if (!saliente) return;
-  var vol = saliente.volume;
-  var fadeOut = setInterval(function() {
-    vol -= 0.15;
-    if (vol <= 0) {
-      vol = 0;
-      clearInterval(fadeOut);
-      saliente.pause();
-    }
-    saliente.volume = vol;
-  }, 40);
-}
-
-function intentarReproducirSonidoCollage(srcImagen) {
-  var match = /imgcoll(\d+)\./i.exec(srcImagen || '');
-  if (!match) return;
-  var numero = match[1];
-
-  var audio = new Audio();
-  audio.preload = 'auto';
-  audio.volume = 0;
-
-  audio.addEventListener('error', function() {});
-  audio.addEventListener('canplaythrough', function alListo() {
-    audio.removeEventListener('canplaythrough', alListo);
-    collageAudioActual = audio;
-    var promesa = audio.play();
-    if (promesa && promesa.catch) {
-      promesa.catch(function() {});
-    }
-    var vol = 0;
-    var fadeIn = setInterval(function() {
-      vol += 0.12;
-      if (vol >= 0.85) {
-        vol = 0.85;
-        clearInterval(fadeIn);
-      }
-      if (audio === collageAudioActual) audio.volume = vol;
-      else clearInterval(fadeIn);
-    }, 40);
-  });
-
-  audio.src = CARPETA_MUSICOLLAGE + 'musicoll' + numero + '.mp3';
-}
-
+// ===== FUNCIONES DEL COLLAGE (SIN AUDIO) =====
 function detectarImagenesCollage(callback) {
   var fallosSeguidosParaParar = 3;
   var encontradas = [];
@@ -150,7 +100,6 @@ function shuffleArray(arr) {
 
 function elegirImagenAleatoria() {
   var total = imagenesCollage.length;
-  // Si ya hemos mostrado todas las imágenes, reiniciamos el historial
   if (collageHistorialImagenes.length >= total) {
     collageHistorialImagenes = [];
   }
@@ -162,7 +111,6 @@ function elegirImagenAleatoria() {
     }
   }
 
-  // Si no hay disponibles (caso extremo), reiniciamos
   if (disponibles.length === 0) {
     collageHistorialImagenes = [];
     disponibles = Array.from({length: total}, (_, i) => i);
@@ -225,9 +173,6 @@ function renderCollage(container) {
     var src = dato.src;
     var ratio = dato.ratio || 1;
 
-    detenerAudioCollage();
-    intentarReproducirSonidoCollage(src);
-
     var w, h;
     if (ratio >= 1) {
       w = TAMANIO_BASE;
@@ -255,6 +200,7 @@ function renderCollage(container) {
     elemento.src = src;
     elemento.alt = 'Gusto';
     elemento.loading = 'lazy';
+    // Sin transiciones de opacidad, aparece directamente
     elemento.style.cssText =
       'width:' + w + '%;' +
       'height:' + h + '%;' +
@@ -262,12 +208,13 @@ function renderCollage(container) {
       'top:' + y + '%;' +
       'z-index:' + collageZIndex + ';' +
       'opacity: 1;' +
-      'transform: rotate(' + rot + 'deg) scale(1);';
+      'transform: rotate(' + rot + 'deg) scale(1) translateZ(0);';
     container.appendChild(elemento);
 
     collageElementos.push({ div: elemento, zona: indiceZona });
     collageZIndex++;
 
+    // Eliminar la imagen más antigua sin animación
     if (collageElementos.length > MAX_IMAGENES_SIMULTANEAS) {
       var antiguo = collageElementos.shift();
       var antiguoDiv = antiguo.div;
@@ -293,7 +240,6 @@ function limpiarCollage() {
     clearInterval(collageTimer);
     collageTimer = null;
   }
-  detenerAudioCollage();
   var container = document.getElementById('collage-container');
   if (container) {
     container.innerHTML = '<div id="collage-loading" style="text-align:center; padding:2rem; color:#fae3a0; font-family:var(--script); font-size:1.2rem;">Cargando collage...</div>';
