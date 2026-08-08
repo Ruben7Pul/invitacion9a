@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS OPTIMIZADOS (ADORNOS DORADOS)
+   🌹 INVITACIÓN XV – ESTILOS OPTIMIZADOS (CON MEJORAS PARA MÓVIL)
    ============================================================ */
 
 :root {
@@ -827,16 +827,13 @@ h1#nombre-hero {
   border-color: #ff69b4;
   background: rgba(255, 105, 180, 0.2);
   box-shadow: 0 0 30px rgba(255, 105, 180, 0.5), inset 0 0 20px rgba(255, 105, 180, 0.2);
-  animation: brilloRosa 1.5s ease-in-out infinite alternate;
+  /* ANIMACIÓN ELIMINADA: solo la rosa se anima */
   transform: scale(1.08);
 }
 .calendario-container .dia.dia-10 .rosa {
   display: inline-block;
   animation: flotarRosa 2s ease-in-out infinite;
-}
-@keyframes brilloRosa {
-  0% { box-shadow: 0 0 20px rgba(255, 105, 180, 0.4); }
-  100% { box-shadow: 0 0 50px rgba(255, 105, 180, 0.8), 0 0 80px rgba(255, 105, 180, 0.3); }
+  will-change: transform;
 }
 @keyframes flotarRosa {
   0%, 100% { transform: translateY(0) rotate(0deg); }
@@ -1277,7 +1274,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   MODAL COLLAGE (GUSTOS) – BORDE DORADO + ESQUINAS EN MÓVIL
+   MODAL COLLAGE (GUSTOS) – SIN AUDIO
    ============================================================ */
 .modal-overlay {
   position: fixed;
@@ -1397,7 +1394,7 @@ h1#nombre-hero {
   text-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
 }
 
-/* ===== COLLAGE – BORDE DORADO + ESQUINAS EN MÓVIL ===== */
+/* ===== COLLAGE – BORDE DORADO + ESQUINAS REDONDEADAS SOLO EN MÓVIL ===== */
 .collage-container {
   flex: 1;
   min-height: 0;
@@ -1406,12 +1403,12 @@ h1#nombre-hero {
   position: relative;
   overflow: hidden;
   margin: 0.5rem 0;
-  background: transparent; /* fondo transparente para que se vea el azul del modal */
-  border: 3px solid #b8860b; /* BORDE DORADO */
-  border-radius: 0; /* sin redondeo en PC */
+  background: transparent;
+  border: 3px solid #b8860b;
+  border-radius: 0;
 }
 
-/* En celular (táctil) añadimos esquinas redondeadas */
+/* En celular (táctil) solo redondeamos las esquinas */
 @media (pointer: coarse) {
   .collage-container {
     border-radius: 16px;
@@ -1439,6 +1436,25 @@ h1#nombre-hero {
 .btn-cerrar-collage {
   margin: 1rem auto 0;
   display: block;
+}
+
+/* ============================================================
+   MEJORAS PARA MÓVIL (SIN AFECTAR A PC)
+   ============================================================ */
+@media (pointer: coarse) {
+  /* Animaciones más suaves en móviles para evitar acelerones */
+  .hint-final {
+    animation-duration: 4s !important;
+  }
+  .calendario-container .dia.dia-10 .rosa {
+    animation-duration: 3s !important;
+  }
+  /* Desactivar parallax en móviles (ya se hace en JS, pero por si acaso) */
+  #app-inner {
+    transform: none !important;
+    transition: none !important;
+  }
+  /* Reducir frecuencia de actualización del contador (se hará en JS) */
 }
 
 /* ============================================================
@@ -1489,9 +1505,9 @@ h1#nombre-hero {
   .gate-wrapper.active .gate-leaf svg { animation-duration: 1.8s; }
   #oval-wrap { animation-duration: 4s; }
   h1#nombre-hero { animation-duration: 2.5s; }
-  .hint-final { animation-duration: 1.3s; }
-  .calendario-container .dia.dia-10 { animation-duration: 1s; }
-  .calendario-container .dia.dia-10 .rosa { animation-duration: 1.3s; }
+  .hint-final { animation-duration: 4s; } /* ya está, pero por consistencia */
+  .calendario-container .dia.dia-10 { animation: none !important; } /* ya eliminado */
+  .calendario-container .dia.dia-10 .rosa { animation-duration: 3s; }
   .calendario-container .dia.hoy { animation-duration: 1.2s; }
 }
 
