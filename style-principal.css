@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS OPTIMIZADOS (CON COLLAGE MEJORADO)
+   🌹 INVITACIÓN XV – ESTILOS OPTIMIZADOS (CON ADORNOS DORADOS)
    ============================================================ */
 
 :root {
@@ -369,7 +369,7 @@ body {
   }
 }
 
-/* ===== SECCIONES ===== */
+/* ===== SECCIONES CON ADORNOS DORADOS ===== */
 .seccion {
   width: 100%;
   background: rgba(10, 18, 34, 0.55);
@@ -389,6 +389,25 @@ body {
   backface-visibility: hidden;
   contain: layout style paint;
 }
+
+/* ===== ADORNO DORADO EN LA PARTE SUPERIOR DE CADA SECCIÓN ===== */
+.seccion::before {
+  content: '✧';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.2rem;
+  color: #d4af37;
+  background: rgba(10, 18, 34, 0.55); /* Fondo de la sección */
+  padding: 0 8px;
+  text-shadow: 0 0 12px rgba(212, 175, 55, 0.6);
+  z-index: 2;
+  border-radius: 0;
+  line-height: 1;
+  pointer-events: none;
+}
+
 .seccion.visible {
   opacity: 1;
   transform: translate3d(0, 0, 0);
@@ -496,9 +515,6 @@ body {
   padding-bottom: 0.5rem;
   border-bottom: 2px solid rgba(212, 175, 55, 0.2);
   position: relative;
-}
-.seccion h2::after {
-  content: '';
 }
 
 .seccion-subtitulo {
@@ -1244,6 +1260,7 @@ h1#nombre-hero {
   margin-top: 0.2rem;
 }
 
+/* ===== SEPARADORES CON ADORNO DORADO (sin fondo) ===== */
 .divider-thin {
   height: 2px;
   background: linear-gradient(90deg, transparent, #d4af37, #fae3a0, #d4af37, transparent);
@@ -1253,16 +1270,17 @@ h1#nombre-hero {
   position: relative;
 }
 .divider-thin::before {
-  content: '🌹';
+  content: '✧';
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  /* === QUITAMOS EL FONDO SÓLIDO para que el emoji sea transparente === */
-  background: transparent;
+  background: transparent; /* Sin fondo sólido */
   padding: 0 8px;
   color: #d4af37;
-  font-size: 0.9rem;
+  font-size: 1.2rem;
+  text-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
+  line-height: 1;
 }
 
 /* ============================================================
@@ -1369,7 +1387,7 @@ h1#nombre-hero {
   position: relative;
 }
 .modal-card h2::after {
-  content: '🌹';
+  content: '✧';
   position: absolute;
   bottom: -12px;
   left: 50%;
