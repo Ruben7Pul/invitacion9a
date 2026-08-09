@@ -1,6 +1,4 @@
-console.log('🚀 principal/script-principal.js (sin reja, página aparte)');
-
-import { obtenerNivel } from '../modules/perf.js';
+console.log('🚀 principal/script-principal.js (versión simplificada)');
 
 async function cargarConfig() {
   try {
@@ -118,23 +116,6 @@ function generarCalendario() {
   }
 }
 
-function marcarDiaActualEnCalendario() {
-  const ahora = new Date();
-  const año = ahora.getFullYear();
-  const mes = ahora.getMonth();
-  const dia = ahora.getDate();
-
-  if (año === 2026 && mes === 9) {
-    const celdas = document.querySelectorAll('.calendario-container .dia');
-    celdas.forEach(celda => {
-      const num = parseInt(celda.textContent);
-      if (num === dia) {
-        celda.classList.add('hoy');
-      }
-    });
-  }
-}
-
 // ===== GENERAR EVENTOS DEL CALENDARIO =====
 function generarEventosCalendario(config) {
   const container = document.getElementById('calendario-eventos');
@@ -197,62 +178,7 @@ function agregarACalendario(evento, config) {
   window.open(url, '_blank');
 }
 
-// ===== RESALTAR ACTIVIDAD ACTUAL EN ITINERARIO =====
-function iniciarBrilloItinerario() {
-  const ahora = new Date();
-  const año = ahora.getFullYear();
-  const mes = ahora.getMonth();
-  const dia = ahora.getDate();
-  const hora = ahora.getHours();
-  const minutos = ahora.getMinutes();
-  const totalMinutos = hora * 60 + minutos;
-
-  if (año === 2026 && mes === 9 && dia === 10) {
-    const items = document.querySelectorAll('.itinerario-item');
-    let activo = null;
-    let anterior = null;
-
-    items.forEach(item => {
-      const horaMin = parseInt(item.dataset.hora);
-      if (totalMinutos >= horaMin) {
-        anterior = item;
-      }
-    });
-
-    if (anterior) {
-      activo = anterior;
-    }
-
-    if (activo) {
-      activo.classList.add('activo');
-    }
-
-    setInterval(() => {
-      const ahora2 = new Date();
-      const hora2 = ahora2.getHours();
-      const min2 = ahora2.getMinutes();
-      const totalMin2 = hora2 * 60 + min2;
-
-      if (ahora2.getDate() === dia && ahora2.getMonth() === mes && ahora2.getFullYear() === año) {
-        const items2 = document.querySelectorAll('.itinerario-item');
-        let nuevoActivo = null;
-        items2.forEach(item => {
-          const horaMin2 = parseInt(item.dataset.hora);
-          if (totalMin2 >= horaMin2) {
-            nuevoActivo = item;
-          }
-        });
-
-        items2.forEach(item => item.classList.remove('activo'));
-        if (nuevoActivo) {
-          nuevoActivo.classList.add('activo');
-        }
-      }
-    }, 60000);
-  }
-}
-
-// ===== CONTADOR CON ANILLO CIRCULAR (con intervalo ajustable por móvil) =====
+// ===== CONTADOR CON ANILLO CIRCULAR =====
 function initContadorCircular(config) {
   const target = new Date(config.fechaISO).getTime();
   if (isNaN(target)) return;
@@ -260,9 +186,8 @@ function initContadorCircular(config) {
   const units = document.querySelectorAll('.clock .unit');
   if (!units.length) return;
 
-  // Detectar móvil para ajustar la frecuencia de actualización
   const isMobile = window.matchMedia('(pointer: coarse)').matches;
-  const intervalo = isMobile ? 1000 : 200; // 1s en móvil, 200ms en PC
+  const intervalo = isMobile ? 1000 : 200;
 
   function actualizarContador() {
     const now = Date.now();
@@ -544,7 +469,6 @@ function renderCollage(container) {
     collageElementos.push({ div: elemento, zona: indiceZona });
     collageZIndex++;
 
-    // Quitar la imagen más antigua sin animación
     if (collageElementos.length > MAX_IMAGENES_SIMULTANEAS) {
       var antiguo = collageElementos.shift();
       var antiguoDiv = antiguo.div;
@@ -577,79 +501,20 @@ function limpiarCollage() {
   }
 }
 
-// ===== AJUSTES POR RENDIMIENTO =====
-function aplicarAjustesRendimiento(nivel) {
-  const nivelNormalizado = (nivel === 'alto' || nivel === 'medio' || nivel === 'bajo') ? nivel : 'desconocido';
-
-  const html = document.documentElement;
-  if (nivelNormalizado !== 'desconocido') {
-    html.classList.add('perf-' + nivelNormalizado);
-  }
-
-  if (nivelNormalizado === 'bajo' || nivelNormalizado === 'medio') {
-    const nombre = document.getElementById('nombre-hero');
-    if (nombre) {
-      nombre.style.animation = 'none';
-      nombre.style.background = 'linear-gradient(90deg, #d4af37, #fae3a0)';
-      nombre.style.webkitBackgroundClip = 'text';
-      nombre.style.backgroundClip = 'text';
-      nombre.style.color = 'transparent';
-    }
-  }
-
-  if (nivelNormalizado === 'bajo') {
-    collageIntervaloMs = 5000;
-  } else if (nivelNormalizado === 'medio') {
-    collageIntervaloMs = 4000;
-  } else {
-    collageIntervaloMs = 3000;
-  }
-
-  if (nivelNormalizado === 'bajo') {
-    window.__parallaxDesactivado = true;
-  }
-
-  if (nivelNormalizado === 'bajo') {
-    document.querySelectorAll('.seccion.visible').forEach(sec => {
-      sec.style.transitionDuration = '0.4s';
-    });
-  }
-
-  const hint = document.getElementById('hint-juego');
-  if (hint) {
-    hint.innerHTML = '';
-    const msgSpan = document.createElement('span');
-    msgSpan.textContent = '👆 Toca el nombre para jugar';
-
-    const dotSpan = document.createElement('span');
-    dotSpan.className = 'perf-indicator';
-
-    const levelColors = {
-      'alto': '#4caf50',
-      'medio': '#ffeb3b',
-      'bajo': '#f44336',
-      'desconocido': '#aaaaaa'
-    };
-    const color = levelColors[nivelNormalizado] || '#888';
-    dotSpan.innerHTML = `<span class="dot" style="background:${color};"></span>`;
-
-    hint.appendChild(msgSpan);
-    hint.appendChild(dotSpan);
-  }
-}
-
 document.addEventListener('DOMContentLoaded', async function() {
-  const nivel = obtenerNivel();
-  console.log('📊 Nivel de rendimiento detectado:', nivel);
-  aplicarAjustesRendimiento(nivel);
+  // ===== INICIALIZAR SONIDOS =====
+  try {
+    const { initSonidos } = await import('../modules/sonidos.js');
+    initSonidos();
+  } catch (e) {
+    console.warn('⚠️ Sonidos no disponibles:', e);
+  }
 
   var config = await cargarConfig();
   rellenarDatos(config);
   generarCalendario();
   generarEventosCalendario(config);
   initContadorCircular(config);
-  marcarDiaActualEnCalendario();
-  iniciarBrilloItinerario();
 
   // ---- COLLAGE ----
   var btnAbrir = document.getElementById('btn-abrir-gustos');
@@ -693,21 +558,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
 
-  // ---- MÚSICA ----
+  // ---- MÚSICA SIMPLIFICADA ----
   try {
-    var { initSonidos } = await import('../modules/sonidos.js');
-    initSonidos();
-  } catch (e) { console.error('❌ Sonidos:', e); }
-
-  try {
-    var { initMusica, playMusic, toggleMusic, resetMusic } = await import('../modules/musica.js');
-    initMusica(); // usa cancion.mp3 por defecto
-    window.playMusic = playMusic;
+    var { initMusica, playMusic, toggleMusic } = await import('../modules/musica.js');
+    initMusica();
     window.toggleMusic = toggleMusic;
-    window.resetMusic = resetMusic;
-
     setTimeout(() => {
-      if (window.playMusic) window.playMusic();
+      if (playMusic) playMusic();
     }, 100);
   } catch (e) { console.error('❌ Música:', e); }
 
@@ -718,7 +575,6 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
   var nombreEl = document.getElementById('nombre-hero');
-  var firmaNombreEl = document.getElementById('firma-nombre');
   var hintJuegoEl = document.getElementById('hint-juego');
 
   function irAlJuego() {
@@ -726,7 +582,6 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
   if (nombreEl) nombreEl.addEventListener('click', irAlJuego);
-  if (firmaNombreEl) firmaNombreEl.addEventListener('click', irAlJuego);
   if (hintJuegoEl) hintJuegoEl.addEventListener('click', irAlJuego);
 
   var app = document.getElementById('app');
@@ -764,15 +619,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     app.appendChild(appInner);
   }
 
-  // Si es móvil, desactivar parallax completamente
-  if (isMobile || window.__parallaxDesactivado) {
+  if (isMobile) {
     console.log('📱 Parallax desactivado en móvil');
     if (appInner) {
       appInner.style.transform = 'none';
       appInner.style.transition = 'none';
     }
   } else {
-    // Solo en PC se activa el parallax
     function applyParallax(x, y) {
       var invertX = -x;
       var invertY = -y;
@@ -845,7 +698,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
 
-  // ===== INTERSECTION OBSERVER CON UMBRALES AJUSTADOS SEGÚN DISPOSITIVO =====
+  // ===== INTERSECTION OBSERVER =====
   if ('IntersectionObserver' in window) {
     var secciones = document.querySelectorAll('.seccion');
     var umbralAparicion = isMobile ? 0.05 : 0.15;
