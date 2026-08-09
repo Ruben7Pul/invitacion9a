@@ -1,5 +1,5 @@
 /* ============================================================
-   🌹 INVITACIÓN XV – ESTILOS COMPLETOS (PORTAL + PRINCIPAL RESTAURADOS)
+   🌹 INVITACIÓN XV – ESTILOS COMPLETOS (PORTAL + PRINCIPAL OPTIMIZADA)
    ============================================================ */
 
 :root {
@@ -117,7 +117,7 @@ body {
 }
 
 /* ============================================================
-   PORTAL (restaurado)
+   PORTAL
    ============================================================ */
 #portal {
   position: fixed;
@@ -323,16 +323,31 @@ body {
   opacity: 1;
   transition: opacity 0.9s ease, transform 0.9s ease;
 }
+
 #transition-video.saliendo {
   opacity: 0;
   transform: translateZ(0) scale(1.04);
 }
+
 .transition-text {
   display: none;
 }
 
+@keyframes pulseText {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.06); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .transition-text {
+    font-size: clamp(1.4rem, 6vw, 2.2rem);
+    padding: 0.4rem 1.2rem;
+    margin-top: 0.8rem;
+  }
+}
+
 /* ============================================================
-   APP (página principal) – RESTAURADA CON ESTILO
+   APP (página principal)
    ============================================================ */
 #app {
   position: fixed;
@@ -357,7 +372,7 @@ body {
   pointer-events: auto;
 }
 
-/* ===== SECCIONES – RESTAURADAS ===== */
+/* ===== SECCIONES ===== */
 .seccion {
   width: 100%;
   background: rgba(10, 18, 34, 0.55);
@@ -365,13 +380,11 @@ body {
   border-radius: 24px;
   padding: 1.2rem 1rem;
   margin: 0.4rem 0;
-  box-shadow: 0 4px 30px rgba(0,0,0,0.3), inset 0 0 40px rgba(212,175,55,0.03);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
   opacity: 0;
   transform: translate3d(0, 30px, 0);
   transition: opacity 0.7s ease, transform 0.7s ease;
   position: relative;
-  background-image: radial-gradient(circle at 10% 20%, rgba(212,175,55,0.05) 0%, transparent 20%),
-                    radial-gradient(circle at 90% 80%, rgba(212,175,55,0.05) 0%, transparent 20%);
   will-change: opacity, transform;
   backface-visibility: hidden;
   contain: layout style paint;
@@ -405,34 +418,6 @@ body {
   line-height: 1;
 }
 
-/* ===== TÍTULOS – SIN animación goldShine ===== */
-.seccion h2 {
-  font-family: var(--serif-display);
-  text-align: center;
-  font-size: clamp(1.3rem, 3.5vw, 1.9rem);
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: #fae3a0;
-  text-shadow: 0 0 25px rgba(212, 175, 55, 0.3);
-  margin: 0 0 0.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid rgba(212, 175, 55, 0.2);
-  position: relative;
-}
-/* ELIMINADO: .seccion.visible h2 { animation: goldShine ... } */
-
-.seccion-subtitulo {
-  font-family: var(--script);
-  font-size: clamp(1rem, 2.8vw, 1.3rem);
-  text-align: center;
-  color: #e0cfa0;
-  margin: -0.2rem 0 0.8rem;
-  opacity: 0.9;
-  letter-spacing: 0.05em;
-  text-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
-}
-
-/* ===== VISIBILIDAD DE SECCIONES ===== */
 .seccion.visible {
   opacity: 1;
   transform: translate3d(0, 0, 0);
@@ -453,7 +438,7 @@ body {
 #seccion-libro-firmas.visible { transition-delay: 0.6s; }
 #seccion-agradecimientos.visible { transition-delay: 0.7s; }
 
-/* ===== TRANSICIONES DE ELEMENTOS INTERNOS ===== */
+/* Transiciones de entrada para elementos internos */
 .seccion h2,
 .seccion .seccion-subtitulo,
 .seccion .detalle-card,
@@ -491,6 +476,32 @@ body {
 }
 #seccion-inicio.visible #app-top { transition-delay: 0.05s; }
 #seccion-inicio.visible #app-mid { transition-delay: 0.1s; }
+
+/* ===== TÍTULOS (más pequeños) ===== */
+.seccion h2 {
+  font-family: var(--serif-display);
+  text-align: center;
+  font-size: clamp(1.1rem, 2.8vw, 1.5rem); /* reducido */
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #fae3a0;
+  text-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+  margin: 0 0 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid rgba(212, 175, 55, 0.2);
+  position: relative;
+}
+
+.seccion-subtitulo {
+  font-family: var(--script);
+  font-size: clamp(1rem, 2.8vw, 1.3rem);
+  text-align: center;
+  color: #e0cfa0;
+  margin: -0.2rem 0 0.8rem;
+  opacity: 0.9;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
+}
 
 #app:not(.show) .seccion,
 #app:not(.show) #app-mid,
@@ -534,7 +545,6 @@ html.sin-reja #app {
   flex-shrink: 0;
 }
 
-/* ===== CABECERA ===== */
 #app-top {
   width: 100%;
   display: flex;
@@ -553,6 +563,8 @@ html.sin-reja #app {
   font-size: 1.2rem;
   color: #d4af37 !important;
 }
+
+/* ===== BOTONES SIN HOVER ===== */
 .top-btn {
   background: none;
   border: 1.5px solid #d4af37;
@@ -565,14 +577,11 @@ html.sin-reja #app {
   justify-content: center;
   border-radius: 30px;
   background: rgba(201, 162, 77, 0.08);
-  box-shadow: 0 0 12px rgba(201,162,77,0.15);
-  transition: none; /* sin hover */
   min-width: 40px;
   height: 40px;
   color: #d4af37 !important;
+  transition: none;
 }
-/* ELIMINADO: .top-btn:hover */
-
 #music-toggle svg { width: 24px; height: 24px; stroke: #d4af37; }
 
 .gold-btn {
@@ -583,10 +592,11 @@ html.sin-reja #app {
   stroke: #d4af37 !important;
 }
 
-/* ===== GIF CENTRAL ===== */
+/* ===== GIF CENTRAL (centrado y sin desplazamiento) ===== */
 #oval-wrap {
   width: clamp(150px, 26cqw, 200px);
   height: clamp(210px, 38cqw, 290px);
+  margin: 0 auto; /* centrado horizontal */
   margin-bottom: 0.1rem;
   margin-top: 0.9rem;
   position: relative;
@@ -605,11 +615,15 @@ html.sin-reja #app {
   border: 4px solid #d4af37;
   box-shadow: 0 0 30px rgba(201, 162, 77, 0.4);
   background: var(--bg-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .gif-central {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
 }
 
@@ -635,7 +649,6 @@ h1#nombre-hero {
   100% { background-position: 300% 50%; }
 }
 
-/* ===== FRASE ===== */
 .frase-inline {
   font-style: italic;
   font-size: clamp(1.55rem, 4.2cqw, 1.8rem);
@@ -648,7 +661,6 @@ h1#nombre-hero {
   animation: none !important;
 }
 
-/* ===== MENSAJE FINAL – SIN ANIMACIÓN ===== */
 .hint-final {
   font-family: var(--script);
   font-size: clamp(1.2rem, 3vw, 1.5rem);
@@ -660,10 +672,12 @@ h1#nombre-hero {
   display: inline-block;
   cursor: pointer;
   user-select: none;
+  /* Sin animación */
 }
-/* ELIMINADO: .hint-final { animation: pulseHint ... } */
 
-/* ===== CALENDARIO (sin resaltado del día actual) ===== */
+/* ============================================================
+   CALENDARIO
+   ============================================================ */
 .calendario-container {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -689,7 +703,7 @@ h1#nombre-hero {
   padding: 0.2rem 0;
   text-align: center;
   color: #f0e0c0;
-  transition: all 0.2s ease;
+  transition: none;
   aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
@@ -720,9 +734,12 @@ h1#nombre-hero {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50% { transform: translateY(-5px) rotate(15deg); }
 }
-/* ELIMINADO: .calendario-container .dia.hoy */
 
-/* ===== EVENTOS CALENDARIO ===== */
+/* Eliminado: resaltado del día actual (.dia.hoy) */
+
+/* ============================================================
+   EVENTOS DEL CALENDARIO
+   ============================================================ */
 .calendario-eventos {
   display: flex;
   flex-direction: column;
@@ -766,10 +783,12 @@ h1#nombre-hero {
   text-decoration: none;
   border: 1.5px solid rgba(201, 162, 77, 0.35);
   cursor: pointer;
-  transition: none; /* sin hover */
+  transition: none;
 }
 
-/* ===== ITINERARIO (sin brillo por hora) ===== */
+/* ============================================================
+   ITINERARIO (sin brillo por hora)
+   ============================================================ */
 .itinerario-dia {
   margin-bottom: 1rem;
 }
@@ -801,8 +820,6 @@ h1#nombre-hero {
   color: #f0e0c0;
   transition: none;
 }
-/* ELIMINADO: .itinerario-item.activo */
-
 .itinerario-hora {
   font-weight: 600;
   color: #d4af37;
@@ -811,11 +828,10 @@ h1#nombre-hero {
   text-align: right;
   color: #fae3a0;
 }
-.itinerario-nota {
-  display: none !important;
-}
 
-/* ===== RELOJ ===== */
+/* ============================================================
+   RELOJ
+   ============================================================ */
 .clock {
   display: flex;
   flex-wrap: nowrap;
@@ -830,7 +846,7 @@ h1#nombre-hero {
   border: 2px solid var(--border-gold);
   border-radius: 16px;
   padding: 0.6rem 0.2rem;
-  box-shadow: inset 0 0 30px rgba(212, 175, 55, 0.08), 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(212, 175, 55, 0.1);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
   position: relative;
   flex: 1;
   min-width: 60px;
@@ -903,14 +919,16 @@ h1#nombre-hero {
   transition: opacity 0.5s ease;
 }
 
-/* ===== TARJETAS DETALLE ===== */
+/* ============================================================
+   TARJETAS DE LUGARES
+   ============================================================ */
 .detalle-card {
   background: rgba(10, 18, 34, 0.55);
   border: 2px solid var(--border-gold);
   border-radius: 20px;
   padding: 1rem 1.2rem 0.8rem;
   margin-bottom: 1rem;
-  box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.03), 0 4px 20px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
   position: relative;
 }
 .detalle-card .icono {
@@ -965,7 +983,9 @@ h1#nombre-hero {
   margin: 0;
 }
 
-/* ===== BOTÓN MAPA – SIN HOVER ===== */
+/* ============================================================
+   BOTONES ESTILO MAPA (unificados)
+   ============================================================ */
 .btn-mapa {
   display: block;
   width: fit-content;
@@ -983,33 +1003,29 @@ h1#nombre-hero {
   box-shadow: 0 0 15px rgba(212,175,55,0.08);
   transition: none;
   cursor: pointer;
-}
-/* ELIMINADO: .btn-mapa:hover */
-
-/* ===== LIBRO DE FIRMAS ===== */
-.libro-firmas-contenido {
   text-align: center;
-  padding: 0.5rem 0;
 }
-.libro-firmas-texto {
-  font-family: var(--serif-body);
-  font-size: clamp(1rem, 2.4vw, 1.2rem);
-  line-height: 1.8;
-  color: #f0e0c0;
-  margin: 0.6rem 0;
-}
-.libro-firmas-contenido .btn-mapa {
-  display: inline-block;
+/* Botón "Conoce mis gustos" con el mismo estilo que los demás */
+#btn-abrir-gustos {
+  width: auto !important;
+  margin: 0.4rem auto 0 !important;
+  font-size: clamp(0.65rem, 1.8vw, 0.8rem) !important;
+  padding: 0.3rem 1.4rem !important;
+  border: 1.5px solid rgba(201, 162, 77, 0.35) !important;
+  background: rgba(201, 162, 77, 0.1) !important;
+  box-shadow: 0 0 15px rgba(212,175,55,0.08) !important;
 }
 
-/* ===== FAMILIA ===== */
+/* ============================================================
+   FAMILIA
+   ============================================================ */
 .familia-grupo {
   background: rgba(10, 18, 34, 0.5);
   border: 2px solid var(--border-gold);
   border-radius: 20px;
   padding: 0.8rem 1rem 0.6rem;
   margin-bottom: 1rem;
-  box-shadow: inset 0 0 30px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
   position: relative;
 }
 .familia-titulo {
@@ -1064,7 +1080,27 @@ h1#nombre-hero {
   padding-top: 0.3rem;
 }
 
-/* ===== AGRADECIMIENTOS ===== */
+/* ============================================================
+   LIBRO DE FIRMAS
+   ============================================================ */
+.libro-firmas-contenido {
+  text-align: center;
+  padding: 0.5rem 0;
+}
+.libro-firmas-texto {
+  font-family: var(--serif-body);
+  font-size: clamp(1rem, 2.4vw, 1.2rem);
+  line-height: 1.8;
+  color: #f0e0c0;
+  margin: 0.6rem 0;
+}
+.libro-firmas-contenido .btn-mapa {
+  display: inline-block;
+}
+
+/* ============================================================
+   AGRADECIMIENTOS
+   ============================================================ */
 .agradecimientos-contenido {
   text-align: center;
   padding: 0.5rem 0;
@@ -1107,7 +1143,9 @@ h1#nombre-hero {
   margin-top: 0.2rem;
 }
 
-/* ===== SEPARADOR ===== */
+/* ============================================================
+   SEPARADOR CON DIAMANTE
+   ============================================================ */
 .divider-thin {
   height: 2px;
   background: linear-gradient(90deg, transparent, #d4af37, #fae3a0, #d4af37, transparent);
@@ -1131,7 +1169,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   MODAL COLLAGE (GUSTOS)
+   MODAL COLLAGE
    ============================================================ */
 .modal-overlay {
   position: fixed;
@@ -1292,7 +1330,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   MEJORAS PARA MÓVIL
+   RESPONSIVE Y MEJORAS MÓVIL
    ============================================================ */
 @media (pointer: coarse) {
   .hint-final {
@@ -1307,9 +1345,6 @@ h1#nombre-hero {
   }
 }
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
 @media (max-width: 400px) {
   #app { padding: 0.3rem 0.6rem 0; }
   #app-inner { gap: 0.6rem; padding: 0 0.2rem 2rem; }
