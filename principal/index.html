@@ -11,8 +11,8 @@
   </script>
   <meta property="og:title" content="Invitación a mis XV años" />
   <meta property="og:description" content="Te invitamos a celebrar mis 15 años. ¡No faltes!" />
-  <meta property="og:image" content="https://tudominio.com/archivos/og-image.jpg" />
-  <meta property="og:url" content="https://tudominio.com/invitacion" />
+  <meta property="og:image" content="https://meliinvitacion1.ruben7pul9.workers.dev/archivos/og-image.jpg" />
+  <meta property="og:url" content="https://meliinvitacion1.ruben7pul9.workers.dev/invitacion" />
   <meta name="twitter:card" content="summary_large_image" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,17 +21,6 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌹</text></svg>">
 </head>
 <body>
-  <!-- ===== APLICAR CLASE DE RENDIMIENTO TEMPRANO ===== -->
-  <script>
-    (function() {
-      let nivel = null;
-      try { nivel = sessionStorage.getItem('perfTier'); } catch(e) {}
-      if (nivel) {
-        document.documentElement.classList.add('perf-' + nivel);
-      }
-    })();
-  </script>
-
   <!-- Cortina de carga -->
   <div id="loading-veil-main" style="position:fixed; inset:0; z-index:9999; background-color:#0e0a18; background-image:url('../archivos/bella.jpg'); background-size:cover; background-position:center; opacity:1; transition:opacity 0.6s ease; pointer-events:none;"></div>
 
@@ -70,7 +59,7 @@
           <div id="oval-wrap">
             <div class="oval-frame">
               <div class="oval-mask">
-                <img src="../archivos/centro.gif" alt="Imagen central" class="gif-central" loading="lazy">
+                <img src="../archivos/centro.gif" alt="Imagen central" class="gif-central" loading="eager">
               </div>
             </div>
           </div>
@@ -147,7 +136,6 @@
             <a class="btn-mapa gold-text" id="mapa-misa" href="#" target="_blank" rel="noopener">📍 Ver en el mapa</a>
             <a class="btn-mapa gold-text" href="https://www.google.com/maps/dir/?api=1&destination=Capilla+del+Puente,+Rayon+164,+Tianguistenco+de+Galeana,+52603+Guadalupe+Yancuictlalpan,+Méx.,+México" target="_blank" rel="noopener">🚗 Cómo llegar</a>
           </div>
-          <!-- advertencia eliminada -->
         </div>
         <div class="divider-thin" aria-hidden="true"></div>
         <div class="detalle-card">
@@ -161,7 +149,6 @@
             <a class="btn-mapa gold-text" id="mapa-fiesta" href="#" target="_blank" rel="noopener">📍 Ver en el mapa</a>
             <a class="btn-mapa gold-text" href="https://www.google.com/maps/dir/?api=1&destination=Auditorio+Gualupita+Yancuictlalpan,+Allende+2,+Tianguistenco+de+Galeana,+52603+Guadalupe+Yancuictlalpan,+Méx.,+México" target="_blank" rel="noopener">🚗 Cómo llegar</a>
           </div>
-          <!-- advertencia eliminada -->
         </div>
       </section>
 
@@ -175,7 +162,6 @@
             <div class="itinerario-item" data-hora="1140"><span class="itinerario-hora">7:00 PM</span><span class="itinerario-evento">Vals</span></div>
           </div>
         </div>
-        <!-- nota eliminada -->
       </section>
 
       <!-- SECCIÓN 6: DEDICATORIAS -->
@@ -188,7 +174,6 @@
           <a href="https://docs.google.com/forms/d/e/1FAIpQLSd9CtYaj-_JR6s5MhZQXrxQPPPBfFTjmB-2FoBk6lvA8PWAIg/viewform" id="link-libro-firmas" class="btn-mapa gold-text" target="_blank" rel="noopener" style="margin-top: 0.8rem; font-size: clamp(0.9rem, 2vw, 1rem); padding: 0.5rem 2rem;">
             ✍️ Escribir dedicatoria
           </a>
-          <!-- nota eliminada -->
         </div>
       </section>
 
@@ -200,14 +185,13 @@
         </button>
       </section>
 
-      <!-- SECCIÓN 8: AGRADECIMIENTO (antes "Gracias") -->
+      <!-- SECCIÓN 8: AGRADECIMIENTO -->
       <section id="seccion-agradecimientos" class="seccion">
         <h2 class="gold-text">🙏 Agradecimiento 🙏</h2>
         <div class="agradecimientos-contenido">
           <p class="agradecimientos-texto">
             Quiero expresar mi más profundo agradecimiento a todos los que han hecho posible este sueño. Agradezco por su apoyo y gran amor incondicional a toda mi familia, a todos y cada uno de mis padrinos, y a cada uno de ustedes, gracias por formar parte de este día tan especial.
           </p>
-          <!-- "Los llevamos en el corazón" eliminado -->
           <div class="agradecimientos-firma">
             <span class="firma-nombre" id="firma-nombre">---</span>
             <span class="firma-rol">y familia</span>
@@ -220,7 +204,7 @@
       </section>
 
       <!-- MENSAJE FINAL -->
-      <p class="hint-final gold-text" id="hint-juego">👆 Toca el nombre para jugar</p>
+      <p class="hint-final gold-text" id="hint-juego">👆 Da click aquí para jugar</p>
     </div>
   </div>
 
