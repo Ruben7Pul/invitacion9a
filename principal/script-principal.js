@@ -370,21 +370,23 @@ function shuffleArray(arr) {
 }
 
 function elegirImagenAleatoria() {
-  var disponibles = [];
-  for (var i = 0; i < imagenesCollage.length; i++) {
-    if (collageHistorialImagenes.indexOf(i) === -1) {
-      disponibles.push(i);
+  // Si el historial está vacío, crear un ciclo completo shuffleado
+  if (collageHistorialImagenes.length === 0) {
+    var indices = [];
+    for (var i = 0; i < imagenesCollage.length; i++) {
+      indices.push(i);
     }
+    // Fisher-Yates shuffle
+    for (var i = indices.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var temp = indices[i];
+      indices[i] = indices[j];
+      indices[j] = temp;
+    }
+    collageHistorialImagenes = indices;
   }
-  if (disponibles.length === 0) {
-    collageHistorialImagenes = [];
-    disponibles = Array.from({length: imagenesCollage.length}, (_, i) => i);
-  }
-  var indiceElegido = disponibles[Math.floor(Math.random() * disponibles.length)];
-  collageHistorialImagenes.push(indiceElegido);
-  if (collageHistorialImagenes.length > 5) {
-    collageHistorialImagenes.shift();
-  }
+  // Sacar el primer índice del ciclo shuffleado
+  var indiceElegido = collageHistorialImagenes.shift();
   return indiceElegido;
 }
 
