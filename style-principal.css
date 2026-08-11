@@ -1241,7 +1241,7 @@ h1#nombre-hero {
 @media (pointer: coarse) {
   .hint-final { /* sin animación */ }
   .calendario-container .dia.dia-10 .rosa { animation-duration: 3s !important; }
-  #app-inner { transform: none !important; transition: none !important; }
+  #app-inner { transition: none !important; }
 }
 @media (max-width: 400px) {
   #app { padding: 0.3rem 0.6rem 0; }
