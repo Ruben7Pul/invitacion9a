@@ -59,7 +59,14 @@
           <div id="oval-wrap">
             <div class="oval-frame">
               <div class="oval-mask">
-                <img src="../archivos/centro.gif" alt="Imagen central" class="gif-central" loading="eager">
+                <!-- === CAMBIO: GIF → MP4 === -->
+                <video src="../archivos/centro.mp4" 
+                       autoplay 
+                       loop 
+                       muted 
+                       playsinline 
+                       class="gif-central" 
+                       alt="Imagen central"></video>
               </div>
             </div>
           </div>
@@ -222,7 +229,7 @@
   </div>
   <!-- ===== FIN MODAL GUSTOS ===== -->
 
-  <script type="module" src="script-principal.js"></script>
+  <script type="module" src="../script-principal.js"></script>
 
   <script>
     const volviendoDelJuego = location.search.indexOf('volver=1') !== -1;
