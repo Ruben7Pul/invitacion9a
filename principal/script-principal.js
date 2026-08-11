@@ -1,4 +1,4 @@
-console.log('🚀 principal/script-principal.js (versión simplificada)');
+console.log('🚀 principal/script-principal.js (optimizado con pausa de contador y tamaño accesible)');
 
 async function cargarConfig() {
   try {
@@ -178,24 +178,33 @@ function agregarACalendario(evento, config) {
   window.open(url, '_blank');
 }
 
-// ===== CONTADOR CON ANILLO CIRCULAR =====
-function initContadorCircular(config) {
-  const target = new Date(config.fechaISO).getTime();
-  if (isNaN(target)) return;
+// ===== CONTADOR CON ANILLO CIRCULAR (con pausa al no estar visible) =====
+let contadorIntervalId = null;
+let contadorTarget = 0;
+let contadorUnits = [];
 
-  const units = document.querySelectorAll('.clock .unit');
-  if (!units.length) return;
+function initContadorCircular(config) {
+  contadorTarget = new Date(config.fechaISO).getTime();
+  if (isNaN(contadorTarget)) return;
+
+  contadorUnits = document.querySelectorAll('.clock .unit');
+  if (!contadorUnits.length) return;
 
   const isMobile = window.matchMedia('(pointer: coarse)').matches;
   const intervalo = isMobile ? 1000 : 200;
 
-  function actualizarContador() {
+  // Función de actualización (se reutiliza)
+  window.actualizarContador = function() {
     const now = Date.now();
-    const diff = target - now;
+    const diff = contadorTarget - now;
 
     if (diff <= 0) {
       document.querySelector('.clock').style.display = 'none';
       document.getElementById('contador-mensaje').textContent = '🎉 ¡El gran día ha llegado! 🎉';
+      if (contadorIntervalId) {
+        clearInterval(contadorIntervalId);
+        contadorIntervalId = null;
+      }
       return;
     }
 
@@ -207,7 +216,7 @@ function initContadorCircular(config) {
     const maxValues = [365, 24, 60, 60];
     const values = [days, hours, minutes, seconds];
 
-    units.forEach((unit, index) => {
+    contadorUnits.forEach((unit, index) => {
       const numEl = unit.querySelector('.num');
       const circle = unit.querySelector('.progress-circle');
       if (numEl) numEl.textContent = String(values[index]).padStart(2, '0');
@@ -223,21 +232,11 @@ function initContadorCircular(config) {
       }
     });
 
-    const msgEl = document.getElementById('contador-mensaje');
-    if (msgEl) {
-      let mensaje = '';
-      if (days > 30) mensaje = 'Falta un poco más de un mes...';
-      else if (days > 7) mensaje = 'La espera se hace corta.';
-      else if (days > 1) mensaje = '¡Ya casi llega!';
-      else if (days === 1) mensaje = '¡Mañana es el gran día!';
-      else if (days === 0 && hours > 6) mensaje = '¡Hoy es el gran día!';
-      else if (days === 0 && hours > 1) mensaje = '¡En unas horas comienza!';
-      else if (days === 0 && hours >= 0) mensaje = '¡El momento está aquí!';
-      msgEl.textContent = mensaje;
-    }
-  }
+    // Mensaje fijo (ya no cambia)
+  };
 
-  units.forEach((unit) => {
+  // Crear los círculos si no existen
+  contadorUnits.forEach((unit) => {
     let circleWrap = unit.querySelector('.circle-wrap');
     if (!circleWrap) {
       const wrap = document.createElement('div');
@@ -259,8 +258,34 @@ function initContadorCircular(config) {
     }
   });
 
-  actualizarContador();
-  setInterval(actualizarContador, intervalo);
+  // Ejecutar primera vez
+  window.actualizarContador();
+
+  // Iniciar intervalo
+  if (contadorIntervalId) clearInterval(contadorIntervalId);
+  contadorIntervalId = setInterval(window.actualizarContador, intervalo);
+
+  // ===== OBSERVER PARA PAUSAR EL CONTADOR CUANDO NO ESTÉ VISIBLE =====
+  const contadorSection = document.getElementById('seccion-contador');
+  if (contadorSection && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Reanudar
+          if (!contadorIntervalId) {
+            contadorIntervalId = setInterval(window.actualizarContador, intervalo);
+          }
+        } else {
+          // Pausar
+          if (contadorIntervalId) {
+            clearInterval(contadorIntervalId);
+            contadorIntervalId = null;
+          }
+        }
+      });
+    }, { threshold: 0.1 });
+    observer.observe(contadorSection);
+  }
 }
 
 // ===== COLLAGE DE GUSTOS (SIN AUDIO) =====
@@ -594,6 +619,14 @@ document.addEventListener('DOMContentLoaded', async function() {
     window.location.href = '../index.html';
   });
 
+  // ===== FORZAR REPRODUCCIÓN DEL VIDEO CENTRAL (MP4) =====
+  const videoCentral = document.querySelector('.oval-mask video');
+  if (videoCentral) {
+    videoCentral.play().catch(() => {
+      console.log('⚠️ El video central no se pudo reproducir automáticamente');
+    });
+  }
+
   // ===== PARALLAX (DESACTIVADO EN MÓVIL) =====
   var isMobile = window.matchMedia('(pointer: coarse)').matches;
   var hasGyro = typeof DeviceOrientationEvent !== 'undefined';
@@ -698,7 +731,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
 
-  // ===== INTERSECTION OBSERVER =====
+  // ===== INTERSECTION OBSERVER (para secciones) =====
   if ('IntersectionObserver' in window) {
     var secciones = document.querySelectorAll('.seccion');
     var umbralAparicion = isMobile ? 0.05 : 0.15;
