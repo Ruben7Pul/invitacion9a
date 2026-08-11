@@ -616,16 +616,16 @@ h1#nombre-hero {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 4px;
-  max-width: 400px;
+  max-width: 350px;
   margin: 0 auto 0.6rem;
   font-family: var(--serif-body);
-  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  font-size: clamp(0.75rem, 1.6vw, 0.95rem);
 }
 .calendario-container .dia-nombre {
   font-weight: 600;
   color: #d4af37;
   text-transform: uppercase;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   letter-spacing: 0.1em;
   padding: 0.2rem 0;
   text-align: center;
@@ -643,7 +643,7 @@ h1#nombre-hero {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  font-size: clamp(1rem, 2.2vw, 1.2rem);
+  font-size: clamp(0.85rem, 1.8vw, 1rem);
 }
 .calendario-container .dia.especial {
   border-color: #d4af37;
@@ -673,8 +673,8 @@ h1#nombre-hero {
 .calendario-eventos {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
-  max-width: 400px;
+  gap: 0.6rem;
+  max-width: 350px;
   margin: 0 auto;
 }
 .calendario-evento {
@@ -684,28 +684,28 @@ h1#nombre-hero {
   background: rgba(10, 18, 34, 0.4);
   border: 1px solid rgba(212, 175, 55, 0.2);
   border-radius: 12px;
-  padding: 0.7rem 1.2rem;
-  font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+  padding: 0.6rem 1rem;
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
   color: #f0e0c0;
 }
 .calendario-evento .evento-info {
   display: flex;
-  gap: 0.8rem;
+  gap: 0.6rem;
   align-items: center;
   flex-wrap: wrap;
 }
 .calendario-evento .evento-info .fecha {
   color: #d4af37;
   font-weight: 600;
-  font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
 }
 .calendario-evento .evento-info .desc {
   color: #fae3a0;
-  font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
 }
 .calendario-evento .btn-agregar {
   font-family: var(--serif-display);
-  font-size: clamp(1rem, 1.8vw, 1.3rem);
+  font-size: clamp(0.8rem, 1.5vw, 1rem);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #f0d9a3;
@@ -746,19 +746,19 @@ h1#nombre-hero {
   padding: 0.8rem 1rem;
   border-bottom: 1px solid rgba(212, 175, 55, 0.15);
   font-family: var(--serif-body);
-  font-size: clamp(1.3rem, 2.8vw, 1.7rem);
+  font-size: clamp(1rem, 2.2vw, 1.3rem);
   color: #f0e0c0;
   transition: none;
 }
 .itinerario-hora {
   font-weight: 600;
   color: #d4af37;
-  font-size: clamp(1.3rem, 2.8vw, 1.7rem);
+  font-size: clamp(1rem, 2.2vw, 1.3rem);
 }
 .itinerario-evento {
   text-align: right;
   color: #fae3a0;
-  font-size: clamp(1.3rem, 2.8vw, 1.7rem);
+  font-size: clamp(1rem, 2.2vw, 1.3rem);
 }
 
 /* ===== RELOJ (sin cambios) ===== */
@@ -811,7 +811,7 @@ h1#nombre-hero {
   left: 50%;
   transform: translate(-50%, -50%);
   color: #fae3a0 !important;
-  font-size: clamp(1.2rem, 3vw, 1.6rem) !important;
+  font-size: clamp(1.4rem, 3.8vw, 2rem) !important;
   font-weight: 700;
   text-shadow: 0 0 15px #d4af37 !important;
   display: block;
@@ -819,7 +819,7 @@ h1#nombre-hero {
 }
 .clock .unit .lbl {
   color: #d4af37 !important;
-  font-size: clamp(0.5rem, 1.2vw, 0.7rem) !important;
+  font-size: clamp(0.65rem, 1.5vw, 0.9rem) !important;
   letter-spacing: 0.15em;
   text-transform: uppercase;
   font-weight: 600;
@@ -884,7 +884,7 @@ h1#nombre-hero {
 .detalle-info .hora {
   font-family: var(--serif-body);
   font-weight: 600;
-  font-size: clamp(0.9rem, 2.2vw, 1.1rem);
+  font-size: clamp(1.1rem, 2.7vw, 1.4rem);
   color: #fae3a0;
   background: rgba(212, 175, 55, 0.08);
   padding: 0.1rem 1rem;
@@ -893,7 +893,7 @@ h1#nombre-hero {
   border: 1px solid rgba(212, 175, 55, 0.12);
 }
 .detalle-info .lugar {
-  font-size: clamp(1rem, 2.6vw, 1.3rem);
+  font-size: clamp(1.1rem, 3vw, 1.5rem);
   font-weight: 500;
   margin: 0.2rem 0 0.1rem;
   color: #e0d0b0;
