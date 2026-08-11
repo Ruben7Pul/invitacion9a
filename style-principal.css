@@ -681,6 +681,8 @@ h1#nombre-hero {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
   background: rgba(10, 18, 34, 0.4);
   border: 1px solid rgba(212, 175, 55, 0.2);
   border-radius: 12px;
@@ -693,6 +695,7 @@ h1#nombre-hero {
   gap: 0.6rem;
   align-items: center;
   flex-wrap: wrap;
+  min-width: 0;
 }
 .calendario-evento .evento-info .fecha {
   color: #d4af37;
@@ -716,6 +719,32 @@ h1#nombre-hero {
   border: 1.5px solid rgba(201, 162, 77, 0.35);
   cursor: pointer;
   transition: none;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* En PC (mouse), si no cabe en la misma línea el botón baja de renglón
+   solo cuando hace falta (flex-wrap arriba), evitando que se encime con
+   el texto del evento. Con espacio de sobra se queda en la misma línea. */
+@media (min-width: 768px) {
+  .calendario-container,
+  .calendario-eventos {
+    max-width: 420px;
+  }
+}
+
+/* En móvil (pantallas táctiles) el botón AÑADIR siempre va en su propio
+   renglón, sin importar el ancho del teléfono, para que las 3 tarjetas
+   se vean siempre igual. */
+@media (hover: none) and (pointer: coarse) {
+  .calendario-evento .evento-info {
+    flex: 1 1 100%;
+  }
+  .calendario-evento .btn-agregar {
+    flex: 1 1 100%;
+    margin-left: 0;
+    text-align: center;
+  }
 }
 
 /* ===== ITINERARIO (más grande) ===== */
@@ -1231,7 +1260,6 @@ h1#nombre-hero {
   .familia-nombres { margin: 0.5rem 0 0.35rem; }
   .divider-thin { margin: 1.1rem 0 1.3rem; }
   .calendario-container { gap: 2px; font-size: 0.7rem; }
-  .calendario-evento { flex-wrap: wrap; gap: 0.2rem; justify-content: center; }
   .itinerario-item { font-size: 0.9rem; }
   .detalle-botones { flex-direction: column; align-items: center; }
   .modal-gustos-card { padding: 1.2rem 0.8rem; }
