@@ -21,18 +21,13 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌹</text></svg>">
 </head>
 <body>
-  <!-- Cortina de carga -->
   <div id="loading-veil-main" style="position:fixed; inset:0; z-index:9999; background-color:#0e0a18; background-image:url('../archivos/bella.jpg'); background-size:cover; background-position:center; opacity:1; transition:opacity 0.6s ease; pointer-events:none;"></div>
-
   <div id="bg"></div>
-
   <video id="video-app" autoplay loop muted playsinline>
     <source src="../archivos/mar1.mp4" type="video/mp4">
     <source src="../archivos/mar1.webm" type="video/webm">
   </video>
-
   <audio id="bg-music" src="../archivos/cancion.mp3" loop preload="auto"></audio>
-
   <div id="app" role="main">
     <div id="app-inner">
       <section id="seccion-inicio" class="seccion">
@@ -55,13 +50,7 @@
           <div id="oval-wrap">
             <div class="oval-frame">
               <div class="oval-mask">
-                <video src="../archivos/centro.mp4" 
-                       autoplay 
-                       loop 
-                       muted 
-                       playsinline 
-                       class="gif-central" 
-                       alt="Imagen central"></video>
+                <video src="../archivos/centro.mp4" autoplay loop muted playsinline class="gif-central" alt="Imagen central"></video>
               </div>
             </div>
           </div>
@@ -71,7 +60,6 @@
           <p class="frase-inline gold-text" id="frase-texto">Cargando...</p>
         </div>
       </section>
-
       <section id="seccion-familia" class="seccion">
         <h2 class="gold-text">👑 Mi familia 👑</h2>
         <p class="seccion-subtitulo gold-text">La corte que me acompaña</p>
@@ -101,14 +89,12 @@
           <p class="familia-detalle gold-text">"Su guía ilumina mi camino"</p>
         </div>
       </section>
-
       <section id="seccion-calendario" class="seccion">
         <h2 class="gold-text">📅 Fecha 📅</h2>
         <p class="seccion-subtitulo gold-text" style="font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 700;">Octubre 2026</p>
         <div class="calendario-container" id="calendario-container"></div>
         <div class="calendario-eventos" id="calendario-eventos"></div>
       </section>
-
       <section id="seccion-contador" class="seccion">
         <h2 class="gold-text">⏳ El reloj ⏳</h2>
         <p class="seccion-subtitulo gold-text">Faltan para el gran día</p>
@@ -120,7 +106,6 @@
         </div>
         <p id="contador-mensaje" class="gold-text" style="font-family:var(--script); font-size:clamp(1.2rem,3vw,1.6rem); margin-top:0.6rem;">Faltan para el gran día</p>
       </section>
-
       <section id="seccion-lugares" class="seccion">
         <h2 class="gold-text">🏰 Donde 🏰</h2>
         <div class="detalle-card">
@@ -149,7 +134,6 @@
           </div>
         </div>
       </section>
-
       <section id="seccion-itinerario" class="seccion">
         <h2 class="gold-text">📋 Itinerario 📋</h2>
         <div class="itinerario-dia">
@@ -160,51 +144,32 @@
           </div>
         </div>
       </section>
-
       <section id="seccion-libro-firmas" class="seccion">
         <h2 class="gold-text">📖 Dedicatorias 📖</h2>
         <div class="libro-firmas-contenido">
-          <p class="libro-firmas-texto">
-            Quiero que seas parte de este día especial. Déjame un mensaje, una bendición o un consejo en mi libro de dedicatorias digital.
-          </p>
-          <a href="https://docs.google.com/forms/d/e/1FAIpQLSd9CtYaj-_JR6s5MhZQXrxQPPPBfFTjmB-2FoBk6lvA8PWAIg/viewform" id="link-libro-firmas" class="btn-mapa gold-text" target="_blank" rel="noopener" style="margin-top: 0.8rem; font-size: clamp(0.9rem, 2vw, 1rem); padding: 0.5rem 2rem;">
-            ✍️ Escribir dedicatoria
-          </a>
+          <p class="libro-firmas-texto">Quiero que seas parte de este día especial. Déjame un mensaje, una bendición o un consejo en mi libro de dedicatorias digital.</p>
+          <a href="https://docs.google.com/forms/d/e/1FAIpQLSd9CtYaj-_JR6s5MhZQXrxQPPPBfFTjmB-2FoBk6lvA8PWAIg/viewform" id="link-libro-firmas" class="btn-mapa gold-text" target="_blank" rel="noopener" style="margin-top: 0.8rem; font-size: clamp(0.9rem, 2vw, 1rem); padding: 0.5rem 2rem;">✍️ Escribir dedicatoria</a>
         </div>
       </section>
-
-      <!-- SECCIÓN GUSTOS CON TEXTO AÑADIDO -->
       <section id="seccion-gustos" class="seccion">
         <h2 class="gold-text">🎨 Gustos 🎨</h2>
         <p style="font-family: var(--serif-body); font-size: clamp(1rem, 2.4vw, 1.2rem); color: #f0e0c0; margin-bottom: 0.5rem; text-align: center;">Descubre algunos de mis gustos</p>
-        <button id="btn-abrir-gustos" class="btn-mapa gold-text" style="margin-top: 0.5rem; border: 2px solid #d4af37; background: rgba(212, 175, 55, 0.15); width: 100%; font-size: clamp(1rem, 2.5vw, 1.3rem); padding: 0.6rem 1rem;">
-          🖼️ Conoce mis gustos
-        </button>
+        <button id="btn-abrir-gustos" class="btn-mapa gold-text" style="margin-top: 0.5rem; border: 2px solid #d4af37; background: rgba(212, 175, 55, 0.15); width: 100%; font-size: clamp(1rem, 2.5vw, 1.3rem); padding: 0.6rem 1rem;">🖼️ Conoce mis gustos</button>
       </section>
-
-      <!-- SECCIÓN AGRADECIMIENTOS SIN "y familia" -->
       <section id="seccion-agradecimientos" class="seccion">
         <h2 class="gold-text">🙏 Agradecimiento 🙏</h2>
         <div class="agradecimientos-contenido">
-          <p class="agradecimientos-texto">
-            Quiero expresar mi más profundo agradecimiento a todos los que han hecho posible este sueño. Agradezco por su apoyo y gran amor incondicional a toda mi familia, a todos y cada uno de mis padrinos, y a cada uno de ustedes, gracias por formar parte de este día tan especial.
-          </p>
+          <p class="agradecimientos-texto">Quiero expresar mi más profundo agradecimiento a todos los que han hecho posible este sueño. Agradezco por su apoyo y gran amor incondicional a toda mi familia, a todos y cada uno de mis padrinos, y a cada uno de ustedes, gracias por formar parte de este día tan especial.</p>
           <div class="agradecimientos-firma">
             <span class="firma-nombre" id="firma-nombre">---</span>
-            <!-- "y familia" ELIMINADO -->
           </div>
         </div>
         <div class="divider-thin" aria-hidden="true"></div>
-        <p class="agradecimientos-no-faltes gold-text">
-          🌹 No faltes 🌹
-        </p>
+        <p class="agradecimientos-no-faltes gold-text">🌹 No faltes 🌹</p>
       </section>
-
       <p class="hint-final gold-text" id="hint-juego">👆 Da click aquí para jugar</p>
     </div>
   </div>
-
-  <!-- MODAL GUSTOS -->
   <div id="modal-gustos" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-gustos-title">
     <div class="modal-card modal-gustos-card">
       <button class="modal-close" data-close-gustos aria-label="Cerrar gustos">&times;</button>
@@ -216,10 +181,7 @@
       <button class="btn-mapa gold-text btn-cerrar-collage" data-close-gustos style="margin: 1rem auto 0; display: block;">Salir</button>
     </div>
   </div>
-
-  <!-- SCRIPT: se carga desde la misma carpeta principal/ -->
   <script type="module" src="script-principal.js"></script>
-
   <script>
     const volviendoDelJuego = location.search.indexOf('volver=1') !== -1;
     const veilMain = document.getElementById('loading-veil-main');
