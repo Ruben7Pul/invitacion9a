@@ -72,7 +72,6 @@ function rellenarDatos(config) {
   }
 }
 
-// ===== GENERAR CALENDARIO =====
 function generarCalendario() {
   const container = document.getElementById('calendario-container');
   if (!container) return;
@@ -116,7 +115,6 @@ function generarCalendario() {
   }
 }
 
-// ===== GENERAR EVENTOS DEL CALENDARIO =====
 function generarEventosCalendario(config) {
   const container = document.getElementById('calendario-eventos');
   if (!container) return;
@@ -178,7 +176,6 @@ function agregarACalendario(evento, config) {
   window.open(url, '_blank');
 }
 
-// ===== CONTADOR CON ANILLO CIRCULAR (con pausa al no estar visible) =====
 let contadorIntervalId = null;
 let contadorTarget = 0;
 let contadorUnits = [];
@@ -193,7 +190,6 @@ function initContadorCircular(config) {
   const isMobile = window.matchMedia('(pointer: coarse)').matches;
   const intervalo = isMobile ? 1000 : 200;
 
-  // Función de actualización (se reutiliza)
   window.actualizarContador = function() {
     const now = Date.now();
     const diff = contadorTarget - now;
@@ -231,12 +227,8 @@ function initContadorCircular(config) {
         circle.style.strokeDashoffset = offset;
       }
     });
-
-    // ===== MENSAJE FIJO (ya no cambia dinámicamente) =====
-    // No se modifica el contenido de #contador-mensaje
   };
 
-  // Crear los círculos si no existen
   contadorUnits.forEach((unit) => {
     let circleWrap = unit.querySelector('.circle-wrap');
     if (!circleWrap) {
@@ -259,25 +251,20 @@ function initContadorCircular(config) {
     }
   });
 
-  // Ejecutar primera vez
   window.actualizarContador();
 
-  // Iniciar intervalo
   if (contadorIntervalId) clearInterval(contadorIntervalId);
   contadorIntervalId = setInterval(window.actualizarContador, intervalo);
 
-  // ===== OBSERVER PARA PAUSAR EL CONTADOR CUANDO NO ESTÉ VISIBLE =====
   const contadorSection = document.getElementById('seccion-contador');
   if (contadorSection && 'IntersectionObserver' in window) {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          // Reanudar
           if (!contadorIntervalId) {
             contadorIntervalId = setInterval(window.actualizarContador, intervalo);
           }
         } else {
-          // Pausar
           if (contadorIntervalId) {
             clearInterval(contadorIntervalId);
             contadorIntervalId = null;
@@ -289,7 +276,6 @@ function initContadorCircular(config) {
   }
 }
 
-// ===== COLLAGE DE GUSTOS (SIN AUDIO) =====
 var collageTimer = null;
 var imagenesCollage = [];
 var collageInicializado = false;
@@ -528,7 +514,6 @@ function limpiarCollage() {
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
-  // ===== INICIALIZAR SONIDOS =====
   try {
     const { initSonidos } = await import('../modules/sonidos.js');
     initSonidos();
@@ -542,7 +527,6 @@ document.addEventListener('DOMContentLoaded', async function() {
   generarEventosCalendario(config);
   initContadorCircular(config);
 
-  // ---- COLLAGE ----
   var btnAbrir = document.getElementById('btn-abrir-gustos');
   var modal = document.getElementById('modal-gustos');
   var closeBtns = modal.querySelectorAll('[data-close-gustos]');
@@ -584,7 +568,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
 
-  // ---- MÚSICA SIMPLIFICADA ----
   try {
     var { initMusica, playMusic, toggleMusic } = await import('../modules/musica.js');
     initMusica();
@@ -620,7 +603,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     window.location.href = '../index.html';
   });
 
-  // ===== FORZAR REPRODUCCIÓN DEL VIDEO CENTRAL (MP4) =====
   const videoCentral = document.querySelector('.oval-mask video');
   if (videoCentral) {
     videoCentral.play().catch(() => {
@@ -628,7 +610,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
 
-  // ===== PARALLAX (DESACTIVADO EN MÓVIL) =====
   var isMobile = window.matchMedia('(pointer: coarse)').matches;
   var hasGyro = typeof DeviceOrientationEvent !== 'undefined';
   var gyroWorking = false;
@@ -732,7 +713,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
 
-  // ===== INTERSECTION OBSERVER (para secciones) =====
   if ('IntersectionObserver' in window) {
     var secciones = document.querySelectorAll('.seccion');
     var umbralAparicion = isMobile ? 0.05 : 0.15;
