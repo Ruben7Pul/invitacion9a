@@ -594,6 +594,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     window.location.href = '../index.html';
   });
 
+  // ===== FORZAR REPRODUCCIÓN DEL VIDEO CENTRAL (MP4) =====
+  const videoCentral = document.querySelector('.oval-mask video');
+  if (videoCentral) {
+    videoCentral.play().catch(() => {
+      // Si falla el autoplay, no pasa nada, ya tiene muted y playsinline
+      console.log('⚠️ El video central no se pudo reproducir automáticamente');
+    });
+  }
+
   // ===== PARALLAX (DESACTIVADO EN MÓVIL) =====
   var isMobile = window.matchMedia('(pointer: coarse)').matches;
   var hasGyro = typeof DeviceOrientationEvent !== 'undefined';
