@@ -232,7 +232,8 @@ function initContadorCircular(config) {
       }
     });
 
-    // Mensaje fijo (ya no cambia)
+    // ===== MENSAJE FIJO (ya no cambia dinámicamente) =====
+    // No se modifica el contenido de #contador-mensaje
   };
 
   // Crear los círculos si no existen
