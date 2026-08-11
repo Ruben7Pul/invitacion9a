@@ -168,12 +168,14 @@ function initParallaxMovil() {
   // simplemente no habrá movimiento y no insistimos.
   if (typeof DeviceOrientationEvent.requestPermission === 'function') return;
 
-  var bg = document.getElementById('bg');
-  if (!bg) return;
+  // El parallax mueve el contenido de enfrente (app-inner) en conjunto,
+  // no el fondo: así se ve mucho más visual, como en la versión de PC.
+  var capa = document.getElementById('app-inner');
+  if (!capa) return;
 
   var activo = false;
   var animando = false;
-  var maxDesplazamiento = 14; // px, efecto sutil
+  var maxDesplazamiento = 32; // px, efecto marcado y visible (no sutil)
   var actualX = 0, actualY = 0, metaX = 0, metaY = 0;
 
   function manejarOrientacion(e) {
@@ -181,8 +183,10 @@ function initParallaxMovil() {
     activo = true;
     var beta = Math.max(-45, Math.min(45, e.beta - 45));
     var gamma = Math.max(-45, Math.min(45, e.gamma));
-    metaX = (gamma / 45) * maxDesplazamiento;
-    metaY = (beta / 45) * maxDesplazamiento;
+    // Invertido, igual que en PC: el contenido se desplaza en sentido
+    // contrario a la inclinación, dando sensación real de profundidad.
+    metaX = -(gamma / 45) * maxDesplazamiento;
+    metaY = -(beta / 45) * maxDesplazamiento;
     if (!animando) {
       animando = true;
       requestAnimationFrame(animar);
@@ -190,9 +194,9 @@ function initParallaxMovil() {
   }
 
   function animar() {
-    actualX += (metaX - actualX) * 0.08;
-    actualY += (metaY - actualY) * 0.08;
-    bg.style.transform = 'translate3d(' + actualX.toFixed(2) + 'px, ' + actualY.toFixed(2) + 'px, 0) scale(1.08)';
+    actualX += (metaX - actualX) * 0.12;
+    actualY += (metaY - actualY) * 0.12;
+    capa.style.transform = 'translate3d(' + actualX.toFixed(2) + 'px, ' + actualY.toFixed(2) + 'px, 0)';
     if (Math.abs(metaX - actualX) > 0.05 || Math.abs(metaY - actualY) > 0.05) {
       requestAnimationFrame(animar);
     } else {
