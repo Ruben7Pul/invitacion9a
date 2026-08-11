@@ -59,7 +59,14 @@
           <div id="oval-wrap">
             <div class="oval-frame">
               <div class="oval-mask">
-                <img src="../archivos/centro.gif" alt="Imagen central" class="gif-central" loading="eager">
+                <!-- CAMBIO: GIF → MP4 -->
+                <video src="../archivos/centro.mp4" 
+                       autoplay 
+                       loop 
+                       muted 
+                       playsinline 
+                       class="gif-central" 
+                       alt="Imagen central"></video>
               </div>
             </div>
           </div>
@@ -119,7 +126,7 @@
           <div class="unit"><span class="num" id="m">00</span><span class="lbl gold-text">Min</span></div>
           <div class="unit"><span class="num" id="s">00</span><span class="lbl gold-text">Seg</span></div>
         </div>
-        <p id="contador-mensaje" class="gold-text" style="font-family:var(--script); font-size:clamp(1.2rem,3vw,1.6rem); margin-top:0.6rem;">Cargando...</p>
+        <p id="contador-mensaje" class="gold-text" style="font-family:var(--script); font-size:clamp(1.2rem,3vw,1.6rem); margin-top:0.6rem;">Faltan para el gran día</p>
       </section>
 
       <!-- SECCIÓN 4: DÓNDE (LUGARES) -->
@@ -180,6 +187,8 @@
       <!-- SECCIÓN 7: GUSTOS -->
       <section id="seccion-gustos" class="seccion">
         <h2 class="gold-text">🎨 Gustos 🎨</h2>
+        <!-- Texto añadido antes del botón -->
+        <p style="font-family: var(--serif-body); font-size: clamp(1rem, 2.4vw, 1.2rem); color: #f0e0c0; margin-bottom: 0.5rem; text-align: center;">Descubre algunos de mis gustos</p>
         <button id="btn-abrir-gustos" class="btn-mapa gold-text" style="margin-top: 0.5rem; border: 2px solid #d4af37; background: rgba(212, 175, 55, 0.15); width: 100%; font-size: clamp(1rem, 2.5vw, 1.3rem); padding: 0.6rem 1rem;">
           🖼️ Conoce mis gustos
         </button>
@@ -194,7 +203,7 @@
           </p>
           <div class="agradecimientos-firma">
             <span class="firma-nombre" id="firma-nombre">---</span>
-            <span class="firma-rol">y familia</span>
+            <!-- Se ha eliminado el texto "y familia" -->
           </div>
         </div>
         <div class="divider-thin" aria-hidden="true"></div>
@@ -222,7 +231,7 @@
   </div>
   <!-- ===== FIN MODAL GUSTOS ===== -->
 
-  <script type="module" src="script-principal.js"></script>
+  <script type="module" src="../script-principal.js"></script>
 
   <script>
     const volviendoDelJuego = location.search.indexOf('volver=1') !== -1;
