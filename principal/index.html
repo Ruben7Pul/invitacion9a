@@ -26,19 +26,15 @@
 
   <div id="bg"></div>
 
-  <!-- VIDEO APP PRINCIPAL (mar1) -->
   <video id="video-app" autoplay loop muted playsinline>
     <source src="../archivos/mar1.mp4" type="video/mp4">
     <source src="../archivos/mar1.webm" type="video/webm">
   </video>
 
-  <!-- ===== AUDIO DE FONDO ===== -->
   <audio id="bg-music" src="../archivos/cancion.mp3" loop preload="auto"></audio>
 
-  <!-- APP PRINCIPAL (scrollable) -->
   <div id="app" role="main">
     <div id="app-inner">
-      <!-- SECCIÓN 0: INICIO -->
       <section id="seccion-inicio" class="seccion">
         <div id="app-top">
           <button type="button" id="back-link" class="top-btn gold-btn" aria-label="Volver a la reja">
@@ -59,7 +55,6 @@
           <div id="oval-wrap">
             <div class="oval-frame">
               <div class="oval-mask">
-                <!-- CAMBIO: GIF → MP4 -->
                 <video src="../archivos/centro.mp4" 
                        autoplay 
                        loop 
@@ -77,7 +72,6 @@
         </div>
       </section>
 
-      <!-- SECCIÓN 1: FAMILIA -->
       <section id="seccion-familia" class="seccion">
         <h2 class="gold-text">👑 Mi familia 👑</h2>
         <p class="seccion-subtitulo gold-text">La corte que me acompaña</p>
@@ -108,7 +102,6 @@
         </div>
       </section>
 
-      <!-- SECCIÓN 2: CALENDARIO -->
       <section id="seccion-calendario" class="seccion">
         <h2 class="gold-text">📅 Fecha 📅</h2>
         <p class="seccion-subtitulo gold-text" style="font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 700;">Octubre 2026</p>
@@ -116,7 +109,6 @@
         <div class="calendario-eventos" id="calendario-eventos"></div>
       </section>
 
-      <!-- SECCIÓN 3: CONTADOR -->
       <section id="seccion-contador" class="seccion">
         <h2 class="gold-text">⏳ El reloj ⏳</h2>
         <p class="seccion-subtitulo gold-text">Faltan para el gran día</p>
@@ -129,7 +121,6 @@
         <p id="contador-mensaje" class="gold-text" style="font-family:var(--script); font-size:clamp(1.2rem,3vw,1.6rem); margin-top:0.6rem;">Faltan para el gran día</p>
       </section>
 
-      <!-- SECCIÓN 4: DÓNDE (LUGARES) -->
       <section id="seccion-lugares" class="seccion">
         <h2 class="gold-text">🏰 Donde 🏰</h2>
         <div class="detalle-card">
@@ -159,7 +150,6 @@
         </div>
       </section>
 
-      <!-- SECCIÓN 5: ITINERARIO -->
       <section id="seccion-itinerario" class="seccion">
         <h2 class="gold-text">📋 Itinerario 📋</h2>
         <div class="itinerario-dia">
@@ -171,7 +161,6 @@
         </div>
       </section>
 
-      <!-- SECCIÓN 6: DEDICATORIAS -->
       <section id="seccion-libro-firmas" class="seccion">
         <h2 class="gold-text">📖 Dedicatorias 📖</h2>
         <div class="libro-firmas-contenido">
@@ -184,7 +173,7 @@
         </div>
       </section>
 
-      <!-- SECCIÓN 7: GUSTOS -->
+      <!-- SECCIÓN GUSTOS CON TEXTO AÑADIDO -->
       <section id="seccion-gustos" class="seccion">
         <h2 class="gold-text">🎨 Gustos 🎨</h2>
         <p style="font-family: var(--serif-body); font-size: clamp(1rem, 2.4vw, 1.2rem); color: #f0e0c0; margin-bottom: 0.5rem; text-align: center;">Descubre algunos de mis gustos</p>
@@ -193,7 +182,7 @@
         </button>
       </section>
 
-      <!-- SECCIÓN 8: AGRADECIMIENTO -->
+      <!-- SECCIÓN AGRADECIMIENTOS SIN "y familia" -->
       <section id="seccion-agradecimientos" class="seccion">
         <h2 class="gold-text">🙏 Agradecimiento 🙏</h2>
         <div class="agradecimientos-contenido">
@@ -202,7 +191,7 @@
           </p>
           <div class="agradecimientos-firma">
             <span class="firma-nombre" id="firma-nombre">---</span>
-            <!-- Se eliminó "y familia" -->
+            <!-- "y familia" ELIMINADO -->
           </div>
         </div>
         <div class="divider-thin" aria-hidden="true"></div>
@@ -211,12 +200,11 @@
         </p>
       </section>
 
-      <!-- MENSAJE FINAL -->
       <p class="hint-final gold-text" id="hint-juego">👆 Da click aquí para jugar</p>
     </div>
   </div>
 
-  <!-- ===== MODAL GUSTOS (COLLAGE) ===== -->
+  <!-- MODAL GUSTOS -->
   <div id="modal-gustos" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-gustos-title">
     <div class="modal-card modal-gustos-card">
       <button class="modal-close" data-close-gustos aria-label="Cerrar gustos">&times;</button>
@@ -228,9 +216,8 @@
       <button class="btn-mapa gold-text btn-cerrar-collage" data-close-gustos style="margin: 1rem auto 0; display: block;">Salir</button>
     </div>
   </div>
-  <!-- ===== FIN MODAL GUSTOS ===== -->
 
-  <!-- SCRIPT: se carga desde la MISMA CARPETA (principal/) -->
+  <!-- SCRIPT: se carga desde la misma carpeta principal/ -->
   <script type="module" src="script-principal.js"></script>
 
   <script>
