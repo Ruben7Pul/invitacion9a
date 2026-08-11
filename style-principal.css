@@ -366,6 +366,8 @@ body {
   scroll-behavior: smooth;
   will-change: opacity;
   contain: layout style paint;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 #app.show {
   opacity: 1;
@@ -388,6 +390,7 @@ body {
   will-change: opacity, transform;
   backface-visibility: hidden;
   contain: layout style paint;
+  transform: translateZ(0);
 }
 
 /* ===== ADORNOS DORADOS (diamantes) ===== */
@@ -481,7 +484,7 @@ body {
 .seccion h2 {
   font-family: var(--serif-display);
   text-align: center;
-  font-size: clamp(1.1rem, 2.8vw, 1.5rem); /* reducido */
+  font-size: clamp(1.1rem, 2.8vw, 1.5rem);
   letter-spacing: 0.25em;
   text-transform: uppercase;
   color: #fae3a0;
@@ -543,6 +546,7 @@ html.sin-reja #app {
   gap: 0.8rem;
   padding: 0 0.5rem 2rem;
   flex-shrink: 0;
+  transform: translateZ(0);
 }
 
 #app-top {
@@ -592,16 +596,17 @@ html.sin-reja #app {
   stroke: #d4af37 !important;
 }
 
-/* ===== GIF CENTRAL (centrado y sin desplazamiento) ===== */
+/* ===== VIDEO CENTRAL (reemplazo del GIF) ===== */
 #oval-wrap {
   width: clamp(150px, 26cqw, 200px);
   height: clamp(210px, 38cqw, 290px);
-  margin: 0 auto; /* centrado horizontal */
+  margin: 0 auto;
   margin-bottom: 0.1rem;
   margin-top: 0.9rem;
   position: relative;
   animation: ovalFlotar 4.5s ease-in-out infinite;
   will-change: transform;
+  transform: translateZ(0);
 }
 @keyframes ovalFlotar {
   0%, 100% { transform: translateY(-10px); }
@@ -618,12 +623,12 @@ html.sin-reja #app {
   display: flex;
   align-items: center;
   justify-content: center;
+  transform: translateZ(0);
 }
 .gif-central {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
   display: block;
 }
 
@@ -672,11 +677,10 @@ h1#nombre-hero {
   display: inline-block;
   cursor: pointer;
   user-select: none;
-  /* Sin animación */
 }
 
 /* ============================================================
-   CALENDARIO
+   CALENDARIO (con tamaños más grandes)
    ============================================================ */
 .calendario-container {
   display: grid;
@@ -685,13 +689,13 @@ h1#nombre-hero {
   max-width: 400px;
   margin: 0 auto 0.6rem;
   font-family: var(--serif-body);
-  font-size: clamp(0.8rem, 1.8vw, 1rem);
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
 }
 .calendario-container .dia-nombre {
   font-weight: 600;
   color: #d4af37;
   text-transform: uppercase;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   letter-spacing: 0.1em;
   padding: 0.2rem 0;
   text-align: center;
@@ -709,7 +713,7 @@ h1#nombre-hero {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  font-size: clamp(1rem, 2.2vw, 1.2rem);
 }
 .calendario-container .dia.especial {
   border-color: #d4af37;
@@ -735,15 +739,11 @@ h1#nombre-hero {
   50% { transform: translateY(-5px) rotate(15deg); }
 }
 
-/* Eliminado: resaltado del día actual (.dia.hoy) */
-
-/* ============================================================
-   EVENTOS DEL CALENDARIO
-   ============================================================ */
+/* ===== EVENTOS DEL CALENDARIO (más grandes) ===== */
 .calendario-eventos {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.6rem;
   max-width: 400px;
   margin: 0 auto;
 }
@@ -754,31 +754,33 @@ h1#nombre-hero {
   background: rgba(10, 18, 34, 0.4);
   border: 1px solid rgba(212, 175, 55, 0.2);
   border-radius: 12px;
-  padding: 0.3rem 0.8rem;
-  font-size: clamp(0.8rem, 1.5vw, 0.95rem);
+  padding: 0.5rem 1rem;
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
   color: #f0e0c0;
 }
 .calendario-evento .evento-info {
   display: flex;
-  gap: 0.6rem;
+  gap: 0.8rem;
   align-items: center;
   flex-wrap: wrap;
 }
 .calendario-evento .evento-info .fecha {
   color: #d4af37;
   font-weight: 600;
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
 }
 .calendario-evento .evento-info .desc {
   color: #fae3a0;
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
 }
 .calendario-evento .btn-agregar {
   font-family: var(--serif-display);
-  font-size: clamp(0.55rem, 1.2vw, 0.7rem);
+  font-size: clamp(0.8rem, 1.4vw, 1rem);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #f0d9a3;
   background: rgba(201, 162, 77, 0.1);
-  padding: 0.2rem 0.8rem;
+  padding: 0.4rem 1rem;
   border-radius: 30px;
   text-decoration: none;
   border: 1.5px solid rgba(201, 162, 77, 0.35);
@@ -787,14 +789,14 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   ITINERARIO (sin brillo por hora)
+   ITINERARIO (más grande)
    ============================================================ */
 .itinerario-dia {
   margin-bottom: 1rem;
 }
 .itinerario-dia-titulo {
   font-family: var(--serif-display);
-  font-size: clamp(0.9rem, 2.2vw, 1.1rem);
+  font-size: clamp(1rem, 2.4vw, 1.2rem);
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: #fae3a0;
@@ -806,31 +808,33 @@ h1#nombre-hero {
 .itinerario-lista {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.5rem;
   max-width: 350px;
   margin: 0 auto;
 }
 .itinerario-item {
   display: flex;
   justify-content: space-between;
-  padding: 0.4rem 0.8rem;
+  padding: 0.6rem 0.8rem;
   border-bottom: 1px solid rgba(212, 175, 55, 0.15);
   font-family: var(--serif-body);
-  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  font-size: clamp(1.1rem, 2.4vw, 1.4rem);
   color: #f0e0c0;
   transition: none;
 }
 .itinerario-hora {
   font-weight: 600;
   color: #d4af37;
+  font-size: clamp(1.1rem, 2.4vw, 1.4rem);
 }
 .itinerario-evento {
   text-align: right;
   color: #fae3a0;
+  font-size: clamp(1.1rem, 2.4vw, 1.4rem);
 }
 
 /* ============================================================
-   RELOJ
+   RELOJ (sin cambios, solo el mensaje fijo)
    ============================================================ */
 .clock {
   display: flex;
@@ -920,7 +924,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   TARJETAS DE LUGARES
+   TARJETAS DE LUGARES (sin cambios)
    ============================================================ */
 .detalle-card {
   background: rgba(10, 18, 34, 0.55);
@@ -1017,7 +1021,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   FAMILIA
+   FAMILIA (sin cambios)
    ============================================================ */
 .familia-grupo {
   background: rgba(10, 18, 34, 0.5);
@@ -1081,7 +1085,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   LIBRO DE FIRMAS
+   LIBRO DE FIRMAS (sin cambios)
    ============================================================ */
 .libro-firmas-contenido {
   text-align: center;
@@ -1099,7 +1103,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   AGRADECIMIENTOS
+   AGRADECIMIENTOS (sin cambios)
    ============================================================ */
 .agradecimientos-contenido {
   text-align: center;
@@ -1125,16 +1129,8 @@ h1#nombre-hero {
   color: #d4af37;
   user-select: none;
 }
-.agradecimientos-firma .firma-rol {
-  display: block;
-  font-size: clamp(0.9rem, 2vw, 1.1rem);
-  font-family: var(--serif-display);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #e0cfa0;
-  opacity: 0.7;
-  margin-top: -0.2rem;
-}
+/* Se eliminó .firma-rol */
+
 .agradecimientos-no-faltes {
   font-family: var(--script);
   font-size: clamp(1.2rem, 3vw, 1.6rem);
@@ -1144,7 +1140,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   SEPARADOR CON DIAMANTE
+   SEPARADOR CON DIAMANTE (sin cambios)
    ============================================================ */
 .divider-thin {
   height: 2px;
@@ -1169,7 +1165,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   MODAL COLLAGE
+   MODAL COLLAGE (sin cambios)
    ============================================================ */
 .modal-overlay {
   position: fixed;
@@ -1330,7 +1326,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   RESPONSIVE Y MEJORAS MÓVIL
+   RESPONSIVE Y MEJORAS MÓVIL (sin cambios relevantes)
    ============================================================ */
 @media (pointer: coarse) {
   .hint-final {
@@ -1363,7 +1359,7 @@ h1#nombre-hero {
   .divider-thin { margin: 1.1rem 0 1.3rem; }
   .calendario-container { gap: 2px; font-size: 0.7rem; }
   .calendario-evento { flex-wrap: wrap; gap: 0.2rem; justify-content: center; }
-  .itinerario-item { font-size: 0.8rem; }
+  .itinerario-item { font-size: 0.9rem; }
   .detalle-botones { flex-direction: column; align-items: center; }
   .modal-gustos-card { padding: 1.2rem 0.8rem; }
   .collage-container { aspect-ratio: 4/3; }
