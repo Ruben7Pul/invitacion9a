@@ -150,6 +150,70 @@ function generarEventosCalendario(config) {
   });
 }
 
+function initParallaxMovil() {
+  // Solo en pantallas táctiles (móvil), nunca en PC.
+  var esTactil = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  if (!esTactil) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (typeof DeviceOrientationEvent === 'undefined') return;
+
+  // Evita dispositivos de gama muy baja para no afectar el rendimiento.
+  try {
+    if (sessionStorage.getItem('perfTier') === 'bajo') return;
+  } catch (e) {}
+
+  // Si el navegador exige un permiso explícito (iOS 13+ Safari), no lo
+  // activamos: no queremos mostrar diálogos ni pedir nada aparte. Algunos
+  // navegadores (p. ej. Brave) bloquean el sensor sin avisar; en ese caso
+  // simplemente no habrá movimiento y no insistimos.
+  if (typeof DeviceOrientationEvent.requestPermission === 'function') return;
+
+  var bg = document.getElementById('bg');
+  if (!bg) return;
+
+  var activo = false;
+  var animando = false;
+  var maxDesplazamiento = 14; // px, efecto sutil
+  var actualX = 0, actualY = 0, metaX = 0, metaY = 0;
+
+  function manejarOrientacion(e) {
+    if (e.beta === null || e.gamma === null) return;
+    activo = true;
+    var beta = Math.max(-45, Math.min(45, e.beta - 45));
+    var gamma = Math.max(-45, Math.min(45, e.gamma));
+    metaX = (gamma / 45) * maxDesplazamiento;
+    metaY = (beta / 45) * maxDesplazamiento;
+    if (!animando) {
+      animando = true;
+      requestAnimationFrame(animar);
+    }
+  }
+
+  function animar() {
+    actualX += (metaX - actualX) * 0.08;
+    actualY += (metaY - actualY) * 0.08;
+    bg.style.transform = 'translate3d(' + actualX.toFixed(2) + 'px, ' + actualY.toFixed(2) + 'px, 0) scale(1.08)';
+    if (Math.abs(metaX - actualX) > 0.05 || Math.abs(metaY - actualY) > 0.05) {
+      requestAnimationFrame(animar);
+    } else {
+      animando = false;
+    }
+  }
+
+  try {
+    window.addEventListener('deviceorientation', manejarOrientacion, { passive: true });
+    // Si en poco tiempo no llega ningún evento (bloqueado por el sistema/navegador),
+    // quitamos el listener y dejamos el fondo quieto, sin pedir nada al usuario.
+    setTimeout(function() {
+      if (!activo) {
+        window.removeEventListener('deviceorientation', manejarOrientacion);
+      }
+    }, 1500);
+  } catch (err) {
+    // No se pudo activar: no se implementa, sin pedir permisos ni mostrar avisos.
+  }
+}
+
 function agregarACalendario(evento, config) {
   const fecha = new Date(evento.fechaISO);
   const inicio = fecha.toISOString().replace(/-|:|\.\d+/g, '');
@@ -528,6 +592,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   generarCalendario();
   generarEventosCalendario(config);
   initContadorCircular(config);
+  try { initParallaxMovil(); } catch (e) {}
 
   var btnAbrir = document.getElementById('btn-abrir-gustos');
   var modal = document.getElementById('modal-gustos');
