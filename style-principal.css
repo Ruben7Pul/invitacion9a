@@ -785,7 +785,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   ITINERARIO (sin brillo por hora)
+   ITINERARIO (texto aumentado un 25%)
    ============================================================ */
 .itinerario-dia {
   margin-bottom: 1rem;
@@ -814,7 +814,7 @@ h1#nombre-hero {
   padding: 0.4rem 0.8rem;
   border-bottom: 1px solid rgba(212, 175, 55, 0.15);
   font-family: var(--serif-body);
-  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  font-size: clamp(1.125rem, 2.5vw, 1.375rem); /* 25% más grande */
   color: #f0e0c0;
   transition: none;
 }
@@ -1137,7 +1137,7 @@ h1#nombre-hero {
 /* ===== "No faltes" aumentado un 30% ===== */
 .agradecimientos-no-faltes {
   font-family: var(--script);
-  font-size: clamp(1.56rem, 3.9vw, 2.08rem); /* 30% más grande que antes */
+  font-size: clamp(1.56rem, 3.9vw, 2.08rem);
   text-align: center;
   color: #fae3a0;
   margin-top: 0.2rem;
@@ -1380,7 +1380,7 @@ body.modal-open .seccion.visible * {
   .divider-thin { margin: 1.1rem 0 1.3rem; }
   .calendario-container { gap: 2px; font-size: 0.7rem; }
   .calendario-evento { flex-wrap: wrap; gap: 0.2rem; justify-content: center; }
-  .itinerario-item { font-size: 0.8rem; }
+  .itinerario-item { font-size: clamp(1rem, 2.2vw, 1.2rem); }
   .detalle-botones { flex-direction: column; align-items: center; }
   .modal-gustos-card { padding: 1.2rem 0.8rem; }
   .collage-container { aspect-ratio: 4/3; }
