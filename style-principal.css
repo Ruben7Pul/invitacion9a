@@ -1261,21 +1261,37 @@ h1#nombre-hero {
   text-transform: uppercase;
   color: #fae3a0;
   text-shadow: 0 0 25px rgba(212, 175, 55, 0.3);
-  margin: 0 0 0.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid rgba(212, 175, 55, 0.2);
+  margin: 0 0 1.1rem;
+  padding-bottom: 1rem;
   position: relative;
+}
+.modal-card h2::before {
+  content: '';
+  position: absolute;
+  bottom: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 65%;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(212, 175, 55, 0.35) 20%,
+    rgba(212, 175, 55, 0.35) 42%,
+    transparent 46%,
+    transparent 54%,
+    rgba(212, 175, 55, 0.35) 58%,
+    rgba(212, 175, 55, 0.35) 80%,
+    transparent 100%);
 }
 .modal-card h2::after {
   content: '✧';
   position: absolute;
-  bottom: -12px;
+  bottom: 0.05rem;
   left: 50%;
   transform: translateX(-50%);
   font-size: 1.2rem;
-  background: #0d1424;
-  padding: 0 6px;
   color: #d4af37;
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
 }
 .modal-subtitle {
   font-family: var(--serif-body);
@@ -1283,7 +1299,7 @@ h1#nombre-hero {
   font-weight: 500;
   text-align: center;
   color: #e0cfa0;
-  margin: 0.9rem 0 1rem;
+  margin: 0 0 1rem;
   opacity: 0.9;
   letter-spacing: 0.05em;
   text-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
