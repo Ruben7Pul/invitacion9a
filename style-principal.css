@@ -57,7 +57,7 @@ body {
   background-image: url('archivos/bella.jpg');
   background-size: cover;
   background-repeat: no-repeat;
-  background-position: 50% 35%;
+  background-position: center; /* Unificado con el portal */
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;
   will-change: transform;
@@ -70,12 +70,8 @@ body {
   transition: opacity 0.8s ease;
 }
 
-@media (max-width: 768px) and (orientation: portrait) {
-  #bg {
-    background-position: 50% 30%;
-    background-size: auto 120%;
-  }
-}
+/* ===== ELIMINADO EL CAMBIO EN MÓVIL PARA QUE SEA CONSISTENTE ===== */
+/* Ya no hay @media que modifique background-position o size */
 
 /* ===== VIDEOS OPTIMIZADOS ===== */
 #video-app, #video-portal {
@@ -506,6 +502,11 @@ body {
 
 /* ===== SUBTÍTULO DEL CONTADOR (más grande un 25%) ===== */
 #seccion-contador .seccion-subtitulo {
+  font-size: clamp(1.25rem, 3.5vw, 1.625rem);
+}
+
+/* ===== SUBTÍTULO DE FAMILIA (mismo tamaño que el del contador) ===== */
+#seccion-familia .seccion-subtitulo {
   font-size: clamp(1.25rem, 3.5vw, 1.625rem);
 }
 
@@ -1132,9 +1133,11 @@ h1#nombre-hero {
   opacity: 0.7;
   margin-top: -0.2rem;
 }
+
+/* ===== "No faltes" aumentado un 30% ===== */
 .agradecimientos-no-faltes {
   font-family: var(--script);
-  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  font-size: clamp(1.56rem, 3.9vw, 2.08rem); /* 30% más grande que antes */
   text-align: center;
   color: #fae3a0;
   margin-top: 0.2rem;
@@ -1327,7 +1330,7 @@ h1#nombre-hero {
 }
 
 /* ============================================================
-   PAUSAR ANIMACIONES AL ABRIR EL MODAL
+   PAUSAR ANIMACIONES AL ABRIR EL MODAL (el contador NO se pausa)
    ============================================================ */
 body.modal-open #oval-wrap,
 body.modal-open h1#nombre-hero,
