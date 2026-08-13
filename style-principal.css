@@ -770,12 +770,12 @@ h1#nombre-hero {
 
 .calendario-evento .btn-agregar {
   font-family: var(--serif-display);
-  font-size: clamp(0.8rem, 1.8vw, 1rem);
+  font-size: clamp(0.9rem, 2vw, 1rem);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #f0d9a3;
   background: rgba(201, 162, 77, 0.1);
-  padding: 0.3rem 1.2rem;
+  padding: 0.5rem 2rem;
   border-radius: 30px;
   border: 1.5px solid rgba(201, 162, 77, 0.35);
   cursor: pointer;
@@ -989,12 +989,12 @@ h1#nombre-hero {
   width: fit-content;
   margin: 0.4rem auto 0;
   font-family: var(--serif-display);
-  font-size: clamp(0.65rem, 1.8vw, 0.8rem);
+  font-size: clamp(0.9rem, 2vw, 1rem);
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #f0d9a3;
   background: rgba(201, 162, 77, 0.1);
-  padding: 0.3rem 1.4rem;
+  padding: 0.5rem 2rem;
   border-radius: 30px;
   text-decoration: none;
   border: 1.5px solid rgba(201, 162, 77, 0.35);
@@ -1007,8 +1007,8 @@ h1#nombre-hero {
 #btn-abrir-gustos {
   width: auto !important;
   margin: 0.4rem auto 0 !important;
-  font-size: clamp(0.65rem, 1.8vw, 0.8rem) !important;
-  padding: 0.3rem 1.4rem !important;
+  font-size: clamp(0.9rem, 2vw, 1rem) !important;
+  padding: 0.5rem 2rem !important;
   border: 1.5px solid rgba(201, 162, 77, 0.35) !important;
   background: rgba(201, 162, 77, 0.1) !important;
   box-shadow: 0 0 15px rgba(212,175,55,0.08) !important;
@@ -1300,12 +1300,7 @@ h1#nombre-hero {
   margin: 0.5rem 0;
   background: transparent;
   border: 3px solid #b8860b;
-  border-radius: 0;
-}
-@media (pointer: coarse) {
-  .collage-container {
-    border-radius: 16px;
-  }
+  border-radius: 16px;
 }
 .collage-container .collage-item {
   position: absolute;
@@ -1313,6 +1308,7 @@ h1#nombre-hero {
   pointer-events: none;
   opacity: 1;
   object-fit: contain;
+  border-radius: 10px;
   -webkit-user-select: none;
   user-select: none;
 }
