@@ -1,4 +1,4 @@
-console.log('🚀 principal/script-principal.js (versión con pausa de recursos en collage, SIN pausar el contador)');
+console.log('🚀 ww principal/script-principal.js (versión con pausa de recursos en collage, SIN pausar el contador)');
 
 // Renombrado para evitar conflictos de declaración
 async function obtenerConfiguracion() {
@@ -273,7 +273,7 @@ var collageInicializado = false;
 var collageIndiceActual = 0;
 var collageZIndex = 1;
 var collageElementos = [];
-var collageHistorialImagenes = [];
+var collageBaraja = [];
 var collageUltimaRotacion = 0;
 var collageIntervaloMs = 3000;
 var MAX_IMAGENES_SIMULTANEAS = 6;
@@ -361,22 +361,10 @@ function shuffleArray(arr) {
 }
 
 function elegirImagenAleatoria() {
-  var disponibles = [];
-  for (var i = 0; i < imagenesCollage.length; i++) {
-    if (collageHistorialImagenes.indexOf(i) === -1) {
-      disponibles.push(i);
-    }
+  if (collageBaraja.length === 0) {
+    collageBaraja = shuffleArray(Array.from({length: imagenesCollage.length}, (_, i) => i));
   }
-  if (disponibles.length === 0) {
-    collageHistorialImagenes = [];
-    disponibles = Array.from({length: imagenesCollage.length}, (_, i) => i);
-  }
-  var indiceElegido = disponibles[Math.floor(Math.random() * disponibles.length)];
-  collageHistorialImagenes.push(indiceElegido);
-  if (collageHistorialImagenes.length > 5) {
-    collageHistorialImagenes.shift();
-  }
-  return indiceElegido;
+  return collageBaraja.shift();
 }
 
 function elegirRotacionContraria() {
@@ -399,7 +387,7 @@ function renderCollage(container) {
   collageIndiceActual = 0;
   collageZIndex = 1;
   collageElementos = [];
-  collageHistorialImagenes = [];
+  collageBaraja = [];
   collageUltimaRotacion = 0;
 
   var TAMANIO_BASE = 80;
