@@ -735,16 +735,15 @@ h1#nombre-hero {
   50% { transform: translateY(-5px) rotate(15deg); }
 }
 
-/* Eliminado: resaltado del día actual (.dia.hoy) */
-
 /* ============================================================
-   EVENTOS DEL CALENDARIO (CORREGIDO: dos líneas centradas siempre)
+   EVENTOS DEL CALENDARIO (CORREGIDO: siempre dos líneas centradas)
    ============================================================ */
 .calendario-evento {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0.2rem;
   background: rgba(10, 18, 34, 0.4);
   border: 1px solid rgba(212, 175, 55, 0.2);
   border-radius: 12px;
@@ -756,8 +755,8 @@ h1#nombre-hero {
 .calendario-evento .evento-info {
   display: flex;
   align-items: center;
-  justify-content: center;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.2rem 0.6rem;
 }
 
@@ -774,10 +773,12 @@ h1#nombre-hero {
   cursor: pointer;
   transition: none;
   flex-shrink: 0;
-  margin-top: 0.15rem;
+  margin-top: 0.1rem;
 }
 
-/* ===== ITINERARIO (sin brillo por hora) ===== */
+/* ============================================================
+   ITINERARIO (sin brillo por hora)
+   ============================================================ */
 .itinerario-dia {
   margin-bottom: 1rem;
 }
