@@ -1327,6 +1327,23 @@ h1#nombre-hero {
 }
 
 /* ============================================================
+   PAUSAR ANIMACIONES AL ABRIR EL MODAL
+   ============================================================ */
+body.modal-open #oval-wrap,
+body.modal-open h1#nombre-hero,
+body.modal-open .calendario-container .dia.dia-10 .rosa,
+body.modal-open .gate-wrapper.active .gate-leaf svg,
+body.modal-open .frase-inline,
+body.modal-open .hint-final {
+  animation-play-state: paused !important;
+}
+
+/* También detener transiciones que puedan estar activas */
+body.modal-open .seccion.visible * {
+  transition: none !important;
+}
+
+/* ============================================================
    RESPONSIVE Y MEJORAS MÓVIL
    ============================================================ */
 @media (pointer: coarse) {
