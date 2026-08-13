@@ -638,7 +638,7 @@ html.sin-reja #app {
 h1#nombre-hero {
   font-family: var(--script);
   font-weight: 400;
-  font-size: clamp(9.3rem, 30cqw, 11.7rem);
+  font-size: clamp(6.975rem, 22.5cqw, 8.775rem);
   line-height: 1.1;
   margin: 0.05rem 0;
   cursor: pointer;
@@ -955,7 +955,7 @@ h1#nombre-hero {
 .detalle-info .hora {
   font-family: var(--serif-body);
   font-weight: 600;
-  font-size: clamp(0.9rem, 2.2vw, 1.1rem);
+  font-size: clamp(1.08rem, 2.64vw, 1.32rem);
   color: #fae3a0;
   background: rgba(212, 175, 55, 0.08);
   padding: 0.1rem 1rem;
@@ -1361,7 +1361,7 @@ body.modal-open .seccion.visible * {
 @media (max-width: 400px) {
   #app { padding: 0.3rem 0.6rem 0; }
   #app-inner { gap: 0.6rem; padding: 0 0.2rem 2rem; }
-  h1#nombre-hero { font-size: clamp(8.1rem, 30cqw, 9.6rem); }
+  h1#nombre-hero { font-size: clamp(6.075rem, 22.5cqw, 7.2rem); }
   .frase-inline { font-size: clamp(1.3rem, 3.8cqw, 1.5rem); }
   #app-top .eyebrow { font-size: 1rem; }
   .top-btn { font-size: 1.1rem; min-width: 32px; height: 32px; }
@@ -1385,7 +1385,7 @@ body.modal-open .seccion.visible * {
   #app { padding: 0.6rem 2rem 0; }
   #app-inner { max-width: 640px; gap: 1rem; padding: 0 0.5rem 3rem; }
   #oval-wrap { width: clamp(200px, 22vh, 300px); height: clamp(280px, 32vh, 420px); }
-  h1#nombre-hero { font-size: clamp(11.25rem, 22.5vh, 16.5rem); }
+  h1#nombre-hero { font-size: clamp(8.4375rem, 16.875vh, 12.375rem); }
   .frase-inline { font-size: clamp(1.7rem, 3vh, 2.2rem); }
   .hint-final { font-size: clamp(1.5rem, 3.75vw, 1.875rem); }
   .seccion { padding: 1.5rem 1.5rem; }
@@ -1393,7 +1393,7 @@ body.modal-open .seccion.visible * {
 @media (min-width: 768px) and (max-height: 900px) {
   #app-mid { gap: 0.6rem; }
   #oval-wrap { width: clamp(180px, 20vh, 260px); height: clamp(250px, 30vh, 360px); }
-  h1#nombre-hero { font-size: clamp(10.5rem, 21vh, 15.75rem); }
+  h1#nombre-hero { font-size: clamp(7.875rem, 15.75vh, 11.8125rem); }
 }
 
 ::-webkit-scrollbar { width: 4px; }
